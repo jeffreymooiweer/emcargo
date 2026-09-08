@@ -183,7 +183,7 @@ jobs:
           (cd frontend && npm ci --no-audit && npm run build)
           STAGE="emcargo-$VERSION"
           rm -rf "$STAGE" && mkdir -p "$STAGE"
-          cp -r backend templates deploy CHANGELOG.md VERSION LICENSE DISCLAIMER.md "$STAGE/"
+          cp -r backend templates deploy CHANGELOG.md VERSION LICENSE TERMS.nl.md DISCLAIMER.md DISCLAIMER.nl.md "$STAGE/"
           rm -rf "$STAGE/backend/tests" "$STAGE/backend/static"
           find "$STAGE" -name __pycache__ -type d -prune -exec rm -rf {} +
           cp -r frontend/dist "$STAGE/backend/static"
