@@ -9,8 +9,8 @@ without a source.
 
 **The drawing is the application's own.** ``docs/data-sources.md`` records that
 the copy, delete, pencil and chevron glyphs are hand-written paths in the
-component that uses them; this takes the copy glyph from
-``frontend/src/components/ReviewLinesPanel.tsx`` verbatim, so the mail and the
+shared icon module; this takes the copy glyph from
+``frontend/src/components/icons.tsx`` verbatim, so the mail and the
 interface show one drawing and there is no third-party licence to carry into
 the mail.
 
@@ -39,13 +39,13 @@ STROKE = "#64748b"
 DISPLAY_PX = 18
 SCALE = 3
 
-#: Verbatim from ReviewLinesPanel.tsx's CopyIcon, including the 20x20 viewBox
-#: and the 1.6 stroke, so the two drawings cannot drift apart.
+#: Verbatim from icons.tsx's CopyIcon, including the 24x24 viewBox
+#: and the 1.7 stroke, so the two drawings cannot drift apart.
 COPY_SVG = (
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" '
-    'width="20" height="20" fill="none" stroke="{stroke}" stroke-width="1.6">'
-    '<rect x="7" y="7" width="9" height="9" rx="2" />'
-    '<path d="M13 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />'
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" '
+    'width="24" height="24" fill="none" stroke="{stroke}" stroke-width="1.7" '
+    'stroke-linecap="round" stroke-linejoin="round">'
+    '<path d="M9 9h12v12H9z M15 9V3H3v12h6" />'
     "</svg>"
 )
 
@@ -61,8 +61,25 @@ def render(destination: Path = OUT) -> Path:
     return destination
 
 
+def render_logo() -> Path:
+    """Keep the mail attachment reproducible from the application's SVG mark."""
+    source = REPO / "frontend" / "public" / "emcargo.svg"
+    destination = OUT.with_name("logo.png")
+    with fitz.open(stream=source.read_bytes(), filetype="svg") as document:
+        page = document[0]
+        zoom = 192 / page.rect.width
+        pixmap = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom), alpha=True)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    pixmap.save(destination)
+    return destination
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=OUT)
-    written = render(parser.parse_args().out)
+    parser.add_argument("--logo", action="store_true", help="Also regenerate the mail logo from emcargo.svg")
+    args = parser.parse_args()
+    written = render(args.out)
     print(f"{written} ({written.stat().st_size} bytes)")
+    if args.logo:
+        print(render_logo())

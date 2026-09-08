@@ -42,7 +42,7 @@ LOGO_CID = "emcargo-logo"
 #: The copy glyph beside a sign-in code. A PNG rather than the inline SVG the
 #: interface uses, because Gmail strips ``<svg>`` from mail outright; it is the
 #: application's own drawing, rendered by scripts/render_mail_icons.py from the
-#: same paths as ReviewLinesPanel.tsx, so no third-party licence travels here.
+#: same paths as icons.tsx, so no third-party licence travels here.
 COPY_ICON_PATH = Path(__file__).resolve().parent.parent / "assets" / "copy.png"
 COPY_ICON_CID = "emcargo-copy"
 
