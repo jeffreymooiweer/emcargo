@@ -1806,7 +1806,7 @@
     }
   },
   "imdg_segregation_cargo_requirements": {
-    "_comment": "Provisions whose target is ordinary cargo, not dangerous goods: foodstuffs, oils, odour-absorbing cargo. CargoPilot does not know what non-dangerous cargo travels alongside, so these are raised as a requirement to verify whenever the substance is in the shipment — the same shape as the ADR CV28 foodstuff warning.",
+    "_comment": "Provisions whose target is ordinary cargo, not dangerous goods: foodstuffs, oils, odour-absorbing cargo. EMCargo does not know what non-dangerous cargo travels alongside, so these are raised as a requirement to verify whenever the substance is in the shipment — the same shape as the ADR CV28 foodstuff warning.",
     "SG23": {
       "nl": "Houd uit de buurt van dierlijke of plantaardige oliën.",
       "en": "Keep away from animal or vegetable oils.",
@@ -1855,7 +1855,7 @@
     }
   },
   "imdg_segregation_exemptions": {
-    "_comment": "IMDG 7.2.6.3 (Amendment 40-20): no segregation needs to be applied between substances listed in the same table. This is a relaxation, not a restriction — SG72 in column 16b points at it. CargoPilot never removes a segregation warning on the strength of it; it reports the exemption alongside, so the finding and its legal basis are both in view and the decision stays with the shipper. Table 7.2.6.3.4 carries the extra caveat of 7.2.6.4.",
+    "_comment": "IMDG 7.2.6.3 (Amendment 40-20): no segregation needs to be applied between substances listed in the same table. This is a relaxation, not a restriction — SG72 in column 16b points at it. EMCargo never removes a segregation warning on the strength of it; it reports the exemption alongside, so the finding and its legal basis are both in view and the decision stays with the shipper. Table 7.2.6.3.4 carries the extra caveat of 7.2.6.4.",
     "source": "IMDG Code, Amendment 40-20, chapter 7.2, section 7.2.6.3",
     "tables": {
       "7.2.6.3.1": [
@@ -1937,16 +1937,16 @@
     "distance_m": 18,
     "rules": {
       "between_positions": {
-        "nl": "RID 7.5.3: een wagen, grote container, transporttank of wegvoertuig met stoffen of voorwerpen van klasse 1 en een plakkaat volgens model 1, 1.5 of 1.6 moet in dezelfde trein van een geplakkateerde eenheid 2.1, 3, 4.1, 4.2, 4.3, 5.1 of 5.2 worden gescheiden door een beschermende afstand. Daaraan is voldaan als de ruimte tussen de bufferkop of de kopwand van de een en die van de ander ten minste 18 m bedraagt, of wordt ingenomen door twee tweeassige wagens of één wagen met vier of meer assen. CargoPilot ziet alleen deze zending; de treinsamenstelling ligt bij de vervoerder.",
-        "en": "RID 7.5.3: a wagon, large container, portable tank or road vehicle holding substances or articles of class 1 and bearing a placard conforming to model No. 1, 1.5 or 1.6 must be separated on the same train from a unit placarded 2.1, 3, 4.1, 4.2, 4.3, 5.1 or 5.2 by a protective distance. That requirement is met where the space between the buffer head or end wall of the one and that of the other is at least 18 m, or is occupied by two 2-axle wagons or one wagon with four or more axles. CargoPilot sees only this consignment; how the train is made up rests with the carrier.",
-        "de": "RID 7.5.3: ein Wagen, Großcontainer, Aufsetztank oder Straßenfahrzeug mit Stoffen oder Gegenständen der Klasse 1 und einer Großzettel nach Muster 1, 1.5 oder 1.6 ist im selben Zug von einer mit 2.1, 3, 4.1, 4.2, 4.3, 5.1 oder 5.2 bezettelten Einheit durch einen Schutzabstand zu trennen. Dieser ist eingehalten, wenn der Raum zwischen dem Pufferkopf oder der Stirnwand des einen und dem des anderen mindestens 18 m beträgt oder von zwei zweiachsigen Wagen oder einem Wagen mit vier oder mehr Achsen eingenommen wird. CargoPilot sieht nur diese Sendung; die Zugbildung liegt beim Beförderer.",
-        "fr": "RID 7.5.3 : un wagon, grand conteneur, citerne mobile ou véhicule routier contenant des matières ou objets de la classe 1 et portant une plaque-étiquette conforme au modèle no 1, 1.5 ou 1.6 doit être séparé, dans le même train, de toute unité placardée 2.1, 3, 4.1, 4.2, 4.3, 5.1 ou 5.2 par une distance de protection. Cette exigence est satisfaite lorsque l'espace entre la tête de tampon ou la paroi frontale de l'un et celle de l'autre est d'au moins 18 m, ou est occupé par deux wagons à deux essieux ou un wagon de quatre essieux ou plus. CargoPilot ne voit que cet envoi ; la composition du train relève du transporteur."
+        "nl": "RID 7.5.3: een wagen, grote container, transporttank of wegvoertuig met stoffen of voorwerpen van klasse 1 en een plakkaat volgens model 1, 1.5 of 1.6 moet in dezelfde trein van een geplakkateerde eenheid 2.1, 3, 4.1, 4.2, 4.3, 5.1 of 5.2 worden gescheiden door een beschermende afstand. Daaraan is voldaan als de ruimte tussen de bufferkop of de kopwand van de een en die van de ander ten minste 18 m bedraagt, of wordt ingenomen door twee tweeassige wagens of één wagen met vier of meer assen. EMCargo ziet alleen deze zending; de treinsamenstelling ligt bij de vervoerder.",
+        "en": "RID 7.5.3: a wagon, large container, portable tank or road vehicle holding substances or articles of class 1 and bearing a placard conforming to model No. 1, 1.5 or 1.6 must be separated on the same train from a unit placarded 2.1, 3, 4.1, 4.2, 4.3, 5.1 or 5.2 by a protective distance. That requirement is met where the space between the buffer head or end wall of the one and that of the other is at least 18 m, or is occupied by two 2-axle wagons or one wagon with four or more axles. EMCargo sees only this consignment; how the train is made up rests with the carrier.",
+        "de": "RID 7.5.3: ein Wagen, Großcontainer, Aufsetztank oder Straßenfahrzeug mit Stoffen oder Gegenständen der Klasse 1 und einer Großzettel nach Muster 1, 1.5 oder 1.6 ist im selben Zug von einer mit 2.1, 3, 4.1, 4.2, 4.3, 5.1 oder 5.2 bezettelten Einheit durch einen Schutzabstand zu trennen. Dieser ist eingehalten, wenn der Raum zwischen dem Pufferkopf oder der Stirnwand des einen und dem des anderen mindestens 18 m beträgt oder von zwei zweiachsigen Wagen oder einem Wagen mit vier oder mehr Achsen eingenommen wird. EMCargo sieht nur diese Sendung; die Zugbildung liegt beim Beförderer.",
+        "fr": "RID 7.5.3 : un wagon, grand conteneur, citerne mobile ou véhicule routier contenant des matières ou objets de la classe 1 et portant une plaque-étiquette conforme au modèle no 1, 1.5 ou 1.6 doit être séparé, dans le même train, de toute unité placardée 2.1, 3, 4.1, 4.2, 4.3, 5.1 ou 5.2 par une distance de protection. Cette exigence est satisfaite lorsque l'espace entre la tête de tampon ou la paroi frontale de l'un et celle de l'autre est d'au moins 18 m, ou est occupé par deux wagons à deux essieux ou un wagon de quatre essieux ou plus. EMCargo ne voit que cet envoi ; la composition du train relève du transporteur."
       },
       "train_formation": {
-        "nl": "RID 7.5.3: deze zending draagt een plakkaat volgens model 1, 1.5 of 1.6. In de trein moet er een beschermende afstand blijven tot elke eenheid met een plakkaat 2.1, 3, 4.1, 4.2, 4.3, 5.1 of 5.2: ten minste 18 m, of twee tweeassige wagens dan wel één wagen met vier of meer assen ertussen. Welke wagens er verder in de trein lopen weet CargoPilot niet; geef dit door aan de vervoerder.",
-        "en": "RID 7.5.3: this consignment bears a placard conforming to model No. 1, 1.5 or 1.6. In the train a protective distance must be kept to every unit placarded 2.1, 3, 4.1, 4.2, 4.3, 5.1 or 5.2: at least 18 m, or two 2-axle wagons or one wagon with four or more axles in between. CargoPilot does not know what else runs in the train; pass this on to the carrier.",
-        "de": "RID 7.5.3: diese Sendung trägt einen Großzettel nach Muster 1, 1.5 oder 1.6. Im Zug ist zu jeder mit 2.1, 3, 4.1, 4.2, 4.3, 5.1 oder 5.2 bezettelten Einheit ein Schutzabstand einzuhalten: mindestens 18 m oder zwei zweiachsige Wagen bzw. ein Wagen mit vier oder mehr Achsen dazwischen. Welche Wagen sonst im Zug laufen, weiß CargoPilot nicht; geben Sie dies an den Beförderer weiter.",
-        "fr": "RID 7.5.3 : cet envoi porte une plaque-étiquette conforme au modèle no 1, 1.5 ou 1.6. Dans le train, une distance de protection doit être maintenue vis-à-vis de toute unité placardée 2.1, 3, 4.1, 4.2, 4.3, 5.1 ou 5.2 : au moins 18 m, ou deux wagons à deux essieux ou un wagon de quatre essieux ou plus intercalés. CargoPilot ignore ce qui circule par ailleurs dans le train ; transmettez cette information au transporteur."
+        "nl": "RID 7.5.3: deze zending draagt een plakkaat volgens model 1, 1.5 of 1.6. In de trein moet er een beschermende afstand blijven tot elke eenheid met een plakkaat 2.1, 3, 4.1, 4.2, 4.3, 5.1 of 5.2: ten minste 18 m, of twee tweeassige wagens dan wel één wagen met vier of meer assen ertussen. Welke wagens er verder in de trein lopen weet EMCargo niet; geef dit door aan de vervoerder.",
+        "en": "RID 7.5.3: this consignment bears a placard conforming to model No. 1, 1.5 or 1.6. In the train a protective distance must be kept to every unit placarded 2.1, 3, 4.1, 4.2, 4.3, 5.1 or 5.2: at least 18 m, or two 2-axle wagons or one wagon with four or more axles in between. EMCargo does not know what else runs in the train; pass this on to the carrier.",
+        "de": "RID 7.5.3: diese Sendung trägt einen Großzettel nach Muster 1, 1.5 oder 1.6. Im Zug ist zu jeder mit 2.1, 3, 4.1, 4.2, 4.3, 5.1 oder 5.2 bezettelten Einheit ein Schutzabstand einzuhalten: mindestens 18 m oder zwei zweiachsige Wagen bzw. ein Wagen mit vier oder mehr Achsen dazwischen. Welche Wagen sonst im Zug laufen, weiß EMCargo nicht; geben Sie dies an den Beförderer weiter.",
+        "fr": "RID 7.5.3 : cet envoi porte une plaque-étiquette conforme au modèle no 1, 1.5 ou 1.6. Dans le train, une distance de protection doit être maintenue vis-à-vis de toute unité placardée 2.1, 3, 4.1, 4.2, 4.3, 5.1 ou 5.2 : au moins 18 m, ou deux wagons à deux essieux ou un wagon de quatre essieux ou plus intercalés. EMCargo ignore ce qui circule par ailleurs dans le train ; transmettez cette information au transporteur."
       }
     }
   },
@@ -2235,15 +2235,15 @@
   },
   "adr_security": {
     "source": "ADR 2025 (UNECE) table 1.10.3.1.2 and 1.10.3.2, read from the official Dutch edition, printed pages 184-185",
-    "_scope": "The packages column of table 1.10.3.1.2. The tank and bulk columns carry their own thresholds — 3000 litres or 3000 kg for most of the b) rows — and footnotes c) and d) make them relevant only where table A column (10), (12) or (17) permits that form of carriage. CargoPilot computes for packages and says so.",
+    "_scope": "The packages column of table 1.10.3.1.2. The tank and bulk columns carry their own thresholds — 3000 litres or 3000 kg for most of the b) rows — and footnotes c) and d) make them relevant only where table A column (10), (12) or (17) permits that form of carriage. EMCargo computes for packages and says so.",
     "_the_answer_is_mostly_no": "For carriage in packages the column holds two values and no others: 0, meaning any quantity at all, and footnote b), meaning 1.10.3 does not apply whatever the quantity. So a full load of packaged petrol of packing group II is not high consequence dangerous goods and never becomes so, while a single kilogram of a packing group I toxic is.",
     "_footnote_b": "Footnote b) to table 1.10.3.1.2: whatever the quantity, the provisions of 1.10.3 do not apply. Quoted here in rendering only — the published text is not redistributed in this repository, and the provision number is enough to find it.",
     "class_7": {
       "provision": "1.10.3.1.3",
-      "nl": "Klasse 7: radioactieve stoffen met een hoog gevarenpotentieel zijn stoffen met een activiteit vanaf 3000 A2 per collo, met eigen grenswaarden per radionuclide in tabel 1.10.3.1.3. CargoPilot kent de activiteit niet en beantwoordt deze vraag niet.",
-      "en": "Class 7: radioactive material of high consequence is material with an activity of 3000 A2 or more per package, with its own limits per radionuclide in table 1.10.3.1.3. CargoPilot does not know the activity and does not answer this.",
-      "de": "Klasse 7: radioaktive Stoffe mit hohem Gefahrenpotenzial sind Stoffe mit einer Aktivität ab 3000 A2 je Versandstück, mit eigenen Grenzwerten je Radionuklid in Tabelle 1.10.3.1.3. CargoPilot kennt die Aktivität nicht und beantwortet dies nicht.",
-      "fr": "Classe 7 : les matières radioactives à haut risque sont celles dont l'activité atteint 3000 A2 par colis, avec des seuils propres par radionucléide au tableau 1.10.3.1.3. CargoPilot ne connaît pas l'activité et ne répond pas à cette question."
+      "nl": "Klasse 7: radioactieve stoffen met een hoog gevarenpotentieel zijn stoffen met een activiteit vanaf 3000 A2 per collo, met eigen grenswaarden per radionuclide in tabel 1.10.3.1.3. EMCargo kent de activiteit niet en beantwoordt deze vraag niet.",
+      "en": "Class 7: radioactive material of high consequence is material with an activity of 3000 A2 or more per package, with its own limits per radionuclide in table 1.10.3.1.3. EMCargo does not know the activity and does not answer this.",
+      "de": "Klasse 7: radioaktive Stoffe mit hohem Gefahrenpotenzial sind Stoffe mit einer Aktivität ab 3000 A2 je Versandstück, mit eigenen Grenzwerten je Radionuklid in Tabelle 1.10.3.1.3. EMCargo kennt die Aktivität nicht und beantwortet dies nicht.",
+      "fr": "Classe 7 : les matières radioactives à haut risque sont celles dont l'activité atteint 3000 A2 par colis, avec des seuils propres par radionucléide au tableau 1.10.3.1.3. EMCargo ne connaît pas l'activité et ne répond pas à cette question."
     },
     "rows": [
       {
@@ -2922,10 +2922,10 @@
       "fr": "Pour {products}, la colonne (12) comporte plusieurs lignes divergentes ; les signaux de ces matières ne sont pas établis et peuvent être plus élevés qu'indiqué ici."
     },
     "containers_note": {
-      "nl": "7.1.5.0.2: voor goederen die uitsluitend in containers reizen verlaagt de seinvoering aan de hand van de totale brutomassa. CargoPilot past die verlaging alleen toe waar u dat per stof hebt verklaard; zonder die verklaring blijft de volle seinvoering staan, wat nooit te laag is.",
-      "en": "7.1.5.0.2: for goods travelling exclusively in containers the signals reduce against the total gross mass. CargoPilot applies that reduction only where you have declared it per substance; without the declaration the full signals stand, which is never too few.",
-      "de": "7.1.5.0.2: Für Güter, die ausschließlich in Containern befördert werden, verringert sich die Signalführung anhand der Bruttogesamtmasse. CargoPilot wendet die Verringerung nur an, wo Sie das je Stoff erklärt haben; ohne diese Erklärung bleibt die volle Signalführung stehen, die nie zu gering ist.",
-      "fr": "7.1.5.0.2 : pour les marchandises voyageant exclusivement en conteneurs, la signalisation diminue selon la masse brute totale. CargoPilot n'applique cette réduction que là où vous l'avez déclarée par matière ; sans cette déclaration, la signalisation complète demeure, ce qui n'est jamais insuffisant."
+      "nl": "7.1.5.0.2: voor goederen die uitsluitend in containers reizen verlaagt de seinvoering aan de hand van de totale brutomassa. EMCargo past die verlaging alleen toe waar u dat per stof hebt verklaard; zonder die verklaring blijft de volle seinvoering staan, wat nooit te laag is.",
+      "en": "7.1.5.0.2: for goods travelling exclusively in containers the signals reduce against the total gross mass. EMCargo applies that reduction only where you have declared it per substance; without the declaration the full signals stand, which is never too few.",
+      "de": "7.1.5.0.2: Für Güter, die ausschließlich in Containern befördert werden, verringert sich die Signalführung anhand der Bruttogesamtmasse. EMCargo wendet die Verringerung nur an, wo Sie das je Stoff erklärt haben; ohne diese Erklärung bleibt die volle Signalführung stehen, die nie zu gering ist.",
+      "fr": "7.1.5.0.2 : pour les marchandises voyageant exclusivement en conteneurs, la signalisation diminue selon la masse brute totale. EMCargo n'applique cette réduction que là où vous l'avez déclarée par matière ; sans cette déclaration, la signalisation complète demeure, ce qui n'est jamais insuffisant."
     },
     "containers_reduction": {
       "provision": "7.1.5.0.2",
@@ -3038,10 +3038,10 @@
       "fr": "ADN 3.2.1, colonne (8) : aucun code « T » n'est indiqué pour {product}. Le transport en bateaux-citernes n'est alors pas autorisé, et le transport en citernes à cargaison sur un bateau à marchandises sèches est interdit (7.1.1.21)."
     },
     "table_c_not_covered": {
-      "nl": "CargoPilot draagt Tabel C van het ADN nog niet. Het scheepstype, het ladingtanktype en de bijbehorende voorwaarden voor {products} staan daarin en zijn hier niet beoordeeld.",
-      "en": "CargoPilot does not yet carry table C of the ADN. The vessel type, the cargo tank type and the conditions that go with them for {products} are in it and have not been assessed here.",
-      "de": "CargoPilot führt Tabelle C des ADN noch nicht. Der Schiffstyp, der Ladetanktyp und die zugehörigen Bedingungen für {products} stehen dort und wurden hier nicht beurteilt.",
-      "fr": "CargoPilot ne porte pas encore le tableau C de l'ADN. Le type de bateau, le type de citerne à cargaison et les conditions qui les accompagnent pour {products} s'y trouvent et n'ont pas été évalués ici."
+      "nl": "EMCargo draagt Tabel C van het ADN nog niet. Het scheepstype, het ladingtanktype en de bijbehorende voorwaarden voor {products} staan daarin en zijn hier niet beoordeeld.",
+      "en": "EMCargo does not yet carry table C of the ADN. The vessel type, the cargo tank type and the conditions that go with them for {products} are in it and have not been assessed here.",
+      "de": "EMCargo führt Tabelle C des ADN noch nicht. Der Schiffstyp, der Ladetanktyp und die zugehörigen Bedingungen für {products} stehen dort und wurden hier nicht beurteilt.",
+      "fr": "EMCargo ne porte pas encore le tableau C de l'ADN. Le type de bateau, le type de citerne à cargaison et les conditions qui les accompagnent pour {products} s'y trouvent et n'ont pas été évalués ici."
     },
     "portable_tank_as_packages": {
       "nl": "ADN 7.1.1.18: vervoer in transporttanks en tankcontainers moet voldoen aan de voorschriften voor het vervoer van colli. {product} vaart dus mee op een drogeladingschip en kolom (8) is daarvoor niet bepalend.",
@@ -3075,10 +3075,10 @@
       "fr": "Le tableau C donne {rows} lignes pour {product}, et le type de bateau diffère selon la variante ({types}). La ligne applicable dépend de la matière exacte ; la colonne (6) de cette ligne détermine le bateau."
     },
     "tank_conditions_note": {
-      "nl": "Tabel C stelt per rij ook eisen aan ladingtankontwerp, -type en -uitrusting, openingsdruk en vullingsgraad. CargoPilot kent het schip niet; controleer die kolommen tegen het schip dat vaart.",
-      "en": "Table C also sets, per row, the cargo tank design, type and equipment, the opening pressure and the filling degree. CargoPilot does not know the vessel; check those columns against the vessel that sails.",
-      "de": "Tabelle C stellt je Zeile auch Anforderungen an Ladetank-Bauart, -Typ und -Ausrüstung, Öffnungsdruck und Füllungsgrad. CargoPilot kennt das Schiff nicht; prüfen Sie diese Spalten gegen das fahrende Schiff.",
-      "fr": "Le tableau C fixe aussi, par ligne, la conception, le type et l'équipement des citernes, la pression d'ouverture et le degré de remplissage. CargoPilot ne connaît pas le bateau ; vérifiez ces colonnes par rapport au bateau."
+      "nl": "Tabel C stelt per rij ook eisen aan ladingtankontwerp, -type en -uitrusting, openingsdruk en vullingsgraad. EMCargo kent het schip niet; controleer die kolommen tegen het schip dat vaart.",
+      "en": "Table C also sets, per row, the cargo tank design, type and equipment, the opening pressure and the filling degree. EMCargo does not know the vessel; check those columns against the vessel that sails.",
+      "de": "Tabelle C stellt je Zeile auch Anforderungen an Ladetank-Bauart, -Typ und -Ausrüstung, Öffnungsdruck und Füllungsgrad. EMCargo kennt das Schiff nicht; prüfen Sie diese Spalten gegen das fahrende Schiff.",
+      "fr": "Le tableau C fixe aussi, par ligne, la conception, le type et l'équipement des citernes, la pression d'ouverture et le degré de remplissage. EMCargo ne connaît pas le bateau ; vérifiez ces colonnes par rapport au bateau."
     },
     "single_reading_note": {
       "nl": "De rij voor {products} berust op één lezing: de Nederlandse editie-export mist hem. De waarden komen uit de Engelse UNECE-uitgave; verifieer tegen het boek.",
@@ -3209,10 +3209,10 @@
       "fr": "La hiérarchie ne tient pas compte des dispositions spéciales de la colonne (13) : {codes} (voir 4.3.5 et 6.8.4)."
     },
     "gas_pressure_from_table": {
-      "nl": "{product}: tank {offered} past qua letters bij tankcode {required}, maar de vereiste proefdruk staat als x in kolom (12): die volgt uit de tabel van 4.3.3.2.5 en zit niet in CargoPilot. Vergelijk de proefdruk zelf.",
-      "en": "{product}: tank {offered} matches tank code {required} on its letters, but the required test pressure is printed as x in column (12): it follows from the table of 4.3.3.2.5, which CargoPilot does not hold. Compare the test pressure yourself.",
-      "de": "{product}: Tank {offered} passt nach den Buchstaben zur Tankcodierung {required}, die verlangte Prüfdruckziffer steht in Spalte (12) aber als x: sie folgt aus der Tabelle in 4.3.3.2.5, die CargoPilot nicht enthält. Vergleichen Sie den Prüfdruck selbst.",
-      "fr": "{product} : la citerne {offered} correspond au code-citerne {required} par ses lettres, mais la pression d'épreuve exigée est imprimée x à la colonne (12) : elle découle du tableau du 4.3.3.2.5, que CargoPilot ne contient pas. Comparez la pression d'épreuve vous-même."
+      "nl": "{product}: tank {offered} past qua letters bij tankcode {required}, maar de vereiste proefdruk staat als x in kolom (12): die volgt uit de tabel van 4.3.3.2.5 en zit niet in EMCargo. Vergelijk de proefdruk zelf.",
+      "en": "{product}: tank {offered} matches tank code {required} on its letters, but the required test pressure is printed as x in column (12): it follows from the table of 4.3.3.2.5, which EMCargo does not hold. Compare the test pressure yourself.",
+      "de": "{product}: Tank {offered} passt nach den Buchstaben zur Tankcodierung {required}, die verlangte Prüfdruckziffer steht in Spalte (12) aber als x: sie folgt aus der Tabelle in 4.3.3.2.5, die EMCargo nicht enthält. Vergleichen Sie den Prüfdruck selbst.",
+      "fr": "{product} : la citerne {offered} correspond au code-citerne {required} par ses lettres, mais la pression d'épreuve exigée est imprimée x à la colonne (12) : elle découle du tableau du 4.3.3.2.5, que EMCargo ne contient pas. Comparez la pression d'épreuve vous-même."
     },
     "gas_suffix": {
       "nl": "{product}: tank {offered} haalt de hiërarchie van 4.3.3.1.2, maar de vereiste code {required} draagt de toevoeging {suffix}, waarover de hiërarchie niets zegt. Controleer die op het keuringsdocument.",
@@ -3311,10 +3311,10 @@
       "fr": "{product} : pour les citernes destinées aux matières des classes 1, 5.2 et 7, le 4.3.2.2.1 prévoit une exception (voir 4.3.4.1.3) ; la formule ci-dessus ne s'y applique pas."
     },
     "no_tank_code": {
-      "nl": "{product}: welke formule van 4.3.2.2.1 geldt, hangt af van de uitrusting van de tank (be- en ontluchting of hermetisch gesloten). Vul de tankcode in, dan kiest CargoPilot de formule; anders geldt de formule zelf als voorwaarde.",
-      "en": "{product}: which formula of 4.3.2.2.1 applies depends on the tank's fittings (breather device or hermetically closed). Fill in the tank code and CargoPilot picks the formula; otherwise the formula itself stands as a condition.",
-      "de": "{product}: welche Formel des 4.3.2.2.1 gilt, hängt von der Ausrüstung des Tanks ab. Tragen Sie die Tankcodierung ein, dann wählt CargoPilot die Formel.",
-      "fr": "{product} : la formule applicable du 4.3.2.2.1 dépend de l'équipement de la citerne. Indiquez le code-citerne et CargoPilot choisit la formule."
+      "nl": "{product}: welke formule van 4.3.2.2.1 geldt, hangt af van de uitrusting van de tank (be- en ontluchting of hermetisch gesloten). Vul de tankcode in, dan kiest EMCargo de formule; anders geldt de formule zelf als voorwaarde.",
+      "en": "{product}: which formula of 4.3.2.2.1 applies depends on the tank's fittings (breather device or hermetically closed). Fill in the tank code and EMCargo picks the formula; otherwise the formula itself stands as a condition.",
+      "de": "{product}: welche Formel des 4.3.2.2.1 gilt, hängt von der Ausrüstung des Tanks ab. Tragen Sie die Tankcodierung ein, dann wählt EMCargo die Formel.",
+      "fr": "{product} : la formule applicable du 4.3.2.2.1 dépend de l'équipement de la citerne. Indiquez le code-citerne et EMCargo choisit la formule."
     }
   },
   "rid_transport_document": {
@@ -3324,22 +3324,22 @@
     "_not_the_adr": "ADR 5.4.1.1.1 has no such paragraph; its (k) is the tunnel restriction code. A hazard identification number in front of the description on a CMR would be an entry the ADR does not ask for.",
     "rules": {
       "prescribed": {
-        "nl": "RID 5.4.1.1.1 (j): omdat de kenmerking van 5.3.2.1 is voorgeschreven, staat het gevaarsidentificatienummer vóór de letters \"UN\", in de volgorde (j), (a), (b), (c), (d) zonder tussengevoegde gegevens. CargoPilot heeft het nummer in de omschrijvingsregel gezet; het ADR kent deze bepaling niet, dus op een CMR staat het er niet.",
-        "en": "RID 5.4.1.1.1 (j): because marking in accordance with 5.3.2.1 is prescribed, the hazard identification number goes before the letters \"UN\", in the sequence (j), (a), (b), (c), (d) with no information interspersed. CargoPilot has placed it in the description line; the ADR has no such provision, so it does not appear on a CMR.",
-        "de": "RID 5.4.1.1.1 j): Da eine Kennzeichnung nach 5.3.2.1 vorgeschrieben ist, steht die Nummer zur Kennzeichnung der Gefahr vor den Buchstaben «UN», in der Reihenfolge j), a), b), c), d) ohne eingefügte Angaben. CargoPilot hat sie in die Beschreibung aufgenommen; das ADR kennt diese Vorschrift nicht, auf einem CMR erscheint sie daher nicht.",
-        "fr": "RID 5.4.1.1.1 j) : la signalisation selon 5.3.2.1 étant prescrite, le numéro d'identification du danger précède les lettres « UN », dans l'ordre j), a), b), c), d) sans information intercalée. CargoPilot l'a placé dans la ligne de description ; l'ADR ne comporte pas cette disposition, il ne figure donc pas sur une CMR."
+        "nl": "RID 5.4.1.1.1 (j): omdat de kenmerking van 5.3.2.1 is voorgeschreven, staat het gevaarsidentificatienummer vóór de letters \"UN\", in de volgorde (j), (a), (b), (c), (d) zonder tussengevoegde gegevens. EMCargo heeft het nummer in de omschrijvingsregel gezet; het ADR kent deze bepaling niet, dus op een CMR staat het er niet.",
+        "en": "RID 5.4.1.1.1 (j): because marking in accordance with 5.3.2.1 is prescribed, the hazard identification number goes before the letters \"UN\", in the sequence (j), (a), (b), (c), (d) with no information interspersed. EMCargo has placed it in the description line; the ADR has no such provision, so it does not appear on a CMR.",
+        "de": "RID 5.4.1.1.1 j): Da eine Kennzeichnung nach 5.3.2.1 vorgeschrieben ist, steht die Nummer zur Kennzeichnung der Gefahr vor den Buchstaben «UN», in der Reihenfolge j), a), b), c), d) ohne eingefügte Angaben. EMCargo hat sie in die Beschreibung aufgenommen; das ADR kennt diese Vorschrift nicht, auf einem CMR erscheint sie daher nicht.",
+        "fr": "RID 5.4.1.1.1 j) : la signalisation selon 5.3.2.1 étant prescrite, le numéro d'identification du danger précède les lettres « UN », dans l'ordre j), a), b), c), d) sans information intercalée. EMCargo l'a placé dans la ligne de description ; l'ADR ne comporte pas cette disposition, il ne figure donc pas sur une CMR."
       },
       "no_hazard_number": {
-        "nl": "RID 5.4.1.1.1 (j): de kenmerking van 5.3.2.1 is voorgeschreven, maar tabel A geeft voor deze stof geen gevaarsidentificatienummer. Er staat dus niets vóór \"UN\" op het document. Controleer kolom (20) van de RID-tabel A: die is niet in CargoPilot opgenomen, alleen de ADR-kolom.",
-        "en": "RID 5.4.1.1.1 (j): marking in accordance with 5.3.2.1 is prescribed, but table A gives no hazard identification number for this substance, so nothing precedes \"UN\" on the document. Check column (20) of the RID's table A: CargoPilot holds the ADR column and not that one.",
-        "de": "RID 5.4.1.1.1 j): Eine Kennzeichnung nach 5.3.2.1 ist vorgeschrieben, die Tabelle A nennt für diesen Stoff aber keine Nummer zur Kennzeichnung der Gefahr; vor «UN» steht daher nichts. Prüfen Sie Spalte (20) der RID-Tabelle A: CargoPilot führt die ADR-Spalte, nicht diese.",
-        "fr": "RID 5.4.1.1.1 j) : la signalisation selon 5.3.2.1 est prescrite, mais le tableau A ne donne pas de numéro d'identification du danger pour cette matière ; rien ne précède donc « UN » sur le document. Vérifiez la colonne (20) du tableau A du RID : CargoPilot détient la colonne de l'ADR, pas celle-là."
+        "nl": "RID 5.4.1.1.1 (j): de kenmerking van 5.3.2.1 is voorgeschreven, maar tabel A geeft voor deze stof geen gevaarsidentificatienummer. Er staat dus niets vóór \"UN\" op het document. Controleer kolom (20) van de RID-tabel A: die is niet in EMCargo opgenomen, alleen de ADR-kolom.",
+        "en": "RID 5.4.1.1.1 (j): marking in accordance with 5.3.2.1 is prescribed, but table A gives no hazard identification number for this substance, so nothing precedes \"UN\" on the document. Check column (20) of the RID's table A: EMCargo holds the ADR column and not that one.",
+        "de": "RID 5.4.1.1.1 j): Eine Kennzeichnung nach 5.3.2.1 ist vorgeschrieben, die Tabelle A nennt für diesen Stoff aber keine Nummer zur Kennzeichnung der Gefahr; vor «UN» steht daher nichts. Prüfen Sie Spalte (20) der RID-Tabelle A: EMCargo führt die ADR-Spalte, nicht diese.",
+        "fr": "RID 5.4.1.1.1 j) : la signalisation selon 5.3.2.1 est prescrite, mais le tableau A ne donne pas de numéro d'identification du danger pour cette matière ; rien ne précède donc « UN » sur le document. Vérifiez la colonne (20) du tableau A du RID : EMCargo détient la colonne de l'ADR, pas celle-là."
       },
       "full_load_of_packages": {
-        "nl": "RID 5.3.2.1.1 laat toe dat een wagen met een volle lading colli van één en dezelfde stof aan beide zijkanten een oranje bord krijgt. Gebeurt dat, dan schrijft 5.4.1.1.1 (j) voor dat het gevaarsidentificatienummer vóór het UN-nummer op het vervoerdocument staat. CargoPilot ziet niet of de wagen zo is gekenmerkt en zet het nummer er daarom niet uit zichzelf voor.",
-        "en": "RID 5.3.2.1.1 permits an orange-coloured plate on both sides of a wagon holding a full load of packages of one and the same substance. Where it is affixed, 5.4.1.1.1 (j) puts the hazard identification number before the UN number on the transport document. CargoPilot cannot see whether the wagon was plated and therefore does not place the number there of its own accord.",
-        "de": "RID 5.3.2.1.1 erlaubt eine orangefarbene Tafel an beiden Längsseiten eines Wagens mit einer geschlossenen Ladung Versandstücke ein und desselben Gutes. Wird sie angebracht, verlangt 5.4.1.1.1 j) die Nummer zur Kennzeichnung der Gefahr vor der UN-Nummer im Beförderungspapier. CargoPilot sieht nicht, ob der Wagen so gekennzeichnet ist, und setzt die Nummer daher nicht von sich aus davor.",
-        "fr": "Le RID 5.3.2.1.1 permet d'apposer un panneau orange sur les deux côtés d'un wagon contenant un chargement complet de colis d'une seule et même matière. S'il est apposé, le 5.4.1.1.1 j) impose le numéro d'identification du danger avant le numéro ONU sur le document de transport. CargoPilot ne peut pas voir si le wagon a été signalisé et ne place donc pas le numéro de lui-même."
+        "nl": "RID 5.3.2.1.1 laat toe dat een wagen met een volle lading colli van één en dezelfde stof aan beide zijkanten een oranje bord krijgt. Gebeurt dat, dan schrijft 5.4.1.1.1 (j) voor dat het gevaarsidentificatienummer vóór het UN-nummer op het vervoerdocument staat. EMCargo ziet niet of de wagen zo is gekenmerkt en zet het nummer er daarom niet uit zichzelf voor.",
+        "en": "RID 5.3.2.1.1 permits an orange-coloured plate on both sides of a wagon holding a full load of packages of one and the same substance. Where it is affixed, 5.4.1.1.1 (j) puts the hazard identification number before the UN number on the transport document. EMCargo cannot see whether the wagon was plated and therefore does not place the number there of its own accord.",
+        "de": "RID 5.3.2.1.1 erlaubt eine orangefarbene Tafel an beiden Längsseiten eines Wagens mit einer geschlossenen Ladung Versandstücke ein und desselben Gutes. Wird sie angebracht, verlangt 5.4.1.1.1 j) die Nummer zur Kennzeichnung der Gefahr vor der UN-Nummer im Beförderungspapier. EMCargo sieht nicht, ob der Wagen so gekennzeichnet ist, und setzt die Nummer daher nicht von sich aus davor.",
+        "fr": "Le RID 5.3.2.1.1 permet d'apposer un panneau orange sur les deux côtés d'un wagon contenant un chargement complet de colis d'une seule et même matière. S'il est apposé, le 5.4.1.1.1 j) impose le numéro d'identification du danger avant le numéro ONU sur le document de transport. EMCargo ne peut pas voir si le wagon a été signalisé et ne place donc pas le numéro de lui-même."
       }
     }
   },

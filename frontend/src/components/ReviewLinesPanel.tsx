@@ -11,7 +11,7 @@
  * What is here now is the middle the two shapes missed. Four things live on the
  * line, because they are what a consignment is made of and what people come
  * back to change: the description, the quantity, the unit, and — read-only —
- * what CargoPilot worked out from them. The thirteen fields are not back:
+ * what EMCargo worked out from them. The thirteen fields are not back:
  * dimensions, wall thickness, cargo form, own weights and the article stay in
  * the detail dialog, one click away, exactly as they were.
  *
@@ -118,6 +118,7 @@ interface Props {
   onAddLine: () => void;
   onImport?: (text: string, mode: "append" | "replace") => void;
   onLineWeightChange?: (lineId: number, field: "weight_each_kg" | "weight_total_kg", value: number | null) => void;
+  initialPaste?: boolean;
   translateMessage: (msg: string) => string;
 }
 
@@ -246,6 +247,7 @@ export default function ReviewLinesPanel({
   onImport,
   onLineWeightChange,
   translateMessage,
+  initialPaste,
 }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
@@ -402,7 +404,7 @@ export default function ReviewLinesPanel({
 
   return (
     <div
-      className={`${panelClass} overflow-hidden ${dragging ? "ring-2 ring-brand-400" : ""}`}
+      className={`${panelClass} goods-panel ${dragging ? "ring-2 ring-brand-400" : ""}`}
       onDragOver={onImport ? (event) => {
         if (!event.dataTransfer.types.includes("Files")) return;
         event.preventDefault();
@@ -423,12 +425,13 @@ export default function ReviewLinesPanel({
       <div className="border-b border-slate-100 px-4 py-4 dark:border-slate-800 sm:px-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{t("review.linesTitle")}</h3>
+            <h3 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">{t("review.linesTitle")}</h3>
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{t("review.intro")}</p>
           </div>
           {onImport && (
             <div className="shrink-0">
               <GoodsImport
+                initialPaste={initialPaste}
                 hasLines={hasLines}
                 onImport={onImport}
                 dropped={dropped}
@@ -483,7 +486,7 @@ export default function ReviewLinesPanel({
             return (
               <li
                 key={line.id}
-                className={`rounded-xl border px-2 py-2 ${
+                className={`goods-row rounded-xl border px-2 py-2 ${
                   open
                     ? "border-brand-300 dark:border-brand-800"
                     : "border-slate-200 dark:border-slate-700"
@@ -493,7 +496,7 @@ export default function ReviewLinesPanel({
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                     {index + 1}
                   </span>
-                  <div className="min-w-[14rem] flex-1">
+                  <div className="goods-description min-w-0 basis-[14rem] flex-1">
                     <EquipmentCombobox
                       value={line.description}
                       onChange={(value) => updateDraft(line.id, { description: value })}
@@ -571,14 +574,13 @@ export default function ReviewLinesPanel({
                       expanded={open}
                       controls={panelId}
                     />
-                    <RowAction label={t("review.duplicateLine")} onClick={() => onDuplicateLine(line.id)} icon={<CopyIcon />} />
-                    <RowAction
-                      label={t("review.removeLine")}
-                      onClick={() => onRemoveLine(line.id)}
-                      icon={<TrashIcon />}
-                      danger
-                      disabled={!canRemove}
-                    />
+                    <details className="goods-menu relative">
+                      <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" aria-label={t("review.moreActions")}><span aria-hidden="true">•••</span></summary>
+                      <div className="absolute right-0 top-12 z-20 min-w-40 rounded-lg border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900">
+                        <button type="button" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); onDuplicateLine(line.id); }} className="flex min-h-[44px] w-full items-center gap-2 rounded px-3 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-800"><CopyIcon />{t("review.duplicateLine")}</button>
+                        <button type="button" disabled={!canRemove} onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); onRemoveLine(line.id); }} className="flex min-h-[44px] w-full items-center gap-2 rounded px-3 text-left text-sm text-red-600 hover:bg-red-50 disabled:opacity-40 dark:text-red-300 dark:hover:bg-red-950"><TrashIcon />{t("review.removeLine")}</button>
+                      </div>
+                    </details>
                   </div>
                 </div>
                 <Derived
@@ -611,7 +613,7 @@ export default function ReviewLinesPanel({
         <button
           type="button"
           onClick={onAddLine}
-          className="mt-3 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 text-sm font-medium text-slate-600 dark:border-slate-700 dark:text-slate-300"
+          className="goods-add mt-3 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 text-sm font-medium text-slate-600 dark:border-slate-700 dark:text-slate-300"
         >
           <PlusIcon />
           {t("review.addLine")}
@@ -722,6 +724,7 @@ function Derived({ line, item, stale, translateMessage }: {
   line: DraftLine;
   item: LineItem | null;
   stale: boolean;
+  initialPaste?: boolean;
   translateMessage: (msg: string) => string;
 }) {
   const { t } = useTranslation();

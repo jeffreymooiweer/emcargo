@@ -54,7 +54,7 @@ interface Slot {
 
 const SlotContext = createContext<Slot | null>(null);
 
-const actionRow = "flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3";
+const actionRow = "wizard-actions flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3";
 
 /** A step's buttons, placed in the shell's action bar. */
 export function WizardActions({ children }: { children: ReactNode }) {
@@ -115,11 +115,12 @@ interface Props {
   /** What the shipment adds up to, beside the work rather than after it. */
   panel?: ReactNode;
   children: ReactNode;
+  secondaryAction?: ReactNode;
 }
 
 export default function WizardShell({
   title, modality, modalities, onModality, steps, currentStep, visited, onGoTo,
-  draft, aside, attention = 0, panel, children,
+  draft, aside, attention = 0, panel, children, secondaryAction,
 }: Props) {
   const { t } = useTranslation();
   const [el, setEl] = useState<HTMLElement | null>(null);
@@ -133,62 +134,27 @@ export default function WizardShell({
 
   return (
     <SlotContext.Provider value={slot}>
-      <div className="space-y-4 sm:space-y-6">
-        <header className="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-          {/* Two rows at every width, rather than one row that wraps. Wrapping
-              put the title in a flex line with the draft state and the mode,
-              and on a phone that left the title 20px of it: a shipment called
-              "N…". What a shipment is called comes first and gets the width. */}
-          <div className="px-3 py-3 sm:px-4">
+      <div className="wizard-shell space-y-4 sm:space-y-6">
+        <header className="wizard-header">
+          <div className="wizard-title-block">
             <div className="flex items-center gap-2">
-              <h2 className="min-w-0 flex-1 truncate text-base font-semibold text-slate-900 sm:text-lg dark:text-slate-100">
-                {title}
-              </h2>
+              <h2 className="min-w-0 flex-1 break-words text-2xl font-semibold tracking-tight sm:text-3xl">{title}</h2>
               {aside}
             </div>
-            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
-            {draft}
-            <label className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-              <ModalityIcon modality={modality} className="h-4 w-4 shrink-0" />
-              <span className="sr-only sm:not-sr-only">{t("wizard.mode")}</span>
-              <select
-                value={modality}
-                onChange={(e) => onModality(e.target.value)}
-                aria-label={t("wizard.mode")}
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-              >
-                {modalities.map((key) => (
-                  <option key={key} value={key}>
-                    {t(`modality.${key}`)}
-                  </option>
-                ))}
+            <div className="mt-2 text-sm text-slate-500 dark:text-slate-400">{draft}</div>
+          </div>
+          <div className="wizard-progress-wrap">
+            <p className="mb-3 text-sm font-medium sm:hidden">{t("wizard.progressStep", { current: index + 1, total: steps.length })} — {steps[index]?.label}</p>
+            <WizardProgress steps={steps} currentStep={currentStep} visited={visited} onGoTo={onGoTo} />
+          </div>
+          <div className="wizard-mode-block">
+            <label className="wizard-mode flex items-center gap-3 rounded-lg border border-slate-300 px-3 dark:border-slate-700">
+              <ModalityIcon modality={modality} className="h-6 w-6 shrink-0 text-slate-400" />
+              <select value={modality} onChange={(event) => onModality(event.target.value)} aria-label={t("wizard.mode")} className="min-h-[48px] min-w-0 flex-1 bg-transparent text-sm font-semibold">
+                {modalities.map((key) => <option key={key} value={key}>{t(`modality.${key}`)}{({ road: " (ADR)", rail: " (RID)", sea: " (IMDG)", inland: " (ADN)" } as Record<string, string>)[key] ?? ""}</option>)}
               </select>
             </label>
-            {/* The switcher changes the mode of this shipment; the tiles are
-                where a shipment is *begun*, and somebody whose default mode
-                takes them straight past them still has to be able to get back
-                to them. Without this link `?choose=1` would have no door. */}
-            <Link
-              to="/?choose=1"
-              className="text-xs text-slate-500 hover:underline dark:text-slate-400"
-            >
-              {t("wizard.changeModality")}
-            </Link>
-            </div>
-          </div>
-
-          <div className="border-t border-slate-200 px-3 py-2.5 sm:px-4 dark:border-slate-800">
-            {/* On a phone the segments are icons, which say where you are but
-                not how far along. This says it in words, and only there. */}
-            <p className="mb-2 text-xs font-medium text-slate-500 sm:hidden dark:text-slate-400">
-              {t("wizard.progressStep", { current: index + 1, total: steps.length })}
-            </p>
-            <WizardProgress
-              steps={steps}
-              currentStep={currentStep}
-              visited={visited}
-              onGoTo={onGoTo}
-            />
+            <Link to="/?choose=1" className="mt-1 block text-right text-xs text-slate-500 hover:underline dark:text-slate-400">{t("wizard.changeModality")}</Link>
           </div>
         </header>
 
@@ -198,7 +164,7 @@ export default function WizardShell({
             scrolls past a form to find the totals. */}
         <div className="flex flex-col gap-4 xl:flex-row-reverse xl:items-start xl:gap-6">
           {panel && (
-            <aside className="xl:sticky xl:top-24 xl:w-72 xl:shrink-0">{panel}</aside>
+            <aside className="wizard-summary xl:sticky xl:top-24 xl:w-72 xl:shrink-0">{panel}</aside>
           )}
           <div className="min-w-0 flex-1">{children}</div>
         </div>
@@ -206,11 +172,12 @@ export default function WizardShell({
         <div
           className={
             filled > 0
-              ? "sticky bottom-0 z-30 -mx-3 border-t border-slate-200 bg-white/95 px-3 py-3 backdrop-blur sm:-mx-4 sm:px-4 dark:border-slate-800 dark:bg-slate-900/95"
+              ? "wizard-action-bar sticky bottom-0 z-30 -mx-3 border-t border-slate-200 bg-white/95 px-3 py-3 backdrop-blur sm:-mx-4 sm:px-4 dark:border-slate-800 dark:bg-slate-900/95"
               : "hidden"
           }
         >
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+            {secondaryAction}
             {/* One count, in one place at a time. From `xl` the panel is on
                 the screen and carries it; below that there is no panel beside
                 the work, so the bar says it. */}

@@ -57,7 +57,7 @@ def geo_address(
     if not settings.address_lookup_enabled:
         return {"results": [], "available": False}
     params = {"q": q, "limit": limit, "lang": lang if lang in ("en", "de", "fr") else "en"}
-    headers = {"User-Agent": "CargoPilot (+https://github.com/jeffreymooiweer/CargoPilot)"}
+    headers = {"User-Agent": "EMCargo (+https://github.com/jeffreymooiweer/EMCargo)"}
     try:
         with httpx.Client(timeout=settings.address_timeout_seconds, headers=headers) as client:
             response = client.get(settings.address_api_url, params=params)

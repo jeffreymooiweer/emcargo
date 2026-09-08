@@ -2,7 +2,7 @@
  * The user's own settings, loaded once and shared by the whole app.
  *
  * Until v1.45.0 the theme and the language lived in `localStorage` only. That
- * works right up to the moment the same person opens CargoPilot on a second
+ * works right up to the moment the same person opens EMCargo on a second
  * device and finds it back in Dutch on a white background — the settings were
  * never theirs, they belonged to one browser.
  *
@@ -36,7 +36,7 @@ export const BROWSER_PREFERENCES_KEY = "cargopilot-preferences";
 
 export const EMPTY_PREFERENCES: UserPreferences = {
   language: "",
-  theme: "system",
+  theme: "dark",
   default_modality: "",
   default_unit: "pcs",
   prefill_documents: true,

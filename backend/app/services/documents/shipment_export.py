@@ -2,20 +2,20 @@
 
 Every other exporter in this package produces paper. This one produces the
 shipment itself: what was filled in, what was carried, and — the part that
-makes it worth more than a form dump — **what CargoPilot worked out**. A
+makes it worth more than a form dump — **what EMCargo worked out**. A
 receiving system that gets only the typed fields has to re-derive the
 regulatory answer, and re-derivation is where two systems start to disagree.
 
 Why now, and why JSON rather than a standard. The EU eFTI Regulation applies in
 full from 9 July 2027, from when authorities must accept freight information
 electronically through certified platforms, and the eFTI data set is built on
-the UN/CEFACT Multi-Modal Transport reference data model. CargoPilot is not
+the UN/CEFACT Multi-Modal Transport reference data model. EMCargo is not
 going to become a certified platform — that is a certification regime for
 platform providers, and this application is a documentation tool. What it can
 be is trivially connectable to one. That starts with a shipment being able to
 leave as structured data at all, which is what this is.
 
-So the format is CargoPilot's own and says so. Mapping it onto MMT-RDM is a
+So the format is EMCargo's own and says so. Mapping it onto MMT-RDM is a
 separate exercise against the published model, and inventing half a mapping
 here would be worse than none: a field named as though it were the standard's,
 carrying something subtly else, is exactly the failure that makes an integration
@@ -102,7 +102,7 @@ def build_shipment_export(
         "format_version": FORMAT_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "generator": {
-            "application": "CargoPilot",
+            "application": "EMCargo",
             "version": get_version(),
         },
         "language": language,

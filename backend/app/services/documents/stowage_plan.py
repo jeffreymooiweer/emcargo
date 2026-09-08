@@ -10,7 +10,7 @@ an annex listing every container with its number and the description of what is
 in it.
 
 So this document is not a drawing and does not pretend to be one. A vessel's
-holds have a geometry CargoPilot knows nothing about, and a plan that invented
+holds have a geometry EMCargo knows nothing about, and a plan that invented
 one would be a picture of a ship that does not exist. What the provision asks
 for is *which goods are where*, in the words the transport document already
 uses — and that is exactly what the application holds.
@@ -49,8 +49,8 @@ TEXT: dict[str, dict[str, str]] = {
         "fr": "Plan d'arrimage (ADN 7.1.4.11.1)",
     },
     "generated": {
-        "nl": "Opgesteld met CargoPilot op", "en": "Drawn up with CargoPilot on",
-        "de": "Erstellt mit CargoPilot am", "fr": "Établi avec CargoPilot le",
+        "nl": "Opgesteld met EMCargo op", "en": "Drawn up with EMCargo on",
+        "de": "Erstellt mit EMCargo am", "fr": "Établi avec EMCargo le",
     },
     "vessel": {"nl": "Schip", "en": "Vessel", "de": "Schiff", "fr": "Bateau"},
     "voyage": {"nl": "Zending", "en": "Consignment", "de": "Sendung", "fr": "Envoi"},
@@ -93,15 +93,15 @@ TEXT: dict[str, dict[str, str]] = {
     "not_a_drawing": {
         "nl": "Dit plan zegt welke goederen waar staan, zoals 7.1.4.11.1 vraagt. Het is geen "
               "tekening van het schip: de indeling en afmetingen van de laadruimen kent "
-              "CargoPilot niet.",
+              "EMCargo niet.",
         "en": "This plan says which goods are where, as 7.1.4.11.1 asks. It is not a drawing "
-              "of the vessel: CargoPilot does not know the layout or the dimensions of the "
+              "of the vessel: EMCargo does not know the layout or the dimensions of the "
               "holds.",
         "de": "Dieser Plan nennt, welche Güter wo stehen, wie 7.1.4.11.1 es verlangt. Er ist "
               "keine Zeichnung des Schiffes: Aufteilung und Maße der Laderäume kennt "
-              "CargoPilot nicht.",
+              "EMCargo nicht.",
         "fr": "Ce plan indique quelles marchandises se trouvent où, comme le demande le "
-              "7.1.4.11.1. Ce n'est pas un dessin du bateau : CargoPilot ne connaît ni "
+              "7.1.4.11.1. Ce n'est pas un dessin du bateau : EMCargo ne connaît ni "
               "l'agencement ni les dimensions des cales.",
     },
     "source": {

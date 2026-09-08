@@ -48,7 +48,7 @@ DOCKER_SOCKET = Path("/var/run/docker.sock")
 #: read from the running container, so a container someone started from a
 #: fork or a hand-built tag refuses rather than pulls something the
 #: check's version number never described.
-IMAGE_REPOSITORY = "jeffersonmouze/cargopilot"
+IMAGE_REPOSITORY = "ghcr.io/jeffreymooiweer/emcargo"
 
 HELPER_NAME_PREFIX = "cargopilot-updater"
 

@@ -113,7 +113,7 @@ export default function DocumentFieldsStep({
   // Which required fields were empty when the user last pressed Next. Nothing
   // is marked while somebody is still typing — that is the difference between
   // telling and nagging — and nothing is blocked either: the second press goes
-  // on regardless, because a document CargoPilot cannot finish is still the
+  // on regardless, because a document EMCargo cannot finish is still the
   // user's to take further.
   const [flagged, setFlagged] = useState<string[]>([]);
   // Whether the customs references apply, read off the route as it is typed.

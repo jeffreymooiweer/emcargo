@@ -129,7 +129,7 @@ def test_arm64_is_not_hardcoded_into_the_build():
 def test_a_pull_request_builds_one_architecture_and_publishes_nothing():
     plan = (WORKFLOWS / "ci.yml").read_text(encoding="utf-8")
     start = plan.index("Decide what to build")
-    branch = plan[start: plan.index("Check DockerHub credentials")]
+    branch = plan[start: plan.index("Set up QEMU")]
     pull_request_half = branch[: branch.index("else")]
     assert "linux/amd64" in pull_request_half
     assert "linux/arm64" not in pull_request_half

@@ -2,7 +2,7 @@
 
 ## Cursor Cloud specific instructions
 
-CargoPilot is a single product with two dev processes: a Python 3.12 FastAPI backend
+EMCargo is a single product with two dev processes: a Python 3.12 FastAPI backend
 (`backend/`, port 8080) and a React/Vite/TypeScript frontend (`frontend/`, Vite dev
 server on port 5173 that proxies `/api` → `http://localhost:8080`). Data is stored in
 file-based SQLite; there is no separate database service. Standard commands live in

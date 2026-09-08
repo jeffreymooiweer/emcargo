@@ -1,4 +1,4 @@
-"""Fill official, fillable PDF forms (AcroForm) with CargoPilot data.
+"""Fill official, fillable PDF forms (AcroForm) with EMCargo data.
 
 The templates sit in ``templates/forms/`` as genuine PDF forms published by the
 issuing body and are filled in — not rebuilt. Signature, carrier and
@@ -230,7 +230,7 @@ def _iata_dg_block(dangerous_goods: list[dict[str, Any]],
 
     The Authorization box of the DGD belongs with this table: that is where the
     reference goes under which the consignment may fly — an approval from the
-    competent authority, an exemption, a DGR paragraph. The template CargoPilot
+    competent authority, an exemption, a DGR paragraph. The template EMCargo
     fills in has no separate field for it, so it is put as a line of its own
     below the table. Visible and named is better than omitted: without that
     reference, a consignment that needs one cannot be offered.
@@ -494,8 +494,8 @@ def _fill_with_pymupdf(
 
         doc.set_metadata(
             {
-                "producer": "CargoPilot",
-                "creator": "CargoPilot",
+                "producer": "EMCargo",
+                "creator": "EMCargo",
                 "subject": disclaimer,
             }
         )
@@ -525,8 +525,8 @@ def _fill_with_pypdf(template_path: Path, fields: dict[str, str], disclaimer: st
     try:
         writer.add_metadata(
             {
-                "/Producer": "CargoPilot",
-                "/Creator": "CargoPilot",
+                "/Producer": "EMCargo",
+                "/Creator": "EMCargo",
                 "/Subject": disclaimer,
             }
         )
@@ -570,10 +570,10 @@ def fill_pdf_document(
     fields = build_fields(document_key, values, lines, dangerous_goods, lang)
 
     disclaimer = (
-        "CONCEPT — gegenereerd met CargoPilot. Controleer, vul aan en onderteken door een "
+        "CONCEPT — gegenereerd met EMCargo. Controleer, vul aan en onderteken door een "
         "bevoegde persoon voor gebruik. Geen aansprakelijkheid; geleverd AS IS onder de "
         "Apache License 2.0 met Commons Clause. Zie DISCLAIMER.md. / DRAFT — generated with "
-        "CargoPilot; verify, complete and sign before use. No liability; provided AS IS."
+        "EMCargo; verify, complete and sign before use. No liability; provided AS IS."
     )
 
     if fitz is not None:

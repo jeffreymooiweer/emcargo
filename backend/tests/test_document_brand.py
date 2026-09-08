@@ -1,7 +1,7 @@
 """Whose name is on the paper.
 
-Every document CargoPilot draws itself carries the installation's brand —
-name and logo — on every page, and CargoPilot's own where nothing was set.
+Every document EMCargo draws itself carries the installation's brand —
+name and logo — on every page, and EMCargo's own where nothing was set.
 The official forms are somebody else's paper and are left alone.
 """
 from __future__ import annotations
@@ -41,8 +41,8 @@ def test_the_default_paper_is_cargopilots(tmp_path):
     brand.set_current(None)
     path = render_equipment_sheet(CONSIGNMENT, [], DG, language="en")
     text, images = pages_of(path)[0]
-    assert "CargoPilot" in text
-    assert "Drawn up with CargoPilot on" in text
+    assert "EMCargo" in text
+    assert "Drawn up with EMCargo on" in text
     assert images >= 1, "the default logo is drawn"
     assert "Page 1" in text
 
@@ -65,8 +65,8 @@ def test_an_installations_brand_is_on_every_page_of_every_document(tmp_path):
     # The generated-with line names the brand, in each language.
     assert "Opgesteld met Mooiweer Logistics op" in pages_of(rendered[0])[0][0]
     assert "Généré avec Mooiweer Logistics le" in pages_of(rendered[2])[0][0]
-    # The disclaimer keeps naming the software: the licence is CargoPilot's.
-    assert "CargoPilot" in pages_of(rendered[2])[-1][0]
+    # The disclaimer keeps naming the software: the licence is EMCargo's.
+    assert "EMCargo" in pages_of(rendered[2])[-1][0]
 
 
 def test_resolving_reads_the_instance_setting_and_the_uploaded_logo(monkeypatch, tmp_path):
@@ -80,14 +80,14 @@ def test_resolving_reads_the_instance_setting_and_the_uploaded_logo(monkeypatch,
     resolved = brand.resolve(db=object())
     assert resolved.name == "Havenbedrijf" and resolved.own and resolved.logo_size() == (120, 40)
 
-    # A name without a logo keeps CargoPilot's logo beside the name; nothing
+    # A name without a logo keeps EMCargo's logo beside the name; nothing
     # set at all is the default, and says so.
     monkeypatch.setattr(branding, "logo_image", lambda: None)
     named = brand.resolve(db=object())
     assert named.name == "Havenbedrijf" and named.own and named.logo
     monkeypatch.setattr(settings_store, "instance_settings", lambda db: SimpleNamespace(brand_name=""))
     assert not brand.resolve(db=object()).own
-    assert brand.resolve(None).name == "CargoPilot"
+    assert brand.resolve(None).name == "EMCargo"
 
 
 def test_a_logo_that_is_not_an_image_does_not_break_the_document():

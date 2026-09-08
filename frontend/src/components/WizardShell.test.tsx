@@ -73,7 +73,7 @@ describe("the frame around a shipment", () => {
 
   it("says how far along you are, for a screen too narrow for the labels", () => {
     shell({ currentStep: 2 });
-    expect(screen.getByText("wizard.progressStep:2,3")).toBeInTheDocument();
+    expect(screen.getByText(/wizard.progressStep:2,3/)).toBeInTheDocument();
   });
 
   it("switches the mode of the shipment already being entered", async () => {

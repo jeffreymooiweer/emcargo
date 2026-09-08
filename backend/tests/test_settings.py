@@ -137,7 +137,7 @@ def test_unreadable_json_falls_back_instead_of_taking_the_app_down(db):
     db.add(InstanceSetting(id=1, data_json="}{"))
     db.commit()
 
-    assert settings_store.user_preferences(db, 1).theme == "system"
+    assert settings_store.user_preferences(db, 1).theme == "dark"
     assert settings_store.instance_settings(db).address_lookup_enabled is True
 
 

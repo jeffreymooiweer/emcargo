@@ -3,7 +3,7 @@
 Three rules hold this module together.
 
 **The language belongs to the reader, not to the sender.** A colleague whose
-CargoPilot is in German gets a German invitation, even when the
+EMCargo is in German gets a German invitation, even when the
 administrator who made the account works in Dutch. Where the reader has no
 preference yet — a brand-new account — the installation's default language
 is the honest guess.
@@ -49,7 +49,7 @@ COPY_ICON_CID = "cargopilot-copy"
 
 @lru_cache(maxsize=1)
 def _default_logo() -> bytes | None:
-    """CargoPilot's own logo, or nothing when it is missing.
+    """EMCargo's own logo, or nothing when it is missing.
 
     Missing is survivable: the message still says everything it needs to.
     A crash while somebody is resetting their password is not.
@@ -64,7 +64,7 @@ def logo_image() -> tuple[bytes, str] | None:
     """The logo the mail carries, as ``(bytes, MIME subtype)``.
 
     The installation's own when an administrator uploaded one — the mail
-    should look like the screen it came from — and CargoPilot's otherwise.
+    should look like the screen it came from — and EMCargo's otherwise.
     Read fresh rather than cached, because the uploaded one can change while
     the process runs and a mail with last month's logo is a small lie.
     """
@@ -181,7 +181,7 @@ def layout(language: str, heading: str, paragraphs: list[str],
             f'{footer}</p>'
         )
 
-    logo = (f'<img src="cid:{LOGO_CID}" width="40" height="40" alt="CargoPilot" '
+    logo = (f'<img src="cid:{LOGO_CID}" width="40" height="40" alt="EMCargo" '
             'style="display:block;border:0;width:40px;height:40px;" />'
             ) if logo_bytes() else ""
 
@@ -206,7 +206,7 @@ def layout(language: str, heading: str, paragraphs: list[str],
         '<tr><td style="padding:24px 24px 8px;">'
         '<table role="presentation" cellpadding="0" cellspacing="0" border="0">'
         f'<tr><td style="padding-right:10px;">{logo}</td>'
-        '<td style="font-size:18px;font-weight:600;color:#0f172a;">CargoPilot</td>'
+        '<td style="font-size:18px;font-weight:600;color:#0f172a;">EMCargo</td>'
         '</tr></table>'
         '</td></tr>'
         '<tr><td style="padding:8px 24px 24px;">'
@@ -242,7 +242,7 @@ RESET = {
     "nl": {
         "subject": "Wachtwoord opnieuw instellen",
         "heading": "Nieuw wachtwoord instellen",
-        "intro": "Er is gevraagd om het wachtwoord van het CargoPilot-account "
+        "intro": "Er is gevraagd om het wachtwoord van het EMCargo-account "
                  "'{username}' opnieuw in te stellen.",
         "action": "Kies een nieuw wachtwoord",
         "validity": "De link werkt één keer en vervalt na {minutes} minuten.",
@@ -252,7 +252,7 @@ RESET = {
     "en": {
         "subject": "Reset your password",
         "heading": "Set a new password",
-        "intro": "Somebody asked to reset the password of the CargoPilot "
+        "intro": "Somebody asked to reset the password of the EMCargo "
                  "account '{username}'.",
         "action": "Choose a new password",
         "validity": "The link works once and expires in {minutes} minutes.",
@@ -262,7 +262,7 @@ RESET = {
     "de": {
         "subject": "Passwort zurücksetzen",
         "heading": "Neues Passwort festlegen",
-        "intro": "Es wurde angefragt, das Passwort des CargoPilot-Kontos "
+        "intro": "Es wurde angefragt, das Passwort des EMCargo-Kontos "
                  "'{username}' zurückzusetzen.",
         "action": "Neues Passwort wählen",
         "validity": "Der Link gilt einmal und verfällt in {minutes} Minuten.",
@@ -274,7 +274,7 @@ RESET = {
         "subject": "Réinitialiser votre mot de passe",
         "heading": "Définir un nouveau mot de passe",
         "intro": "Quelqu'un a demandé la réinitialisation du mot de passe du "
-                 "compte CargoPilot « {username} ».",
+                 "compte EMCargo « {username} ».",
         "action": "Choisir un nouveau mot de passe",
         "validity": "Le lien fonctionne une fois et expire dans {minutes} minutes.",
         "ignore": "Si ce n'était pas vous, rien ne s'est produit et vous "
@@ -285,11 +285,11 @@ RESET = {
 
 INVITE = {
     "nl": {
-        "subject": "Uw CargoPilot-account",
-        "heading": "Welkom bij CargoPilot",
+        "subject": "Uw EMCargo-account",
+        "heading": "Welkom bij EMCargo",
         # No name: an invitation should not tell its reader which account is
         # an administrator's.
-        "intro": "Een beheerder heeft een CargoPilot-account voor u aangemaakt.",
+        "intro": "Een beheerder heeft een EMCargo-account voor u aangemaakt.",
         "username": "Uw gebruikersnaam is <strong>{username}</strong>.",
         "username_text": "Uw gebruikersnaam is {username}.",
         "action": "Kies uw wachtwoord",
@@ -298,9 +298,9 @@ INVITE = {
                    "'Wachtwoord vergeten?' een nieuwe link aan.",
     },
     "en": {
-        "subject": "Your CargoPilot account",
-        "heading": "Welcome to CargoPilot",
-        "intro": "An administrator has made a CargoPilot account for you.",
+        "subject": "Your EMCargo account",
+        "heading": "Welcome to EMCargo",
+        "intro": "An administrator has made a EMCargo account for you.",
         "username": "Your user name is <strong>{username}</strong>.",
         "username_text": "Your user name is {username}.",
         "action": "Choose your password",
@@ -309,9 +309,9 @@ INVITE = {
                    "screen to get a new one.",
     },
     "de": {
-        "subject": "Ihr CargoPilot-Konto",
-        "heading": "Willkommen bei CargoPilot",
-        "intro": "Ein Administrator hat ein CargoPilot-Konto für Sie angelegt.",
+        "subject": "Ihr EMCargo-Konto",
+        "heading": "Willkommen bei EMCargo",
+        "intro": "Ein Administrator hat ein EMCargo-Konto für Sie angelegt.",
         "username": "Ihr Benutzername lautet <strong>{username}</strong>.",
         "username_text": "Ihr Benutzername lautet {username}.",
         "action": "Passwort wählen",
@@ -320,9 +320,9 @@ INVITE = {
                    "Anmeldeseite einen neuen Link an.",
     },
     "fr": {
-        "subject": "Votre compte CargoPilot",
-        "heading": "Bienvenue dans CargoPilot",
-        "intro": "Un administrateur a créé un compte CargoPilot pour vous.",
+        "subject": "Votre compte EMCargo",
+        "heading": "Bienvenue dans EMCargo",
+        "intro": "Un administrateur a créé un compte EMCargo pour vous.",
         "username": "Votre nom d'utilisateur est <strong>{username}</strong>.",
         "username_text": "Votre nom d'utilisateur est {username}.",
         "action": "Choisir votre mot de passe",
@@ -336,74 +336,74 @@ SIGN_IN_CODE = {
     "nl": {
         "subject": "Uw inlogcode",
         "heading": "Uw inlogcode",
-        "intro": "Gebruik deze code om in te loggen bij CargoPilot:",
+        "intro": "Gebruik deze code om in te loggen bij EMCargo:",
         "hint": "Houd de code even ingedrukt om hem te kopiëren.",
         "validity": "De code vervalt na {minutes} minuten.",
         "warning": "Logt u nu niet in? Dan kent iemand anders uw wachtwoord. "
-                   "Wijzig het en waarschuw de beheerder van CargoPilot.",
+                   "Wijzig het en waarschuw de beheerder van EMCargo.",
     },
     "en": {
         "subject": "Your sign-in code",
         "heading": "Your sign-in code",
-        "intro": "Use this code to sign in to CargoPilot:",
+        "intro": "Use this code to sign in to EMCargo:",
         "hint": "Press and hold the code to copy it.",
         "validity": "The code expires in {minutes} minutes.",
         "warning": "If you are not signing in right now, somebody knows your "
-                   "password. Change it, and tell whoever looks after CargoPilot.",
+                   "password. Change it, and tell whoever looks after EMCargo.",
     },
     "de": {
         "subject": "Ihr Anmeldecode",
         "heading": "Ihr Anmeldecode",
-        "intro": "Verwenden Sie diesen Code, um sich bei CargoPilot anzumelden:",
+        "intro": "Verwenden Sie diesen Code, um sich bei EMCargo anzumelden:",
         "hint": "Halten Sie den Code gedrückt, um ihn zu kopieren.",
         "validity": "Der Code verfällt in {minutes} Minuten.",
         "warning": "Melden Sie sich gerade nicht an? Dann kennt jemand Ihr "
                    "Passwort. Ändern Sie es und informieren Sie den "
-                   "Administrator von CargoPilot.",
+                   "Administrator von EMCargo.",
     },
     "fr": {
         "subject": "Votre code de connexion",
         "heading": "Votre code de connexion",
-        "intro": "Utilisez ce code pour vous connecter à CargoPilot :",
+        "intro": "Utilisez ce code pour vous connecter à EMCargo :",
         "hint": "Maintenez le code appuyé pour le copier.",
         "validity": "Le code expire dans {minutes} minutes.",
         "warning": "Si vous n'êtes pas en train de vous connecter, quelqu'un "
                    "connaît votre mot de passe. Changez-le et prévenez "
-                   "l'administrateur de CargoPilot.",
+                   "l'administrateur de EMCargo.",
     },
 }
 
 TEST = {
     "nl": {
-        "subject": "CargoPilot testbericht",
+        "subject": "EMCargo testbericht",
         "heading": "Het werkt",
-        "intro": "Dit is een testbericht van CargoPilot.",
+        "intro": "Dit is een testbericht van EMCargo.",
         "explain": "Leest u dit, dan kloppen de instellingen van de "
-                   "mailserver: CargoPilot bereikte de server, werd "
+                   "mailserver: EMCargo bereikte de server, werd "
                    "geaccepteerd en het bericht is bezorgd.",
     },
     "en": {
-        "subject": "CargoPilot test message",
+        "subject": "EMCargo test message",
         "heading": "It works",
-        "intro": "This is a test message from CargoPilot.",
+        "intro": "This is a test message from EMCargo.",
         "explain": "If you are reading it, the mail server settings work: "
-                   "CargoPilot reached the server, was accepted, and the "
+                   "EMCargo reached the server, was accepted, and the "
                    "message was delivered.",
     },
     "de": {
-        "subject": "CargoPilot-Testnachricht",
+        "subject": "EMCargo-Testnachricht",
         "heading": "Es funktioniert",
-        "intro": "Dies ist eine Testnachricht von CargoPilot.",
+        "intro": "Dies ist eine Testnachricht von EMCargo.",
         "explain": "Wenn Sie sie lesen, stimmen die Einstellungen des "
-                   "Mailservers: CargoPilot hat den Server erreicht, wurde "
+                   "Mailservers: EMCargo hat den Server erreicht, wurde "
                    "akzeptiert, und die Nachricht wurde zugestellt.",
     },
     "fr": {
-        "subject": "Message de test CargoPilot",
+        "subject": "Message de test EMCargo",
         "heading": "Cela fonctionne",
-        "intro": "Ceci est un message de test de CargoPilot.",
+        "intro": "Ceci est un message de test de EMCargo.",
         "explain": "Si vous le lisez, les paramètres du serveur de messagerie "
-                   "sont corrects : CargoPilot a joint le serveur, a été "
+                   "sont corrects : EMCargo a joint le serveur, a été "
                    "accepté, et le message a été distribué.",
     },
 }
@@ -413,25 +413,25 @@ DOCUMENTS = {
         "subject": "Vervoerdocumenten {reference}",
         "heading": "Vervoerdocumenten",
         "intro": "In de bijlage vindt u de vervoerdocumenten van deze zending.",
-        "sender": "Verstuurd vanuit CargoPilot door {sender}.",
+        "sender": "Verstuurd vanuit EMCargo door {sender}.",
     },
     "en": {
         "subject": "Transport documents {reference}",
         "heading": "Transport documents",
         "intro": "The transport documents for this consignment are attached.",
-        "sender": "Sent from CargoPilot by {sender}.",
+        "sender": "Sent from EMCargo by {sender}.",
     },
     "de": {
         "subject": "Beförderungspapiere {reference}",
         "heading": "Beförderungspapiere",
         "intro": "Im Anhang finden Sie die Beförderungspapiere dieser Sendung.",
-        "sender": "Gesendet aus CargoPilot von {sender}.",
+        "sender": "Gesendet aus EMCargo von {sender}.",
     },
     "fr": {
         "subject": "Documents de transport {reference}",
         "heading": "Documents de transport",
         "intro": "Les documents de transport de cet envoi sont en pièce jointe.",
-        "sender": "Envoyé depuis CargoPilot par {sender}.",
+        "sender": "Envoyé depuis EMCargo par {sender}.",
     },
 }
 

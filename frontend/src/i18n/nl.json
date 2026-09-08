@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "CargoPilot",
+    "name": "EMCargo",
     "tagline": "Van materiaallijst naar transportdocumenten"
   },
   "nav": {
@@ -29,7 +29,10 @@
       "administration": "Beheer",
       "account": "Account"
     },
-    "overview": "Overzicht"
+    "overview": "Overzicht",
+    "skipContent": "Naar inhoud",
+    "library": "Bibliotheek",
+    "manage": "Beheer"
   },
   "theme": {
     "dark": "Donker",
@@ -37,7 +40,7 @@
     "toggle": "Thema wisselen"
   },
   "dashboard": {
-    "privacy": "CargoPilot bewaart geen historie, geplakte data of documentbestanden op de server. Na download verdwijnt alles uit het geheugen."
+    "privacy": "EMCargo bewaart geen historie, geplakte data of documentbestanden op de server. Na download verdwijnt alles uit het geheugen."
   },
   "login": {
     "title": "Inloggen",
@@ -110,7 +113,13 @@
     "newShipment": "Nieuwe zending",
     "mode": "Vervoerswijze",
     "modeCarried": "Uw invoer is meegegaan naar {{mode}}. De berekening wordt opnieuw gedaan.",
-    "attention": "{{count}} aandachtspunt(en)"
+    "attention": "{{count}} aandachtspunt(en)",
+    "progressLabel": "Voortgang zending",
+    "toShipmentDetails": "Naar zendinggegevens",
+    "stageGoods": "Goederen",
+    "stageDetails": "Zendinggegevens",
+    "stageReview": "Controleren",
+    "saveAndClose": "Opslaan en sluiten"
   },
   "review": {
     "linesTitle": "Goederen",
@@ -197,7 +206,8 @@
     "packingGroup": "Verpakkingsgroep",
     "typeOfPackage": "Verpakkingssoort",
     "netPerPackage": "Netto per verpakking",
-    "derivedLater": "Uit de tabellen"
+    "derivedLater": "Uit de tabellen",
+    "moreActions": "Meer acties"
   },
   "import": {
     "downloadTemplate": "Template downloaden",
@@ -304,7 +314,7 @@
     "organisationHint": "Wordt als afzender voorgesteld aan gebruikers die zelf niets hebben ingevuld.",
     "organisationAddress": "Adres organisatie",
     "adminNetwork": "Verbindingen naar buiten",
-    "adminNetworkHint": "CargoPilot draait op uw eigen server. Dit zijn de enige verzoeken die het naar buiten doet.",
+    "adminNetworkHint": "EMCargo draait op uw eigen server. Dit zijn de enige verzoeken die het naar buiten doet.",
     "addressLookup": "Adressen opzoeken",
     "addressLookupHint": "Adres-aanvulling in de wizard. Uit betekent dat er tijdens het typen niets naar buiten gaat.",
     "addressApiUrl": "Adres-API",
@@ -337,7 +347,7 @@
     "updateExplain": "Bijwerken is altijd: het nieuwere image ophalen en de container opnieuw aanmaken — vanaf de server, bijvoorbeeld:",
     "updateAuto": "Met Watchtower gaat dit vanzelf; op Unraid volstaat één klik op 'update' in het Docker-tabblad.",
     "unCardsStoreTitle": "UN Cards",
-    "unCardsStoreIntro": "Door CargoPilot gegenereerde kaarten, geïnstalleerd op het datavolume — geen onderdeel van het Docker-image.",
+    "unCardsStoreIntro": "Door EMCargo gegenereerde kaarten, geïnstalleerd op het datavolume — geen onderdeel van het Docker-image.",
     "unCardsNone": "Er is nog geen kaartenset geïnstalleerd. Haal de nieuwste set op of importeer een gedownload ZIP-bestand.",
     "unCardsInstalled": "Geïnstalleerd: {{count}} kaarten, gegenereerd {{generated}}",
     "unCardsImportedAt": "Geïmporteerd {{date}}",
@@ -362,8 +372,8 @@
     "updateFound": "Nieuwere versie beschikbaar: {{latest}} (u draait {{current}}).",
     "updateApplyNow": "Update naar v{{version}} en herstart",
     "updateApplying": "Bezig met updaten…",
-    "updateApplyHint": "Duurt één tot enkele minuten; CargoPilot is even niet bereikbaar en laadt daarna vanzelf opnieuw.",
-    "updateApplyConfirm": "CargoPilot wordt bijgewerkt naar v{{version}} en herstart daarbij. Lopende downloads breken af. Doorgaan?",
+    "updateApplyHint": "Duurt één tot enkele minuten; EMCargo is even niet bereikbaar en laadt daarna vanzelf opnieuw.",
+    "updateApplyConfirm": "EMCargo wordt bijgewerkt naar v{{version}} en herstart daarbij. Lopende downloads breken af. Doorgaan?",
     "updatePhasePulling": "Nieuwe image wordt opgehaald…",
     "updatePhaseRestarting": "De applicatie herstart — deze pagina vernieuwt zodra de nieuwe versie antwoordt.",
     "updateDone": "Update geslaagd: u draait nu versie {{version}}.",
@@ -377,10 +387,10 @@
     "tabMaintenance": "Onderhoud",
     "updateReasonPermission": "De socket is gemount, maar de app mag hem niet openen. Dit is opgelost sinds v1.135.0 — werk de container nog één keer handmatig bij en herstart.",
     "updateReasonContainerNotFound": "De socket werkt, maar de app kan de eigen container niet terugvinden bij de Docker-daemon.",
-    "updateReasonForeignImage": "Deze container draait niet op het officiële CargoPilot-image; bijwerken vanuit de app blijft dan uit.",
+    "updateReasonForeignImage": "Deze container draait niet op het officiële EMCargo-image; bijwerken vanuit de app blijft dan uit.",
     "updateReasonSocketUnusable": "De Docker-socket is gemount maar reageert niet bruikbaar; controleer de mount en herstart de container.",
     "mailTitle": "Mailserver",
-    "mailHint": "Waarlangs CargoPilot mail verstuurt. Zonder server verstuurt de app niets.",
+    "mailHint": "Waarlangs EMCargo mail verstuurt. Zonder server verstuurt de app niets.",
     "mailEnabled": "Mail versturen",
     "mailEnabledHint": "Uit betekent: geen enkele uitgaande mail, ook geen test.",
     "mailHost": "Server (host)",
@@ -406,7 +416,7 @@
     "mailTesting": "Bezig met versturen…",
     "mailTestSent": "Testbericht verstuurd naar {{to}}.",
     "publicUrl": "Adres van deze installatie",
-    "publicUrlHint": "Wordt gebruikt voor links in uitgaande mail, bijvoorbeeld https://cargopilot.example.nl. Leeg laten als de browser CargoPilot rechtstreeks bereikt.",
+    "publicUrlHint": "Wordt gebruikt voor links in uitgaande mail, bijvoorbeeld https://cargopilot.example.nl. Leeg laten als de browser EMCargo rechtstreeks bereikt.",
     "cardLinks": "QR-code met UN-kaarten op documenten",
     "cardLinksHint": "Zet een QR-code op elk vervoersdocument die de UN-kaarten van deze zending opent. De pagina erachter vraagt niet om inloggen — dat is de bedoeling: de chauffeur langs de weg en de hulpverlener ter plaatse hebben hier geen account. De pagina toont alleen de UN-nummers en of er een kaart van is; niets over de zending, de partijen of de hoeveelheden. Uit tenzij u dit aanzet.",
     "cardLinksNeedsUrl": "Vul eerst het publieke adres hierboven in. Zonder dat adres wordt er geen QR-code afgedrukt: een code op papier die nergens heen leidt is erger dan geen code, want wie het papier vasthoudt kan dat niet zien.",
@@ -420,7 +430,7 @@
     "adminBranding": "Huisstijl",
     "adminBrandingHint": "De eigen naam en afbeeldingen van deze installatie: in de kop, op het inlogscherm en op de tegels. De afbeeldingen gelden zodra ze zijn geüpload; de naam wordt opgeslagen met de knop onderaan.",
     "brandName": "Naam",
-    "brandNameHint": "Staat in de kop, op het inlogscherm en in het browsertabblad. Leeg betekent CargoPilot.",
+    "brandNameHint": "Staat in de kop, op het inlogscherm en in het browsertabblad. Leeg betekent EMCargo.",
     "brandLogo": "Logo",
     "brandLogoHint": "PNG, JPEG of WebP, tot 1 MB. Wordt in beide thema's in eigen kleuren getoond en gaat mee in uitgaande mail.",
     "brandModalities": "Tegelafbeeldingen",
@@ -590,16 +600,16 @@
   },
   "legal": {
     "title": "Disclaimer en licentie",
-    "updated": "Laatst bijgewerkt: 12 juli 2026 · CargoPilot v1.4.0",
-    "intro": "CargoPilot is een hulpmiddel dat vervoers- en begeleidingsdocumenten voorbereidt op basis van uw invoer. De applicatie geeft geen juridisch, douanetechnisch of veiligheidskundig advies. Lees onderstaande voorwaarden zorgvuldig; door CargoPilot te gebruiken aanvaardt u ze.",
+    "updated": "Laatst bijgewerkt: 12 juli 2026 · EMCargo v1.4.0",
+    "intro": "EMCargo is een hulpmiddel dat vervoers- en begeleidingsdocumenten voorbereidt op basis van uw invoer. De applicatie geeft geen juridisch, douanetechnisch of veiligheidskundig advies. Lees onderstaande voorwaarden zorgvuldig; door EMCargo te gebruiken aanvaardt u ze.",
     "sections": [
       {
         "heading": "1. Concept — geen definitief document",
-        "body": "Elk door CargoPilot voortgebracht document is een concept. Vóór gebruik, overdracht, indiening of ondertekening moet het volledig worden gecontroleerd, aangevuld en ondertekend door een daartoe bevoegde en gekwalificeerde persoon. Handtekeningvelden, carriergegevens en operationele velden worden bewust niet vooraf ingevuld."
+        "body": "Elk door EMCargo voortgebracht document is een concept. Vóór gebruik, overdracht, indiening of ondertekening moet het volledig worden gecontroleerd, aangevuld en ondertekend door een daartoe bevoegde en gekwalificeerde persoon. Handtekeningvelden, carriergegevens en operationele velden worden bewust niet vooraf ingevuld."
       },
       {
         "heading": "2. Gevaarlijke stoffen",
-        "body": "Classificatie, verpakking, markering, etikettering en documentatie van gevaarlijke stoffen (ADR, RID, ADN, IMDG, IATA DGR) vallen onder de exclusieve verantwoordelijkheid van de afzender en andere wettelijk aangewezen partijen. CargoPilot zet een vrije omschrijving nooit automatisch om in een definitieve classificatie en vervangt geen gecertificeerde masterdata, veiligheidsadviseur of de actuele, geautoriseerde regelgeving."
+        "body": "Classificatie, verpakking, markering, etikettering en documentatie van gevaarlijke stoffen (ADR, RID, ADN, IMDG, IATA DGR) vallen onder de exclusieve verantwoordelijkheid van de afzender en andere wettelijk aangewezen partijen. EMCargo zet een vrije omschrijving nooit automatisch om in een definitieve classificatie en vervangt geen gecertificeerde masterdata, veiligheidsadviseur of de actuele, geautoriseerde regelgeving."
       },
       {
         "heading": "3. Geen garanties (AS IS)",
@@ -607,15 +617,15 @@
       },
       {
         "heading": "4. Uitsluiting van aansprakelijkheid",
-        "body": "Voor zover maximaal toegestaan onder het toepasselijke recht sluiten de maker(s), rechthebbende(n) en bijdragers van CargoPilot elke aansprakelijkheid uit voor enige directe, indirecte, incidentele, bijzondere, punitieve of gevolgschade — waaronder winstderving, bedrijfsstilstand, boetes, sancties, vertragingen, in beslag genomen of geweigerde zendingen, verlies van of schade aan goederen, milieuschade, persoonlijk letsel of verlies van gegevens — voortvloeiend uit of verband houdend met het gebruik van, of het onvermogen tot gebruik van, de applicatie of de gegenereerde documenten, ongeacht de rechtsgrond en zelfs indien op de mogelijkheid van dergelijke schade is gewezen. U gebruikt CargoPilot volledig op eigen risico."
+        "body": "Voor zover maximaal toegestaan onder het toepasselijke recht sluiten de maker(s), rechthebbende(n) en bijdragers van EMCargo elke aansprakelijkheid uit voor enige directe, indirecte, incidentele, bijzondere, punitieve of gevolgschade — waaronder winstderving, bedrijfsstilstand, boetes, sancties, vertragingen, in beslag genomen of geweigerde zendingen, verlies van of schade aan goederen, milieuschade, persoonlijk letsel of verlies van gegevens — voortvloeiend uit of verband houdend met het gebruik van, of het onvermogen tot gebruik van, de applicatie of de gegenereerde documenten, ongeacht de rechtsgrond en zelfs indien op de mogelijkheid van dergelijke schade is gewezen. U gebruikt EMCargo volledig op eigen risico."
       },
       {
         "heading": "5. Vrijwaring",
-        "body": "U vrijwaart de maker(s) en rechthebbende(n) van CargoPilot tegen alle aanspraken van derden die voortvloeien uit of verband houden met uw gebruik van de applicatie of de gegenereerde documenten."
+        "body": "U vrijwaart de maker(s) en rechthebbende(n) van EMCargo tegen alle aanspraken van derden die voortvloeien uit of verband houden met uw gebruik van de applicatie of de gegenereerde documenten."
       },
       {
         "heading": "6. Licentie — Apache License 2.0 met Commons Clause",
-        "body": "CargoPilot wordt in licentie gegeven onder de Apache License, Version 2.0, aangevuld met de Commons Clause. Onder de Apache License 2.0 wordt de software zonder garanties en met beperking van aansprakelijkheid geleverd (secties 7 en 8 van die licentie). Gebruik binnen uw eigen organisatie is toegestaan; het verkopen, doorverkopen, hosten als betaalde dienst of anderszins commercieel herdistribueren van de software zelf vereist voorafgaande schriftelijke toestemming van de rechthebbende (Commons Clause). De volledige tekst staat in het LICENSE-bestand van de repository."
+        "body": "EMCargo wordt in licentie gegeven onder de Apache License, Version 2.0, aangevuld met de Commons Clause. Onder de Apache License 2.0 wordt de software zonder garanties en met beperking van aansprakelijkheid geleverd (secties 7 en 8 van die licentie). Gebruik binnen uw eigen organisatie is toegestaan; het verkopen, doorverkopen, hosten als betaalde dienst of anderszins commercieel herdistribueren van de software zelf vereist voorafgaande schriftelijke toestemming van de rechthebbende (Commons Clause). De volledige tekst staat in het LICENSE-bestand van de repository."
       },
       {
         "heading": "7. Toepasselijk recht",
@@ -741,7 +751,7 @@
   },
   "dgauto": {
     "title": "Automatisch afgeleid",
-    "intro": "Op basis van het UN-nummer en de ingevoerde colli vult CargoPilot de classificatie, verpakkingsgegevens en documentregels zelf in. Controleer de gegevens en pas ze waar nodig aan.",
+    "intro": "Op basis van het UN-nummer en de ingevoerde colli vult EMCargo de classificatie, verpakkingsgegevens en documentregels zelf in. Controleer de gegevens en pas ze waar nodig aan.",
     "documentLine": "Omschrijving voor het vervoersdocument ({{profile}})",
     "documentLinesTitle": "Documentregels en totalen",
     "adrTotals": "Totaal per vervoerscategorie (ADR 5.4.1.1.1.1)",
@@ -827,7 +837,7 @@
   "checklist": {
     "title": "ADN-controlelijst (8.6.3)",
     "intro": "Vóór het laden of lossen van een tankschip moet de controlelijst van 8.6.3 worden ingevuld en ondertekend door schipper en walinstallatie. Dit is het voorgeschreven model uit de ADN-uitgave.",
-    "notFilledIn": "CargoPilot levert het model zoals het boek het drukt en vult niets voor u in: de lijst wordt aan boord samen met de walinstallatie ingevuld."
+    "notFilledIn": "EMCargo levert het model zoals het boek het drukt en vult niets voor u in: de lijst wordt aan boord samen met de walinstallatie ingevuld."
   },
   "dgstep": {
     "summaryTitle": "Afgeleid uit de regelgeving",
@@ -853,7 +863,7 @@
     "totals_11136": "Voor het totaal en de 1.1.3.6-puntentelling",
     "sp3122": "Meerdere namen onder dit UN-nummer — 3.1.2.2: alleen de meest toepasselijke naam komt op het document",
     "packaging_spec": "Op de verpakking staat vaak een UN-keuringscode; die code mag de omschrijving op het vervoerdocument aanvullen (5.4.1.1.1 e).",
-    "dimensions_complete_the_picture": "Met de afmetingen en de dichtheid uit de catalogus rekent CargoPilot het gewicht en het laadvolume zelf uit.",
+    "dimensions_complete_the_picture": "Met de afmetingen en de dichtheid uit de catalogus rekent EMCargo het gewicht en het laadvolume zelf uit.",
     "dimensions_complete_the_volume": "Het gewicht is al bekend; met de afmetingen van de verpakking komt ook het laadvolume erbij.",
     "weight_unknown_material": "Deze goederen staan niet in de catalogus, dus het gewicht kan niet berekend worden."
   },
@@ -907,12 +917,12 @@
   },
   "whatsNew": {
     "title": "Wat is er nieuw",
-    "intro": "CargoPilot is bijgewerkt naar versie {{version}}. Dit is er sinds uw vorige bezoek veranderd:",
+    "intro": "EMCargo is bijgewerkt naar versie {{version}}. Dit is er sinds uw vorige bezoek veranderd:",
     "truncated": "Niet alle tussenliggende versies worden getoond; het volledige overzicht staat in het changelog-bestand van het project.",
     "close": "Sluiten"
   },
   "update": {
-    "available": "CargoPilot {{version}} is beschikbaar.",
+    "available": "EMCargo {{version}} is beschikbaar.",
     "hint": "Deze installatie werkt zichzelf niet bij; haal het nieuwere image op zoals u dat gewend bent.",
     "releaseNotes": "Bekijk de release-opmerkingen",
     "dismiss": "Melding sluiten"
@@ -1054,7 +1064,7 @@
     "incomplete": "onvolledig",
     "mixedLoading": "Samenlading (7.5.2)",
     "notStored": "Deze rit wordt niet opgeslagen. Hij bestaat alleen op dit scherm; verversen wist hem.",
-    "notAnExport": "{{file}} is geen CargoPilot-zendingexport en is overgeslagen.",
+    "notAnExport": "{{file}} is geen EMCargo-zendingexport en is overgeslagen.",
     "noDangerousGoods": "{{file}} bevat geen gevaarlijke goederen en is overgeslagen.",
     "unreadable": "{{file}} kon niet worden gelezen.",
     "failed": "De beoordeling is niet gelukt.",
@@ -1361,7 +1371,7 @@
     "download": "Concept downloaden",
     "open": "Concept openen",
     "opened": "Concept geopend.",
-    "notADraft": "Dit bestand is geen CargoPilot-concept."
+    "notADraft": "Dit bestand is geen EMCargo-concept."
   },
   "check": {
     "title": "Controleer uw antwoorden",
@@ -1386,11 +1396,12 @@
     "ready": "Gereed",
     "missing": "{{count}} nog nodig",
     "missingUnknown": "Nog niet compleet",
-    "blocked": "Stofgegevens ontbreken"
+    "blocked": "Stofgegevens ontbreken",
+    "title": "Zendingsoverzicht"
   },
   "overview": {
     "title": "Overzicht",
-    "intro": "Waar u gebleven was, wat er vandaag is gemaakt, en de zendingen van de laatste tijd. Een nieuwe zending begint u hier of via de tegels.",
+    "intro": "Dit vraagt vandaag uw aandacht",
     "introNoHistory": "Deze installatie bewaart geen zendingen, dus er is niets om op terug te komen. Beginnen kan hier wel.",
     "resumeTitle": "Verder waar u gebleven was",
     "resume": "Verder",
@@ -1403,6 +1414,23 @@
     "allShipments": "Alle zendingen",
     "open": "Openen",
     "asTemplate": "Als sjabloon",
-    "dg": "Gevaarlijke stoffen"
+    "dg": "Gevaarlijke stoffen",
+    "morning": "Goedemorgen",
+    "afternoon": "Goedemiddag",
+    "evening": "Goedenavond",
+    "search": "Zoek in recente zendingen op referentie of organisatie",
+    "loadError": "Niet alle gegevens konden worden geladen. Probeer het opnieuw.",
+    "retry": "Opnieuw proberen",
+    "loading": "Zendingen laden…",
+    "noResults": "Geen recente zendingen gevonden.",
+    "unavailable": "Zendingen zijn tijdelijk niet beschikbaar.",
+    "localStart": "Start met uw goederen. Plak een lijst uit Excel of kies een vervoerswijze.",
+    "paste": "Plakken uit Excel",
+    "reference": "Referentie",
+    "route": "Route",
+    "status": "Status",
+    "updated": "Bijgewerkt",
+    "documentsAvailable": "Documenten beschikbaar",
+    "kept": "Bewaard"
   }
 }

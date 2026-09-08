@@ -1,4 +1,4 @@
-"""Whether a newer CargoPilot exists — asked, never acted on.
+"""Whether a newer EMCargo exists — asked, never acted on.
 
 A container cannot update itself: the operator pulls a newer image, by hand or
 through whatever they run for the purpose. What the application *can* do is
@@ -22,7 +22,7 @@ from app.core.config import get_settings
 
 logger = logging.getLogger(__name__)
 
-RELEASES_URL = "https://api.github.com/repos/jeffreymooiweer/CargoPilot/releases/latest"
+RELEASES_URL = "https://api.github.com/repos/jeffreymooiweer/emcargo/releases/latest"
 SUCCESS_TTL_SECONDS = 6 * 3600
 FAILURE_TTL_SECONDS = 15 * 60
 

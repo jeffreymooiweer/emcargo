@@ -1,6 +1,6 @@
 """The placarding sheet: what goes on the outside of the vehicle (ADR 5.3).
 
-CargoPilot has derived chapter 5.3 since v1.53.0 and shown the answer on
+EMCargo has derived chapter 5.3 since v1.53.0 and shown the answer on
 screen. On screen is where it stayed. The person who needs it is standing at
 the back of a trailer with plates and placards in his hand, and a compliance
 panel in a browser is not a thing you hold while doing that.
@@ -88,8 +88,8 @@ TEXT: dict[str, dict[str, str]] = {
         "fr": "Engin de transport à bord (conteneur, véhicule ou wagon)",
     },
     "generated": {
-        "nl": "Opgesteld met CargoPilot op", "en": "Drawn up with CargoPilot on",
-        "de": "Erstellt mit CargoPilot am", "fr": "Établi avec CargoPilot le",
+        "nl": "Opgesteld met EMCargo op", "en": "Drawn up with EMCargo on",
+        "de": "Erstellt mit EMCargo am", "fr": "Établi avec EMCargo le",
     },
     "consignment": {
         "nl": "Zending", "en": "Consignment", "de": "Sendung", "fr": "Envoi",

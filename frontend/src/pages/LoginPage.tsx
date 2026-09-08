@@ -87,10 +87,10 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
         >
           <div className="text-center">
             <img
-              src={branding.logo ?? "/shipping.png"}
+              src={branding.logo ?? "/emcargo.svg"}
               alt=""
               aria-hidden="true"
-              className={`mx-auto h-16 w-16 object-contain ${branding.logo ? "" : "dark:brightness-0 dark:invert"}`}
+              className={`mx-auto h-16 w-16 object-contain ${branding.logo ? "" : ""}`}
             />
             <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mt-3">
               {t("login.twoFactorTitle")}
@@ -148,10 +148,10 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
       <form onSubmit={submit} className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-8 w-full max-w-md space-y-4">
         <div className="text-center">
           <img
-            src={branding.logo ?? "/shipping.png"}
+            src={branding.logo ?? "/emcargo.svg"}
             alt=""
             aria-hidden="true"
-            className={`mx-auto h-16 w-16 object-contain ${branding.logo ? "" : "dark:brightness-0 dark:invert"}`}
+            className={`mx-auto h-16 w-16 object-contain ${branding.logo ? "" : ""}`}
           />
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mt-3">
             {branding.name || t("app.name")}

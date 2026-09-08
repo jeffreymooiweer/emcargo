@@ -60,7 +60,7 @@ class UserPreferences(BaseModel):
 
     #: Empty means: follow the instance default (and, failing that, the browser).
     language: str = ""
-    theme: ThemeChoice = "system"
+    theme: ThemeChoice = "dark"
 
     #: Skip the transport-mode tiles and open this mode straight away. Empty
     #: keeps the tiles, which is right for anyone who ships by more than one mode.
@@ -158,7 +158,7 @@ class InstanceSettings(BaseModel):
     #: The language a user who has not chosen one gets, and the language of the
     #: login screen.
     default_language: str = DEFAULT_LANGUAGE
-    default_theme: ThemeChoice = "system"
+    default_theme: ThemeChoice = "dark"
 
     #: Address autocomplete is the only outbound request the app makes while
     #: someone is using it. On an air-gapped or privacy-sensitive installation
@@ -174,7 +174,7 @@ class InstanceSettings(BaseModel):
     #: The third and last outbound request: asking GitHub whether a newer
     #: release exists, when an administrator opens the screen that could act
     #: on the answer. The container cannot update itself either way — this
-    #: only decides whether CargoPilot may *ask*.
+    #: only decides whether EMCargo may *ask*.
     update_check_enabled: bool = True
 
     #: The UN card download. Some installations would rather hand out their own
@@ -217,7 +217,7 @@ class InstanceSettings(BaseModel):
     organisation_address: str = ""
 
     #: What the screen calls itself: in the header, on the sign-in page and in
-    #: the browser tab. Empty means CargoPilot. Separate from the organisation
+    #: the browser tab. Empty means EMCargo. Separate from the organisation
     #: name above on purpose — that one goes on a document as the consignor,
     #: this one goes on the door, and a shipper's legal name is not always
     #: what it wants over its tools. The logo and the tile images beside it
@@ -231,7 +231,7 @@ class InstanceSettings(BaseModel):
 
     #: The address people reach this installation on, used to build the links
     #: in outgoing mail. Empty means: read it from the request, which is right
-    #: whenever the browser talks to CargoPilot directly and wrong behind a
+    #: whenever the browser talks to EMCargo directly and wrong behind a
     #: reverse proxy that does not pass its own host on.
     public_url: str = ""
 

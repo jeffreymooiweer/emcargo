@@ -171,7 +171,7 @@ TEXTS = {
               "IMDG 5.4.1.4.1 / IATA DGR 8.1.2.1 require",
         "de": "Offizielle Benennung auf diesem Dokument auf Englisch gesetzt, "
               "wie IMDG 5.4.1.4.1 / IATA DGR 8.1.2.1 es verlangen", "fr": "Désignation officielle de transport mise en anglais sur ce document, comme l'exigent le 5.4.1.4.1 de l'IMDG et le 8.1.2.1 de l'IATA DGR"},
-    # The counterpart of not inventing a unit. CargoPilot used to default a
+    # The counterpart of not inventing a unit. EMCargo used to default a
     # unitless quantity to kilograms, so "100" silently became "100 kg" on the
     # consignment note; now the number stands bare and the omission is named.
     "quantity_without_unit": {
@@ -280,24 +280,24 @@ TEXTS = {
     },
     "disclaimer": {
         "nl": (
-            "Dit document is automatisch gegenereerd met CargoPilot en is een concept: het moet vóór gebruik "
+            "Dit document is automatisch gegenereerd met EMCargo en is een concept: het moet vóór gebruik "
             "volledig worden gecontroleerd, aangevuld en ondertekend door een daartoe bevoegde persoon. "
-            "CargoPilot en de maker(s) aanvaarden geen enkele aansprakelijkheid; de software wordt geleverd "
+            "EMCargo en de maker(s) aanvaarden geen enkele aansprakelijkheid; de software wordt geleverd "
             "\"AS IS\" onder de Apache License 2.0 met Commons Clause (zie DISCLAIMER.md en LICENSE)."
         ),
         "en": (
-            "This document was generated automatically with CargoPilot and is a draft: before use it must be "
-            "fully verified, completed and signed by a duly authorised person. CargoPilot and its author(s) "
+            "This document was generated automatically with EMCargo and is a draft: before use it must be "
+            "fully verified, completed and signed by a duly authorised person. EMCargo and its author(s) "
             "accept no liability whatsoever; the software is provided \"AS IS\" under the Apache License 2.0 "
             "with Commons Clause (see DISCLAIMER.md and LICENSE)."
         ),
         "de": (
-            "Dieses Dokument wurde automatisch mit CargoPilot erstellt und ist ein Entwurf: Vor der "
+            "Dieses Dokument wurde automatisch mit EMCargo erstellt und ist ein Entwurf: Vor der "
             "Verwendung muss es von einer dazu befugten Person vollständig geprüft, ergänzt und "
-            "unterschrieben werden. CargoPilot und seine Urheber übernehmen keinerlei Haftung; die "
+            "unterschrieben werden. EMCargo und seine Urheber übernehmen keinerlei Haftung; die "
             "Software wird \"AS IS\" unter der Apache License 2.0 mit Commons Clause bereitgestellt "
             "(siehe DISCLAIMER.md und LICENSE)."
-        ), "fr": "Ce document a été généré automatiquement avec CargoPilot et constitue un projet : avant utilisation, il doit être intégralement vérifié, complété et signé par une personne dûment habilitée. CargoPilot et son ou ses auteurs déclinent toute responsabilité ; le logiciel est fourni « EN L'ÉTAT » sous licence Apache 2.0 avec Commons Clause (voir DISCLAIMER.md et LICENSE)."},
+        ), "fr": "Ce document a été généré automatiquement avec EMCargo et constitue un projet : avant utilisation, il doit être intégralement vérifié, complété et signé par une personne dûment habilitée. EMCargo et son ou ses auteurs déclinent toute responsabilité ; le logiciel est fourni « EN L'ÉTAT » sous licence Apache 2.0 avec Commons Clause (voir DISCLAIMER.md et LICENSE)."},
     "iata_dg_headers": {
         "nl": [
             "UN- of ID-nr.",
@@ -548,7 +548,7 @@ def validate_document(
                 # German name standing in the field.
                 #
                 # That is no reason to refuse the export: the language belongs to
-                # the document and not to the consignment, and CargoPilot knows
+                # the document and not to the consignment, and EMCargo knows
                 # which name has to be here. It puts it there itself and reports
                 # it — blocking would only make the user retype what the app
                 # already knew.

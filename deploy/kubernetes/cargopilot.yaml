@@ -1,4 +1,4 @@
-# CargoPilot on Kubernetes: plain manifests, one file.
+# EMCargo on Kubernetes: plain manifests, one file.
 #
 # What is here: a namespace, a persistent volume claim for /data, a secret
 # for the first administrator's password, a config map for the rest of the
@@ -9,7 +9,7 @@
 # in-app updater, which needs a Docker socket a pod does not have.
 #
 #   kubectl apply -f cargopilot.yaml
-#   kubectl -n cargopilot set image deployment/cargopilot cargopilot=jeffersonmouze/cargopilot:1.181.0
+#   kubectl -n cargopilot set image deployment/cargopilot cargopilot=ghcr.io/jeffreymooiweer/emcargo:1.181.0
 #
 # See docs/installation-native.md for the walk-through.
 apiVersion: v1
@@ -78,7 +78,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: cargopilot
-          image: jeffersonmouze/cargopilot:latest
+          image: ghcr.io/jeffreymooiweer/emcargo:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

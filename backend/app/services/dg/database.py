@@ -407,9 +407,9 @@ def offline_lookup(
         "tunnel_restriction_code": f"({entry['tunnel_code']})" if entry.get("tunnel_code") else None,
         "transport_category": entry.get("transport_category"),
         "source": (
-            f"CargoPilot offline seed ({entry['source_note']})"
+            f"EMCargo offline seed ({entry['source_note']})"
             if entry.get("source_note")
-            else "CargoPilot offline seed (ADR 2023 Tabel A / 49 CFR 172.101)"
+            else "EMCargo offline seed (ADR 2023 Tabel A / 49 CFR 172.101)"
         ),
         "variants": len(entries),
     }

@@ -28,7 +28,7 @@ import ImportColumnMapping from "./ImportColumnMapping";
 import { ImportIcon } from "./icons";
 
 const buttonClass =
-  "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium " +
+  "inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-3 text-sm font-medium " +
   "text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50 " +
   "dark:text-slate-200 dark:hover:bg-slate-800";
 const textareaClass =
@@ -53,16 +53,17 @@ function PasteIcon() {
 interface Props {
   /** Whether the shipment already holds a line worth replacing. */
   hasLines: boolean;
+  initialPaste?: boolean;
   onImport: (text: string, mode: "append" | "replace") => void;
   /** A file dropped on the goods panel, handed over to be parsed here. */
   dropped?: File | null;
   onDroppedHandled?: () => void;
 }
 
-export default function GoodsImport({ hasLines, onImport, dropped, onDroppedHandled }: Props) {
+export default function GoodsImport({ hasLines, onImport, dropped, onDroppedHandled, initialPaste = false }: Props) {
   const { t } = useTranslation();
   const toast = useToast();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initialPaste);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [analysis, setAnalysis] = useState<ImportAnalysis | null>(null);

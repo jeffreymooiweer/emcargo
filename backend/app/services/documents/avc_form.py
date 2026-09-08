@@ -334,15 +334,15 @@ def fill_avc_waybill(
 
     disclaimer = pick(
         {
-            "nl": "CONCEPT — gegenereerd met CargoPilot; controleer, vul aan en onderteken "
+            "nl": "CONCEPT — gegenereerd met EMCargo; controleer, vul aan en onderteken "
                   "door een bevoegde persoon vóór gebruik. Geen aansprakelijkheid, geleverd "
                   "AS IS (Apache License 2.0 met Commons Clause, zie DISCLAIMER.md).",
-            "en": "DRAFT — generated with CargoPilot; verify, complete and sign by an "
+            "en": "DRAFT — generated with EMCargo; verify, complete and sign by an "
                   "authorised person before use. No liability, provided AS IS (Apache "
                   "License 2.0 with Commons Clause).",
-            "de": "ENTWURF — mit CargoPilot erstellt; vor der Verwendung von einer befugten "
+            "de": "ENTWURF — mit EMCargo erstellt; vor der Verwendung von einer befugten "
                   "Person prüfen, ergänzen und unterschreiben lassen. Keine Haftung, "
-                  "bereitgestellt AS IS (Apache License 2.0 mit Commons Clause).", "fr": "PROJET — généré avec CargoPilot ; à vérifier, à compléter et à faire signer par une personne habilitée avant utilisation. Aucune responsabilité, fourni EN L'ÉTAT (licence Apache 2.0 avec Commons Clause)."},
+                  "bereitgestellt AS IS (Apache License 2.0 mit Commons Clause).", "fr": "PROJET — généré avec EMCargo ; à vérifier, à compléter et à faire signer par une personne habilitée avant utilisation. Aucune responsabilité, fourni EN L'ÉTAT (licence Apache 2.0 avec Commons Clause)."},
         lang,
     )
     _draw_footer_note(c, disclaimer)
@@ -358,8 +358,8 @@ def fill_avc_waybill(
     writer.add_page(page)
     try:
         writer.add_metadata({
-            "/Producer": "CargoPilot",
-            "/Creator": "CargoPilot",
+            "/Producer": "EMCargo",
+            "/Creator": "EMCargo",
             "/Subject": disclaimer,
         })
     except Exception:  # pragma: no cover

@@ -95,7 +95,7 @@ def verify_totp(secret: str, code: str, at: float | None = None) -> bool:
     return False
 
 
-def provisioning_uri(user: User, secret: str, issuer: str = "CargoPilot") -> str:
+def provisioning_uri(user: User, secret: str, issuer: str = "EMCargo") -> str:
     """The otpauth: URI an authenticator app reads from the QR code."""
     from urllib.parse import quote
 

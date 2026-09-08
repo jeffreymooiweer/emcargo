@@ -540,15 +540,11 @@ export default function WizardPage() {
     return list;
   }, [needsDg, genericDocs.length]);
 
-  const stepLabels: Record<StepKey, string> = {
-    lines: t("wizard.step2"),
-    dg: t("wizard.step3dg"),
-    details: t("wizard.stepDetails"),
-    export: t("wizard.step4"),
-  };
-
-  const stepPills = steps.map((key, index) => ({ n: index + 1, key, label: stepLabels[key] }));
-  const currentIndex = Math.max(0, steps.indexOf(stepKey));
+  const stepPills = [
+    { n: 1, key: "lines" as const, label: t("wizard.stageGoods") },
+    ...(genericDocs.length > 0 ? [{ n: 2, key: "details" as const, label: t("wizard.stageDetails") }] : []),
+    { n: 3, key: "export" as const, label: t("wizard.stageReview") },
+  ];
 
   const goNextFrom = (from: StepKey) => {
     const index = steps.indexOf(from);
@@ -983,17 +979,38 @@ export default function WizardPage() {
   const draftBody = useRef<string>("");
   const draftTimer = useRef<number | undefined>(undefined);
   const draftRestored = useRef(false);
+  const pendingDraft = useRef<Promise<unknown>>(Promise.resolve());
+  const [closing, setClosing] = useState(false);
+
+  // Queue writes so an older autosave cannot overwrite the final explicit save.
+  const persistDraft = (payload: ShipmentIn) => {
+    const write = pendingDraft.current.catch(() => undefined).then(() => api.saveDraft(payload));
+    pendingDraft.current = write;
+    return write;
+  };
+  const saveAndClose = async () => {
+    if (closing) return;
+    setClosing(true);
+    window.clearTimeout(draftTimer.current);
+    try {
+      setDraftStatus("saving");
+      await persistDraft(shipmentPayload(true));
+      navigate("/overzicht");
+    } catch {
+      setDraftStatus("failed");
+      setClosing(false);
+    }
+  };
 
   useEffect(() => {
-    if (!historyOn || !hasEntry || reopenId) return;
+    if (!historyOn || !hasEntry || reopenId || closing) return;
     const payload = shipmentPayload(true);
     const body = JSON.stringify(payload);
     if (body === draftBody.current) return;
     window.clearTimeout(draftTimer.current);
     draftTimer.current = window.setTimeout(() => {
       setDraftStatus("saving");
-      api
-        .saveDraft(payload)
+      persistDraft(payload)
         .then((saved) => {
           draftBody.current = body;
           setHistoryId((current) => current ?? saved.id);
@@ -1008,7 +1025,7 @@ export default function WizardPage() {
     // The payload is rebuilt from these; the body comparison does the rest.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [historyOn, hasEntry, reopenId, stepKey, draftLines, docValues, result, dgEntries,
-      selectedDocs, signature, chosenDocLang, skippedQuestions]);
+      selectedDocs, signature, chosenDocLang, skippedQuestions, closing]);
 
   // Coming back to it. Only this modality's draft, and only when the wizard was
   // not opened on a shipment of its own.
@@ -1461,12 +1478,15 @@ export default function WizardPage() {
       modalities={AVAILABLE_MODALITIES}
       onModality={switchModality}
       steps={stepPills}
-      currentStep={currentIndex + 1}
+      currentStep={stepKey === "export" ? 3 : stepKey === "details" ? 2 : 1}
       visited={visited}
       onGoTo={(key) => {
         setReturnTo(null);
         setStepKey(key as StepKey);
       }}
+      secondaryAction={historyOn && hasEntry && !reopenId ? (
+        <button type="button" disabled={closing} className={buttonSecondary} onClick={() => void saveAndClose()}>{t("wizard.saveAndClose")}</button>
+      ) : undefined}
       attention={attention}
       panel={
         <ShipmentPanel
@@ -1506,7 +1526,7 @@ export default function WizardPage() {
         </button>
       }
     >
-      <div className="space-y-4 sm:space-y-6">
+      <div className="space-y-4 sm:space-y-6" inert={closing || undefined}>
       <AssistantModal
         open={assistantOpen}
         onClose={() => setAssistantOpen(false)}
@@ -1539,6 +1559,7 @@ export default function WizardPage() {
               are in the panel now, on every step — because the totals you are
               entering against do not stop mattering when you move on. */}
           <ReviewLinesPanel
+            initialPaste={searchParams.get("input") === "paste"}
             draftLines={draftLines}
             resultLines={result?.lines}
             onDraftChange={(lines) => {
@@ -1558,7 +1579,7 @@ export default function WizardPage() {
 
           <WizardActions>
             <button type="button" onClick={goFromLines} disabled={loading} className={buttonPrimary}>
-              {t("wizard.continue")}
+              {needsDg ? t("wizard.step3dg") : t("wizard.toShipmentDetails")}
             </button>
           </WizardActions>
         </div>

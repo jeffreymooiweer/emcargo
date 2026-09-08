@@ -33,7 +33,7 @@ def lookup_un_number(un_number: str, *, timeout: float = 15.0) -> dict | None:
             response = client.get(
                 FREIGHTUTILS_ADR_URL,
                 params={"un": digits},
-                headers={"Accept": "application/json", "User-Agent": "CargoPilot/1.0"},
+                headers={"Accept": "application/json", "User-Agent": "EMCargo/1.0"},
             )
             response.raise_for_status()
             payload = response.json()

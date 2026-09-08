@@ -5,7 +5,7 @@ is in this repository, so an installation that never set it runs on a key
 anybody can look up, and whoever holds that key writes themselves a valid admin
 token. That is an open front door, not a blemish.
 
-**What used to be here, and why that was wrong.** From v1.25.0 CargoPilot
+**What used to be here, and why that was wrong.** From v1.25.0 EMCargo
 refused to start in that case. The reasoning — nobody reads a warning in a log
 — was sound; the execution was not. This application's own defaults *are*
 `APP_SECRET_KEY=change-me` and `CORS_ALLOWED_ORIGINS=*`, and the Unraid
@@ -160,7 +160,7 @@ def configuration_warnings(settings) -> list[str]:
             "CORS_ALLOWED_ORIGINS is set to '*'. A wildcard is answered without "
             "credentials, so a call from another website cannot carry the login "
             "cookie — the interface served by this application is unaffected. "
-            "Better to name the addresses you reach CargoPilot on:"
+            "Better to name the addresses you reach EMCargo on:"
             "\n    CORS_ALLOWED_ORIGINS=https://cargopilot.example.com"
         )
 

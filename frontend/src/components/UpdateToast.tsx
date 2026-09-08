@@ -1,7 +1,7 @@
 /**
  * A quiet corner note for the one person who can do something about it.
  *
- * The update check tells an administrator that a newer CargoPilot exists;
+ * The update check tells an administrator that a newer EMCargo exists;
  * nobody else operates the container, so nobody else sees the notice. The
  * component itself renders nothing — it hands the notice to the toast system
  * as a sticky info toast (information, not an interruption, so it never

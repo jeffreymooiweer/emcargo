@@ -2,6 +2,24 @@
 
 All notable changes are documented here, following [Semantic Versioning](https://semver.org/).
 
+## [1.207.0] — 2026-09-08
+
+### EMCargo dark interface
+
+- Rename the product, generated-document branding, email templates and new 2FA
+  enrolments to EMCargo. Keep existing data, import formats and licence attribution.
+- Follow the approved dark desktop and mobile mockups: persistent navigation rail,
+  overview with draft resume and quick start, three shipment stages, adjacent
+  shipment summary and a bottom action bar.
+- Add direct Excel paste entry, searchable recent shipments, grouped row actions,
+  keyboard-accessible mobile navigation and explicit save-and-close with ordered
+  draft writes.
+- Use dark mode for new installations while preserving explicit user preferences
+  and custom organisation branding. Keep all four interface languages.
+- Point release checks and container updates to EMCargo's own repository and GHCR
+  image. Preserve native service and archive names for upgrade compatibility.
+
+
 ## [1.206.2] — 2026-09-07
 
 ### One form of address

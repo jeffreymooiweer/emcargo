@@ -6,7 +6,7 @@
   "directory_date": "2016-06-08",
   "source": {
     "title": "UN/EDIFACT D.16A directory, message IFTDGN (Dangerous goods notification message), UN/CEFACT TBG3 Transport",
-    "note": "The directory is licensed by the United Nations and is not redistributed in this repository; this file holds only the message structure and the elements and code values CargoPilot uses, verified against the directory files whose checksums are recorded here.",
+    "note": "The directory is licensed by the United Nations and is not redistributed in this repository; this file holds only the message structure and the elements and code values EMCargo uses, verified against the directory files whose checksums are recorded here.",
     "verified_against": {
       "edmd/IFTDGN_D.16A": "491fb3b209c95f5a",
       "edsd/EDSD.16A": "2fc30cb8b9e1235d",
@@ -125,7 +125,7 @@
   "external_codes": {
     "8067": {"source": "UN/ECE Recommendation No. 19 (named by the data element's note; not part of the D.16A code list)", "values": {"1": "Maritime transport", "2": "Rail transport", "3": "Road transport", "4": "Air transport", "8": "Inland water transport"}},
     "6411": {"source": "UN/ECE Recommendation No. 20 (named by the data element's note; not part of the D.16A code list)", "values": {"KGM": "kilogram", "LTR": "litre", "CEL": "degree Celsius"}},
-    "7065": {"source": "UN/ECE Recommendation No. 21 (named by the data element's note; not part of the D.16A code list). Not coded by CargoPilot: the package type travels as text in 7064 until the Recommendation has been read.", "values": {}}
+    "7065": {"source": "UN/ECE Recommendation No. 21 (named by the data element's note; not part of the D.16A code list). Not coded by EMCargo: the package type travels as text in 7064 until the Recommendation has been read.", "values": {}}
   },
   "syntax": {
     "interchange": "ISO 9735 service segments UNA, UNB and UNZ; character set UNOC (ISO 8859-1) so names keep their case and accents",

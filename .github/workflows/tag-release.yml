@@ -20,6 +20,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
   actions: write
 
 jobs:
@@ -117,7 +118,7 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "$TAG" -m "CargoPilot $TAG"
+          git tag -a "$TAG" -m "EMCargo $TAG"
 
           if [ -n "$RELEASE_TOKEN" ]; then
             HEADER="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$RELEASE_TOKEN" | base64 -w0)"
@@ -161,7 +162,7 @@ jobs:
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "Release $TAG already exists — skipping."
           else
-            gh release create "$TAG" --title "CargoPilot $TAG" --notes-file release-body.md
+            gh release create "$TAG" --title "EMCargo $TAG" --notes-file release-body.md
           fi
 
       # The native bundle: what a host without Docker installs. The backend,
@@ -208,16 +209,17 @@ jobs:
       # without pulling a single layer. And it is stricter than a rebuild: the
       # released image is bit for bit the image that came green through CI,
       # instead of a second compilation that can come out slightly different.
-      - name: Log in to Docker Hub
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Name the image main already built
         env:
           VERSION: ${{ steps.release.outputs.version }}
-          IMAGE: jeffersonmouze/cargopilot
+          IMAGE: ghcr.io/jeffreymooiweer/emcargo
         run: |
           SHORT="$(git rev-parse --short=7 HEAD)"
           echo "Looking for $IMAGE:$SHORT — the image built from this very commit."

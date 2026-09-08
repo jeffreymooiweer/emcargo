@@ -1,6 +1,6 @@
 """The safety adviser's annual report as paper.
 
-Drawn in CargoPilot's own style on the installation's page frame, in the
+Drawn in EMCargo's own style on the installation's page frame, in the
 order the DVSA template gives the report: company and adviser, risk rating,
 summary, activities, incidents, training, high consequence goods, the
 transport table, practices and procedures, the class 7 block where class 7
@@ -161,7 +161,7 @@ def _incidents_table(question: dict[str, Any], rows: list[dict[str, Any]], style
 
 
 def render_dgsa_report(report: dict[str, Any], definition: dict[str, Any], answers: dict[str, Any],
-                       signature_png: bytes | None = None, brand_name: str = "CargoPilot") -> Path:
+                       signature_png: bytes | None = None, brand_name: str = "EMCargo") -> Path:
     lang = report.get("language", "nl")
     styles = _styles()
     out_path = _output_path()
