@@ -2,47 +2,13 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useToast } from "../toast/ToastProvider";
 import NumberInput from "../components/NumberInput";
-import { ImportIcon } from "../components/icons";
+import { ImportIcon, DownloadIcon, DocumentIcon, PenIcon as PencilIcon, CopyIcon, TrashIcon, PlusIcon, ChevronDownIcon } from "../components/icons";
 import { api, EquipmentItem } from "../api/client";
 import EquipmentImportDialog from "../components/EquipmentImportDialog";
 
 const inputClass =
   "border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 rounded-lg px-3 py-2 text-sm";
 const panelClass = "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800";
-
-function PencilIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} aria-hidden>
-      <path d="M13.5 3.5l3 3L7 16l-3.5.5L4 13l9.5-9.5Z" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function CopyIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} aria-hidden>
-      <rect x="7" y="7" width="9" height="9" rx="2" />
-      <path d="M13 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
-    </svg>
-  );
-}
-
-function TrashIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} aria-hidden>
-      <path d="M4 6h12M8 6V4.5A1.5 1.5 0 0 1 9.5 3h1A1.5 1.5 0 0 1 12 4.5V6m-6 0v9a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function DownloadIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
-      <path d="M10 3a.75.75 0 0 1 .75.75v7.19l2.22-2.22a.75.75 0 1 1 1.06 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-3.5-3.5a.75.75 0 1 1 1.06-1.06l2.22 2.22V3.75A.75.75 0 0 1 10 3Z" />
-      <path d="M4 14.25a.75.75 0 0 0-1.5 0v1A2.75 2.75 0 0 0 5.25 18h9.5A2.75 2.75 0 0 0 17.5 15.25v-1a.75.75 0 0 0-1.5 0v1c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-1Z" />
-    </svg>
-  );
-}
 
 function CardAction({
   label,
@@ -96,7 +62,7 @@ function CardRow({ label, children }: { label: string; children: React.ReactNode
   return (
     <div className="border-t border-slate-100 px-4 py-2.5 text-sm first:border-t-0 dark:border-slate-800">
       <div ref={rowRef} className="relative">
-        {/* Onzichtbare probes om de natuurlijke breedte op één regel te meten */}
+        {/* Invisible probes measure the natural width on one line. */}
         <span ref={labelProbeRef} aria-hidden className="pointer-events-none invisible absolute left-0 top-0 whitespace-nowrap">
           {label}
         </span>
@@ -136,6 +102,7 @@ export default function MaterieelPage() {
   const [items, setItems] = useState<EquipmentItem[]>([]);
   const [search, setSearch] = useState("");
   const [form, setForm] = useState<EquipmentItem>(emptyForm());
+  const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState("");
   const toast = useToast();
@@ -161,6 +128,7 @@ export default function MaterieelPage() {
   }, [items, search]);
 
   const resetForm = () => {
+    setFormOpen(false);
     setForm(emptyForm());
     setEditingId(null);
   };
@@ -192,12 +160,14 @@ export default function MaterieelPage() {
   };
 
   const startEdit = (item: EquipmentItem) => {
+    setFormOpen(true);
     setEditingId(item.id!);
     setForm({ ...item, aliases: item.aliases || [] });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const duplicate = (item: EquipmentItem) => {
+    setFormOpen(true);
     setEditingId(null);
     setForm({ ...emptyForm(), ...item, id: undefined, aliases: item.aliases || [] });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -222,40 +192,34 @@ export default function MaterieelPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between gap-3">
+    <div className="collection-page page-enter space-y-6">
+      <header>
+        <h2 className="text-2xl font-semibold">{t("nav.materieel")}</h2>
         <p className="min-w-0 flex-1 text-sm text-slate-600 dark:text-slate-400">{t("materieel.intro")}</p>
-        <div className="flex shrink-0 items-center gap-0.5">
-          <CardAction
-            label={t("import.downloadTemplate")}
-            onClick={() => api.downloadEquipmentTemplate().catch((e) => toast.error(String(e)))}
-            icon={<DownloadIcon />}
-          />
-          <CardAction
-            label={t("materieel.exportLibrary")}
-            onClick={() => api.exportEquipmentLibrary().catch((e) => toast.error(String(e)))}
-            icon={<DownloadIcon />}
-          />
-          <CardAction label={t("materieel.import")} onClick={() => setImportOpen(true)} icon={<ImportIcon />} />
+        <div className="mt-5 flex flex-wrap gap-2">
+          <button className="action-secondary" onClick={() => api.downloadEquipmentTemplate().catch((e) => toast.error(String(e)))}><DocumentIcon />{t("import.downloadTemplate")}</button>
+          <button className="action-secondary" onClick={() => api.exportEquipmentLibrary().catch((e) => toast.error(String(e)))}><DownloadIcon />{t("materieel.exportLibrary")}</button>
+          <button className="action-secondary" onClick={() => setImportOpen(true)}><ImportIcon />{t("materieel.import")}</button>
         </div>
-      </div>
+      </header>
 
-      <form onSubmit={submit} className={`${panelClass} p-6 grid md:grid-cols-2 gap-3`}>
-        <h3 className="md:col-span-2 font-semibold text-slate-900 dark:text-slate-100">
-          {editingId ? t("materieel.edit") : t("materieel.add")}
-        </h3>
-        <input className={`${inputClass} md:col-span-2`} required placeholder={t("materieel.specifications")} value={form.specifications} onChange={(e) => setForm({ ...form, specifications: e.target.value })} />
-        <NumberInput className={inputClass} step="0.1" placeholder={t("materieel.length")} value={form.length_cm ?? ""} onChange={(e) => setForm({ ...form, length_cm: e.target.value ? Number(e.target.value) : null })} />
-        <NumberInput className={inputClass} step="0.1" placeholder={t("materieel.width")} value={form.width_cm ?? ""} onChange={(e) => setForm({ ...form, width_cm: e.target.value ? Number(e.target.value) : null })} />
-        <NumberInput className={inputClass} step="0.1" placeholder={t("materieel.height")} value={form.height_cm ?? ""} onChange={(e) => setForm({ ...form, height_cm: e.target.value ? Number(e.target.value) : null })} />
-        <NumberInput className={inputClass} step="0.1" placeholder={t("materieel.wallThickness")} value={form.wall_thickness_mm ?? ""} onChange={(e) => setForm({ ...form, wall_thickness_mm: e.target.value ? Number(e.target.value) : null })} />
-        <NumberInput className={inputClass} step="0.1" required placeholder={t("materieel.weight")} value={form.weight_kg || ""} onChange={(e) => setForm({ ...form, weight_kg: Number(e.target.value) })} />
+      <details className="surface collection-form" open={formOpen} onToggle={(event) => setFormOpen(event.currentTarget.open)}>
+        <summary><PlusIcon /><span>{editingId ? t("materieel.edit") : t("materieel.add")}</span><ChevronDownIcon /></summary>
+        <form onSubmit={submit} className="collection-form-body grid md:grid-cols-2 gap-4">
+        <label className="equipment-field md:col-span-2">{t("materieel.specifications")}<input className={`${inputClass} md:col-span-2`} required placeholder={t("materieel.specifications")} value={form.specifications} onChange={(e) => setForm({ ...form, specifications: e.target.value })} /></label>
+        <label className="equipment-field">{t("materieel.length")}<NumberInput className={inputClass} step="0.1" placeholder={t("materieel.length")} value={form.length_cm ?? ""} onChange={(e) => setForm({ ...form, length_cm: e.target.value ? Number(e.target.value) : null })} /></label>
+        <label className="equipment-field">{t("materieel.width")}<NumberInput className={inputClass} step="0.1" placeholder={t("materieel.width")} value={form.width_cm ?? ""} onChange={(e) => setForm({ ...form, width_cm: e.target.value ? Number(e.target.value) : null })} /></label>
+        <label className="equipment-field">{t("materieel.height")}<NumberInput className={inputClass} step="0.1" placeholder={t("materieel.height")} value={form.height_cm ?? ""} onChange={(e) => setForm({ ...form, height_cm: e.target.value ? Number(e.target.value) : null })} /></label>
+        <label className="equipment-field">{t("materieel.wallThickness")}<NumberInput className={inputClass} step="0.1" placeholder={t("materieel.wallThickness")} value={form.wall_thickness_mm ?? ""} onChange={(e) => setForm({ ...form, wall_thickness_mm: e.target.value ? Number(e.target.value) : null })} /></label>
+        <label className="equipment-field">{t("materieel.weight")}<NumberInput className={inputClass} step="0.1" required placeholder={t("materieel.weight")} value={form.weight_kg || ""} onChange={(e) => setForm({ ...form, weight_kg: Number(e.target.value) })} /></label>
+        <label className="equipment-field md:col-span-2">{t("materieel.aliases")}
         <input
           className={`${inputClass} md:col-span-2`}
           placeholder={t("materieel.aliases")}
           value={(form.aliases || []).join(", ")}
           onChange={(e) => setForm({ ...form, aliases: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
         />
+        </label>
         <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
           <input type="checkbox" checked={form.active !== false} onChange={(e) => setForm({ ...form, active: e.target.checked })} />
           {t("materieel.active")}
@@ -270,7 +234,8 @@ export default function MaterieelPage() {
             </button>
           )}
         </div>
-      </form>
+        </form>
+      </details>
 
       <div className={`${panelClass} p-4`}>
         <input
@@ -284,7 +249,7 @@ export default function MaterieelPage() {
         </p>
       </div>
 
-      {/* Mobiel: cards */}
+      {/* Cards on narrow screens. */}
       <div className="space-y-3 md:hidden">
         {filtered.map((item) => (
           <div key={item.id} className={`${panelClass} shadow-sm`}>

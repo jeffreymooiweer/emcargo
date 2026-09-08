@@ -1,3 +1,4 @@
+import { PlusIcon, CopyIcon, TrashIcon, MoreIcon, ChevronDownIcon } from "./icons";
 /**
  * A goods list with direct quantity editing and details on demand.
  * Successful lines show their result once; only exceptions and unanswered
@@ -121,46 +122,8 @@ function signatureOf(line: DraftLine): string {
   ]);
 }
 
-function PlusIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.8} aria-hidden>
-      <path d="M10 4v12M4 10h12" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-/** The disclosure arrow. It points down when the line is closed and up when it
- *  is open, so the glyph says what pressing it will do. */
 function DetailsIcon({ open }: { open: boolean }) {
-  return (
-    <svg
-      className={`h-4 w-4 transition-transform duration-200 motion-reduce:transition-none ${open ? "rotate-180" : ""}`}
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      aria-hidden
-    >
-      <path d="m5 8 5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function CopyIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} aria-hidden>
-      <rect x="7" y="7" width="9" height="9" rx="2" />
-      <path d="M13 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
-    </svg>
-  );
-}
-
-function TrashIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} aria-hidden>
-      <path d="M4 6h12M8 6V4.5A1.5 1.5 0 0 1 9.5 3h1A1.5 1.5 0 0 1 12 4.5V6m-6 0v9a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <ChevronDownIcon className={`h-4 w-4 transition-transform motion-reduce:transition-none ${open ? "rotate-180" : ""}`} />;
 }
 
 export default function ReviewLinesPanel({
@@ -396,7 +359,7 @@ export default function ReviewLinesPanel({
                 <details className="goods-menu" onKeyDown={(event) => {
                   if (event.key === "Escape") { event.currentTarget.open = false; event.currentTarget.querySelector("summary")?.focus(); }
                 }}>
-                  <summary aria-label={t("review.moreActions")}><span aria-hidden="true">•••</span></summary>
+                  <summary aria-label={t("review.moreActions")}><MoreIcon /></summary>
                   <div className="goods-menu-options">
                     <button type="button" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); onDuplicateLine(line.id); }}><CopyIcon />{t("review.duplicateLine")}</button>
                     <button type="button" disabled={!canRemove} onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); onRemoveLine(line.id); }}><TrashIcon />{t("review.removeLine")}</button>

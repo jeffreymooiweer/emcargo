@@ -2,6 +2,44 @@
 
 All notable changes are documented here, following [Semantic Versioning](https://semver.org/).
 
+## [2.2.0] — 2026-09-08
+
+### EMCargo, throughout the workspace
+
+- Introduce a navy and cobalt identity, a new vector logo and a consistent set
+  of line icons. Seven original generated photographs cover the transport
+  choices and the login backdrop. Preserve custom branding and transport locks.
+- Reorganize Settings into personal preferences, organisation and system.
+  Updates have their own destination. Security owns two-factor policy and
+  session duration; connections own the installation address; UN cards own
+  card availability and QR links. Mail settings contain mail controls.
+- Show the dangerous substance and its unanswered questions first. Keep
+  derived details and special cases in disclosures, preserve every regulatory
+  warning, and clear stale findings when the input changes.
+- Give the final wizard page a review grid and a quieter document workspace.
+  Identical warnings appear once with their affected documents. Failed document
+  checks remain explicit; missing-field links and export blockers are preserved.
+- Prioritize library and user lists. Creation forms open on demand, equipment
+  fields have persistent labels, and secondary pages share the same hierarchy.
+- Restyle notifications with restrained status colours and common icons. Pause
+  timed messages while pointed at or keyboard-focused; retain undo semantics.
+  Confirmation dialogs keep keyboard focus inside and return it on closing.
+
+### Updating from inside EMCargo
+
+- Open Settings / Updates directly from the update notification. Show installed
+  and available versions, manual checking, prerequisites and persistent progress.
+- Resume progress after navigation or restart and report failed updates inline.
+  Prevent concurrent installation attempts, including the helper handover window.
+- Preserve named mounts and a custom data directory in the updater helper,
+  recognize official digest-pinned images, write progress atomically, and avoid
+  overwriting a fast helper's completion. Wait for the replacement health check
+  before removing the previous container.
+- Add an optional Compose override and Unraid template controls for the existing
+  Docker opt-in. See [in-app update setup](docs/in-app-updates.md) and the
+  [implementation and visual review](docs/design/review-2.2.0.md).
+- No database migration, reference-table or transport-calculation change.
+
 ## [2.1.1] — 2026-09-08
 
 ### Simpler goods entry

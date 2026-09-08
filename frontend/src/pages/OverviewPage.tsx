@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { api, ShipmentDetail, ShipmentSummary } from "../api/client";
 import { ModalityIcon } from "../components/WizardShell";
-import { HomeIcon, PlusIcon, ShipmentsIcon, TripsIcon, ImportIcon } from "../components/icons";
+import { MoreIcon, ArrowRightIcon, HomeIcon, PlusIcon, ShipmentsIcon, TripsIcon, ImportIcon } from "../components/icons";
 import { usePreferences } from "../settings/preferences";
 import { readSnapshot } from "../wizard/snapshot";
 import { localDayRange } from "../utils/dateRanges";
@@ -77,14 +77,14 @@ export default function OverviewPage() {
                 <p className="break-words font-semibold">{draft.reference || draft.consignee_name || t("wizard.newShipment")}</p>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t(`modality.${draftModality}`)} · {t("draft.savedAt", { time: draftTime })}</p>
               </div>
-              <Link className="action-primary" to={`/wizard/${draftModality || "road"}`}>{t("overview.resume")}<span aria-hidden="true">→</span></Link>
+              <Link className="action-primary" to={`/wizard/${draftModality || "road"}`}>{t("overview.resume")}<ArrowRightIcon className="inline h-4 w-4" /></Link>
             </div>
             <div className="mt-2 text-right"><button disabled={discarding} className="min-h-[44px] px-2 text-xs text-slate-500 hover:underline dark:text-slate-400" onClick={() => void discard()}>{t("draft.discard")}</button></div>
           </section>}
           {history && <section className="surface">
             <div className="flex flex-wrap items-center justify-between gap-3 p-5 sm:p-6">
               <h3 className="surface-title">{t("overview.recentTitle")}</h3>
-              <Link to="/shipments" className="text-sm font-medium text-brand-600 hover:underline dark:text-brand-300">{t("overview.allShipments")} <span aria-hidden="true">→</span></Link>
+              <Link to="/shipments" className="text-sm font-medium text-brand-600 hover:underline dark:text-brand-300">{t("overview.allShipments")} <ArrowRightIcon className="inline h-4 w-4" /></Link>
               <label className="relative w-full">
                 <span className="sr-only">{t("overview.search")}</span>
                 <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("overview.search")} className="min-h-[44px] w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm dark:border-slate-700 dark:bg-slate-950/50" />
@@ -100,13 +100,13 @@ export default function OverviewPage() {
               {filtered.map((shipment) => <li key={shipment.id} className="recent-table-row">
                 <Link className="recent-reference min-w-0 break-words text-sm font-medium hover:text-brand-400" to={`/wizard/${shipment.modality || "road"}?shipment=${shipment.id}`}>{shipment.reference || shipment.consignee_name || `#${shipment.id}`}</Link>
                 <div className="recent-route min-w-0 text-sm">
-                  <p className="break-words">{shipment.consignor_name || "—"} <span aria-hidden="true">→</span> {shipment.consignee_name || "—"}</p>
+                  <p className="break-words">{shipment.consignor_name || "—"} <ArrowRightIcon className="inline h-4 w-4" /> {shipment.consignee_name || "—"}</p>
                   <span className="mt-1 inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400"><ModalityIcon modality={shipment.modality} className="h-3.5 w-3.5" />{t(`modality.${shipment.modality}`)}{shipment.has_dangerous_goods && ` · ${t("overview.dg")}`}</span>
                 </div>
                 <span className={`recent-status text-xs ${shipment.has_documents ? "text-emerald-700 dark:text-emerald-300" : "text-slate-500 dark:text-slate-400"}`}>{shipment.has_documents ? t("overview.documentsAvailable") : t("overview.kept")}</span>
                 <time className="recent-date text-xs text-slate-500 dark:text-slate-400" dateTime={shipment.updated_at}>{new Date(shipment.updated_at).toLocaleDateString(i18n.language)}</time>
                 <details className="recent-menu relative">
-                  <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded hover:bg-slate-100 dark:hover:bg-slate-800" aria-label={t("review.moreActions")}><span aria-hidden="true">•••</span></summary>
+                  <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded hover:bg-slate-100 dark:hover:bg-slate-800" aria-label={t("review.moreActions")}><MoreIcon /></summary>
                   <div className="absolute right-0 z-20 min-w-44 rounded-lg border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900">
                     <Link className="action-secondary w-full border-0 justify-start" to={`/wizard/${shipment.modality || "road"}?shipment=${shipment.id}`}>{t("overview.open")}</Link>
                     <Link className="action-secondary w-full border-0 justify-start" to={`/wizard/${shipment.modality || "road"}?template=${shipment.id}`}>{t("overview.asTemplate")}</Link>
@@ -130,9 +130,9 @@ export default function OverviewPage() {
           <section className="surface overview-quick p-5">
             <h3 className="surface-title">{t("overview.startTitle")}</h3>
             <div className="mt-4 space-y-2">
-              <Link to={`/wizard/${preferred}?input=paste`} className="action-secondary w-full justify-between"><span className="flex items-center gap-2"><ImportIcon className="h-5 w-5" />{t("overview.paste")}</span><span aria-hidden="true">→</span></Link>
+              <Link to={`/wizard/${preferred}?input=paste`} className="action-secondary w-full justify-between"><span className="flex items-center gap-2"><ImportIcon className="h-5 w-5" />{t("overview.paste")}</span><ArrowRightIcon className="inline h-4 w-4" /></Link>
               {AVAILABLE_MODALITIES.map((key) => <button key={key} type="button" onClick={() => navigate(`/wizard/${key}`)} className="action-secondary w-full justify-between">
-                <span className="flex items-center gap-2"><ModalityIcon modality={key} className="h-5 w-5" />{t(`modality.${key}`)}</span><span aria-hidden="true">→</span>
+                <span className="flex items-center gap-2"><ModalityIcon modality={key} className="h-5 w-5" />{t(`modality.${key}`)}</span><ArrowRightIcon className="inline h-4 w-4" />
               </button>)}
             </div>
             <Link to="/?choose=1" className="mt-3 inline-flex min-h-[44px] items-center text-xs text-slate-500 hover:underline dark:text-slate-400">{t("wizard.changeModality")}</Link>

@@ -122,7 +122,7 @@ describe("de modaliteitkeuze", () => {
 
 describe("de eigen tegelafbeeldingen", () => {
   it("toont een geüploade afbeelding in beide thema's en de standaard waar er geen is", () => {
-    // Custom organisation images remain supported; other modes use vector icons.
+    // Custom organisation images remain supported; other modes use the bundled transport photography.
     preferences.default_modality = undefined;
     branding.modalities = { road: "/api/branding/modality/road?v=42" };
     renderAt("/?choose=1");
@@ -131,7 +131,9 @@ describe("de eigen tegelafbeeldingen", () => {
     expect(sources).toContain("/api/branding/modality/road?v=42");
     expect(sources).not.toContain("/modalities/road-light.webp");
     expect(sources).not.toContain("/modalities/road-dark.webp");
-    expect(sources).toHaveLength(1);
+    expect(sources).toHaveLength(6);
+    expect(sources).toContain("/art/rail.webp");
+    expect(sources).not.toContain("/art/road.webp");
     expect(screen.getByRole("button", { name: /modality.rail/ }).querySelector("svg")).not.toBeNull();
     branding.modalities = {};
   });

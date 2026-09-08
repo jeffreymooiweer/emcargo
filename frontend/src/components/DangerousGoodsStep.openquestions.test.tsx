@@ -126,9 +126,10 @@ describe("the DG step with a UN number", () => {
 });
 
 describe("the DG step without a UN number", () => {
-  it("shows the full form: the substance itself is the question", () => {
+  it("asks for the substance before exposing dependent fields", () => {
     renderStep(false);
-    expect(screen.getByText("proper_shipping_name")).toBeTruthy();
+    expect(screen.queryByText("proper_shipping_name")).toBeNull();
+    expect(screen.getByText("dgFocus.chooseSubstance")).toBeTruthy();
     expect(screen.queryByText("dgstep.summaryTitle")).toBeNull();
   });
 });

@@ -1,3 +1,4 @@
+import { PenIcon, UploadIcon, CheckIcon } from "./icons";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -14,7 +15,7 @@ interface Props {
   onChange: (dataUrl: string | null) => void;
 }
 
-/** Handtekening: tekenen (muis/vinger/stylus), afbeelding uploaden, of overslaan. */
+/** Draw a signature with a pointer, upload an image, or leave it for paper. */
 export default function SignaturePad({ value, onChange }: Props) {
   const { t } = useTranslation();
   const [mode, setMode] = useState<Mode>(value ? "draw" : "skip");
@@ -170,10 +171,10 @@ export default function SignaturePad({ value, onChange }: Props) {
 
       <div className="mt-3 flex flex-wrap gap-2">
         <button type="button" className={tabClass(mode === "draw")} onClick={() => switchMode("draw")}>
-          ✍️ {t("signature.draw")}
+          <PenIcon className="mr-2 inline h-4 w-4" />{t("signature.draw")}
         </button>
         <button type="button" className={tabClass(mode === "upload")} onClick={() => switchMode("upload")}>
-          🖼️ {t("signature.upload")}
+          <UploadIcon className="mr-2 inline h-4 w-4" />{t("signature.upload")}
         </button>
         <button type="button" className={tabClass(mode === "skip")} onClick={() => switchMode("skip")}>
           {t("signature.skip")}
@@ -250,7 +251,7 @@ export default function SignaturePad({ value, onChange }: Props) {
       {mode === "skip" && <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">{t("signature.skipHint")}</p>}
 
       {value && mode !== "skip" && (
-        <p className="mt-3 text-xs text-emerald-700 dark:text-emerald-300">✓ {t("signature.applied")}</p>
+        <p className="mt-3 text-xs text-emerald-700 dark:text-emerald-300"><CheckIcon className="mr-1 inline h-4 w-4" />{t("signature.applied")}</p>
       )}
     </section>
   );

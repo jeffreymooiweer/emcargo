@@ -1,3 +1,4 @@
+import { CloseIcon } from "./icons";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, AssistantEvent, AssistantPending, AssistantState } from "../api/client";
@@ -257,7 +258,7 @@ export default function AssistantModal({ open, onClose, buildState, onApplyState
             aria-label={t("assistant.close")}
             className="ml-auto rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
           >
-            ✕
+            <CloseIcon className="h-5 w-5" />
           </button>
         </div>
 

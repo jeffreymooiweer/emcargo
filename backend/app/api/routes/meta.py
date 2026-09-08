@@ -6,12 +6,14 @@ everything else — not because release notes are secret, but because nothing
 that is not needed for monitoring should be readable from outside.
 """
 import logging
+from datetime import datetime, timezone
 import threading
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.messages import error
 from app.core.deps import get_current_user, require_admin
 from app.models.user import User
 from app.services import changelog, settings_store, updater, updates
@@ -20,6 +22,7 @@ from app.version import get_version
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["meta"])
+_apply_lock = threading.Lock()
 
 
 @router.get("/changelog")
@@ -78,7 +81,7 @@ def update_check_now(admin: User = Depends(require_admin),
     presses "check now" is asking GitHub, not the cache.
     """
     if not settings_store.instance_settings(db).update_check_enabled:
-        raise HTTPException(status_code=409, detail="The update check is switched off")
+        raise error(409, "update.check_disabled")
     updates.clear_cache()
     return update_status(admin=admin, db=db)
 
@@ -122,21 +125,39 @@ def update_apply(admin: User = Depends(require_admin),
     """
     ability = updater.capability()
     if not ability["available"]:
-        raise HTTPException(status_code=409, detail={
-            "error": "apply_unavailable", "reason": ability["reason"]})
+        raise error(409, "update.unavailable", reason=ability["reason"])
     status = update_status(admin=admin, db=db)
     if not status.get("update_available"):
-        raise HTTPException(status_code=409, detail={
-            "error": "no_update", "current": status.get("current")})
+        raise error(409, "update.no_update")
     target = status["latest"]
+    if not _apply_lock.acquire(blocking=False):
+        raise error(409, "update.in_progress")
+    previous = updater.read_state()
+    if previous and previous.get("phase") in ("pulling", "handed_over", "stopping"):
+        try:
+            age = (datetime.now(timezone.utc) - datetime.fromisoformat(previous["at"].replace("Z", "+00:00"))).total_seconds()
+        except (ValueError, KeyError, TypeError):
+            age = float("inf")
+        if age < 20 * 60:
+            _apply_lock.release()
+            raise error(409, "update.in_progress")
+    updater.write_state({"phase": "pulling", "to": target})
 
     def run() -> None:
         try:
             updater.start_update(target)
-        except updater.UpdateError as exc:
-            logger.warning("In-app update to %s failed: %s", target, exc)
-            updater.write_state({"phase": "failed", "to": target,
-                                 "error": str(exc)})
+        except Exception as exc:
+            # Socket disconnects and filesystem failures must also terminate
+            # progress visibly, rather than leave the screen polling forever.
+            logger.exception("In-app update to %s failed", target)
+            updater.write_state({"phase": "failed", "to": target, "error": str(exc)})
+        finally:
+            _apply_lock.release()
 
-    threading.Thread(target=run, name="update-apply", daemon=True).start()
+    try:
+        threading.Thread(target=run, name="update-apply", daemon=True).start()
+    except Exception:
+        _apply_lock.release()
+        updater.write_state({"phase": "failed", "to": target, "error": "Could not start the update worker"})
+        raise
     return {"started": True, "to": target}

@@ -31,12 +31,13 @@ CMR, CIM and AVC forms and sea/inland documents, and checks your dangerous goods
 
 ## EMCargo interface
 
-EMCargo 2.1 uses a quiet charcoal workspace with a persistent desktop sidebar,
-a mobile navigation drawer, three clear shipment stages and a bottom action bar.
-Use Ctrl/Cmd K to jump between pages. Additional documents are tucked into
-disclosures, and shipment summaries remain available on smaller screens.
-Transitions respect reduced-motion preferences. See the
-[design and functional review](docs/design/review-2.1.0.md).
+EMCargo 2.2 uses a navy and cobalt workspace, original transport photography,
+a consistent icon set and a redesigned login. Settings are grouped by personal,
+organisation and system tasks, with a dedicated Updates page. Dangerous-goods
+entry emphasizes unanswered questions, while the final wizard page groups
+repeated findings and keeps document actions clear. Mobile layouts and motion
+preferences are supported. See the [design review](docs/design/review-2.2.0.md)
+and [in-app update setup](docs/in-app-updates.md).
 Dangerous-goods assessment remains mandatory within the goods stage. The complete source now uses EMCargo identifiers, including storage and native
 installation names. Existing installations require the steps in
 [Identity migration](docs/identity-migration.md) before upgrading. The original

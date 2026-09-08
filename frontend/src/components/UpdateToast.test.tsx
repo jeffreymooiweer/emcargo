@@ -10,6 +10,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { MemoryRouter, useLocation } from "react-router";
 import UpdateToast, { DISMISSED_KEY } from "./UpdateToast";
 import { ToastProvider } from "../toast/ToastProvider";
 import { api, User } from "../api/client";
@@ -34,11 +35,14 @@ const AVAILABLE = {
   update_available: true,
 };
 
+function Location() { const location = useLocation(); return <span data-testid="location">{location.pathname + location.search}</span>; }
+
 function renderNotice(user: User) {
   return render(
-    <ToastProvider>
+    <MemoryRouter><ToastProvider>
+      <Location />
       <UpdateToast user={user} />
-    </ToastProvider>,
+    </ToastProvider></MemoryRouter>,
   );
 }
 
@@ -48,14 +52,13 @@ afterEach(() => {
 });
 
 describe("UpdateToast", () => {
-  it("tells an administrator a newer release exists, with the release notes", async () => {
+  it("takes the administrator directly to update controls", async () => {
     vi.spyOn(api, "updateStatus").mockResolvedValue(AVAILABLE);
-    const open = vi.spyOn(window, "open").mockReturnValue(null);
     renderNotice(admin);
     expect(await screen.findByRole("status")).toBeInTheDocument();
     expect(screen.getByText(/update\.available 1\.126\.0/)).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "update.releaseNotes" }));
-    expect(open).toHaveBeenCalledWith(AVAILABLE.url, "_blank", "noopener,noreferrer");
+    await userEvent.click(screen.getByRole("button", { name: "updates.open" }));
+    expect(screen.getByTestId("location")).toHaveTextContent("/settings?tab=updates");
   });
 
   it("never even asks for a regular user", async () => {

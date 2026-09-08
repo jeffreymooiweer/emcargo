@@ -1,0 +1,70 @@
+{
+  "mode": "built-in image_gen__imagegen; seven separate generation requests",
+  "assets": [
+    {
+      "name": "road",
+      "prompt": "Use case: photorealistic-natural. Asset type: original premium logistics application transport card photography. Style: high-end industrial editorial photograph, cinematic photorealism, crisp credible engineering, restrained refined composition. Matching series art direction: European logistics at blue-grey dawn, deep ink navy shadows, subtle cobalt accents and silver neutral surfaces, natural soft atmospheric light, understated cool grade, modest warm pinlights. Landscape 1536x1024 or similar. Compose the important subject within the central horizontal band so a centered 2:1 card crop keeps the whole main subject legible. Photographic realism rather than illustration. No text, no lettering, no logos, no brands, no watermark, no UI, no cartoon, no neon science fiction.\nScene: elegant broad curve of a well-maintained European highway in understated open countryside at dawn. Subject: one contemporary European cab-over semi truck with deep navy tractor and plain silver enclosed trailer, three-quarter front view, driving toward camera. Entire articulated truck clearly visible, realistic dimensions, simple road markings, beautifully composed road leading line, ample atmosphere around vehicle.",
+      "outputPath": "frontend/public/art/road.webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 144866,
+      "encoding": "WebP quality 88; source dimensions preserved; no art edits"
+    },
+    {
+      "name": "air",
+      "prompt": "Use case: photorealistic-natural. Asset type: original premium logistics application transport card photography. Style: high-end industrial editorial photograph, cinematic photorealism, crisp credible engineering, restrained refined composition. Matching series art direction: European logistics at blue-grey dawn, deep ink navy shadows, subtle cobalt accents and silver neutral surfaces, natural soft atmospheric light, understated cool grade, modest warm pinlights. Landscape 1536x1024 or similar. Compose the important subject within the central horizontal band so a centered 2:1 card crop keeps the whole main subject legible. Photographic realism rather than illustration. No text, no lettering, no logos, no brands, no watermark, no UI, no cartoon, no neon science fiction.\nScene: expansive realistic European airport cargo apron in pale blue-grey dawn. Subject: a large modern wide-body cargo jet, plain silver-white fuselage, very subtle deep navy tail, no branding or painted lettering. Three-quarter nose view from a slightly elevated camera, the complete aircraft and its wings unmistakable and readable, landing gear on ground, quiet runway infrastructure far behind, restrained apron reflections. Aircraft alone is the dominant subject.",
+      "outputPath": "frontend/public/art/air.webp",
+      "width": 1774,
+      "height": 887,
+      "bytes": 159512,
+      "encoding": "WebP quality 88; source dimensions preserved; no art edits"
+    },
+    {
+      "name": "sea",
+      "prompt": "Use case: photorealistic-natural. Asset type: original premium logistics application transport card photography. Style: high-end industrial editorial photograph, cinematic photorealism, crisp credible engineering, restrained refined composition. Matching series art direction: European logistics at blue-grey dawn, deep ink navy shadows, subtle cobalt accents and silver neutral surfaces, natural soft atmospheric light, understated cool grade, modest warm pinlights. Landscape 1536x1024 or similar. Compose the important subject within the central horizontal band so a centered 2:1 card crop keeps the whole main subject legible. Photographic realism rather than illustration. No text, no lettering, no logos, no brands, no watermark, no UI, no cartoon, no neon science fiction.\nScene: open ocean in blue-grey dawn with soft distant horizon. Subject: one large ocean-going container vessel, unmistakably high deep-sea ship with tall superstructure, substantial navy hull, orderly stacks of cobalt, grey and desaturated brick containers. Elevated three-quarter bow view, full vessel readable, wake and sea reflections. Calm, grand scale, plenty of surrounding water, no competing vessels.",
+      "outputPath": "frontend/public/art/sea.webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 287364,
+      "encoding": "WebP quality 88; source dimensions preserved; no art edits"
+    },
+    {
+      "name": "inland",
+      "prompt": "Use case: photorealistic-natural. Asset type: original premium logistics application transport card photography. Style: high-end industrial editorial photograph, cinematic photorealism, crisp credible engineering, restrained refined composition. Matching series art direction: European logistics at blue-grey dawn, deep ink navy shadows, subtle cobalt accents and silver neutral surfaces, natural soft atmospheric light, understated cool grade, modest warm pinlights. Landscape 1536x1024 or similar. Compose the important subject within the central horizontal band so a centered 2:1 card crop keeps the whole main subject legible. Photographic realism rather than illustration. No text, no lettering, no logos, no brands, no watermark, no UI, no cartoon, no neon science fiction.\nScene: broad calm European inland river with low green banks and subtle distant industrial river infrastructure under blue-grey dawn. Subject: one long very low flat inland freight barge, low freeboard close to water, shallow hull, low small stern wheelhouse, shallow flat rows of grey and muted cobalt container freight. Elevated three-quarter side view showing its long flat silhouette entirely. Crucial: unmistakable river barge, clearly different from an ocean container ship, not tall, not a cruise ship. Calm water and low riverbank establish inland scale.",
+      "outputPath": "frontend/public/art/inland.webp",
+      "width": 1774,
+      "height": 887,
+      "bytes": 176310,
+      "encoding": "WebP quality 88; source dimensions preserved; no art edits"
+    },
+    {
+      "name": "rail",
+      "prompt": "Use case: photorealistic-natural. Asset type: original premium logistics application transport card photography. Style: high-end industrial editorial photograph, cinematic photorealism, crisp credible engineering, restrained refined composition. Matching series art direction: European logistics at blue-grey dawn, deep ink navy shadows, subtle cobalt accents and silver neutral surfaces, natural soft atmospheric light, understated cool grade, modest warm pinlights. Landscape 1536x1024 or similar. Compose the important subject within the central horizontal band so a centered 2:1 card crop keeps the whole main subject legible. Photographic realism rather than illustration. No text, no lettering, no logos, no brands, no watermark, no UI, no cartoon, no neon science fiction.\nScene: European freight railway curving gently through quiet industrial outskirts at blue-grey dawn. Subject: a substantial modern deep navy electric freight locomotive pulling a long orderly train of grey and muted cobalt intermodal container wagons. Three-quarter front view, locomotive clearly readable and not cut off, containers recede beautifully into atmospheric depth; realistic wheels, rails, overhead catenary and engineering. Clean composition, no passengers or competing train.",
+      "outputPath": "frontend/public/art/rail.webp",
+      "width": 1774,
+      "height": 887,
+      "bytes": 279276,
+      "encoding": "WebP quality 88; source dimensions preserved; no art edits"
+    },
+    {
+      "name": "multimodal",
+      "prompt": "Use case: photorealistic-natural. Asset type: original premium logistics application transport card photography. Style: high-end industrial editorial photograph, cinematic photorealism, crisp credible engineering, restrained refined composition. Matching series art direction: European logistics at blue-grey dawn, deep ink navy shadows, subtle cobalt accents and silver neutral surfaces, natural soft atmospheric light, understated cool grade, modest warm pinlights. Landscape 1536x1024 or similar. Compose the important subject within the central horizontal band so a centered 2:1 card crop keeps the whole main subject legible. Photographic realism rather than illustration. No text, no lettering, no logos, no brands, no watermark, no UI, no cartoon, no neon science fiction.\nScene: one coherent real intermodal harbor terminal at blue-grey dawn, not a collage. A striking silver gantry crane is the central organizing subject, lifting a plain cobalt container across a working interchange. A container ship is berthed at the quay behind, a container freight train runs parallel to the quay and a navy semi truck is visible at the landward side, all physically plausible and naturally integrated at consistent scale and perspective. Medium-high aerial view, unmistakable ship/rail/road integration, orderly geometry, beautifully legible at small card size, restrained density and natural industrial realism.",
+      "outputPath": "frontend/public/art/multimodal.webp",
+      "width": 1774,
+      "height": 887,
+      "bytes": 336830,
+      "encoding": "WebP quality 88; source dimensions preserved; no art edits"
+    },
+    {
+      "name": "login-harbor",
+      "prompt": "Use case: photorealistic-natural. Asset type: original premium logistics application transport card photography. Style: high-end industrial editorial photograph, cinematic photorealism, crisp credible engineering, restrained refined composition. Matching series art direction: European logistics at blue-grey dawn, deep ink navy shadows, subtle cobalt accents and silver neutral surfaces, natural soft atmospheric light, understated cool grade, modest warm pinlights. Landscape 1536x1024 or similar. Compose the important subject within the central horizontal band so a centered 2:1 card crop keeps the whole main subject legible. Photographic realism rather than illustration. No text, no lettering, no logos, no brands, no watermark, no UI, no cartoon, no neon science fiction.\nAsset type override: cinematic logistics application login background, wide 2048x1152 landscape. Scene: majestic aerial container harbor at blue hour, deep navy water and organized quay geometry, subtle amber crane lights, orderly muted cobalt and silver container stacks, realistic cranes and vessels. Composition is essential: calm dark open water and soft atmospheric negative space across the left half and top-left for white login branding; denser port infrastructure, cranes and fine glowing detail concentrated along the right half and bottom-right. Premium cinematic industrial editorial photograph, subtle atmospheric depth, natural realistic harbor engineering, beautiful but quiet and restrained. No writing or logos anywhere.",
+      "outputPath": "frontend/public/art/login-harbor.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 234296,
+      "encoding": "WebP quality 88; source dimensions preserved; no art edits"
+    }
+  ],
+  "created": "2026-09-08",
+  "purpose": "Original EMCargo interface photography; no regulatory artwork was generated or replaced."
+}

@@ -6,7 +6,7 @@
   "nav": {
     "dashboard": "Tableau de bord",
     "new": "Nouvel envoi",
-    "materieel": "Aperçu du matériel",
+    "materieel": "Matériel",
     "settings": "Paramètres",
     "users": "Utilisateurs",
     "logout": "Déconnexion",
@@ -358,10 +358,10 @@
     "tabPick": "Choisir une section",
     "updateCheck": "Vérifier les mises à jour",
     "updateCheckHint": "Demande à GitHub si une version plus récente existe. Désactivé : aucune requête ne sort jamais.",
-    "adminUpdates": "Mise à jour",
+    "adminUpdates": "Mises à jour",
     "updateExplain": "Mettre à jour, c'est toujours : récupérer l'image plus récente et recréer le conteneur — depuis le serveur, par exemple :",
     "updateAuto": "Avec Watchtower cela se fait tout seul ; sous Unraid un clic sur « update » dans l'onglet Docker suffit.",
-    "unCardsStoreTitle": "UN Cards",
+    "unCardsStoreTitle": "Jeu de fiches installé",
     "unCardsStoreIntro": "Cartes générées par EMCargo, installées sur le volume de données — pas dans l'image Docker.",
     "unCardsNone": "Aucun jeu de cartes n'est encore installé. Téléchargez le jeu le plus récent ou importez un fichier ZIP téléchargé.",
     "unCardsInstalled": "Installé : {{count}} cartes, générées le {{generated}}",
@@ -398,7 +398,7 @@
     "updateEnableApplyHow": "Montez le socket Docker, activez la variable d'environnement et redémarrez le conteneur une fois ; un bouton de mise à jour apparaît alors ici :",
     "updateSocketWarning": "Attention : monter le socket Docker donne de fait à ce conteneur les droits d'administrateur sur tout le serveur.",
     "updateReasonNoSocket": "L'interrupteur est activé, mais aucun socket Docker n'est monté dans le conteneur — ajoutez la ligne de volume ci-dessus et redémarrez le conteneur.",
-    "updateReasonSwitchOff": "Un socket Docker a été trouvé, mais UPDATE_APPLY_ENABLED n'est pas défini — ajoutez la variable d'environnement et redémarrez le conteneur.",
+    "updateReasonSwitchOff": "L’installation depuis l’application n’est pas encore activée. Ajoutez UPDATE_APPLY_ENABLED=true aux paramètres du conteneur et redémarrez-le.",
     "tabMaintenance": "Maintenance",
     "updateReasonPermission": "Le socket est monté, mais l'application n'a pas le droit de l'ouvrir. Corrigé depuis la v1.135.0 — mettez à jour le conteneur manuellement une dernière fois et redémarrez.",
     "updateReasonContainerNotFound": "Le socket fonctionne, mais l'application ne retrouve pas son propre conteneur auprès du démon Docker.",
@@ -449,7 +449,7 @@
     "brandLogo": "Logo",
     "brandLogoHint": "PNG, JPEG ou WebP, jusqu'à 1 Mo. Affiché dans ses propres couleurs dans les deux thèmes et joint aux courriels sortants.",
     "brandModalities": "Images des tuiles",
-    "brandModalitiesHint": "Une image par mode de transport, PNG, JPEG ou WebP jusqu'à 3 Mo, affichée dans les deux thèmes. Les images larges conviennent le mieux : la tuile est trois fois plus large que haute.",
+    "brandModalitiesHint": "Une image par mode de transport, PNG, JPEG ou WebP jusqu’à 3 Mo. Choisissez un format paysage au sujet centré ; le cadrage s’adapte à l’écran.",
     "brandUpload": "Envoyer",
     "brandReplace": "Remplacer",
     "brandRemove": "Revenir au défaut",
@@ -837,9 +837,15 @@
       "row_refused": "Ligne {{row}} : {{reason}}"
     },
     "auth": {
-      "two_factor_required": "Cette installation exige la vérification en deux étapes pour votre compte. Configurez-la d'abord sous Paramètres, Mes informations.",
+      "two_factor_required": "Cette installation exige la vérification en deux étapes pour votre compte. Configurez-la d'abord sous Paramètres, Sécurité.",
       "two_factor_invalid_code": "Ce code de vérification est invalide.",
       "two_factor_inactive": "La vérification en deux étapes n’est pas active."
+    },
+    "update": {
+      "check_disabled": "La vérification des mises à jour est désactivée",
+      "in_progress": "Une mise à jour est déjà en cours",
+      "unavailable": "La mise à jour dans l’application est indisponible. Consultez les prérequis dans Paramètres / Mises à jour.",
+      "no_update": "Aucune version plus récente n’est disponible. Recherchez à nouveau les mises à jour."
     }
   },
   "instructions": {
@@ -940,7 +946,7 @@
   },
   "update": {
     "available": "EMCargo {{version}} est disponible.",
-    "hint": "Cette installation ne se met pas à jour elle-même ; récupérez la nouvelle image comme vous en avez l'habitude.",
+    "hint": "Ouvrez Mises à jour pour consulter et installer cette version.",
     "releaseNotes": "Voir les notes de version",
     "dismiss": "Fermer la notification"
   },
@@ -1467,5 +1473,52 @@
     "historyPrivacy": "Lorsque l’historique est activé, vos brouillons et expéditions enregistrées sont conservés sur cette installation.",
     "documentsSelected": "Sélection : {{count}}",
     "showOptions": "Voir les options"
+  },
+  "settingsNav": {
+    "personal": "Pour vous",
+    "organisation": "Organisation",
+    "system": "Système",
+    "security": "Sécurité",
+    "connections": "Connexions",
+    "cards": "Fiches UN",
+    "assistant": "Assistant",
+    "unsaved": "Modifications non enregistrées",
+    "allSaved": "Tout est enregistré",
+    "intro": "Préférences personnelles, organisation et système. Tout au même endroit.",
+    "accessPolicy": "Politique d’accès de cette installation",
+    "cardOptions": "Fiches ONU et liens QR"
+  },
+  "updates": {
+    "intro": "Versions, progression et mises à jour au même endroit.",
+    "installed": "Version installée",
+    "latest": "Dernière version",
+    "open": "Mises à jour",
+    "checkDisabled": "La vérification automatique est désactivée.",
+    "notChecked": "Vérifiez si une nouvelle version est disponible.",
+    "inApp": "Mettre à jour depuis EMCargo",
+    "ready": "Disponible",
+    "setupNeeded": "Configuration nécessaire",
+    "loadingCapability": "Vérification des possibilités…",
+    "setup": "Instructions de configuration",
+    "unraid": "Unraid : ajoutez la variable de conteneur UPDATE_APPLY_ENABLED avec la valeur true et montez /var/run/docker.sock au même chemin dans le conteneur. Appliquez les paramètres. Le bouton de mise à jour apparaît lorsqu’une nouvelle version est disponible."
+  },
+  "dgFocus": {
+    "title": "Marchandises dangereuses",
+    "intro": "Confirmez la substance et complétez les informations nécessaires à cet envoi.",
+    "sources": "Sources et précisions",
+    "preparing": "Mise à jour des données et des questions complémentaires…",
+    "prepareError": "Les données de la substance n’ont pas pu être chargées. La vérification est incomplète. Modifiez le numéro UN pour réessayer.",
+    "editPosition": "Modifier la description du poste",
+    "chooseSubstance": "Choisissez d’abord une substance. Ses données et les questions associées apparaîtront ensuite."
+  },
+  "exportFocus": {
+    "goods": "{{count}} lignes de marchandises · ajuster le poids",
+    "reference": "Documents et instructions complémentaires",
+    "checks": "Points à vérifier pour ce dossier",
+    "appliesTo": "Concerne {{count}} document(s)",
+    "validationFailed": "Le contrôle des documents est indisponible. Réessayez avant d’utiliser ces documents."
+  },
+  "authArt": {
+    "title": "Du départ à destination."
   }
 }

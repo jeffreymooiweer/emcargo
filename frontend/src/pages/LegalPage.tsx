@@ -7,7 +7,7 @@ export default function LegalPage() {
   const sections = t("legal.sections", { returnObjects: true }) as { heading: string; body: string }[];
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="collection-page page-enter space-y-4 sm:space-y-6">
       <div className={`${panelClass} p-5 sm:p-8`}>
         <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-100">{t("legal.title")}</h2>
         <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{t("legal.updated")}</p>

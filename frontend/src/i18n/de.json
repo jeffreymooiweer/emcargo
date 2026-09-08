@@ -6,7 +6,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "new": "Neue Sendung",
-    "materieel": "Materialübersicht",
+    "materieel": "Ausrüstung",
     "settings": "Einstellungen",
     "users": "Benutzer",
     "logout": "Abmelden",
@@ -358,10 +358,10 @@
     "tabPick": "Bereich wählen",
     "updateCheck": "Auf Updates prüfen",
     "updateCheckHint": "Fragt GitHub, ob eine neuere Version existiert. Aus bedeutet: es geht nie eine Anfrage hinaus.",
-    "adminUpdates": "Aktualisieren",
+    "adminUpdates": "Updates",
     "updateExplain": "Aktualisieren heißt immer: das neuere Image holen und den Container neu erstellen — auf dem Server, zum Beispiel:",
     "updateAuto": "Mit Watchtower geschieht das von selbst; unter Unraid genügt ein Klick auf 'update' im Docker-Tab.",
-    "unCardsStoreTitle": "UN Cards",
+    "unCardsStoreTitle": "Installierter Kartensatz",
     "unCardsStoreIntro": "Von EMCargo erzeugte Karten, installiert auf dem Datenvolume — kein Teil des Docker-Images.",
     "unCardsNone": "Es ist noch kein Kartensatz installiert. Laden Sie den neuesten Satz herunter oder importieren Sie eine heruntergeladene ZIP-Datei.",
     "unCardsInstalled": "Installiert: {{count}} Karten, generiert {{generated}}",
@@ -398,7 +398,7 @@
     "updateEnableApplyHow": "Docker-Socket einbinden, Umgebungsvariable setzen und den Container einmal neu starten; danach erscheint hier eine Update-Schaltfläche:",
     "updateSocketWarning": "Achtung: Wer den Docker-Socket einbindet, gibt diesem Container faktisch Administratorrechte über den ganzen Server.",
     "updateReasonNoSocket": "Der Schalter ist an, aber es ist kein Docker-Socket in den Container gemountet — fügen Sie die Volume-Zeile oben hinzu und starten Sie den Container neu.",
-    "updateReasonSwitchOff": "Ein Docker-Socket wurde gefunden, aber UPDATE_APPLY_ENABLED ist nicht gesetzt — fügen Sie die Umgebungsvariable hinzu und starten Sie den Container neu.",
+    "updateReasonSwitchOff": "Die Installation in der App ist noch nicht aktiviert. Fügen Sie UPDATE_APPLY_ENABLED=true zu den Container-Einstellungen hinzu und starten Sie ihn neu.",
     "tabMaintenance": "Wartung",
     "updateReasonPermission": "Der Socket ist eingebunden, aber die App darf ihn nicht öffnen. Seit v1.135.0 behoben — den Container einmal manuell aktualisieren und neu starten.",
     "updateReasonContainerNotFound": "Der Socket funktioniert, aber die App findet ihren eigenen Container beim Docker-Daemon nicht.",
@@ -449,7 +449,7 @@
     "brandLogo": "Logo",
     "brandLogoHint": "PNG, JPEG oder WebP, bis 1 MB. Wird in beiden Designs in eigenen Farben gezeigt und in ausgehenden E-Mails mitgeführt.",
     "brandModalities": "Kachelbilder",
-    "brandModalitiesHint": "Ein Bild je Verkehrsträger, PNG, JPEG oder WebP bis 3 MB, in beiden Designs gezeigt. Breite Bilder passen am besten: die Kachel ist dreimal so breit wie hoch.",
+    "brandModalitiesHint": "Ein Bild pro Verkehrsart, PNG, JPEG oder WebP bis 3 MB. Wählen Sie ein Querformat mit zentriertem Motiv; der Ausschnitt passt sich dem Bildschirm an.",
     "brandUpload": "Hochladen",
     "brandReplace": "Ersetzen",
     "brandRemove": "Zurück zum Standard",
@@ -837,9 +837,15 @@
       "row_refused": "Zeile {{row}}: {{reason}}"
     },
     "auth": {
-      "two_factor_required": "Diese Installation verlangt eine Zwei-Faktor-Bestätigung für Ihr Konto. Richten Sie sie zuerst unter Einstellungen, Meine Daten ein.",
+      "two_factor_required": "Diese Installation verlangt eine Zwei-Faktor-Bestätigung für Ihr Konto. Richten Sie sie zuerst unter Einstellungen, Sicherheit ein.",
       "two_factor_invalid_code": "Dieser Bestätigungscode ist ungültig.",
       "two_factor_inactive": "Die Zwei-Faktor-Verifizierung ist nicht aktiv."
+    },
+    "update": {
+      "check_disabled": "Die Update-Prüfung ist ausgeschaltet",
+      "in_progress": "Eine Aktualisierung läuft bereits",
+      "unavailable": "Updates in der App sind nicht verfügbar. Die Voraussetzungen stehen unter Einstellungen / Updates.",
+      "no_update": "Es gibt keine neuere Version zum Installieren. Suchen Sie erneut nach Updates."
     }
   },
   "instructions": {
@@ -940,7 +946,7 @@
   },
   "update": {
     "available": "EMCargo {{version}} ist verfügbar.",
-    "hint": "Diese Installation aktualisiert sich nicht selbst; holen Sie das neuere Image wie gewohnt.",
+    "hint": "Öffnen Sie Updates, um diese Version anzusehen und zu installieren.",
     "releaseNotes": "Versionshinweise ansehen",
     "dismiss": "Meldung schließen"
   },
@@ -1467,5 +1473,52 @@
     "historyPrivacy": "Bei aktiviertem Sendungsverlauf werden Ihre Entwürfe und gespeicherten Sendungen in dieser Installation gespeichert.",
     "documentsSelected": "Ausgewählt: {{count}}",
     "showOptions": "Optionen anzeigen"
+  },
+  "settingsNav": {
+    "personal": "Für Sie",
+    "organisation": "Organisation",
+    "system": "System",
+    "security": "Sicherheit",
+    "connections": "Verbindungen",
+    "cards": "UN-Karten",
+    "assistant": "Assistent",
+    "unsaved": "Ungespeicherte Änderungen",
+    "allSaved": "Alles gespeichert",
+    "intro": "Persönliche Einstellungen, Organisation und System. Alles an einem Ort.",
+    "accessPolicy": "Zugriffsrichtlinie dieser Installation",
+    "cardOptions": "UN-Karten und QR-Links"
+  },
+  "updates": {
+    "intro": "Versionen, Fortschritt und Updates an einem Ort.",
+    "installed": "Installiert",
+    "latest": "Neueste Version",
+    "open": "Zu den Updates",
+    "checkDisabled": "Automatische Prüfungen sind ausgeschaltet.",
+    "notChecked": "Prüfen Sie, ob eine neue Version verfügbar ist.",
+    "inApp": "In EMCargo aktualisieren",
+    "ready": "Verfügbar",
+    "setupNeeded": "Einrichtung erforderlich",
+    "loadingCapability": "Möglichkeiten werden geprüft…",
+    "setup": "Installationsanleitung",
+    "unraid": "Unraid: Fügen Sie die Container-Variable UPDATE_APPLY_ENABLED mit dem Wert true hinzu und binden Sie /var/run/docker.sock unter demselben Container-Pfad ein. Übernehmen Sie die Container-Einstellungen. Bei einer neuen Version erscheint dann die Update-Schaltfläche."
+  },
+  "dgFocus": {
+    "title": "Gefährliche Güter",
+    "intro": "Bestätigen Sie den Stoff und ergänzen Sie die noch benötigten Angaben zur Sendung.",
+    "sources": "Quellen und Hinweise",
+    "preparing": "Stoffdaten und Folgefragen werden aktualisiert…",
+    "prepareError": "Die Stoffdaten konnten nicht geladen werden. Die Prüfung ist unvollständig. Ändern Sie die UN-Nummer, um es erneut zu versuchen.",
+    "editPosition": "Positionsbeschreibung ändern",
+    "chooseSubstance": "Wählen Sie zuerst einen Stoff. Danach erscheinen die zugehörigen Daten und Fragen."
+  },
+  "exportFocus": {
+    "goods": "{{count}} Warenpositionen · Gewicht anpassen",
+    "reference": "Zusätzliche Dokumente und Anweisungen",
+    "checks": "Hinweise zu diesem Dokumentenpaket",
+    "appliesTo": "Gilt für {{count}} Dokument(e)",
+    "validationFailed": "Die Dokumentenprüfung ist nicht verfügbar. Versuchen Sie es erneut, bevor Sie diese Dokumente verwenden."
+  },
+  "authArt": {
+    "title": "Vom Start bis zum Ziel."
   }
 }

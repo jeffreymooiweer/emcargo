@@ -5,7 +5,7 @@
  * the undo is taken. Those last two are the difference between "undo" as a
  * UI flourish and undo as a promise.
  */
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -43,7 +43,7 @@ function expectIconsInherit() {
   const icons = document.querySelectorAll("svg");
   expect(icons.length).toBeGreaterThan(0);
   icons.forEach((icon) => {
-    expect(icon.getAttribute("fill")).toBe("currentColor");
+    expect(icon.getAttribute("stroke")).toBe("currentColor");
     expect(icon.hasAttribute("width")).toBe(false);
     expect(icon.hasAttribute("height")).toBe(false);
     expect(icon).toHaveAttribute("aria-hidden");
@@ -94,6 +94,23 @@ describe("ToastProvider", () => {
     expect(screen.getByText("done")).toBeInTheDocument();
     act(() => void vi.advanceTimersByTime(4100));
     await waitFor(() => expect(screen.queryByText("done")).not.toBeInTheDocument());
+  });
+
+  it("a loading outcome stays paused when the pointer was already over its progress", () => {
+    // Loading notices have no expiry, but dropping their hover state would
+    // let the final result disappear while somebody is still reading it.
+    const api = setup();
+    let handle!: ReturnType<ToastApi["loading"]>;
+    act(() => { handle = api().loading("working"); });
+    const notice = screen.getByText("working").closest("[data-kind]")!;
+    fireEvent.pointerEnter(notice);
+    act(() => handle.progress("almost done"));
+    act(() => handle.success("finished"));
+    act(() => void vi.advanceTimersByTime(10000));
+    expect(screen.getByText("finished")).toBeInTheDocument();
+    fireEvent.pointerLeave(notice);
+    act(() => void vi.advanceTimersByTime(4100));
+    expect(screen.queryByText("finished")).not.toBeInTheDocument();
   });
 
   it("an undoable delete fires the deferred call when the window closes", async () => {
@@ -299,4 +316,22 @@ describe("ToastProvider", () => {
     expect(screen.getByRole("alert")).toHaveAttribute("aria-live", "assertive");
     expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite");
   });
+});
+
+
+it("pauses undo for both pointer and keyboard focus, resuming only after both leave", () => {
+  const api = setup();
+  const execute = vi.fn();
+  act(() => void api().undoable("deleted", { execute, restore: vi.fn() }));
+  act(() => void vi.advanceTimersByTime(2000));
+  const toast = screen.getByRole("status");
+  fireEvent.pointerEnter(toast);
+  fireEvent.focus(screen.getByRole("button", { name: "toast.undo" }));
+  act(() => void vi.advanceTimersByTime(8000));
+  fireEvent.pointerLeave(toast);
+  act(() => void vi.advanceTimersByTime(8000));
+  expect(execute).not.toHaveBeenCalled();
+  fireEvent.blur(screen.getByRole("button", { name: "toast.undo" }), { relatedTarget: document.body });
+  act(() => void vi.advanceTimersByTime(4100));
+  expect(execute).toHaveBeenCalledTimes(1);
 });

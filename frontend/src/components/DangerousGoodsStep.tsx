@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   api,
@@ -12,6 +12,7 @@ import {
 } from "../api/client";
 import { documentLanguage, localised } from "../i18n/language";
 import CollapsibleSection, { SummaryChip } from "./CollapsibleSection";
+import { ChevronDownIcon, DocumentIcon, RefreshIcon, WarningIcon } from "./icons";
 import InfoTooltip from "./InfoTooltip";
 import SuggestInput, { SuggestItem } from "./SuggestInput";
 
@@ -235,6 +236,8 @@ export default function DangerousGoodsStep({
   const [instructions, setInstructions] = useState<DgInstructions | null>(null);
   const [lookupError, setLookupError] = useState("");
   const [positionIndex, setPositionIndex] = useState(0);
+  const [preparing, setPreparing] = useState(false);
+  const [prepareError, setPrepareError] = useState(false);
   const [prepared, setPrepared] = useState<DgPrepareResult | null>(null);
   // Per product: the full form instead of the summary. A choice the user
   // makes, never a mode the step falls into by itself.
@@ -275,15 +278,21 @@ export default function DangerousGoodsStep({
   useEffect(() => {
     if (!entries.some((entry) => entry.products.some((p) => (p.un_number ?? "").trim()))) {
       setPrepared(null);
+      setPreparing(false);
+      setPrepareError(false);
       return;
     }
     let cancelled = false;
+    setPrepared(null);
+    setPreparing(true);
+    setPrepareError(false);
     const timer = window.setTimeout(() => {
       const sent = entriesRef.current;
       api
         .dgPrepare(sent, lines, profiles, lang)
         .then((res) => {
           if (cancelled) return;
+          setPreparing(false);
           setPrepared(res);
           const merged = mergeDerived(entriesRef.current, sent, res.entries);
           if (JSON.stringify(merged) !== JSON.stringify(entriesRef.current)) {
@@ -291,7 +300,7 @@ export default function DangerousGoodsStep({
           }
         })
         .catch(() => {
-          if (!cancelled) setPrepared(null);
+          if (!cancelled) { setPrepared(null); setPreparing(false); setPrepareError(true); }
         });
     }, 250);
     return () => {
@@ -422,15 +431,17 @@ export default function DangerousGoodsStep({
     }
   };
 
-  const visibleEntries = perPosition && entries.length > 0 ? [entries[positionIndex]] : entries;
-  const visibleEntryOffset = perPosition ? positionIndex : 0;
+  const safePositionIndex = Math.min(positionIndex, Math.max(0, entries.length - 1));
+  const visibleEntries = perPosition && entries.length > 0 ? [entries[safePositionIndex]] : entries;
+  const visibleEntryOffset = perPosition ? safePositionIndex : 0;
 
   return (
-    <div className="space-y-4">
-      <div className={`${panelClass} p-4 text-sm text-slate-600 dark:text-slate-300`}>
-        <p>{localised(instructions?.dg_intro, lang) || t("wizard.dgIntro")}</p>
-        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{t("wizard.dgSource")}</p>
-      </div>
+    <div className="dg-workspace space-y-4">
+      <header className="dg-step-heading"><div><h3>{t("dgFocus.title")}</h3><p>{t("dgFocus.intro")}</p></div>
+        <details className="dg-source"><summary><DocumentIcon />{t("dgFocus.sources")}</summary><div><p>{localised(instructions?.dg_intro, lang) || t("wizard.dgIntro")}</p><p>{t("wizard.dgSource")}</p></div></details>
+      </header>
+      {preparing && <p className="dg-preparing" role="status"><RefreshIcon className="h-4 w-4 animate-spin" />{t("dgFocus.preparing")}</p>}
+      {prepareError && <p className="dg-prepare-error" role="alert"><WarningIcon />{t("dgFocus.prepareError")}</p>}
 
       {perPosition && entries.length > 1 && (
         <div className="flex items-center justify-between text-sm">
@@ -464,19 +475,14 @@ export default function DangerousGoodsStep({
       {visibleEntries.map((entry, localIndex) => {
         const entryIndex = visibleEntryOffset + localIndex;
         return (
-        <div key={entry.line_id} className={`${panelClass} p-5 space-y-4`}>
-          <div>
-            <h3 className="font-semibold text-slate-900 dark:text-slate-100">
-              {t("wizard.dgLine")} {entry.line_id}
-            </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">{entry.vehicle}</p>
-          </div>
-          <Field
-            label={t("wizard.dgVehicle")}
-            help={t("wizard.dgVehicleHelp")}
-            value={entry.vehicle}
-            onChange={(v) => updateEntry(entryIndex, { vehicle: v })}
-          />
+        <div key={entry.line_id} className={`${panelClass} dg-entry p-5 space-y-4`}>
+          <header className="dg-entry-heading"><span className="dg-entry-index">{String(entryIndex + 1).padStart(2, "0")}</span>
+            <div><p>{t("wizard.dgLine")} {entry.line_id}</p><h3>{entry.vehicle}</h3></div>
+          </header>
+          <details className="dg-position-edit"><summary>{t("dgFocus.editPosition")}<ChevronDownIcon /></summary>
+            <Field label={t("wizard.dgVehicle")} help={t("wizard.dgVehicleHelp")} value={entry.vehicle}
+              onChange={(v) => updateEntry(entryIndex, { vehicle: v })} />
+          </details>
           {entry.products.map((product, productIndex) => {
             const isClass1 = String(product.class ?? "").trim().startsWith("1");
             const noExemptionRoute =
@@ -493,9 +499,9 @@ export default function DangerousGoodsStep({
             );
             const un = String(product.un_number ?? "").trim();
             const stateKey = `${entryIndex}:${productIndex}`;
-            // Without a UN number the whole form is the question; with one,
-            // the summary is the default and the full form is a choice.
-            const showAll = !un || !!editAll[stateKey];
+            // Start with substance identity. After selection, show the
+            // summary; the full form remains an explicit editing choice.
+            const showAll = !!editAll[stateKey];
             const productQuestions = (prepared?.open_questions ?? [])
               .filter(
                 (block) =>
@@ -544,9 +550,9 @@ export default function DangerousGoodsStep({
               );
 
             return (
-            <div key={productIndex} className="space-y-3 border-t border-slate-100 dark:border-slate-800 pt-4">
-              <div className="grid md:grid-cols-2 gap-3">
-                <div>
+            <div key={productIndex} className="dg-product space-y-4">
+              <div className={`grid gap-4 ${showAll ? "md:grid-cols-2" : ""}`}>
+                <div className="dg-identity-search">
                   <div className="flex items-center gap-1.5">
                     <label className="text-sm font-medium text-slate-800 dark:text-slate-200">
                       {labelFor("un_number")}
@@ -595,35 +601,19 @@ export default function DangerousGoodsStep({
                     .map(renderField)}
               </div>
 
-              {!showAll && (
+              {!showAll && un && (
                 <>
-                  {/* What the tables answered, shown as answers. Every value is
-                      still editable — behind the one button below, not as
-                      twenty-two open fields. */}
-                  <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                      {t("dgstep.summaryTitle")}
-                    </p>
-                    <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 md:grid-cols-3">
-                      {SUMMARY_FIELDS.map((field) => {
-                        const value = String(
-                          (product as Record<string, unknown>)[field] ?? "",
-                        ).trim();
-                        if (!value) return null;
-                        return (
-                          <div key={field}>
-                            <dt className="text-[11px] text-slate-500 dark:text-slate-400">{labelFor(field)}</dt>
-                            <dd className="break-words text-sm text-slate-800 dark:text-slate-200">{value}</dd>
-                          </div>
-                        );
-                      })}
-                    </dl>
+                  <div className="dg-identity-summary">
+                    <strong>{product.proper_shipping_name || `UN ${un}`}</strong>
+                    <div>{product.class && <span>{t("dgsearch.classShort")} {product.class}</span>}{product.packing_group && <span>PG {product.packing_group}</span>}
+                      {product.type_of_package && <span>{product.quantity_packages && `${product.quantity_packages} × `}{product.type_of_package}</span>}
+                      {product.adr_total_quantity && <span>{labelFor("adr_total_quantity")}: {String(product.adr_total_quantity)}</span>}
+                    </div>
                   </div>
-
                   {productQuestions.length > 0 && (
-                    <div>
+                    <div className="dg-open-questions">
                       <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                        {t("dgstep.openTitle")}
+                        {t("dgstep.openTitle")} <span className="dg-question-count">{productQuestions.length}</span>
                       </p>
                       <div className="mt-2 grid gap-3 md:grid-cols-2">
                         {productQuestions.map((question) => (
@@ -664,6 +654,27 @@ export default function DangerousGoodsStep({
                     </div>
                   )}
 
+                  {/* What the tables answered, shown as answers. Every value is
+                      still editable — behind the one button below, not as
+                      twenty-two open fields. */}
+                  <details className="dg-derived-details"><summary>{t("dgstep.summaryTitle")}<ChevronDownIcon /></summary><div>
+                    <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 md:grid-cols-3">
+                      {SUMMARY_FIELDS.filter((field) => field !== "proper_shipping_name").map((field) => {
+                        const value = String(
+                          (product as Record<string, unknown>)[field] ?? "",
+                        ).trim();
+                        if (!value) return null;
+                        return (
+                          <div key={field}>
+                            <dt className="text-xs text-slate-500 dark:text-slate-400">{labelFor(field)}</dt>
+                            <dd className="break-words text-sm text-slate-800 dark:text-slate-200">{value}</dd>
+                          </div>
+                        );
+                      })}
+                    </dl>
+                  </div></details>
+
+
                   {specialFields.length > 0 && (
                     <CollapsibleSection
                       title={t("dgstep.special")}
@@ -679,10 +690,12 @@ export default function DangerousGoodsStep({
                 </>
               )}
 
+              {!un && <p className="dg-start-hint">{t("dgFocus.chooseSubstance")}</p>}
               {un && (
                 <button
                   type="button"
-                  className="text-xs font-medium text-slate-500 underline hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100"
+                  className="dg-edit-all"
+                  aria-expanded={!!editAll[stateKey]}
                   onClick={() =>
                     setEditAll((state) => ({ ...state, [stateKey]: !state[stateKey] }))
                   }
@@ -911,19 +924,22 @@ function Field({
    *  judged as packages again — the exact failure the field exists to end. */
   options?: { value: string; label: string }[];
 }) {
+  const id = useId();
   return (
     <div>
       <div className="flex items-center gap-1.5">
-        <label className="text-sm font-medium text-slate-800 dark:text-slate-200">{label}</label>
+        <label htmlFor={id} className="text-sm font-medium text-slate-800 dark:text-slate-200">{label}</label>
         {help && <InfoTooltip text={help} />}
       </div>
       {options && options.length > 0 ? (
         <select
+          id={id}
           className={`${inputClass} mt-1`}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
         >
+          {!options.some((option) => option.value === "") && <option value="">—</option>}
           {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -931,7 +947,7 @@ function Field({
           ))}
         </select>
       ) : (
-        <input className={`${inputClass} mt-1`} value={value} onChange={(e) => onChange(e.target.value)} onBlur={onBlur} />
+        <input id={id} className={`${inputClass} mt-1`} value={value} onChange={(e) => onChange(e.target.value)} onBlur={onBlur} />
       )}
     </div>
   );

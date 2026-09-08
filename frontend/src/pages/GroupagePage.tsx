@@ -1,3 +1,4 @@
+import { ImportIcon } from "../components/icons";
 /** Groupage: several consignments on one vehicle, judged as one load.
  *
  *  Every other screen reasons about a consignment, because a consignment is
@@ -265,7 +266,7 @@ export default function GroupagePage() {
     "rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800";
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-4">
+    <div className="collection-page page-enter max-w-4xl space-y-6">
       <header>
         <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
           {t("groupage.title")}
@@ -280,16 +281,18 @@ export default function GroupagePage() {
         <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
           {t("groupage.addHint")}
         </p>
+        <label className="action-secondary mt-4 cursor-pointer"><ImportIcon />{t("groupage.addConsignments")}
         <input
+          aria-label={t("groupage.addConsignments")}
           type="file"
           accept="application/json,.json"
           multiple
-          className="mt-2 block w-full text-sm"
+          className="sr-only"
           onChange={(e) => {
             void addFiles(e.target.files);
             e.target.value = "";
           }}
-        />
+        /></label>
       </section>
 
       {historyOn && (

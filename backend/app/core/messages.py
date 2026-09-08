@@ -50,6 +50,10 @@ class ApiError(HTTPException):
 #: Kept here rather than at the raise sites so that the set of codes is
 #: countable — a translation guard cannot check what it cannot enumerate.
 MESSAGES: dict[str, str] = {
+    "update.unavailable": "In-app updating is unavailable. Check Settings / Updates for the installation requirements.",
+    "update.no_update": "There is no newer release to install. Check for updates again.",
+    "update.check_disabled": "Update checks are switched off",
+    "update.in_progress": "An update is already in progress",
     # Uploading and importing
     "import.filename_missing": "The file has no name",
     "import.empty_file": "The file is empty",
@@ -69,7 +73,7 @@ MESSAGES: dict[str, str] = {
     # Signing in
     "auth.two_factor_required": (
         "This installation requires two-factor verification for your account. "
-        "Set it up under Settings, My details, before doing anything else"
+        "Set it up under Settings, Security, before doing anything else"
     ),
     "auth.two_factor_invalid_code": "That verification code is not valid",
     "auth.two_factor_inactive": "Two-factor verification is not switched on",

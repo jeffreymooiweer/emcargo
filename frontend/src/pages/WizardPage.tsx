@@ -1,3 +1,4 @@
+import { ArrowRightIcon, ChevronDownIcon, DownloadIcon, DocumentIcon } from "../components/icons";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate, useParams, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -18,7 +19,7 @@ import {
 import { documentLanguage, localised, LANGUAGE_NAMES, SUPPORTED_LANGUAGES, Language } from "../i18n/language";
 import DangerousGoodsStep, { buildDgEntries } from "../components/DangerousGoodsStep";
 import DgCompliancePanel from "../components/DgCompliancePanel";
-import DocumentWarnings, { useDocumentValidation } from "../components/DocumentWarnings";
+import { groupDocumentWarnings, useDocumentValidation } from "../components/DocumentWarnings";
 import AiIcon from "../components/AiIcon";
 import AssistantModal from "../components/AssistantModal";
 import DocumentFieldsStep, { resolveSections } from "../components/DocumentFieldsStep";
@@ -349,6 +350,7 @@ export default function WizardPage() {
 
   useEffect(() => {
     setVisited((seen) => (seen.includes(stepKey) ? seen : [...seen, stepKey]));
+    if (!focusField) window.scrollTo({ top: 0, behavior: "auto" });
   }, [stepKey]);
 
   const goToField = (key: string) => {
@@ -804,6 +806,7 @@ export default function WizardPage() {
   const docWarnings = useDocumentValidation(
     stepKey === "export" && result ? selectedDefinitions.map(payloadFor) : [],
     stepKey === "export" && !!result,
+    t("exportFocus.validationFailed"),
   );
 
   const exportGenericDoc = async (doc: DocumentDefinition) => {
@@ -1569,7 +1572,7 @@ export default function WizardPage() {
           <WizardActions>
             <button type="button" onClick={goFromLines} disabled={loading} className={buttonPrimary + " wizard-next"}
               aria-label={t("review.continueTo", { step: needsDg ? t("wizard.step3dg") : t("wizard.toShipmentDetails") })}>
-              {t("review.continue")}<span aria-hidden="true">→</span>
+              {t("review.continue")}<ArrowRightIcon className="h-4 w-4" />
             </button>
           </WizardActions>
         </div>
@@ -1658,13 +1661,11 @@ export default function WizardPage() {
       )}
 
       {stepKey === "export" && result && (
-        <div className="space-y-4">
+        <div className="export-workspace space-y-4">
           {/* The last look before anything is produced: what is about to go on
               paper, and one way back to each answer that is not right. */}
           <CheckYourAnswers title={t("check.title")} rows={answerRows} />
 
-          <div className={`${panelClass} space-y-4 p-4 sm:p-6`}>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{t("wizard.summary")}</h3>
             {needsDg && (
               <p className="text-sm text-amber-700 dark:text-amber-300">
                 {t("wizard.dgIncluded", { count: dgEntries.length })}
@@ -1682,6 +1683,9 @@ export default function WizardPage() {
                 </button>
               </p>
             )}
+          <details className="surface export-goods">
+            <summary><span>{t("exportFocus.goods", { count: result.totals.included_count })}</span><strong>{result.totals.total_weight_kg?.toLocaleString(i18n.language)} kg</strong><ChevronDownIcon /></summary>
+            <div className="export-goods-content space-y-4">
             <div className="space-y-3">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{t("wizard.products")}</h4>
@@ -1744,38 +1748,15 @@ export default function WizardPage() {
               <li>{t("wizard.totalWeight")}: {result.totals.total_weight_kg} kg</li>
               <li>{t("wizard.totalVolume")}: {result.totals.total_transport_volume_m3} m³</li>
             </ul>
-          </div>
+            </div>
+          </details>
 
           {needsDg && dgEntries.length > 0 && <DgCompliancePanel entries={dgEntries} profiles={dgProfiles} />}
 
-          {historyOn && (
-            <div className={`${panelClass} p-4 sm:p-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`}>
-              <div className="min-w-0">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{t("history.keepTitle")}</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t("history.keepHint")}</p>
-                <p className="text-sm text-slate-700 dark:text-slate-200 mt-2" data-testid="history-status">
-                  {keptAt
-                    ? t("history.keptAt", { time: keptAt.toLocaleTimeString(i18n.language, { timeStyle: "short" }) })
-                    : t("history.notKept")}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => void keepInHistory()}
-                disabled={keeping}
-                className={buttonSecondary}
-              >
-                {/* Kept, not merely written: a draft has a row of its own, and
-                    a button that said "update" over a shipment nobody has kept
-                    yet would be claiming something that never happened. */}
-                {keeping ? t("history.keeping") : keptAt ? t("history.update") : t("history.keep")}
-              </button>
-            </div>
-          )}
 
-          <div className={`${panelClass} space-y-3 p-4 sm:p-6`}>
+          <div className={`${panelClass} export-documents space-y-3 p-4 sm:p-6`}>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{t("wizardDocs.title")}</h3>
+              <h3 className="export-documents-title"><DocumentIcon className="h-6 w-6" />{t("wizardDocs.title")}</h3>
               <div className="flex flex-wrap gap-2">
                 {readyDocs.length > 0 && publicSettings?.mail_enabled && (
                   <button
@@ -1907,12 +1888,21 @@ export default function WizardPage() {
                 {t("nav.legal")}
               </Link>
             </p>
+            {Object.values(docWarnings).some((warnings) => warnings.length > 0) && <section className="export-checks" id="export-checks">
+              <h4>{t("exportFocus.checks")}</h4>
+              <ul>{groupDocumentWarnings(docWarnings).map(({ message, documents }) => <li key={message}>
+                <p>{message}</p>
+                <details><summary>{t("exportFocus.appliesTo", { count: documents.length })}</summary>
+                  <ul>{documents.map((key) => <li key={key}>{L(selectedDefinitions.find((doc) => doc.key === key)?.label) || key}</li>)}</ul>
+                </details>
+              </li>)}</ul>
+            </section>}
             <div className="space-y-2">
               {selectedDefinitions.map((doc) => {
                 const info = docStatus(doc);
                 const busy = exportingDoc === doc.key;
                 return (
-                  <div key={doc.key} className="rounded-xl border border-slate-200 p-3 dark:border-slate-700 sm:p-4">
+                  <div key={doc.key} className="export-document-row" data-state={info.status}>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
@@ -1943,18 +1933,14 @@ export default function WizardPage() {
                         {info.status === "blocked" && (
                           <p className="mt-1 text-xs text-red-600 dark:text-red-400">{t("wizardDocs.dgBlocked")}</p>
                         )}
-                        <DocumentWarnings
-                          heading={t("wizardDocs.checkWarnings")}
-                          warnings={docWarnings[doc.key] ?? []}
-                        />
                       </div>
                       <button
                         type="button"
                         onClick={() => exportGenericDoc(doc)}
                         disabled={busy || info.status === "blocked" || info.status === "not_applicable" || info.status === "draft"}
-                        className={buttonPrimary}
+                        className={buttonSecondary + " gap-2"}
                       >
-                        {busy ? t("wizardDocs.exporting") : t("wizard.download")}
+                        <DownloadIcon />{busy ? t("wizardDocs.exporting") : t("wizard.download")}
                       </button>
                     </div>
                   </div>
@@ -1987,6 +1973,34 @@ export default function WizardPage() {
             </p>
           </div>
 
+          {historyOn && (
+            <div className={`${panelClass} p-4 sm:p-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`}>
+              <div className="min-w-0">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{t("history.keepTitle")}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t("history.keepHint")}</p>
+                <p className="text-sm text-slate-700 dark:text-slate-200 mt-2" data-testid="history-status">
+                  {keptAt
+                    ? t("history.keptAt", { time: keptAt.toLocaleTimeString(i18n.language, { timeStyle: "short" }) })
+                    : t("history.notKept")}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void keepInHistory()}
+                disabled={keeping}
+                className={buttonSecondary}
+              >
+                {/* Kept, not merely written: a draft has a row of its own, and
+                    a button that said "update" over a shipment nobody has kept
+                    yet would be claiming something that never happened. */}
+                {keeping ? t("history.keeping") : keptAt ? t("history.update") : t("history.keep")}
+              </button>
+            </div>
+          )}
+
+          {((instructionRegimes.length > 0 && instructions.length > 0) || checklist.length > 0 || (unCards?.enabled && unCards.count > 0)) && <details className="surface export-reference">
+            <summary><DocumentIcon />{t("exportFocus.reference")}<ChevronDownIcon /></summary>
+            <div className="space-y-3 p-4">
           {instructionRegimes.length > 0 && instructions.length > 0 && (
             <div className={`${panelClass} space-y-3 p-4 sm:p-6`}>
               <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
@@ -2094,6 +2108,9 @@ export default function WizardPage() {
               </div>
             </div>
           )}
+
+            </div>
+          </details>}
 
           <WizardActions>
             <button type="button" onClick={() => goBackFrom("export")} className={buttonSecondary}>

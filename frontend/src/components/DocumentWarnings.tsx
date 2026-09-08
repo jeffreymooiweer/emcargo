@@ -28,13 +28,13 @@ import type { DocumentExportPayload } from "../api/client";
  *  The effect keys on the *content* of the payloads, not their identity: the
  *  caller rebuilds the array every render, and an effect that fired on identity
  *  would turn every keystroke into a round of validation requests. A failing
- *  endpoint yields no warnings rather than an error, because a validation that
- *  cannot run must not take the export step down with it — the download works
- *  without it and errors have their own channel.
+ *  endpoint yields an explicit unavailable notice, while export errors keep
+ *  their own channel. New input clears the previous findings immediately.
  */
 export function useDocumentValidation(
   payloads: DocumentExportPayload[],
   active: boolean,
+  unavailableMessage = "Document checks are unavailable. Try again before using these documents.",
 ): Record<string, string[]> {
   const [warnings, setWarnings] = useState<Record<string, string[]>>({});
   const current = useRef(payloads);
@@ -47,12 +47,13 @@ export function useDocumentValidation(
       return;
     }
     let cancelled = false;
+    setWarnings({});
     Promise.all(
       current.current.map((payload) =>
         api
           .validateDocument(payload)
           .then((result) => [payload.document_key, result.warnings] as const)
-          .catch(() => [payload.document_key, [] as string[]] as const),
+          .catch(() => [payload.document_key, [unavailableMessage]] as const),
       ),
     ).then((entries) => {
       if (!cancelled) setWarnings(Object.fromEntries(entries));
@@ -60,7 +61,7 @@ export function useDocumentValidation(
     return () => {
       cancelled = true;
     };
-  }, [active, contentKey]);
+  }, [active, contentKey, unavailableMessage]);
 
   return warnings;
 }
@@ -83,4 +84,13 @@ export default function DocumentWarnings({
       </ul>
     </div>
   );
+}
+
+/** Merge identical findings while retaining every affected document. */
+export function groupDocumentWarnings(warnings: Record<string, string[]>) {
+  const grouped = new Map<string, string[]>();
+  for (const [document, findings] of Object.entries(warnings)) {
+    for (const warning of new Set(findings)) grouped.set(warning, [...(grouped.get(warning) ?? []), document]);
+  }
+  return Array.from(grouped, ([message, documents]) => ({ message, documents }));
 }

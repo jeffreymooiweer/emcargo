@@ -64,6 +64,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -71,6 +72,7 @@ import {
   type ReactNode,
 } from "react";
 import { useTranslation } from "react-i18next";
+import { ErrorIcon } from "../components/icons";
 import {
   CheckIcon,
   CircleXmarkIcon,
@@ -177,11 +179,21 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const [toasts, setToasts] = useState<Toast[]>([]);
   // Timers live outside state: a re-render must not reset a running window.
-  const timers = useRef(new Map<number, ReturnType<typeof setTimeout>>());
+  const timers = useRef(new Map<number, {
+    handle?: ReturnType<typeof setTimeout>;
+    deadline: number;
+    remaining: number | null;
+    paused: Set<"pointer" | "focus">;
+  }>());
+
+  useEffect(() => () => {
+    timers.current.forEach((timer) => clearTimeout(timer.handle));
+    timers.current.clear();
+  }, []);
 
   const remove = useCallback((id: number, reason: "undo" | "timeout" | "dismiss") => {
     const timer = timers.current.get(id);
-    if (timer) clearTimeout(timer);
+    if (timer) clearTimeout(timer.handle);
     timers.current.delete(id);
     setToasts((current) => {
       const found = current.find((toast) => toast.id === id);
@@ -193,6 +205,32 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       return current.filter((toast) => toast.id !== id);
     });
   }, []);
+
+  const schedule = useCallback((id: number, lifetimeMs: number | null) => {
+    const previous = timers.current.get(id);
+    clearTimeout(previous?.handle);
+    // Loading and persistent notices also retain pointer/focus state, so a
+    // loading notice that finishes under the pointer stays readable.
+    const timer = { remaining: lifetimeMs, deadline: Date.now() + (lifetimeMs ?? 0),
+      paused: previous?.paused ?? new Set<"pointer" | "focus">(), handle: undefined as ReturnType<typeof setTimeout> | undefined };
+    if (lifetimeMs !== null && !timer.paused.size) timer.handle = setTimeout(() => remove(id, "timeout"), lifetimeMs);
+    timers.current.set(id, timer);
+  }, [remove]);
+
+  const pause = useCallback((id: number, cause: "pointer" | "focus", active: boolean) => {
+    const timer = timers.current.get(id);
+    if (!timer) return;
+    if (active) {
+      if (!timer.paused.size && timer.remaining !== null) {
+        timer.remaining = Math.max(0, timer.deadline - Date.now());
+        clearTimeout(timer.handle);
+      }
+      timer.paused.add(cause);
+    } else if (timer.paused.delete(cause) && !timer.paused.size && timer.remaining !== null) {
+      timer.deadline = Date.now() + timer.remaining;
+      timer.handle = setTimeout(() => remove(id, "timeout"), timer.remaining);
+    }
+  }, [remove]);
 
   const push = useCallback(
     (toast: Omit<Toast, "id">, lifetimeMs: number | null) => {
@@ -214,19 +252,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             // cancel a delete the user asked for.
             oldest.onExpire?.();
             const timer = timers.current.get(oldest.id);
-            if (timer) clearTimeout(timer);
+            if (timer) clearTimeout(timer.handle);
             timers.current.delete(oldest.id);
             return next.filter((candidate) => candidate.id !== oldest.id);
           }
         }
         return next;
       });
-      if (lifetimeMs !== null) {
-        timers.current.set(id, setTimeout(() => remove(id, "timeout"), lifetimeMs));
-      }
+      schedule(id, lifetimeMs);
       return id;
     },
-    [remove],
+    [schedule],
   );
 
   const api = useMemo<ToastApi>(() => {
@@ -234,11 +270,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       setToasts((current) =>
         current.map((toast) => (toast.id === id ? { ...toast, ...patch } : toast)),
       );
-      const timer = timers.current.get(id);
-      if (timer) clearTimeout(timer);
-      if (lifetimeMs !== null) {
-        timers.current.set(id, setTimeout(() => remove(id, "timeout"), lifetimeMs));
-      }
+      schedule(id, lifetimeMs);
     };
     return {
       success: (message) => push({ kind: "success", message }, AUTO_DISMISS_MS),
@@ -305,39 +337,20 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       },
       dismiss: (id) => remove(id, "dismiss"),
     };
-  }, [push, remove, t]);
+  }, [push, remove, schedule, t]);
 
   return (
     <ToastContext.Provider value={api}>
       {children}
-      <ToastHost toasts={toasts} onDismiss={(id) => remove(id, "dismiss")} />
+      <ToastHost toasts={toasts} onDismiss={(id) => remove(id, "dismiss")} onPause={pause} />
     </ToastContext.Provider>
   );
 }
 
-const KIND_STYLE: Record<ToastKind, string> = {
-  success:
-    "border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-700 dark:bg-emerald-950 dark:text-emerald-100",
-  info: "border-slate-300 bg-white text-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100",
-  error:
-    "border-red-300 bg-red-50 text-red-900 dark:border-red-700 dark:bg-red-950 dark:text-red-100",
-  loading:
-    "border-sky-300 bg-sky-50 text-sky-900 dark:border-sky-700 dark:bg-sky-950 dark:text-sky-100",
-  // Amber, like the recognition chip it replaces: this one is not telling the
-  // user something, it is waiting for them.
-  question:
-    "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100",
-  // The same amber as a question — both are the application waiting on the
-  // user — but marked with the exclamation rather than the query, because
-  // this one is not asking which of several answers is right.
-  warning:
-    "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-100",
-};
-
 const KIND_ICON: Record<ToastKind, (props: { className?: string }) => ReactElement> = {
   success: CheckIcon,
   info: InfoIcon,
-  error: ExclamationIcon,
+  error: ErrorIcon,
   loading: SpinnerIcon,
   question: QuestionIcon,
   warning: ExclamationIcon,
@@ -364,14 +377,18 @@ export const INLINE_ACTION_MAX_CHARS = 60;
  *  The gap between them is where this sits. */
 export const INLINE_ACTION_MAX_LABEL = 16;
 
-function ToastHost({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: number) => void }) {
+function ToastHost({ toasts, onDismiss, onPause }: {
+  toasts: Toast[];
+  onDismiss: (id: number) => void;
+  onPause: (id: number, cause: "pointer" | "focus", active: boolean) => void;
+}) {
   const { t } = useTranslation();
   if (toasts.length === 0) return null;
   return (
     // Bottom sheet on mobile, bottom-right stack on desktop. Errors announce
     // assertively; the rest waits its turn — a screen reader user saving a
     // form should not be interrupted mid-sentence for "saved".
-    <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col gap-2 p-3 sm:inset-x-auto sm:right-4 sm:bottom-4 sm:w-96">
+    <div className="toast-stack">
       {toasts.map((toast) => {
         const Icon = KIND_ICON[toast.kind];
         const actions = toast.actions ?? [];
@@ -390,10 +407,17 @@ function ToastHost({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: num
             key={toast.id}
             role={toast.kind === "error" ? "alert" : "status"}
             aria-live={toast.kind === "error" ? "assertive" : "polite"}
-            className={`flex items-start gap-2 rounded-xl border px-3 py-2.5 text-sm shadow-lg ${KIND_STYLE[toast.kind]}`}
+            className={`toast-message toast-${toast.kind}`}
+            data-kind={toast.kind}
+            onPointerEnter={() => onPause(toast.id, "pointer", true)}
+            onPointerLeave={() => onPause(toast.id, "pointer", false)}
+            onFocusCapture={() => onPause(toast.id, "focus", true)}
+            onBlurCapture={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget as Node | null)) onPause(toast.id, "focus", false);
+            }}
           >
             <Icon
-              className={`h-5 w-5 shrink-0 self-center ${toast.kind === "loading" ? "animate-spin" : ""}`}
+              className={`toast-icon h-5 w-5 shrink-0 ${toast.kind === "loading" ? "animate-spin" : ""}`}
             />
             {/* A question puts its answers under the text rather than beside
                 it: two or three UN numbers on one line squeeze the sentence
@@ -431,7 +455,7 @@ function ToastHost({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id: num
                 type="button"
                 onClick={() => onDismiss(toast.id)}
                 aria-label={t("toast.dismiss")}
-                className="shrink-0 rounded-md p-0.5 opacity-60 hover:opacity-100"
+                className="toast-dismiss"
               >
                 <CircleXmarkIcon className="h-4 w-4" />
               </button>
