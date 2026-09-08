@@ -20,12 +20,10 @@ import i18n from "i18next";
 
 import { api, UserPreferences } from "../api/client";
 import {
-  BROWSER_PREFERENCES_KEY,
   EMPTY_PREFERENCES,
   LANGUAGE_STORAGE_KEY,
   PreferencesProvider,
   applyPreferences,
-  readBrowserPreferences,
   usePreferences,
 } from "./preferences";
 
@@ -140,82 +138,29 @@ describe("de voorkeurenprovider", () => {
   });
 });
 
-describe("de open installatie", () => {
-  // No accounts, so no server-side settings: the browser is the truth. The
-  // one call that must never be made is the one to `/settings/me` — the
-  // address is not on the server, and a 404 on every page load is exactly
-  // the kind of noise a public installation should not produce.
-  const shared = {
-    default_language: "nl",
-    default_theme: "system" as const,
-    address_lookup_enabled: true,
-    un_cards_enabled: true,
-    card_links_enabled: false,
-    organisation_name: "",
-    organisation_address: "",
-    mail_enabled: false,
-  };
-
-  it("leest de voorkeuren uit de browser en vraagt ze nooit aan de server", async () => {
-    localStorage.setItem(
-      BROWSER_PREFERENCES_KEY,
-      JSON.stringify(preferences({ consignor_name: "Mooiweer BV", default_unit: "pallet" })),
-    );
-    const mine = vi.spyOn(api, "mySettings").mockRejectedValue(new Error("404"));
-    vi.spyOn(api, "publicSettings").mockResolvedValue(shared);
-
-    render(
-      <PreferencesProvider mode="open">
-        <Probe />
-      </PreferencesProvider>,
-    );
-
-    await waitFor(() => expect(screen.getByTestId("loaded")).toHaveTextContent("true"));
-    expect(screen.getByTestId("consignor")).toHaveTextContent("Mooiweer BV");
-    expect(screen.getByTestId("unit")).toHaveTextContent("pallet");
-    expect(mine).not.toHaveBeenCalled();
+describe("account persistence", () => {
+  it("uses the account instead of legacy guest preferences", async () => {
+    localStorage.setItem("emcargo-preferences", JSON.stringify(preferences({ consignor_name: "Guest" })));
+    vi.spyOn(api, "mySettings").mockResolvedValue(preferences({ consignor_name: "Account" }));
+    vi.spyOn(api, "publicSettings").mockRejectedValue(new Error("unavailable"));
+    render(<PreferencesProvider><Probe /></PreferencesProvider>);
+    await waitFor(() => expect(screen.getByTestId("consignor")).toHaveTextContent("Account"));
   });
 
-  it("bewaart een wijziging in de browser, niet op de server", async () => {
-    vi.spyOn(api, "publicSettings").mockResolvedValue(shared);
-    const server = vi.spyOn(api, "saveMySettings").mockRejectedValue(new Error("404"));
-
+  it("persists edits through the authenticated API", async () => {
+    vi.spyOn(api, "mySettings").mockResolvedValue(preferences());
+    vi.spyOn(api, "publicSettings").mockRejectedValue(new Error("unavailable"));
+    const saved = preferences({ consignor_name: "Ada" });
+    const server = vi.spyOn(api, "saveMySettings").mockResolvedValue(saved);
     function Saver() {
       const { save } = usePreferences();
-      return (
-        <button type="button" onClick={() => void save(preferences({ consignor_name: "Ada" }))}>
-          save
-        </button>
-      );
+      return <button onClick={() => void save(saved)}>save</button>;
     }
-    render(
-      <PreferencesProvider mode="open">
-        <Saver />
-        <Probe />
-      </PreferencesProvider>,
-    );
-
+    render(<PreferencesProvider><Saver /><Probe /></PreferencesProvider>);
     await waitFor(() => expect(screen.getByTestId("loaded")).toHaveTextContent("true"));
     screen.getByText("save").click();
-
     await waitFor(() => expect(screen.getByTestId("consignor")).toHaveTextContent("Ada"));
-    expect(JSON.parse(localStorage.getItem(BROWSER_PREFERENCES_KEY)!).consignor_name).toBe("Ada");
-    expect(server).not.toHaveBeenCalled();
-  });
-
-  it("laat een onleesbare of verouderde kopie niet door", () => {
-    // Garbage, or a document from an older version with a key that has
-    // since changed type, reads as the defaults rather than as an error.
-    localStorage.setItem(BROWSER_PREFERENCES_KEY, "{not json");
-    expect(readBrowserPreferences()).toEqual(EMPTY_PREFERENCES);
-
-    localStorage.setItem(
-      BROWSER_PREFERENCES_KEY,
-      JSON.stringify({ consignor_name: "Ada", prefill_documents: "yes", unknown: 1 }),
-    );
-    const read = readBrowserPreferences();
-    expect(read.consignor_name).toBe("Ada");
-    expect(read.prefill_documents).toBe(true);
-    expect("unknown" in read).toBe(false);
+    expect(server).toHaveBeenCalledWith(saved);
+    expect(localStorage.getItem("emcargo-preferences")).toBeNull();
   });
 });

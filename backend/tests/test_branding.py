@@ -5,7 +5,7 @@ this file pins: the *bytes* decide what a file is, never its name or its
 declared type; SVG is refused because it is a document that can carry script;
 and the caps are enforced before the upload is held whole. Around that, the
 plainer facts — a visitor can read the door before signing in, only an
-administrator can repaint it, the open application serves files its operator
+administrator can repaint it, and the sign-in page serves files its operator
 placed by hand, and the mail carries the same logo as the screen.
 """
 from __future__ import annotations
@@ -236,39 +236,31 @@ def test_the_mail_carries_the_uploaded_logo_with_the_right_subtype(admin, db):
     assert mail_templates.logo_image()[1] == "png"
 
 
-# --- the open application ----------------------------------------------------
+# --- login branding ----------------------------------------------------
 
 
-def test_the_open_application_shows_what_its_operator_placed_by_hand(db, monkeypatch):
-    """No screen to upload from, so the operator drops the files into
-    DATA_DIR/branding and sets BRAND_NAME; the door reads the same."""
+def test_login_branding_stays_public_while_changes_require_an_account(db, monkeypatch):
+    """Existing branding files must still paint the sign-in page after upgrading,
+    while an anonymous visitor must never be allowed to replace those files.
+    """
     monkeypatch.setenv("EMCARGO_MODE", "open")
-    monkeypatch.setenv("BRAND_NAME", "Open Haven")
+    monkeypatch.setenv("BRAND_NAME", "Example Haven")
     get_settings.cache_clear()
     folder = branding.directory()
     folder.mkdir(parents=True)
     (folder / "logo.png").write_bytes(png())
     (folder / "modality-rail.jpg").write_bytes(JPEG)
 
-    open_app = create_app()
-    open_app.dependency_overrides[get_db] = lambda: db
-    with TestClient(open_app) as client:
+    application = create_app()
+    application.dependency_overrides[get_db] = lambda: db
+    with TestClient(application) as client:
         door = client.get("/api/branding").json()
-        assert door["name"] == "Open Haven"
+        assert door["name"] == "Example Haven"
         assert door["logo"].startswith("/api/branding/logo?v=")
         assert door["modalities"]["rail"].startswith("/api/branding/modality/rail?v=")
         assert door["modalities"]["road"] is None
         assert client.get(door["logo"]).status_code == 200
-        # And no way to change it from outside: the write routes are absent.
-        # The address exists for GET, so a POST or DELETE is 405 — "not a
-        # thing you can do here" — rather than 404; either way, not 403,
-        # which would mean the route is there and merely guarded.
-        assert upload(client, "/api/branding/logo", png()).status_code == 405
-        assert client.delete("/api/branding/logo").status_code == 405
-        assert upload(client, "/api/branding/modality/rail", png()).status_code == 405
-        # Structurally as well: nothing in the route table writes branding.
-        writers = [a for a in route_table.addresses(open_app)
-                   if a.path.startswith("/api/branding")
-                   and a.methods & {"POST", "DELETE", "PUT"}]
-        assert writers == []
-        assert any(a.path == "/api/branding" for a in route_table.addresses(open_app))
+        assert upload(client, "/api/branding/logo", png()).status_code == 401
+        assert client.delete("/api/branding/logo").status_code == 401
+        assert upload(client, "/api/branding/modality/rail", png()).status_code == 401
+        assert any(a.path == "/api/branding" for a in route_table.addresses(application))

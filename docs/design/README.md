@@ -30,7 +30,7 @@ cards and accessible primary actions.
 
 The EMCargo 2.0 interface passed backend and frontend automation and the production
 build. This documentation update additionally tests the new environment aliases,
-open-mode behaviour, settings and installation manifests.
+account access, public QR-card links, settings and installation manifests.
 
 The preview now opens the EMCargo sign-in screen in the cloud browser after
 explicitly configuring the preview host in Vite and restarting the preview.

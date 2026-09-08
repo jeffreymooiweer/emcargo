@@ -9,29 +9,8 @@ class Settings(BaseSettings):
 
     app_name: str = "EMCargo"
     app_env: str = "production"
-    #: Which of the two applications this image runs as.
-    #:
-    #: ``organisation`` — the default, and what every existing installation
-    #: is — has accounts: people sign in, and the server keeps their accounts,
-    #: their settings and the equipment library. ``open`` has none: anyone may
-    #: use it, nothing is kept about anyone, and the routes that would make
-    #: that untrue — sign-in, users, the settings screen, the library, mail,
-    #: updating — do not exist. Set at deploy time and read once, because a
-    #: privacy promise an administrator could click away is not a promise,
-    #: and the open application has no administrator to click it.
-    #:
-    #: A value that is neither is read as ``organisation`` and reported: the
-    #: closed application is the one a typo may safely land in, and the mode
-    #: is printed by ``/api/health`` so the operator can see what they got.
-    emcargo_mode: str = "organisation"
-    #: Whether the organisation application keeps the shipments it makes.
-    #: Since v1.188.0 this is an administrator's setting on the screen —
-    #: *Keep shipments* under Administration — and the variable is only its
-    #: starting value, like every other setting with a screen counterpart:
-    #: read until an administrator saves the screen, ignored from then on.
-    #: Kept so an installation that set it before keeps its history across
-    #: the upgrade. The open application ignores it: nothing is kept about
-    #: anyone there.
+    #: Initial shipment retention setting, overridden by saved settings.
+    #: EMCARGO_MODE is retired: every installation requires an account.
     emcargo_history: bool = False
     app_secret_key: str = "change-me"
     database_url: str = "sqlite:////data/emcargo.db"
@@ -92,18 +71,14 @@ class Settings(BaseSettings):
     smtp_from_name: str = ""
     smtp_timeout_seconds: float = 15.0
     #: The switches an administrator would otherwise flip on the settings
-    #: screen. They have always had a screen; they gain an environment
-    #: variable here because the open application has no screen and no
-    #: administrator, so the environment is its whole configuration. In the
-    #: organisation application they are, like every other variable, the
-    #: starting value a saved setting overrides.
+    #: screen. Environment variables provide the starting values until
+    #: an administrator saves an override.
     default_language: str = "nl"
     default_theme: str = "dark"
     address_lookup_enabled: bool = True
     un_cards_enabled: bool = True
     #: Whether documents carry a QR code that opens this installation's UN
-    #: cards — the one route that never asks for a sign-in. Off by default in
-    #: both applications; see ``docs/privacy.md``.
+    #: cards without signing in. Off by default; see ``docs/privacy.md``.
     card_links_enabled: bool = False
     #: The address the installation is reached on, for the links in those QR
     #: codes and in outgoing mail. Empty means: read it from the request.
@@ -112,17 +87,6 @@ class Settings(BaseSettings):
     #: tile images beside it are files in ``DATA_DIR/branding``, uploaded from
     #: the settings screen or placed there by the operator.
     brand_name: str = ""
-
-    @property
-    def is_open(self) -> bool:
-        """Whether this is the open application: no accounts, nothing kept."""
-        return self.mode == "open"
-
-    @property
-    def mode(self) -> str:
-        """``open`` or ``organisation``, with anything else read as the latter."""
-        value = (self.emcargo_mode or "").strip().lower()
-        return value if value in ("open", "organisation") else "organisation"
 
     @property
     def templates_dir(self) -> Path:

@@ -57,10 +57,7 @@ from app.services.documents.signature import decode_signature_image
 from app.services.settings_store import instance_settings
 
 router = APIRouter(prefix="/documents", tags=["documents"])
-#: Mailing the bundle lives on its own router so the open application can
-#: leave it out. There, a visitor who can download the papers does not need
-#: the installation to send them — and an installation that sends what
-#: strangers type, to addresses strangers choose, is a spam relay.
+#: Mailing is separately configured and always requires a signed-in account.
 mail_router = APIRouter(prefix="/documents", tags=["documents"])
 
 

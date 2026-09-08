@@ -63,7 +63,7 @@ def test_the_environment_example_names_only_variables_the_application_reads():
     keys = env_keys((NATIVE / "emcargo.env.example").read_text(encoding="utf-8"))
     assert keys, "the example is empty"
     assert keys <= settings_fields(), keys - settings_fields()
-    assert {"DATA_DIR", "DATABASE_URL", "EMCARGO_MODE", "ADMIN_PASSWORD"} <= keys
+    assert {"DATA_DIR", "DATABASE_URL", "ADMIN_PASSWORD"} <= keys
 
 
 def test_the_kubernetes_manifests_parse_and_name_real_variables():

@@ -559,7 +559,7 @@ selection as CSV for whoever keeps records elsewhere. What a shipment contained 
 parties, the goods, the UN numbers — is never in this log, so it can be kept longer than
 the shipments themselves: the **retention** under Administration says how many days a
 line stays (365 by default), and whatever is older is removed when the application
-starts. The open application has no accounts and writes no log. See
+starts. Every installation uses accounts and records these actions. See
 [Privacy](privacy.md#the-audit-log).
 
 ## Language

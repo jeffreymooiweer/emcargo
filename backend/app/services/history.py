@@ -24,7 +24,6 @@ from typing import Any
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session, defer, joinedload
 
-from app.core.config import get_settings
 from app.core.dates import utc_filter_bound
 from app.models.shipment import Shipment
 from app.models.user import Department, User
@@ -92,9 +91,6 @@ def adopt_kept_data(db: Session) -> bool:
     """
     from app.services.settings_store import instance_settings, save_instance_settings
 
-    settings = get_settings()
-    if settings.is_open:
-        return False
     current = instance_settings(db)
     if current.history_enabled:
         return False

@@ -133,15 +133,15 @@ def test_with_the_switch_they_do(db, monkeypatch):
         assert client.get("/api/health").json()["history"] is True
 
 
-def test_the_open_application_ignores_the_switch(db, monkeypatch):
-    # Both the legacy variable and a saved setting: the open application has
-    # no administrator and keeps nothing, whatever either says.
+def test_a_retired_mode_variable_cannot_hide_kept_shipments(db, monkeypatch):
+    """Upgrading a former guest installation must not hide existing history.
+    Login is mandatory, while the saved retention setting still controls data.
+    """
     switch_history(db, True)
-    with application(db, monkeypatch, EMCARGO_HISTORY="true",
-                     EMCARGO_MODE="open") as client:
-        assert client.get("/api/shipments").status_code == 404
-        assert client.get("/api/health").json()["history"] is False
-    assert settings_store.history_enabled(db) is False
+    with application(db, monkeypatch, EMCARGO_HISTORY="true", EMCARGO_MODE="open") as client:
+        assert client.get("/api/shipments").status_code == 200
+        assert client.get("/api/health").json()["history"] is True
+    assert settings_store.history_enabled(db) is True
 
 
 # --- 2. the switch is the administrator's, and off never hides data ---------------

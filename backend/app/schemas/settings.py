@@ -207,8 +207,7 @@ class InstanceSettings(BaseModel):
     #: default: a shipment drawn up is a shipment forgotten. Switching it
     #: *off* with kept shipments in the table is refused until the
     #: administrator has them deleted first, so a table is never kept while
-    #: the interface claims it does not exist. The open application has no
-    #: administrator and never keeps anything, whatever this says.
+    #: the interface claims it does not exist.
     history_enabled: bool = False
 
     #: Used as the consignor for users who filled in nothing of their own, so a

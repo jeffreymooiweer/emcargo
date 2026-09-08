@@ -66,12 +66,7 @@ interface Props {
 
 export default function SettingsPage({ user, onUserChange }: Props) {
   const { t } = useTranslation();
-  const { preferences, save, loaded, mode } = usePreferences();
-  // In the open application what is saved here stays in the browser, and
-  // the screen has to say so: "stored in your browser" is a promise about
-  // where the data is *not*, and a warning that it goes with the browser
-  // data. There is also no account to put a second factor on.
-  const open = mode === "open";
+  const { preferences, save, loaded } = usePreferences();
   const [draft, setDraft] = useState<UserPreferences>(preferences);
   const [options, setOptions] = useState<SettingsOptions | null>(null);
   const [version, setVersion] = useState("");
@@ -127,7 +122,7 @@ export default function SettingsPage({ user, onUserChange }: Props) {
     }
   };
 
-  const tabs = TABS.filter((tab) => (!tab.admin || user.role === "admin") && !(open && tab.key === "security"));
+  const tabs = TABS.filter((tab) => !tab.admin || user.role === "admin");
   const active = tabs.some((tab) => tab.key === tab_) ? tab_ : "appearance";
 
   return (
@@ -136,7 +131,7 @@ export default function SettingsPage({ user, onUserChange }: Props) {
       <div>
         <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{t("settings.title")}</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          {open ? t("settings.introOpen") : t("settingsNav.intro")}
+          {t("settingsNav.intro")}
         </p>
       </div>
 
@@ -282,13 +277,13 @@ export default function SettingsPage({ user, onUserChange }: Props) {
 
       {active === "details" && (
       <section className={`${panelClass} p-5 space-y-4`}>
-        {!open && <AvatarSettings user={user} onUserChange={onUserChange} />}
+        <AvatarSettings user={user} onUserChange={onUserChange} />
         <div>
           <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
             {t("settings.myDetails")}
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            {open ? t("settings.myDetailsHintOpen") : t("settings.myDetailsHint")}
+            {t("settings.myDetailsHint")}
           </p>
         </div>
 
@@ -355,7 +350,7 @@ export default function SettingsPage({ user, onUserChange }: Props) {
         </>
       )}
 
-      {active === "security" && !open && <TwoFactorPanel />}
+      {active === "security" && <TwoFactorPanel />}
       {ADMIN_TABS.includes(active) && user.role === "admin" && <AdminSettings section={active} />}
       {active === "updates" && user.role === "admin" && <UpdatePanel />}
       {active === "cards" && user.role === "admin" && <UnCardsAdminPanel />}

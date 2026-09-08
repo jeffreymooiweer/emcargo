@@ -9,8 +9,7 @@
  * - Where the history is on, the running entry is kept as a draft and this
  *   says so — *Saved*, *Saving…*, or *Could not save*, never a claim that
  *   something was kept when the save failed.
- * - Where nothing may be stored — the open application, or the history
- *   switched off — this says that too, and offers the draft as a file the
+ * - Where the history is switched off, this says that too, and offers the draft as a file the
  *   user keeps themselves. A promise not to store anything is not a licence
  *   to lose somebody's work silently.
  */

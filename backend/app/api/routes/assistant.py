@@ -18,9 +18,7 @@ from app.services.assistant import runtime
 from app.services.assistant.orchestrator import step
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
-#: Installing the model is an administrator's click, on a router of its own
-#: so the open application — which has no administrator — leaves it out. The
-#: operator of an open installation puts the model in place at deploy time.
+#: Model installation and maintenance require an administrator.
 admin_router = APIRouter(prefix="/assistant", tags=["assistant"])
 
 

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { api, ShipmentDetail, ShipmentSummary, type User } from "../api/client";
 import { ModalityIcon } from "../components/WizardShell";
-import { MoreIcon, ArrowRightIcon, HomeIcon, PlusIcon, ShipmentsIcon, TripsIcon, ImportIcon } from "../components/icons";
+import { MoreIcon, ArrowRightIcon, PlusIcon, ShipmentsIcon, TripsIcon, ImportIcon } from "../components/icons";
 import { usePreferences } from "../settings/preferences";
 import HistoryStatus from "../components/HistoryStatus";
 import { readSnapshot } from "../wizard/snapshot";
@@ -13,7 +13,7 @@ import { AVAILABLE_MODALITIES, isModalityAvailable } from "./ModalitySelectPage"
 export default function OverviewPage({ user }: { user?: User }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { publicSettings, preferences, mode } = usePreferences();
+  const { publicSettings, preferences } = usePreferences();
   const history = !!publicSettings?.history_enabled;
   const [draft, setDraft] = useState<ShipmentDetail | null>(null);
   const [recent, setRecent] = useState<ShipmentSummary[]>([]);
@@ -126,7 +126,7 @@ export default function OverviewPage({ user }: { user?: User }) {
               </li>)}
             </ul></div>}
           </section>}
-          {!history && (mode === "open" ? <div className="surface flex items-start gap-4 p-6"><span className="icon-tile"><HomeIcon className="h-6 w-6" /></span><p>{t("overview.localStart")}</p></div> : <HistoryStatus title={t("nav.overview")} admin={user?.role === "admin"} embedded />)}
+          {!history && <HistoryStatus title={t("nav.overview")} admin={user?.role === "admin"} embedded />}
         </div>
         <aside className="space-y-6">
           <section className="surface overview-quick p-5">

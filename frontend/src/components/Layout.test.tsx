@@ -10,7 +10,7 @@ vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => k
 vi.mock("./WhatsNewModal", () => ({ default: () => null }));
 vi.mock("./UpdateToast", () => ({ default: () => null }));
 vi.mock("./TwoFactorNudge", () => ({ default: () => null, clearTwoFactorNudge: vi.fn() }));
-const config = vi.hoisted(() => ({ mode: "organisation", publicSettings: { history_enabled: true } }));
+const config = vi.hoisted(() => ({ publicSettings: { history_enabled: true } }));
 vi.mock("../settings/preferences", () => ({ usePreferences: () => config }));
 const api = vi.hoisted(() => ({ health: vi.fn(), logout: vi.fn() }));
 vi.mock("../api/client", () => ({ api }));
@@ -24,7 +24,7 @@ function renderAt(path = "/wizard/road", custom = false) {
   </BrandingContext.Provider>);
 }
 
-beforeEach(() => { vi.spyOn(window, "scrollTo").mockImplementation(() => {}); vi.clearAllMocks(); config.mode = "organisation"; config.publicSettings.history_enabled = true; api.health.mockResolvedValue({ version: "1.206.2" }); api.logout.mockResolvedValue({ ok: true }); });
+beforeEach(() => { vi.spyOn(window, "scrollTo").mockImplementation(() => {}); vi.clearAllMocks(); config.publicSettings.history_enabled = true; api.health.mockResolvedValue({ version: "1.206.2" }); api.logout.mockResolvedValue({ ok: true }); });
 
 describe("the approved EMCargo navigation", () => {
   it("keeps all four work pages directly discoverable when storage is off", async () => {
@@ -89,11 +89,11 @@ describe("the approved EMCargo navigation", () => {
     await userEvent.click(within(screen.getByRole("dialog")).getByRole("link", { name: "nav.new" }));
     expect(screen.queryByRole("dialog")).toBeNull(); expect(screen.getByText("chooser")).toBeInTheDocument();
   });
-  it("never offers accounts or history to an open installation", () => {
-    config.mode = "open"; config.publicSettings.history_enabled = false; renderAt();
-    expect(screen.queryByRole("link", { name: "nav.shipments" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "nav.logout" })).toBeNull();
-    expect(screen.getByText("nav.openMode")).toBeInTheDocument();
+  it("always shows the account and sign-out action", () => {
+    renderAt();
+    expect(screen.getByRole("link", { name: "profile.open" })).toHaveAttribute("href", "/settings?tab=details");
+    expect(screen.getByRole("button", { name: "nav.logout" })).toBeVisible();
+    expect(screen.getByText("tester")).toBeInTheDocument();
   });
   it("keeps a skip link and labels the current destination", () => {
     renderAt("/");

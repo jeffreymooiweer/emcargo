@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.docs import get_redoc_html, get_swagger_ui_html
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi import _rate_limit_exceeded_handler
@@ -39,7 +40,7 @@ from app.api.routes.un_cards_admin import router as un_cards_admin_router
 from app.api.routes.users import router as users_router
 from app.core.config import get_settings
 from app.core.database import get_db
-from app.core.deps import require_history
+from app.core.deps import get_current_user, require_history
 from app.core.ratelimit import limiter
 from app.core.security_checks import apply_security_configuration
 from app.core.startup import init_app
@@ -49,8 +50,7 @@ from app.version import get_version
 
 logger = logging.getLogger(__name__)
 
-#: The work: what both applications serve. Parsing, judging, rendering, the
-#: reference data, and the public facts the interface draws itself from.
+#: Authenticated document work, reference data and shared settings.
 WORK_ROUTERS = (
     assistant_router,
     jobs_router,
@@ -63,19 +63,10 @@ WORK_ROUTERS = (
     catalog_search_router,
     units_router,
     settings_public_router,
-    # What is on the door: the name and the pictures, read by the sign-in
-    # page before anybody has signed in and by the open application.
-    branding_public_router,
 )
 
-#: The accounts: what only the organisation application serves. Signing in
-#: and everything that presumes somebody did — their settings, the users
-#: page, the equipment library, mail, the administrator's maintenance. In
-#: the open application these are not hidden behind a refusal; they are not
-#: mounted, so they answer 404 like any address that does not exist. The
-#: test suite asserts their absence route by route.
+#: Account services retain their additional administrator checks.
 ACCOUNT_ROUTERS = (
-    auth_router,
     users_router,
     settings_router,
     equipment_router,
@@ -88,11 +79,7 @@ ACCOUNT_ROUTERS = (
     audit_router,
 )
 
-#: The history: what only an organisation application that keeps its
-#: shipments serves. Mounted behind ``require_history``, which answers 404
-#: while the administrator's *Keep shipments* setting is off — so on every
-#: other installation "nothing is kept" is a matter of which addresses answer.
-#: Never mounted in the open application, which has no administrator.
+#: Retention stays opt-in, with authentication checked before the setting.
 HISTORY_ROUTERS = (history_router, departments_router, addresses_router, articles_router,
                    trips_router)
 
@@ -113,7 +100,8 @@ def create_app() -> FastAPI:
         application.state.has_admin = init_app()
         yield
 
-    app = FastAPI(title=settings.app_name, lifespan=lifespan)
+    app = FastAPI(title=settings.app_name, lifespan=lifespan,
+                  docs_url=None, redoc_url=None, openapi_url=None)
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
     # A wildcard origin never travels with credentials. Starlette answers
@@ -143,20 +131,15 @@ def create_app() -> FastAPI:
             "status": "ok",
             "app": settings.app_name,
             "version": get_version(),
-            # Which application this is. A visitor cannot see an environment
-            # variable; this line, the footer that repeats it and the public
-            # source are what make "nothing is kept about you" checkable
-            # rather than merely true.
-            "mode": settings.mode,
-            # And whether it keeps its shipments — the other half of what a
-            # visitor may want to know before typing a customer's name.
+            # Retained for older clients; it can no longer select guest access.
+            "mode": "organisation",
             "history": history_enabled(db),
             # Which editions this installation uses, compactly. Whoever reports a
             # bug passes on straight away what their app computes with.
             "regulatory": summary(),
         }
 
-    @app.get("/api/regulatory")
+    @app.get("/api/regulatory", dependencies=[Depends(get_current_user)])
     def regulatory():
         """Per rule set: edition, source, validity, errata and checksum."""
         return build_manifest()
@@ -164,18 +147,33 @@ def create_app() -> FastAPI:
     @app.get("/api/setup-status")
     def setup_status():
         return {"has_admin": getattr(app.state, "has_admin", False),
-                "mode": settings.mode}
+                "mode": "organisation"}
 
-    for router in WORK_ROUTERS:
+    # Sign-in/recovery, login branding and the optional QR card routes are
+    # public. Account-bound API routes always enforce authentication, even
+    # when an old deployment still contains EMCARGO_MODE=open.
+    app.include_router(auth_router, prefix="/api")
+    app.include_router(branding_public_router, prefix="/api")
+    for router in (*WORK_ROUTERS, *ACCOUNT_ROUTERS):
         app.include_router(router, prefix="/api")
-    if not settings.is_open:
-        for router in ACCOUNT_ROUTERS:
-            app.include_router(router, prefix="/api")
-        for router in HISTORY_ROUTERS:
-            app.include_router(router, prefix="/api", dependencies=[Depends(require_history)])
-    # Public by design in both applications — see app/api/routes/cards.py.
-    # It is off unless an administrator, or the environment, turns it on.
+    for router in HISTORY_ROUTERS:
+        app.include_router(router, prefix="/api",
+                           dependencies=[Depends(get_current_user), Depends(require_history)])
     app.include_router(cards_router, prefix="/api")
+
+    @app.get("/openapi.json", include_in_schema=False, dependencies=[Depends(get_current_user)])
+    def openapi_schema():
+        return JSONResponse(app.openapi(), headers={"Cache-Control": "private, no-store"})
+
+    @app.get("/docs", include_in_schema=False, dependencies=[Depends(get_current_user)])
+    def api_docs(request: Request):
+        root = request.scope.get("root_path", "").rstrip("/")
+        return get_swagger_ui_html(openapi_url=f"{root}/openapi.json", title=f"{settings.app_name} API")
+
+    @app.get("/redoc", include_in_schema=False, dependencies=[Depends(get_current_user)])
+    def api_reference(request: Request):
+        root = request.scope.get("root_path", "").rstrip("/")
+        return get_redoc_html(openapi_url=f"{root}/openapi.json", title=f"{settings.app_name} API")
 
     static_dir = settings.static_dir
     if static_dir.exists():

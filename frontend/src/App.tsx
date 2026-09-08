@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Navigate, Route, Routes, useNavigate } from "react-router";
-import { api, InstallationMode, User, VISITOR } from "./api/client";
+import { Navigate, Route, Routes, useLocation } from "react-router";
+import { api, User } from "./api/client";
 import { useTranslation } from "react-i18next";
 import Layout from "./components/Layout";
 const CardsPage = lazy(() => import("./pages/CardsPage"));
@@ -26,39 +26,24 @@ import { ToastProvider } from "./toast/ToastProvider";
 export default function App() {
   const { t } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
-  const [mode, setMode] = useState<InstallationMode>("organisation");
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from;
+  const afterLogin = typeof from === "string" && from.startsWith("/") && !from.startsWith("//") && !from.startsWith("/login") ? from : "/";
 
   useEffect(() => {
-    // Which application is this? The health line says, and it needs no
-    // cookie — the one question that can be asked before knowing whether
-    // there is anybody to ask on behalf of. The open application has no
-    // `/auth/me` to call, so its caller is the visitor, straight away. An
-    // unreachable server is treated as the organisation application: the
-    // sign-in page is the one that can show the error.
     let cancelled = false;
-    void (async () => {
-      const health = await api.health().catch(() => null);
-      if (cancelled) return;
-      if (health?.mode === "open") {
-        setMode("open");
-        setUser(VISITOR);
-        setLoading(false);
-        return;
-      }
-      try {
-        setUser((await api.me()).user);
-      } catch {
-        setUser(null);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    api.me().then(
+      ({ user: account }) => { if (!cancelled) setUser(account); },
+      () => { if (!cancelled) setUser(null); },
+    ).finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, []);
+
+  async function signedIn() {
+    const { user: account } = await api.me();
+    setUser(account);
+  }
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-slate-500 dark:text-slate-400" role="status">{t("wizard.loading")}</div>;
@@ -70,7 +55,7 @@ export default function App() {
       <ToastProvider>
       <Suspense fallback={<div className="route-loading" role="status">{t("wizard.loading")}</div>}>
       <Routes>
-        <Route path="/login" element={<LoginPage onLogin={() => api.me().then((r) => { setUser(r.user); navigate("/"); })} />} />
+        <Route path="/login" element={<LoginPage onLogin={signedIn} />} />
         {/* A reset link is opened by somebody who cannot sign in; sending
             them to /login would swallow the token in the address. */}
         <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -78,7 +63,7 @@ export default function App() {
             no account here. Sending them to /login would make the code
             useless, which is the whole point of it being public. */}
         <Route path="/cards" element={<CardsPage />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace state={{ from: location.pathname + location.search + location.hash }} />} />
       </Routes>
       </Suspense>
       </ToastProvider>
@@ -86,11 +71,9 @@ export default function App() {
     );
   }
 
-  const open = mode === "open";
-
   return (
     <BrandingProvider>
-    <PreferencesProvider mode={mode}>
+    <PreferencesProvider>
       <ToastProvider>
       <Suspense fallback={<div className="route-loading" role="status">{t("wizard.loading")}</div>}>
       <Routes>
@@ -103,26 +86,22 @@ export default function App() {
           <Route path="/wizard" element={<Navigate to="/" replace />} />
           <Route path="/wizard/:modality" element={<WizardPage />} />
           <Route path="/groupage" element={<GroupagePage />} />
-          {/* The library and the users page presume an account. In the open
-              application their addresses are not on the server either, so
-              a page that called them would only draw an error. */}
-          {/* The history exists only where the switch is on; the page says
-              so itself when it is not, and the open application never
-              keeps anything. */}
-          {!open && <Route path="/shipments" element={<ShipmentsPage user={user} />} />}
-          {!open && <Route path="/shipments/report" element={<DgsaReportPage user={user} />} />}
-          {!open && <Route path="/shipments/:id" element={<ShipmentsPage user={user} />} />}
-          {!open && <Route path="/trips" element={<TripsPage user={user} />} />}
-          {!open && <Route path="/trips/:id" element={<TripsPage user={user} />} />}
-          {!open && <Route path="/articles" element={<ArticlesPage user={user} />} />}
-          {!open && <Route path="/materieel" element={<MaterieelPage />} />}
-          {!open && user.role === "admin" && <Route path="/users" element={<UsersPage user={user} />} />}
-          {!open && user.role === "admin" && <Route path="/audit" element={<AuditPage />} />}
+          {/* Retention remains optional; each page explains when it is off. */}
+          <Route path="/shipments" element={<ShipmentsPage user={user} />} />
+          <Route path="/shipments/report" element={<DgsaReportPage user={user} />} />
+          <Route path="/shipments/:id" element={<ShipmentsPage user={user} />} />
+          <Route path="/trips" element={<TripsPage user={user} />} />
+          <Route path="/trips/:id" element={<TripsPage user={user} />} />
+          <Route path="/articles" element={<ArticlesPage user={user} />} />
+          <Route path="/materieel" element={<MaterieelPage />} />
+          {user.role === "admin" && <Route path="/users" element={<UsersPage user={user} />} />}
+          {user.role === "admin" && <Route path="/audit" element={<AuditPage />} />}
           <Route path="/settings" element={<SettingsPage user={user} onUserChange={setUser} />} />
           <Route path="/legal" element={<LegalPage />} />
         </Route>
-        {!open && <Route path="/reset-password" element={<ResetPasswordPage />} />}
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/cards" element={<CardsPage />} />
+        <Route path="/login" element={<Navigate to={afterLogin} replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </Suspense>

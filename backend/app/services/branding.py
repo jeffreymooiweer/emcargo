@@ -8,9 +8,8 @@ module is the whole of how they are kept:
 
 - **Where.** ``DATA_DIR/branding``, one file per asset, named by what it is:
   ``logo.png``, ``modality-road.jpg``. The extension follows the bytes, not
-  the upload's own name, so a file on disk is what it says it is. An operator
-  of the open application — which has no screen to upload from — places the
-  same files there by hand and gets the same result.
+  the upload's own name, so a file on disk is what it says it is. Operators
+  may place the same files there by hand.
 - **What.** PNG, JPEG or WebP, recognised by their first bytes rather than by
   the name or the declared type, both of which the uploader chooses. SVG is
   deliberately not accepted: it is a document that can carry script, and an

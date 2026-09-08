@@ -9,8 +9,7 @@ the address the request came from. The contents of a consignment never
 enter this table, so the log can be kept longer than the shipments and
 shown to an administrator without showing them a customer's goods.
 
-Only the organisation application writes here; the open application has
-no accounts and nothing to attribute an event to.
+Every installation records these events for its administrators.
 """
 from __future__ import annotations
 
