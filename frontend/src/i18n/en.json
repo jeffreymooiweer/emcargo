@@ -846,6 +846,11 @@
       "in_progress": "An update is already in progress",
       "unavailable": "In-app updating is unavailable. Check Settings / Updates for the installation requirements.",
       "no_update": "There is no newer release to install. Check for updates again."
+    },
+    "avatar": {
+      "invalid": "Choose a valid, static JPG, PNG or WebP image.",
+      "too_large": "Choose an image up to 5 MB and 16 megapixels.",
+      "not_found": "Profile photo not found."
     }
   },
   "instructions": {
@@ -1444,7 +1449,7 @@
     "morning": "Good morning",
     "afternoon": "Good afternoon",
     "evening": "Good evening",
-    "search": "Search recent shipments by reference or organisation",
+    "search": "Search recent shipments",
     "loadError": "Some information could not be loaded. Please try again.",
     "retry": "Try again",
     "loading": "Loading shipments…",
@@ -1520,5 +1525,44 @@
   },
   "authArt": {
     "title": "From departure to destination."
+  },
+  "profile": {
+    "open": "My profile",
+    "photo": "Profile photo",
+    "hint": "JPG, PNG or WebP, up to 5 MB. The photo is cropped to a square and saved to your account immediately.",
+    "upload": "Choose photo",
+    "replace": "Replace photo",
+    "remove": "Remove",
+    "saving": "Saving photo…",
+    "saved": "Profile photo saved.",
+    "removed": "Profile photo removed."
+  },
+  "historyAccess": {
+    "disabled": "Storage is switched off",
+    "unavailable": "Settings unavailable",
+    "retryHint": "The storage settings could not be loaded. Please try again.",
+    "adminHint": "Enable “Keep shipments” under Organisation to use shipments, trips and articles.",
+    "memberHint": "Ask an administrator to enable “Keep shipments”.",
+    "settings": "Organisation settings",
+    "retry": "Try again"
+  },
+  "directory": {
+    "intro": "Manage accounts, access and departments.",
+    "search": "Search by name, email or department",
+    "allRoles": "All roles",
+    "allStatuses": "All statuses",
+    "status": "Status",
+    "active": "Active",
+    "activeAccount": "Account active",
+    "count": "{{shown}} of {{total}} users",
+    "loadFailed": "Users could not be loaded.",
+    "noResults": "No users match these filters.",
+    "empty": "There are no users yet.",
+    "edit": "Edit",
+    "editTitle": "Edit user",
+    "close": "Close",
+    "save": "Save changes",
+    "saving": "Saving…",
+    "security": "Security and recovery"
   }
 }

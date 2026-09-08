@@ -1,3 +1,4 @@
+import AvatarSettings from "../components/AvatarSettings";
 import { useEffect, useId, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
@@ -60,9 +61,10 @@ const PERSONAL_TABS: TabKey[] = ["appearance", "shipment", "details"];
 
 interface Props {
   user: User;
+  onUserChange?: (user: User) => void;
 }
 
-export default function SettingsPage({ user }: Props) {
+export default function SettingsPage({ user, onUserChange }: Props) {
   const { t } = useTranslation();
   const { preferences, save, loaded, mode } = usePreferences();
   // In the open application what is saved here stays in the browser, and
@@ -280,6 +282,7 @@ export default function SettingsPage({ user }: Props) {
 
       {active === "details" && (
       <section className={`${panelClass} p-5 space-y-4`}>
+        {!open && <AvatarSettings user={user} onUserChange={onUserChange} />}
         <div>
           <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
             {t("settings.myDetails")}

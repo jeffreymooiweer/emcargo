@@ -1,376 +1,188 @@
-import { PlusIcon, ChevronDownIcon } from "../components/icons";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { api, Department, User } from "../api/client";
+import { api, type Department, type User } from "../api/client";
 import { usePreferences } from "../settings/preferences";
 import { useToast } from "../toast/ToastProvider";
 import ConfirmDialog from "../toast/ConfirmDialog";
+import Avatar from "../components/Avatar";
+import { PlusIcon, PenIcon, SearchIcon, CloseIcon, UserIcon, ShieldIcon, TrashIcon } from "../components/icons";
 
-const inputClass =
-  "border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 rounded-lg px-3 py-2 w-full";
-const panelClass = "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800";
-const buttonPrimary =
-  "rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50";
-const buttonSecondary =
-  "rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800";
-const buttonDanger =
-  "rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50 dark:border-red-900/60 dark:text-red-300 dark:hover:bg-red-950/40";
+const inputClass = "directory-input";
+const panelClass = "surface";
+const buttonPrimary = "action-primary";
+const buttonSecondary = "action-secondary";
+type EditorFeedback = { kind: "error" | "success"; text: string } | null;
 
-/** Whether the backend's safety rules would refuse this change: you cannot
- *  demote, deactivate or delete yourself, nor the last active
- *  administrator. The server enforces it; disabling the control here just
- *  saves the round trip and explains itself in the tooltip. */
 function guarded(target: User, self: User | null, users: User[]): string | null {
-  const isSelf = self != null && target.id === self.id;
-  const activeAdmins = users.filter((u) => u.role === "admin" && u.active !== false).length;
-  const lastAdmin = target.role === "admin" && target.active !== false && activeAdmins <= 1;
-  if (isSelf) return "self";
-  if (lastAdmin) return "lastAdmin";
+  if (self?.id === target.id) return "self";
+  if (target.role === "admin" && target.active !== false && users.filter(u => u.role === "admin" && u.active !== false).length <= 1) return "lastAdmin";
   return null;
 }
 
 export default function UsersPage({ user: self }: { user: User | null }) {
   const { t } = useTranslation();
-  const [users, setUsers] = useState<User[]>([]);
-  const { publicSettings } = usePreferences();
-  const canInvite = !!publicSettings?.mail_enabled;
-  // Departments exist only beside the shipment history: they decide who
-  // sees whose kept shipments, and mean nothing without them.
-  const historyOn = !!publicSettings?.history_enabled;
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const loadDepartments = () =>
-    api.departments().then(setDepartments).catch(() => setDepartments([]));
-  useEffect(() => {
-    if (historyOn) void loadDepartments();
-  }, [historyOn]);
-  const [form, setForm] = useState({ username: "", email: "", password: "", role: "user" });
-  // With a mail server the invitation is the better default: the new
-  // colleague picks their own password, so it never travels by chat or note.
-  const [invite, setInvite] = useState(true);
-  const [busy, setBusy] = useState(false);
-  const [resetFor, setResetFor] = useState<number | null>(null);
-  const [resetPassword, setResetPassword] = useState("");
-  // The one action that keeps a confirmation step: clearing two-factor is a
-  // security action, so it gets a deliberate dialog rather than an undo.
-  const [clearTwoFactorTarget, setClearTwoFactorTarget] = useState<User | null>(null);
   const toast = useToast();
+  const { publicSettings } = usePreferences();
+  const historyOn = !!publicSettings?.history_enabled;
+  const [users, setUsers] = useState<User[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [query, setQuery] = useState("");
+  const [role, setRole] = useState("");
+  const [status, setStatus] = useState("");
+  const [section, setSection] = useState("users");
+  const [editing, setEditing] = useState<number | "new" | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
+  const [feedback, setFeedback] = useState<EditorFeedback>(null);
+  const active = useRef(false);
 
-  const load = () =>
-    api
-      .listUsers()
-      .then(setUsers)
-      .catch((e) => toast.error(String(e)));
-  useEffect(() => {
-    void load();
-  }, []);
+  async function load() {
+    setLoading(true); setFailed(false);
+    try { setUsers(await api.listUsers()); }
+    catch (error) { setFailed(true); toast.error(String(error)); }
+    finally { setLoading(false); }
+  }
+  async function loadDepartments() {
+    try { setDepartments(await api.departments()); }
+    catch (error) { toast.error(String(error)); }
+  }
+  useEffect(() => { void load(); }, []);
+  useEffect(() => { if (historyOn) void loadDepartments(); }, [historyOn]);
 
-  const run = async (action: () => Promise<unknown>, done = "") => {
-    setBusy(true);
+  async function run(action: () => Promise<unknown>, message = ""): Promise<boolean> {
+    if (active.current) return false;
+    active.current = true; setBusy(true); setFeedback(null);
     try {
-      await action();
-      await load();
-      if (done) toast.success(done);
-    } catch (e) {
-      toast.error(String(e));
-    } finally {
-      setBusy(false);
+      await action(); await load();
+      if (message) { toast.success(message); setFeedback({ kind: "success", text: message }); }
+      return true;
     }
-  };
-
-  const create = (e: React.FormEvent) => {
-    e.preventDefault();
-    const sendWelcome = canInvite && invite;
-    void run(async () => {
-      const created = await api.createUser({
-        ...form,
-        // An empty box means "no password typed": with an invitation the
-        // colleague chooses one, without it the server refuses and says so.
-        password: form.password.trim() ? form.password : undefined,
-        send_welcome: sendWelcome,
-      });
-      setForm({ username: "", email: "", password: "", role: "user" });
-      if (created.welcome_mail && created.welcome_mail !== "not_requested") {
-        (created.welcome_mail === "sent" ? toast.success : toast.error)(
-          created.welcome_mail === "sent"
-            ? t("users.invited", { email: created.email })
-            : created.welcome_mail === "no_mail_server"
-              ? t("users.inviteNoMailServer")
-              : t("users.inviteFailed", { reason: created.welcome_mail }),
-        );
-      }
-    }, sendWelcome ? "" : t("users.created"));
-  };
-
-  const patch = (id: number, payload: Record<string, unknown>, done = "") =>
-    run(() => api.updateUser(id, payload), done);
-
-  const remove = (target: User) => {
-    // Deferred delete: the row disappears now, the DELETE fires when the undo
-    // window closes. Undo means the call never happened — which is why the
-    // restored user keeps their password.
-    setUsers((current) => current.filter((u) => u.id !== target.id));
+    catch (error) {
+      setFeedback({ kind: "error", text: String(error) });
+      return false;
+    }
+    finally { active.current = false; setBusy(false); }
+  }
+  function openEditor(id: number | "new") { setFeedback(null); setEditing(id); }
+  function remove(target: User) {
+    setEditing(null);
+    setUsers(current => current.filter(u => u.id !== target.id));
     toast.undoable(t("toast.deletedUser", { name: target.username }), {
-      execute: () => {
-        api.deleteUser(target.id).then(load).catch((e) => {
-          toast.error(String(e));
-          void load();
-        });
-      },
-      restore: () => setUsers((current) =>
-        current.some((u) => u.id === target.id) ? current : [...current, target]),
+      execute: () => { api.deleteUser(target.id).then(load).catch(error => { toast.error(String(error)); void load(); }); },
+      restore: () => setUsers(current => current.some(u => u.id === target.id) ? current : [...current, target]),
     });
-  };
+  }
+  const shown = useMemo(() => users.filter(u => {
+    const text = [u.username, u.email, departments.find(d => d.id === u.department_id)?.name || ""].join(" ").toLocaleLowerCase();
+    return text.includes(query.trim().toLocaleLowerCase()) && (!role || u.role === role)
+      && (!status || (status === "active" ? u.active !== false : u.active === false));
+  }), [users, departments, query, role, status]);
+  const target = typeof editing === "number" ? users.find(u => u.id === editing) : undefined;
 
-  const guardText = (kind: string | null) =>
-    kind === "self" ? t("users.guardSelf") : kind === "lastAdmin" ? t("users.guardLastAdmin") : undefined;
-
-  return (
-    <div className="collection-page page-enter space-y-6 max-w-4xl">
-      <div>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{t("users.title")}</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t("users.intro")}</p>
+  return <div className="collection-page page-enter users-workspace">
+    <header className="page-heading"><div><h2>{t("users.title")}</h2><p>{t("directory.intro")}</p></div>
+      <button type="button" className="action-primary" disabled={busy || loading || failed} onClick={() => openEditor("new")}><PlusIcon />{t("users.newUser")}</button>
+    </header>
+    {historyOn && <nav className="directory-sections" aria-label={t("users.title")}>
+      <button type="button" aria-pressed={section === "users"} onClick={() => setSection("users")}>{t("users.title")}<span>{users.length}</span></button>
+      <button type="button" aria-pressed={section === "departments"} onClick={() => setSection("departments")}>{t("departments.title")}<span>{departments.length}</span></button>
+    </nav>}
+    {section === "departments" && historyOn ? <DepartmentsPanel departments={departments} reload={loadDepartments} busy={busy} /> : <section className="surface directory-surface">
+      <div className="directory-toolbar">
+        <label className="directory-search"><SearchIcon /><span className="sr-only">{t("directory.search")}</span><input type="search" value={query} placeholder={t("directory.search")} onChange={e => setQuery(e.target.value)} /></label>
+        <label><span className="sr-only">{t("users.role")}</span><select className={inputClass} value={role} onChange={e => setRole(e.target.value)}><option value="">{t("directory.allRoles")}</option><option value="admin">{t("users.roleAdmin")}</option><option value="user">{t("users.roleUser")}</option></select></label>
+        <label><span className="sr-only">{t("directory.status")}</span><select className={inputClass} value={status} onChange={e => setStatus(e.target.value)}><option value="">{t("directory.allStatuses")}</option><option value="active">{t("directory.active")}</option><option value="inactive">{t("users.inactive")}</option></select></label>
       </div>
+      <p className="directory-count" role="status">{loading ? t("wizard.loading") : t("directory.count", { shown: shown.length, total: users.length })}</p>
+      {failed ? <div className="directory-empty" role="alert"><p>{t("directory.loadFailed")}</p><button type="button" className="action-secondary" onClick={() => void load()}>{t("historyAccess.retry")}</button></div>
+        : !loading && !shown.length ? <div className="directory-empty"><UserIcon className="h-8 w-8" /><p>{t(users.length ? "directory.noResults" : "directory.empty")}</p></div>
+        : <ul className="directory-list">{shown.map(u => <li className="directory-row" key={u.id}>
+          <div className="directory-identity"><Avatar user={u} /><div><p><strong>{u.username}</strong>{u.id === self?.id && <span className="directory-you">{t("users.you")}</span>}</p><span className="directory-email">{u.email}</span></div></div>
+          <div className="directory-membership"><span className={`directory-role ${u.role === "admin" ? "is-admin" : ""}`}>{u.role === "admin" && <ShieldIcon />}{t(u.role === "admin" ? "users.roleAdmin" : "users.roleUser")}</span>{historyOn && <span>{departments.find(d => d.id === u.department_id)?.name || t("departments.none")}</span>}</div>
+          <span className="directory-state" data-active={u.active !== false}>{t(u.active === false ? "users.inactive" : "directory.active")}</span>
+          <button type="button" className="action-secondary directory-edit" aria-label={`${t("directory.edit")} ${u.username}`} disabled={busy} onClick={() => openEditor(u.id)}><PenIcon /><span>{t("directory.edit")}</span></button>
+        </li>)}</ul>}
+    </section>}
+    {editing !== null && (editing === "new" || target) && <UserEditor key={editing} target={target} self={self} guard={target ? guarded(target, self, users) : null}
+      departments={departments} historyOn={historyOn} canInvite={!!publicSettings?.mail_enabled} busy={busy} feedback={feedback} run={run} onClose={() => setEditing(null)} onRemove={remove} />}
+  </div>;
+}
 
-      <details className="surface collection-form">
-        <summary><PlusIcon /><span>{t("users.newUser")}</span><ChevronDownIcon /></summary>
-        <form onSubmit={create} className="collection-form-body space-y-4">
-        <div className="grid gap-3 md:grid-cols-2">
-          <div>
-            <label className="text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor="new-username">
-              {t("users.username")}
-            </label>
-            <input
-              id="new-username"
-              className={`${inputClass} mt-1`}
-              value={form.username}
-              minLength={3}
-              required
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor="new-email">
-              {t("users.email")}
-            </label>
-            <input
-              id="new-email"
-              type="email"
-              className={`${inputClass} mt-1`}
-              value={form.email}
-              required
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor="new-password">
-              {t("users.password")}
-            </label>
-            <input
-              id="new-password"
-              type="password"
-              className={`${inputClass} mt-1`}
-              value={form.password}
-              minLength={8}
-              required={!canInvite || !invite}
-              disabled={canInvite && invite}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-            />
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-              {canInvite && invite ? t("users.passwordByInvite") : t("users.passwordHint")}
-            </p>
-          </div>
-          <div>
-            <label className="text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor="new-role">
-              {t("users.role")}
-            </label>
-            <select
-              id="new-role"
-              className={`${inputClass} mt-1`}
-              value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value })}
-            >
-              <option value="user">{t("users.roleUser")}</option>
-              <option value="admin">{t("users.roleAdmin")}</option>
-            </select>
-          </div>
-        </div>
-        {canInvite && (
-          <label className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-200">
-            <input
-              type="checkbox"
-              className="mt-0.5"
-              checked={invite}
-              onChange={(e) => setInvite(e.target.checked)}
-            />
-            <span>
-              {t("users.invite")}
-              <span className="block text-xs text-slate-500 dark:text-slate-400">
-                {t("users.inviteHint")}
-              </span>
-            </span>
-          </label>
-        )}
-        <button className={buttonPrimary} disabled={busy}>
-          {canInvite && invite ? t("users.createAndInvite") : t("users.create")}
-        </button>
-        </form>
-      </details>
+function EditorDialog({ title, busy, onClose, children }: { title: string; busy: boolean; onClose: () => void; children: ReactNode }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const closeRef = useRef(onClose); closeRef.current = onClose;
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null;
+    const dialog = ref.current;
+    dialog?.showModal();
+    return () => { dialog?.close(); previous?.focus(); };
+  }, []);
+  const { t } = useTranslation();
+  return <dialog ref={ref} className="user-editor" aria-label={title} onCancel={event => { event.preventDefault(); if (!busy) closeRef.current(); }}>
+    <header><h2>{title}</h2><button type="button" className="action-quiet" disabled={busy} aria-label={t("directory.close")} onClick={onClose}><CloseIcon /></button></header>
+    {children}
+  </dialog>;
+}
 
-      {historyOn && <details className="surface collection-form">
-        <summary><PlusIcon /><span>{t("departments.title")}</span><ChevronDownIcon /></summary>
-        <DepartmentsPanel departments={departments} reload={loadDepartments} busy={busy} />
-      </details>}
+function UserEditor({ target, self, guard, departments, historyOn, canInvite, busy, feedback, run, onClose, onRemove }: {
+  target?: User; self: User | null; guard: string | null; departments: Department[]; historyOn: boolean; canInvite: boolean; busy: boolean;
+  feedback: EditorFeedback;
+  run: (action: () => Promise<unknown>, message?: string) => Promise<boolean>; onClose: () => void; onRemove: (user: User) => void;
+}) {
+  const { t } = useTranslation();
+  const toast = useToast();
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState(target?.email || "");
+  const [role, setRole] = useState(target?.role || "user");
+  const [active, setActive] = useState(target?.active !== false);
+  const [department, setDepartment] = useState(String(target?.department_id ?? ""));
+  const [password, setPassword] = useState("");
+  const [invite, setInvite] = useState(true);
+  const [clearFactor, setClearFactor] = useState(false);
+  const guardText = guard === "self" ? t("users.guardSelf") : guard ? t("users.guardLastAdmin") : "";
+  const sendInvite = !target && canInvite && invite;
 
-      <div className="space-y-3">
-        {users.map((u) => {
-          const guard = guarded(u, self, users);
-          const inactive = u.active === false;
-          return (
-            <div key={u.id} className={`${panelClass} p-4 space-y-3 ${inactive ? "opacity-70" : ""}`}>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-medium text-slate-900 dark:text-slate-100">{u.username}</span>
-                {self && u.id === self.id && (
-                  <span className="rounded-full bg-brand-100 px-2 py-0.5 text-[11px] font-medium text-brand-700 dark:bg-brand-900/50 dark:text-brand-200">
-                    {t("users.you")}
-                  </span>
-                )}
-                {inactive && (
-                  <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">
-                    {t("users.inactive")}
-                  </span>
-                )}
-                <span className="text-sm text-slate-500 dark:text-slate-400">{u.email}</span>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <label className="text-xs text-slate-500 dark:text-slate-400">
-                  {t("users.role")}
-                  <select
-                    className={`${inputClass} mt-1 !w-auto py-1.5 text-sm`}
-                    value={u.role}
-                    disabled={busy || guard !== null}
-                    title={guardText(guard)}
-                    onChange={(e) => void patch(u.id, { role: e.target.value }, t("users.saved"))}
-                  >
-                    <option value="user">{t("users.roleUser")}</option>
-                    <option value="admin">{t("users.roleAdmin")}</option>
-                  </select>
-                </label>
-                {historyOn && (
-                  <label className="text-xs text-slate-500 dark:text-slate-400">
-                    {t("departments.userDepartment")}
-                    <select
-                      className={`${inputClass} mt-1 !w-auto py-1.5 text-sm`}
-                      value={u.department_id ?? ""}
-                      disabled={busy}
-                      onChange={(e) =>
-                        void patch(
-                          u.id,
-                          { department_id: e.target.value ? Number(e.target.value) : null },
-                          t("users.saved"),
-                        ).then(loadDepartments)
-                      }
-                    >
-                      <option value="">{t("departments.none")}</option>
-                      {departments.map((d) => (
-                        <option key={d.id} value={d.id}>
-                          {d.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                )}
-
-                <div className="ml-auto flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    className={buttonSecondary}
-                    disabled={busy || guard !== null}
-                    title={guardText(guard)}
-                    onClick={() => void patch(u.id, { active: inactive }, t("users.saved"))}
-                  >
-                    {inactive ? t("users.activate") : t("users.deactivate")}
-                  </button>
-                  <button
-                    type="button"
-                    className={buttonSecondary}
-                    disabled={busy}
-                    onClick={() => {
-                      setResetFor(resetFor === u.id ? null : u.id);
-                      setResetPassword("");
-                    }}
-                  >
-                    {t("users.resetPassword")}
-                  </button>
-                  <button
-                    type="button"
-                    className={buttonSecondary}
-                    disabled={busy}
-                    title={t("users.clearTwoFactorHint")}
-                    onClick={() => setClearTwoFactorTarget(u)}
-                  >
-                    {t("users.clearTwoFactor")}
-                  </button>
-                  <button
-                    type="button"
-                    className={buttonDanger}
-                    disabled={busy || guard !== null}
-                    title={guardText(guard)}
-                    onClick={() => remove(u)}
-                  >
-                    {t("users.delete")}
-                  </button>
-                </div>
-              </div>
-
-              {resetFor === u.id && (
-                <form
-                  className="flex flex-wrap items-end gap-2"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    void patch(u.id, { password: resetPassword }, t("users.passwordReset"));
-                    setResetFor(null);
-                    setResetPassword("");
-                  }}
-                >
-                  <div className="min-w-[220px] flex-1">
-                    <label className="text-xs text-slate-500 dark:text-slate-400" htmlFor={`reset-${u.id}`}>
-                      {t("users.newPasswordFor", { name: u.username })}
-                    </label>
-                    <input
-                      id={`reset-${u.id}`}
-                      type="password"
-                      className={`${inputClass} mt-1`}
-                      value={resetPassword}
-                      minLength={8}
-                      required
-                      onChange={(e) => setResetPassword(e.target.value)}
-                    />
-                  </div>
-                  <button className={buttonPrimary} disabled={busy}>
-                    {t("users.resetPasswordDo")}
-                  </button>
-                </form>
-              )}
-            </div>
-          );
-        })}
+  async function save(event: React.FormEvent) {
+    event.preventDefault();
+    const success = await run(async () => {
+      if (target) await api.updateUser(target.id, { email, role, active, ...(historyOn ? { department_id: department ? Number(department) : null } : {}) });
+      else {
+        const created = await api.createUser({ username, email, role, password: sendInvite ? undefined : password, send_welcome: sendInvite });
+        if (sendInvite) {
+          if (created.welcome_mail === "sent") toast.success(t("users.invited", { email }));
+          else toast.error(t(created.welcome_mail === "no_mail_server" ? "users.inviteNoMailServer" : "users.inviteFailed", { reason: created.welcome_mail }));
+        }
+      }
+    }, target ? t("users.saved") : sendInvite ? "" : t("users.created"));
+    if (success) onClose();
+  }
+  return <EditorDialog title={t(target ? "directory.editTitle" : "users.newUser")} busy={busy} onClose={onClose}>
+    {target && <div className="editor-identity"><Avatar user={target} large /><div><strong>{target.username}</strong><p>{target.id === self?.id ? t("users.you") : t(target.role === "admin" ? "users.roleAdmin" : "users.roleUser")}</p></div></div>}
+    {feedback && <p className="editor-feedback" data-kind={feedback.kind} role={feedback.kind === "error" ? "alert" : "status"}>{feedback.text}</p>}
+    <form className="editor-form" onSubmit={event => void save(event)}>
+      {!target && <label>{t("users.username")}<input className={inputClass} value={username} minLength={3} maxLength={64} required autoComplete="off" onChange={e => setUsername(e.target.value)} /></label>}
+      <label>{t("users.email")}<input className={inputClass} type="email" value={email} required onChange={e => setEmail(e.target.value)} /></label>
+      <div className="editor-fields"><label>{t("users.role")}<select className={inputClass} value={role} disabled={busy || !!guard} title={guardText} onChange={e => setRole(e.target.value)}><option value="user">{t("users.roleUser")}</option><option value="admin">{t("users.roleAdmin")}</option></select></label>
+        {historyOn && target && <label>{t("departments.userDepartment")}<select className={inputClass} value={department} onChange={e => setDepartment(e.target.value)}><option value="">{t("departments.none")}</option>{departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}</select></label>}
       </div>
-
-      <ConfirmDialog
-        open={clearTwoFactorTarget !== null}
-        title={t("users.clearTwoFactor")}
-        body={clearTwoFactorTarget ? t("users.clearTwoFactorConfirm", { name: clearTwoFactorTarget.username }) : ""}
-        confirmLabel={t("users.clearTwoFactor")}
-        onConfirm={() => {
-          const target = clearTwoFactorTarget;
-          setClearTwoFactorTarget(null);
-          if (target) void run(() => api.clearTwoFactorFor(target.id), t("users.twoFactorCleared"));
-        }}
-        onCancel={() => setClearTwoFactorTarget(null)}
-      />
-    </div>
-  );
+      {target && <label className="editor-toggle"><input type="checkbox" checked={active} disabled={busy || !!guard} onChange={e => setActive(e.target.checked)} /><span>{t("directory.activeAccount")}</span></label>}
+      {guardText && <p className="editor-hint">{guardText}</p>}
+      {!target && canInvite && <label className="editor-toggle"><input type="checkbox" checked={invite} onChange={e => setInvite(e.target.checked)} /><span>{t("users.invite")}<small>{t("users.inviteHint")}</small></span></label>}
+      {!target && !sendInvite && <div><label>{t("users.password")}<input className={inputClass} type="password" value={password} minLength={8} required autoComplete="new-password" aria-describedby="new-user-password-hint" onChange={e => setPassword(e.target.value)} /></label><p id="new-user-password-hint" className="editor-hint">{t("users.passwordHint")}</p></div>}
+      <footer><button type="button" className="action-secondary" disabled={busy} onClick={onClose}>{t("toast.cancel")}</button><button className="action-primary" disabled={busy}>{t(busy ? "directory.saving" : target ? "directory.save" : sendInvite ? "users.createAndInvite" : "users.create")}</button></footer>
+    </form>
+    {target && <details className="editor-security"><summary><ShieldIcon />{t("directory.security")}</summary><div>
+      <form className="editor-form" onSubmit={event => { event.preventDefault(); void run(() => api.updateUser(target.id, { password }), t("users.passwordReset")).then(ok => { if (ok) setPassword(""); }); }}>
+        <label>{t("users.newPasswordFor", { name: target.username })}<input className={inputClass} type="password" value={password} minLength={8} required autoComplete="new-password" onChange={e => setPassword(e.target.value)} /></label>
+        <button className="action-secondary" disabled={busy}>{t("users.resetPasswordDo")}</button>
+      </form>
+      <p className="editor-hint">{t("users.clearTwoFactorHint")}</p><button type="button" className="action-secondary" disabled={busy} onClick={() => setClearFactor(true)}>{t("users.clearTwoFactor")}</button>
+      <button type="button" className="editor-delete" disabled={busy || !!guard} title={guardText} onClick={() => onRemove(target)}><TrashIcon />{t("users.delete")}</button>
+    </div></details>}
+    <ConfirmDialog open={clearFactor} title={t("users.clearTwoFactor")} body={t("users.clearTwoFactorConfirm", { name: target?.username })} confirmLabel={t("users.clearTwoFactor")}
+      onCancel={() => setClearFactor(false)} onConfirm={() => { setClearFactor(false); if (target) void run(() => api.clearTwoFactorFor(target.id), t("users.twoFactorCleared")); }} />
+  </EditorDialog>;
 }
 
 /**

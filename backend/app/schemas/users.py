@@ -51,6 +51,7 @@ class UserOut(BaseModel):
     role: UserRole
     active: bool
     department_id: int | None = None
+    avatar_url: str | None = None
 
 
 class UserCreateResult(UserOut):

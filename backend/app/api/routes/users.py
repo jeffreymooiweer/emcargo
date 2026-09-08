@@ -1,14 +1,15 @@
 import logging
 import secrets
 
-from fastapi import APIRouter, Depends, HTTPException, Request
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, UploadFile, File
+from sqlalchemy.orm import Session, selectinload
 
 from app.api.routes.auth import _public_base_url
 from app.core.database import get_db
-from app.core.deps import require_admin
+from app.core.deps import get_current_user, require_admin
+from app.core.messages import error
 from app.core.security import hash_password
-from app.models.user import Department, User
+from app.models.user import Department, User, UserAvatar
 from app.schemas.users import (
     UserCreate,
     UserCreateResult,
@@ -16,12 +17,53 @@ from app.schemas.users import (
     UserRole,
     UserUpdate,
 )
-from app.services import audit, mail, mail_templates, password_reset, two_factor
+from app.services import audit, avatars, mail, mail_templates, password_reset, two_factor
 from app.services.settings_store import instance_settings, language_for
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+
+@router.post("/me/avatar", response_model=UserOut)
+def upload_my_avatar(request: Request, file: UploadFile = File(...),
+                     user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    data = file.file.read(avatars.MAX_UPLOAD_BYTES + 1)
+    image, etag = avatars.normalize(data)
+    if user.avatar is None:
+        user.avatar = UserAvatar(image=image, etag=etag)
+    else:
+        user.avatar.image, user.avatar.etag = image, etag
+    db.commit()
+    db.refresh(user)
+    audit.record(db, "user.updated", summary="avatar", actor=user, target=("user", user.id), request=request)
+    return user
+
+
+@router.delete("/me/avatar", response_model=UserOut)
+def delete_my_avatar(request: Request, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    user.avatar = None
+    db.commit()
+    db.refresh(user)
+    audit.record(db, "user.updated", summary="avatar removed", actor=user, target=("user", user.id), request=request)
+    return user
+
+
+@router.get("/{user_id}/avatar")
+def get_avatar(user_id: int, request: Request, user: User = Depends(get_current_user),
+               db: Session = Depends(get_db)):
+    # Photos are for their owner and the administrator's user directory.
+    # Authorize before cache validation, including responses without a body.
+    if user.id != user_id and user.role != "admin":
+        raise error(404, "avatar.not_found")
+    avatar = db.get(UserAvatar, user_id)
+    if avatar is None:
+        raise error(404, "avatar.not_found")
+    headers = {"ETag": f'"{avatar.etag}"', "Cache-Control": "private, no-cache",
+               "X-Content-Type-Options": "nosniff"}
+    if request.headers.get("if-none-match") == headers["ETag"]:
+        return Response(status_code=304, headers=headers)
+    return Response(avatar.image, media_type="image/webp", headers=headers)
 
 
 def _is_active_admin(user: User) -> bool:
@@ -57,7 +99,9 @@ def _ensure_delete_is_safe(target: User, acting_admin: User, active_admin_count:
 
 @router.get("", response_model=list[UserOut])
 def list_users(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
-    return db.query(User).order_by(User.id).all()
+    # Batch avatar metadata only where it is displayed. Global eager loading
+    # would add photo queries to shipment and trip ownership lookups too.
+    return db.query(User).options(selectinload(User.avatar)).order_by(User.id).all()
 
 
 @router.post("", response_model=UserCreateResult)

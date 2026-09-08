@@ -438,6 +438,8 @@ export const api = {
       body: JSON.stringify({ to }),
     }),
   listUsers: () => request<User[]>("/users"),
+  uploadMyAvatar: (file: File) => uploadFile<User>("/users/me/avatar", file),
+  deleteMyAvatar: () => request<User>("/users/me/avatar", { method: "DELETE" }),
   /** Make an account. With `send_welcome` the new colleague gets a link to
    *  choose their own password, and `password` may be left out entirely;
    *  `welcome_mail` in the answer says what became of that invitation. */
@@ -735,6 +737,7 @@ export interface User {
   /** Whose kept shipments they see; null is the unassigned pool. Only
    *  meaningful on an installation that keeps its shipments. */
   department_id?: number | null;
+  avatar_url?: string | null;
 }
 
 /** A group of users whose kept shipments are theirs to see. */
@@ -2321,4 +2324,3 @@ export interface UnitConversion {
    *  with a count and no weight per item. Not an error but an outcome. */
   missing: string | null;
 }
-

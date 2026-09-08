@@ -2,6 +2,28 @@
 
 All notable changes are documented here, following [Semantic Versioning](https://semver.org/).
 
+## [2.2.1] — 2026-09-08
+
+### Find your workspace and manage your team
+
+- Keep Overview, Shipments, Trips and Articles directly visible in organisation
+  navigation, including mobile and quick navigation. Explain disabled storage
+  on the page and link administrators to its setting. Storage remains opt-in.
+- Give Overview a clearer greeting, daily totals, recent shipments and quick
+  actions. Clear stale records when storage is disabled or a request fails.
+- Replace the crowded user controls with a searchable directory, role and
+  status filters, and a focused edit dialog. Save changes explicitly, report
+  failures inside the dialog, and keep account security actions in a disclosure.
+  Preserve current-user and last-administrator protections and deletion undo.
+- Let users upload, replace or remove their own profile photo in Settings /
+  My details. Show it in the account menu and user directory, with initials as
+  fallback. Store a normalized 256-pixel WebP in the installation database,
+  accessible to the account owner and administrators. Strip image metadata;
+  reject unsupported, animated, oversized or invalid uploads.
+- Add the avatar table automatically at startup without changing existing user
+  columns or shipment records. Deleting an account also removes its photo.
+- Translate all new controls and messages into Dutch, English, German and French.
+
 ## [2.2.0] — 2026-09-08
 
 ### EMCargo, throughout the workspace

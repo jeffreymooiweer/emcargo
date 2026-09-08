@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
-import { api, ShipmentDetail, ShipmentSummary } from "../api/client";
+import { api, ShipmentDetail, ShipmentSummary, type User } from "../api/client";
 import { ModalityIcon } from "../components/WizardShell";
 import { MoreIcon, ArrowRightIcon, HomeIcon, PlusIcon, ShipmentsIcon, TripsIcon, ImportIcon } from "../components/icons";
 import { usePreferences } from "../settings/preferences";
+import HistoryStatus from "../components/HistoryStatus";
 import { readSnapshot } from "../wizard/snapshot";
 import { localDayRange } from "../utils/dateRanges";
 import { AVAILABLE_MODALITIES, isModalityAvailable } from "./ModalitySelectPage";
 
-export default function OverviewPage() {
+export default function OverviewPage({ user }: { user?: User }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { publicSettings, preferences } = usePreferences();
+  const { publicSettings, preferences, mode } = usePreferences();
   const history = !!publicSettings?.history_enabled;
   const [draft, setDraft] = useState<ShipmentDetail | null>(null);
   const [recent, setRecent] = useState<ShipmentSummary[]>([]);
@@ -24,9 +25,9 @@ export default function OverviewPage() {
   const [reload, setReload] = useState(0);
 
   useEffect(() => {
-    if (!history) return;
+    if (!history) { setDraft(null); setRecent([]); setCounts(null); setLoading(false); setError(false); return; }
     let alive = true;
-    setLoading(true); setError(false);
+    setLoading(true); setError(false); setDraft(null); setRecent([]); setCounts(null);
     const day = localDayRange();
     const fail = () => { if (alive) setError(true); };
     api.runningDraft().then((value) => { if (alive) setDraft(value); }).catch(fail);
@@ -55,10 +56,10 @@ export default function OverviewPage() {
   }
 
   return (
-    <div className="page-enter space-y-6">
+    <div className="overview-workspace collection-page page-enter space-y-6">
       <div className="page-heading">
         <div>
-          <h2>{t(`overview.${greeting}`)}</h2>
+          <p className="eyebrow">{t("nav.overview")}</p><h2>{t(`overview.${greeting}`)}{user?.username && <span className="overview-name"> {user.username}</span>}</h2>
           <p>{history ? t("overview.intro") : t("overview.introNoHistory")}</p>
         </div>
         <Link to="/" className="action-primary"><PlusIcon className="h-5 w-5" />{t("nav.new")}</Link>
@@ -67,9 +68,19 @@ export default function OverviewPage() {
         <span>{t("overview.loadError")}</span>
         <button className="action-secondary" onClick={() => setReload((value) => value + 1)}>{t("overview.retry")}</button>
       </div>}
+      {history && <section className="surface overview-today">
+        <h3 className="surface-title">{t("overview.todayTitle")}</h3>
+        <div className="overview-metrics">
+          {[{ label: "overview.todayShipments", value: counts?.shipments, icon: ShipmentsIcon, to: "/shipments" }, { label: "overview.todayTrips", value: counts?.trips, icon: TripsIcon, to: "/trips" }].map(({ label, value, icon: Icon, to }) => <Link key={label} to={to} className="overview-metric">
+            <span className="icon-tile"><Icon className="h-5 w-5" /></span>
+            <div><p className="text-2xl font-semibold tabular-nums">{value ?? "—"}</p><p className="text-xs text-slate-500 dark:text-slate-400">{t(label)}</p></div>
+          </Link>)}
+        </div>
+      </section>}
+
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
         <div className="min-w-0 space-y-6">
-          {draft && <section data-testid="resume-entry" className="surface overview-resume p-5 sm:p-6">
+          {history && draft && <section data-testid="resume-entry" className="surface overview-resume p-5 sm:p-6">
             <h3 className="surface-title">{t("overview.resumeTitle")}</h3>
             <div className="overview-resume-content">
               <span className="icon-tile"><ModalityIcon modality={draftModality} className="h-6 w-6" /></span>
@@ -115,18 +126,9 @@ export default function OverviewPage() {
               </li>)}
             </ul></div>}
           </section>}
-          {!history && <div className="surface flex items-start gap-4 p-6"><span className="icon-tile"><HomeIcon className="h-6 w-6" /></span><p className="text-sm text-slate-600 dark:text-slate-300">{t("overview.localStart")}</p></div>}
+          {!history && (mode === "open" ? <div className="surface flex items-start gap-4 p-6"><span className="icon-tile"><HomeIcon className="h-6 w-6" /></span><p>{t("overview.localStart")}</p></div> : <HistoryStatus title={t("nav.overview")} admin={user?.role === "admin"} embedded />)}
         </div>
         <aside className="space-y-6">
-          {history && <section className="surface p-5">
-            <h3 className="surface-title">{t("overview.todayTitle")}</h3>
-            <div className="mt-4 space-y-3">
-              {[{ label: "overview.todayShipments", value: counts?.shipments, icon: ShipmentsIcon, to: "/shipments" }, { label: "overview.todayTrips", value: counts?.trips, icon: TripsIcon, to: "/trips" }].map(({ label, value, icon: Icon, to }) => <Link key={label} to={to} className="overview-metric">
-                <span className="icon-tile"><Icon className="h-5 w-5" /></span>
-                <div><p className="text-2xl font-semibold tabular-nums">{value ?? "—"}</p><p className="text-xs text-slate-500 dark:text-slate-400">{t(label)}</p></div>
-              </Link>)}
-            </div>
-          </section>}
           <section className="surface overview-quick p-5">
             <h3 className="surface-title">{t("overview.startTitle")}</h3>
             <div className="mt-4 space-y-2">

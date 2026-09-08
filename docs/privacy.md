@@ -10,6 +10,7 @@ Everything persistent lives in the `/data` volume:
 | Stored | Why |
 |---|---|
 | User accounts | Logging in |
+| Profile photos users choose to upload | Their account menu and the administrator's user directory; stored as a small image without camera metadata, readable only by the owner and administrators, and removable under Settings / My details |
 | Catalogue reference data | Materials, profiles, locations, UN numbers |
 | Catalogue sync status | So startup knows what is current |
 | Equipment **you** imported | Your own library |

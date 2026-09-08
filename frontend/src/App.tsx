@@ -99,7 +99,7 @@ export default function App() {
               overview has its own address so that nobody with a preferred
               mode is sent through a dashboard on their way into the wizard. */}
           <Route path="/" element={<ModalitySelectPage />} />
-          <Route path="/overzicht" element={<OverviewPage />} />
+          <Route path="/overzicht" element={<OverviewPage user={user} />} />
           <Route path="/wizard" element={<Navigate to="/" replace />} />
           <Route path="/wizard/:modality" element={<WizardPage />} />
           <Route path="/groupage" element={<GroupagePage />} />
@@ -114,11 +114,11 @@ export default function App() {
           {!open && <Route path="/shipments/:id" element={<ShipmentsPage user={user} />} />}
           {!open && <Route path="/trips" element={<TripsPage user={user} />} />}
           {!open && <Route path="/trips/:id" element={<TripsPage user={user} />} />}
-          {!open && <Route path="/articles" element={<ArticlesPage />} />}
+          {!open && <Route path="/articles" element={<ArticlesPage user={user} />} />}
           {!open && <Route path="/materieel" element={<MaterieelPage />} />}
-          {!open && <Route path="/users" element={<UsersPage user={user} />} />}
+          {!open && user.role === "admin" && <Route path="/users" element={<UsersPage user={user} />} />}
           {!open && user.role === "admin" && <Route path="/audit" element={<AuditPage />} />}
-          <Route path="/settings" element={<SettingsPage user={user} />} />
+          <Route path="/settings" element={<SettingsPage user={user} onUserChange={setUser} />} />
           <Route path="/legal" element={<LegalPage />} />
         </Route>
         {!open && <Route path="/reset-password" element={<ResetPasswordPage />} />}

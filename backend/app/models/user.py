@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, LargeBinary, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -38,6 +38,25 @@ class User(Base):
 
     jobs: Mapped[list["Job"]] = relationship(back_populates="creator")
     department: Mapped[Department | None] = relationship()
+    avatar: Mapped["UserAvatar | None"] = relationship(
+        cascade="all, delete-orphan", uselist=False)
+
+    @property
+    def avatar_url(self) -> str | None:
+        return f"/api/users/{self.id}/avatar?v={self.avatar.etag}" if self.avatar else None
+
+
+class UserAvatar(Base):
+    """A bounded, normalized profile image owned by one account.
+
+    A separate table is created by the existing bootstrap on upgrades; no
+    existing user columns change. Image bytes are deferred when listing users.
+    """
+
+    __tablename__ = "user_avatars"
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    image: Mapped[bytes] = mapped_column(LargeBinary, deferred=True)
+    etag: Mapped[str] = mapped_column(String(64))
 
 
 class Job(Base):

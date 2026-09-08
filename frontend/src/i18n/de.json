@@ -846,6 +846,11 @@
       "in_progress": "Eine Aktualisierung läuft bereits",
       "unavailable": "Updates in der App sind nicht verfügbar. Die Voraussetzungen stehen unter Einstellungen / Updates.",
       "no_update": "Es gibt keine neuere Version zum Installieren. Suchen Sie erneut nach Updates."
+    },
+    "avatar": {
+      "invalid": "Wählen Sie ein gültiges, nicht animiertes JPG-, PNG- oder WebP-Bild.",
+      "too_large": "Wählen Sie ein Bild mit maximal 5 MB und 16 Megapixeln.",
+      "not_found": "Profilfoto nicht gefunden."
     }
   },
   "instructions": {
@@ -1444,7 +1449,7 @@
     "morning": "Guten Morgen",
     "afternoon": "Guten Tag",
     "evening": "Guten Abend",
-    "search": "Letzte Sendungen nach Referenz oder Organisation suchen",
+    "search": "Letzte Sendungen durchsuchen",
     "loadError": "Einige Daten konnten nicht geladen werden. Bitte erneut versuchen.",
     "retry": "Erneut versuchen",
     "loading": "Sendungen werden geladen…",
@@ -1520,5 +1525,44 @@
   },
   "authArt": {
     "title": "Vom Start bis zum Ziel."
+  },
+  "profile": {
+    "open": "Mein Profil",
+    "photo": "Profilfoto",
+    "hint": "JPG, PNG oder WebP, maximal 5 MB. Das Foto wird quadratisch zugeschnitten und sofort in Ihrem Konto gespeichert.",
+    "upload": "Foto auswählen",
+    "replace": "Foto ersetzen",
+    "remove": "Entfernen",
+    "saving": "Foto wird gespeichert…",
+    "saved": "Profilfoto gespeichert.",
+    "removed": "Profilfoto entfernt."
+  },
+  "historyAccess": {
+    "disabled": "Speicherung ist ausgeschaltet",
+    "unavailable": "Einstellungen nicht erreichbar",
+    "retryHint": "Die Speichereinstellungen konnten nicht geladen werden. Versuchen Sie es erneut.",
+    "adminHint": "Aktivieren Sie „Sendungen aufbewahren“ unter Organisation, um Sendungen, Fahrten und Artikel zu verwenden.",
+    "memberHint": "Bitten Sie einen Administrator, „Sendungen aufbewahren“ zu aktivieren.",
+    "settings": "Organisationseinstellungen",
+    "retry": "Erneut versuchen"
+  },
+  "directory": {
+    "intro": "Konten, Zugriff und Abteilungen verwalten.",
+    "search": "Nach Name, E-Mail oder Abteilung suchen",
+    "allRoles": "Alle Rollen",
+    "allStatuses": "Alle Status",
+    "status": "Status",
+    "active": "Aktiv",
+    "activeAccount": "Konto aktiv",
+    "count": "{{shown}} von {{total}} Benutzern",
+    "loadFailed": "Die Benutzer konnten nicht geladen werden.",
+    "noResults": "Keine Benutzer entsprechen diesen Filtern.",
+    "empty": "Es sind noch keine Benutzer vorhanden.",
+    "edit": "Bearbeiten",
+    "editTitle": "Benutzer bearbeiten",
+    "close": "Schließen",
+    "save": "Änderungen speichern",
+    "saving": "Wird gespeichert…",
+    "security": "Sicherheit und Wiederherstellung"
   }
 }

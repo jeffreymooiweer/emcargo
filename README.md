@@ -38,6 +38,13 @@ entry emphasizes unanswered questions, while the final wizard page groups
 repeated findings and keeps document actions clear. Mobile layouts and motion
 preferences are supported. See the [design review](docs/design/review-2.2.0.md)
 and [in-app update setup](docs/in-app-updates.md).
+
+Overview, Shipments, Trips and Articles have permanent entries in organisation
+navigation. When shipment storage is disabled, those pages explain how an
+administrator can enable it. Users can set their profile photo under Settings /
+My details; administrators manage accounts in a searchable directory with a
+separate edit dialog.
+
 Dangerous-goods assessment remains mandatory within the goods stage. The complete source now uses EMCargo identifiers, including storage and native
 installation names. Existing installations require the steps in
 [Identity migration](docs/identity-migration.md) before upgrading. The original

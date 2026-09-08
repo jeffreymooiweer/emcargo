@@ -1,3 +1,4 @@
+import HistoryStatus from "../components/HistoryStatus";
 /**
  * The shipments this installation kept.
  *
@@ -63,14 +64,7 @@ export default function ShipmentsPage({ user }: { user?: User | null }) {
   // with their own department whatever is asked.
   const admin = user?.role === "admin";
 
-  if (publicSettings && !publicSettings.history_enabled) {
-    return (
-      <div className={`${panelClass} p-5 sm:p-8 space-y-2`}>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{t("history.title")}</h2>
-        <p className="text-sm text-slate-600 dark:text-slate-300">{t("history.off")}</p>
-      </div>
-    );
-  }
+  if (!publicSettings?.history_enabled) return <HistoryStatus title={t("history.title")} admin={admin} />;
 
   if (id) return <ShipmentView id={Number(id)} language={i18n.language} />;
   return <ShipmentList language={i18n.language} admin={admin} />;
