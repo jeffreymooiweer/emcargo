@@ -53,6 +53,7 @@ docs
 *.md
 !backend/**/*.md
 !CHANGELOG.md
+!TERMS.nl.md
 scripts
 unraid
 assets

@@ -30,6 +30,7 @@ vi.mock("../api/client", () => ({
     health: vi.fn().mockResolvedValue({ version: "1.115.0" }),
     settingsOptions: vi.fn().mockResolvedValue({ modalities: ["road"], units: [] }),
     instanceSettings: vi.fn().mockResolvedValue({}),
+    organisationSettings: vi.fn().mockResolvedValue({ organisation_name: "Test", organisation_address: "", default_language: "nl", default_theme: "dark" }),
     assistantStatus: vi.fn().mockResolvedValue({
       mode: "deterministic", installed: false, available: true, installable: true,
       download: { state: "idle" },
@@ -139,4 +140,15 @@ describe("SettingsPage tabs", () => {
     // The server refuses their writes anyway; this keeps the screen honest.
     expect(await screen.findByText("settings.appearance")).toBeTruthy();
   });
+});
+
+
+it("gives Super Users organisation defaults without exposing system or DG policy tabs", async () => {
+  renderAt(userOf("super_user"), "/settings?tab=admin");
+  expect(await screen.findByDisplayValue("Test")).toBeInTheDocument();
+  for (const label of ["settings.adminBranding", "settings.mailTitle", "settingsNav.connections", "settings.adminUpdates", "settingsNav.assistant", "dgReview.settingsTitle"]) {
+    expect(screen.queryByRole("button", { name: label })).toBeNull();
+  }
+  await userEvent.click(screen.getByRole("button", { name: "settingsNav.security" }));
+  expect(screen.queryByText("settingsNav.accessPolicy")).toBeNull();
 });

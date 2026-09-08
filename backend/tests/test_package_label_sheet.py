@@ -427,3 +427,7 @@ def test_the_mark_page_renders_in_every_language():
     for language in ("nl", "en", "de", "fr"):
         assert any("3.4.7.1" in t
                    for t in pages(limited_quantities_sheet(language))), language
+
+
+# These fixtures exercise document/retention behaviour with optional review off.
+pytestmark = pytest.mark.usefixtures("dg_review_disabled")

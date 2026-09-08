@@ -475,3 +475,7 @@ def test_every_unlocked_mode_can_carry_a_container():
         # the others call it the container number. Both are the same box.
         assert ("container_number" in fields
                 or "container_uti_number" in fields), f"{mode} ({key})"
+
+
+# These fixtures exercise document/retention behaviour with optional review off.
+pytestmark = pytest.mark.usefixtures("dg_review_disabled")

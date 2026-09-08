@@ -1,31 +1,32 @@
+import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
+import terms from "../../../TERMS.nl.md?raw";
+import { DocumentIcon, DownloadIcon } from "../components/icons";
 
-const panelClass = "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800";
-
+const panelClass = "surface";
+const sections = terms.split(/^### /m).slice(1).map(section => {
+  const [heading, ...body] = section.split("\n");
+  return { heading, body: body.join("\n").trim() };
+});
+function Paragraph({ text }: { text: string }) {
+  return <p>{text.split(/(\*\*.*?\*\*)/g).map((part, i) => part.startsWith("**") ? <strong key={i}>{part.slice(2, -2)}</strong> : <Fragment key={i}>{part}</Fragment>)}</p>;
+}
 export default function LegalPage() {
   const { t } = useTranslation();
-  const sections = t("legal.sections", { returnObjects: true }) as { heading: string; body: string }[];
-
-  return (
-    <div className="collection-page page-enter space-y-4 sm:space-y-6">
-      <div className={`${panelClass} p-5 sm:p-8`}>
-        <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-100">{t("legal.title")}</h2>
-        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{t("legal.updated")}</p>
-        <p className="mt-4 max-w-3xl text-sm leading-relaxed text-slate-700 dark:text-slate-300">{t("legal.intro")}</p>
-      </div>
-
-      <div className={`${panelClass} divide-y divide-slate-100 dark:divide-slate-800`}>
-        {Array.isArray(sections) &&
-          sections.map((section, i) => (
-            <section key={i} className="p-5 sm:p-6">
-              <h3 className="font-semibold text-slate-900 dark:text-slate-100">{section.heading}</h3>
-              <p className="mt-2 max-w-3xl whitespace-pre-line text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                {section.body}
-              </p>
-            </section>
-          ))}
-      </div>
-
+  const [expanded, setExpanded] = useState(false);
+  function download() {
+    const url = URL.createObjectURL(new Blob([terms], { type: "text/markdown;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url; link.download = "EMCargo-gebruikersvoorwaarden-0.2-concept.md"; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  return <div className="collection-page page-enter legal-workspace">
+    <header className="page-heading"><div><p className="eyebrow">EMCargo</p><h2>{t("legal.title")}</h2><p>{t("legal.updated")}</p></div><button className="action-secondary" onClick={download}><DownloadIcon />{t("legal.download")}</button></header>
+    <section className="surface legal-introduction"><DocumentIcon className="h-8 w-8" /><div><p>{t("legal.intro")}</p><p className="mt-3 text-sm text-slate-500">{t("legal.sourceLanguage")}</p></div></section>
+    <button className="action-secondary" onClick={() => setExpanded(value => !value)}>{t(expanded ? "legal.collapseAll" : "legal.expandAll")}</button>
+    <div className="surface legal-articles" lang="nl" key={String(expanded)}>{sections.map((section, index) => <details key={section.heading} open={expanded || index === 0}>
+      <summary>{section.heading}</summary><div className="legal-body">{section.body.split(/\n\n+/).map((paragraph, i) => <Paragraph key={i} text={paragraph} />)}</div>
+    </details>)}</div>
       {/* Credits belong where the people using the application can see them,
           not only in a file in the repository: the icon set is free to use on
           the condition that it is named, and a licence condition met only in
@@ -66,6 +67,5 @@ export default function LegalPage() {
           </a>
         </p>
       </div>
-    </div>
-  );
+  </div>;
 }

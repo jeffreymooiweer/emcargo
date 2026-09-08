@@ -3,7 +3,7 @@ loading, the LQ/EQ limits of chapters 3.4 and 3.5, and IATA Table 9.3.A
 segregation plus the Q value (5.0.2.11).
 
 The results are guidance and warnings — not a legal determination. The
-qualified person remains responsible (see DISCLAIMER.md).
+qualified person remains responsible (see TERMS.nl.md).
 """
 
 import json

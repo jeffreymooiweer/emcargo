@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.deps import get_current_user, require_admin
+from app.core.deps import get_current_user, require_manager
 from app.models.user import Department, User
 from app.services import departments
 
@@ -34,7 +34,7 @@ def list_departments(user: User = Depends(get_current_user), db: Session = Depen
 
 
 @router.post("")
-def create_department(payload: DepartmentIn, admin: User = Depends(require_admin),
+def create_department(payload: DepartmentIn, admin: User = Depends(require_manager),
                       db: Session = Depends(get_db)):
     try:
         created = departments.create(db, payload.name)
@@ -45,7 +45,7 @@ def create_department(payload: DepartmentIn, admin: User = Depends(require_admin
 
 @router.put("/{department_id}")
 def rename_department(department_id: int, payload: DepartmentIn,
-                      admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+                      admin: User = Depends(require_manager), db: Session = Depends(get_db)):
     try:
         renamed = departments.rename(db, _department(department_id, db), payload.name)
     except departments.DepartmentError as exc:
@@ -54,6 +54,6 @@ def rename_department(department_id: int, payload: DepartmentIn,
 
 
 @router.delete("/{department_id}")
-def delete_department(department_id: int, admin: User = Depends(require_admin),
+def delete_department(department_id: int, admin: User = Depends(require_manager),
                       db: Session = Depends(get_db)):
     return departments.remove(db, _department(department_id, db))

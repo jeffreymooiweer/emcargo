@@ -2,6 +2,37 @@
 
 All notable changes are documented here, following [Semantic Versioning](https://semver.org/).
 
+## [2.4.0] — 2026-09-08
+
+### Specialist release and operational roles
+
+- Add DG Specialist and Super User roles. Super Users manage ordinary users,
+  other Super Users, departments, equipment and organisation defaults. Privileged
+  account management, installation security, branding, mail, connections, updates
+  and AI configuration remain administrator-only, enforced by the API.
+- Require DG Specialist release for dangerous goods shipments by default. Add a
+  review queue with immutable submitted inputs, explanations for requested changes,
+  reopening in the wizard and live review status in the export step. Release binds
+  to the exact document content across single downloads, bundles, mail and history.
+  Drafts stay editable; changed inputs require a new review.
+- Restrict every DGSA report route and its interface to Admin and DG Specialist.
+  Administrators can optionally grant Super User report access; the default is off.
+- Keep review submissions separately from opt-in shipment history and explain the
+  stored data before submission. Removing a review revokes its release. Reopening
+  the same released review reuses its kept shipment instead of double-counting it.
+- Put all transport modes in one grid. Sea and multimodal are disabled with a short
+  development label; air remains disabled too. Preserve existing sea calculations
+  and saved records. Colour the EM in the shared EMCargo wordmark blue.
+- Replace the former disclaimer with the supplied Dutch terms, adapted to EMCargo,
+  its review workflow and account access. Provide the complete downloadable source,
+  readable articles and translated navigation. Keep the document explicitly a draft
+  while contracting-party details and the effective date are unconfirmed. Remove
+  contradictory blanket liability language from document notices.
+- Align overview links, navigation, department filters, user management, settings,
+  output notices and privacy documentation. Preserve public UN-card QR access and
+  authentication for the application. Translate new interface controls in all four
+  supported languages; the full legal source remains explicitly Dutch.
+
 ## [2.3.0] — 2026-09-08
 
 ### One full application, with sign-in

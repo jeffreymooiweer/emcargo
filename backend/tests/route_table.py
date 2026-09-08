@@ -34,7 +34,11 @@ def addresses(app) -> list[Address]:
         if not path:
             continue
         dependant = getattr(context, "dependant", None)
-        guards = frozenset(d.call for d in dependant.dependencies) if dependant is not None else frozenset()
+        def dependencies(node):
+            for child in node.dependencies:
+                yield child.call
+                yield from dependencies(child)
+        guards = frozenset(dependencies(dependant)) if dependant is not None else frozenset()
         out.append(Address(path=path, methods=frozenset(context.methods or ()),
                            guards=guards, operation=dependant is not None))
     return out

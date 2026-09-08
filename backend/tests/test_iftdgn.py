@@ -380,3 +380,7 @@ def test_the_code_values_are_in_the_directory_s_code_list():
             m = re.search(r"\n[\*+#|X ]    %s\s{2,}(.+)" % re.escape(code), block.group(0))
             assert m, f"{element} {code}"
             assert m.group(1).strip().startswith(name[:20]), f"{element} {code}: {m.group(1)}"
+
+
+# These fixtures exercise document/retention behaviour with optional review off.
+pytestmark = pytest.mark.usefixtures("dg_review_disabled")

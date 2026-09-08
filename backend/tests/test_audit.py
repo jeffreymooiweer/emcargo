@@ -289,3 +289,7 @@ def test_the_schema_step_makes_the_table_on_an_old_database(tmp_path):
     migrations.run(engine, fresh=False)
     assert inspect(engine).has_table("audit_events")
     assert "audit_events" in [name for _v, name, _s in migrations.MIGRATIONS]
+
+
+# These fixtures exercise document/retention behaviour with optional review off.
+pytestmark = pytest.mark.usefixtures("dg_review_disabled")

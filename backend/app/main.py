@@ -30,6 +30,7 @@ from app.api.routes.documents import mail_router as documents_mail_router
 from app.api.routes.documents import router as documents_router
 from app.api.routes.geo import router as geo_router
 from app.api.routes.history import router as history_router
+from app.api.routes.dg_reviews import router as dg_reviews_router
 from app.api.routes.jobs import router as jobs_router
 from app.api.routes.meta import router as meta_router
 from app.api.routes.nhm import router as nhm_router
@@ -56,6 +57,7 @@ WORK_ROUTERS = (
     jobs_router,
     dangerous_goods_router,
     documents_router,
+    dg_reviews_router,
     geo_router,
     nhm_router,
     reference_router,

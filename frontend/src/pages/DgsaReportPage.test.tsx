@@ -20,7 +20,7 @@ vi.mock("react-i18next", () => ({
   }),
 }));
 
-const settings = { history_enabled: true };
+const settings = { history_enabled: true, super_user_dgsa_enabled: false };
 vi.mock("../settings/preferences", () => ({
   usePreferences: () => ({ publicSettings: settings, preferences: {}, loaded: true, mode: "organisation" }),
 }));
@@ -53,7 +53,7 @@ const api = vi.hoisted(() => ({
 }));
 vi.mock("../api/client", () => ({ api }));
 
-function renderPage(user?: { id: number; username: string; email: string; role: string; active: boolean }) {
+function renderPage(user = { id: 1, username: "specialist", email: "dg@example.com", role: "dg_specialist", active: true }) {
   return render(
     <ToastProvider>
       <MemoryRouter initialEntries={["/shipments/report"]}>
@@ -66,6 +66,7 @@ function renderPage(user?: { id: number; username: string; email: string; role: 
 beforeEach(() => {
   vi.clearAllMocks();
   settings.history_enabled = true;
+  settings.super_user_dgsa_enabled = false;
   api.reportYears.mockResolvedValue({ years: [2026, 2025] });
   api.dgsaReport.mockResolvedValue(report);
   api.downloadDgsaReport.mockResolvedValue(undefined);
@@ -108,11 +109,17 @@ describe("het DGSA-jaarrapport", () => {
     await waitFor(() => expect(api.dgsaReport).toHaveBeenLastCalledWith(2025, "1", "nl"));
   });
 
-  it("geeft een gewone gebruiker geen afdelingsfilter", async () => {
-    renderPage({ id: 2, username: "ada", email: "a@example.com", role: "user", active: true });
-    await screen.findByText("Benzine");
-    expect(screen.queryByLabelText("departments.userDepartment")).toBeNull();
-    expect(api.departments).not.toHaveBeenCalled();
+  it.each(["user", "super_user"])("refuses report access to %s before requesting data", async role => {
+    renderPage({ id: 2, username: "ada", email: "a@example.com", role, active: true });
+    expect(screen.queryByText("Benzine")).toBeNull();
+    expect(api.dgsaReport).not.toHaveBeenCalled();
+    expect(api.reportYears).not.toHaveBeenCalled();
+  });
+
+  it("allows a Super User only after the admin enables report access", async () => {
+    settings.super_user_dgsa_enabled = true;
+    renderPage({ id: 2, username: "ada", email: "a@example.com", role: "super_user", active: true });
+    expect(await screen.findByText("Benzine")).toBeInTheDocument();
   });
 
   it("opent het formulier op het tabblad en downloadt het rapport als PDF", async () => {

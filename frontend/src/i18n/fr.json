@@ -13,7 +13,7 @@
     "menu": "Menu",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
-    "legal": "Clause de non-responsabilité",
+    "legal": "Conditions d’utilisation",
     "collapseMenu": "Replier le menu",
     "expandMenu": "Déplier le menu",
     "groupage": "Groupage",
@@ -458,7 +458,7 @@
     "auditRetention": "Conservation du journal d'audit (jours)",
     "auditRetentionHint": "Combien de temps une ligne reste dans le journal d'audit. Ce qui est plus ancien est supprimé au démarrage. 365 correspond à un an.",
     "historyEnabled": "Conserver les expéditions (historique)",
-    "historyEnabledHint": "Activé : l'étape d'export conserve chaque expédition dès que ses documents sont téléchargés, et les pages Expéditions, Trajets et Articles, le carnet d'adresses et le rapport annuel du conseiller à la sécurité apparaissent. Désactivé : rien n'est conservé, et la désactivation n'est possible qu'une fois les expéditions et trajets conservés supprimés — cet écran le demande d'abord.",
+    "historyEnabledHint": "Conservez les envois terminés et utilisez les trajets, articles, adresses et rapports DGSA. Supprimez les envois et trajets conservés avant de désactiver. Les contrôles DG soumis sont conservés séparément.",
     "historyDiscardTitle": "Désactiver l'historique et supprimer ce qu'il a conservé ?",
     "historyDiscardBody": "L'historique contient encore {{shipments}} expédition(s) conservée(s) et {{trips}} trajet(s) conservé(s). La désactivation les supprime définitivement ; le carnet d'adresses, les articles et les rapports annuels restent. Cette action est irréversible.",
     "historyDiscardConfirm": "Supprimer et désactiver"
@@ -479,7 +479,8 @@
     "multimodal": "Multimodal",
     "multimodalDesc": "Combinaison de modes — tous les formulaires",
     "locked": "en développement",
-    "lockedReason": "Ce mode n'est pas encore disponible. Ses vérifications réglementaires sont incomplètes, et un document à moitié juste est pire que pas de document. Le transport routier est disponible."
+    "lockedReason": "Ce mode n'est pas encore disponible. Ses vérifications réglementaires sont incomplètes, et un document à moitié juste est pire que pas de document. Le transport routier est disponible.",
+    "inDevelopment": "En développement"
   },
   "forms": {
     "title": "Quels formulaires souhaitez-vous préparer ?",
@@ -581,7 +582,7 @@
     "checkWarnings": "Points à vérifier sur ce document :",
     "dgBlocked": "La classification des marchandises dangereuses est incomplète. Renseignez le numéro ONU, la désignation officielle de transport, la classe et les données d'emballage à l'étape « marchandises dangereuses ».",
     "exporting": "Export en cours…",
-    "exportNotice": "Attention : les documents générés sont des projets. À vérifier, à compléter et à faire signer par une personne habilitée avant utilisation. Voir la clause de non-responsabilité.",
+    "exportNotice": "Vérifiez les fichiers définitifs et faites-les signer par une personne habilitée si nécessaire. Consultez les conditions d’utilisation.",
     "documentLanguage": "Langue des documents",
     "documentLanguageRule": "5.4.1.4.1 : une langue officielle du pays d'expédition et, si ce n'est pas l'allemand, l'anglais ou le français, en outre dans l'une de ces trois. Pour le néerlandais, l'application inscrit les deux noms dans le champ.",
     "downloadAll": "Télécharger le jeu de documents ({{count}})",
@@ -610,41 +611,15 @@
     "download": "Télécharger les fiches ONU ({{count}})"
   },
   "legal": {
-    "title": "Clause de non-responsabilité et licence",
-    "updated": "Dernière mise à jour : 12 juillet 2026 · EMCargo v1.4.0",
-    "intro": "EMCargo est un outil qui prépare des documents de transport et des documents d'accompagnement à partir de vos saisies. Il ne fournit aucun conseil juridique, douanier ou de sécurité. Lisez attentivement les conditions ci-dessous ; en utilisant EMCargo, vous les acceptez.",
-    "sections": [
-      {
-        "heading": "1. Projet — pas un document définitif",
-        "body": "Tout document produit par EMCargo est un projet. Avant utilisation, remise, dépôt ou signature, il doit être intégralement vérifié, complété et signé par une personne dûment habilitée et qualifiée. Les champs de signature, les données du transporteur et les champs opérationnels ne sont délibérément pas préremplis."
-      },
-      {
-        "heading": "2. Marchandises dangereuses",
-        "body": "La classification, l'emballage, le marquage, l'étiquetage et la documentation des marchandises dangereuses (ADR, RID, ADN, IMDG, IATA DGR) relèvent de la responsabilité exclusive de l'expéditeur et des autres parties légalement désignées. EMCargo ne transforme jamais automatiquement une description en texte libre en classification définitive et ne remplace ni des données de référence certifiées, ni un conseiller à la sécurité, ni la réglementation en vigueur et faisant foi."
-      },
-      {
-        "heading": "3. Aucune garantie (EN L'ÉTAT)",
-        "body": "Le logiciel et tous les documents générés sont fournis « EN L'ÉTAT » et « SELON DISPONIBILITÉ », sans aucune garantie expresse ou implicite, y compris les garanties de qualité marchande, d'adéquation à un usage particulier, d'exactitude, d'actualité, d'exhaustivité ou d'absence de contrefaçon. Aucune garantie n'est donnée quant à l'exactitude, l'actualité ou l'exhaustivité des données de référence ou des modèles de formulaires."
-      },
-      {
-        "heading": "4. Limitation de responsabilité",
-        "body": "Dans la mesure maximale permise par le droit applicable, le ou les auteurs, les titulaires de droits et les contributeurs de EMCargo excluent toute responsabilité pour tout dommage direct, indirect, accessoire, spécial, punitif ou consécutif — y compris la perte de bénéfices, l'interruption d'activité, les amendes, les pénalités, les retards, les envois saisis ou refusés, la perte de marchandises ou les dommages à celles-ci, les dommages environnementaux, les dommages corporels ou la perte de données — découlant de l'utilisation, ou de l'impossibilité d'utiliser, l'application ou les documents générés, ou en lien avec celles-ci, sur quelque fondement juridique que ce soit et même en cas d'avertissement de la possibilité d'un tel dommage. Vous utilisez EMCargo entièrement à vos propres risques."
-      },
-      {
-        "heading": "5. Garantie d'indemnisation",
-        "body": "Vous garantissez le ou les auteurs et les titulaires de droits de EMCargo contre toute réclamation de tiers découlant de votre utilisation de l'application ou des documents générés, ou en lien avec celle-ci."
-      },
-      {
-        "heading": "6. Licence — Apache License 2.0 avec Commons Clause",
-        "body": "EMCargo est distribué sous la licence Apache, version 2.0, complétée par la Commons Clause. Sous la licence Apache 2.0, le logiciel est fourni sans garantie et avec une limitation de responsabilité (articles 7 et 8 de cette licence). L'utilisation au sein de votre propre organisation est autorisée ; la vente, la revente, l'hébergement en tant que service payant ou toute autre redistribution commerciale du logiciel lui-même requièrent l'autorisation écrite préalable du titulaire des droits (Commons Clause). Le texte intégral figure dans le fichier LICENSE du dépôt."
-      },
-      {
-        "heading": "7. Droit applicable",
-        "body": "La présente clause de non-responsabilité est régie par le droit néerlandais, dans la mesure où des règles impératives ne s'y opposent pas. Si une disposition est jugée nulle ou inapplicable, les autres dispositions conservent leur plein effet."
-      }
-    ],
+    "title": "Conditions d’utilisation",
+    "updated": "Version 0.2 · projet · 8 septembre 2026",
+    "intro": "Conditions d’utilisation d’EMCargo fondées sur le projet fourni. La partie contractante, les coordonnées juridiques et la date d’effet restent à confirmer. Ce projet n’est pas présenté comme des conditions déjà acceptées.",
     "creditsHeading": "Icônes",
-    "creditsBody": "Les icônes de cette interface — pour les notifications, le menu, les modes de transport, l'import et l'assistant — proviennent de jeux libres d'utilisation, à condition que leur auteur soit crédité :"
+    "creditsBody": "Les icônes de cette interface — pour les notifications, le menu, les modes de transport, l'import et l'assistant — proviennent de jeux libres d'utilisation, à condition que leur auteur soit crédité :",
+    "sourceLanguage": "Le texte complet ci-dessous est disponible en néerlandais. Vous pouvez en télécharger et conserver une copie.",
+    "download": "Télécharger les conditions",
+    "expandAll": "Ouvrir tous les articles",
+    "collapseAll": "Replier les articles"
   },
   "compliance": {
     "title": "Contrôle de conformité des marchandises dangereuses",
@@ -690,7 +665,7 @@
     "qValueFor": "Position {{position}} : Q = {{value}}",
     "qExceeded": "DÉPASSE le maximum de 1,0",
     "caoHint": "La mention « Cargo Aircraft Only » s'applique à : {{products}}. Indiquez-la sur la déclaration de l'expéditeur et dans les informations de manutention de la LTA.",
-    "disclaimer": "Ces contrôles sont indicatifs, fondés sur l'ADR 2025 et la 67e édition de l'IATA DGR, et ne remplacent ni un conseiller à la sécurité ni la réglementation officielle. Voir la clause de non-responsabilité.",
+    "disclaimer": "Ces contrôles facilitent l’examen sans remplacer le conseiller à la sécurité ni la réglementation applicable. Consultez les conditions d’utilisation.",
     "segGroupsTitle": "Groupes de séparation IMDG 7.2.5 (acides, alcalis, cyanures, …)",
     "adnExemptionTitle": "ADN 1.1.3.6.1 — exemption sur la masse brute",
     "adnTotalMass": "{{total}} kg sur {{threshold}} kg au maximum",
@@ -847,6 +822,23 @@
       "invalid": "Choisissez une image JPG, PNG ou WebP valide et non animée.",
       "too_large": "Choisissez une image de 5 Mo et 16 mégapixels maximum.",
       "not_found": "Photo de profil introuvable."
+    },
+    "permissions": {
+      "manager_required": "Des droits de gestion sont requis.",
+      "specialist_required": "Seul un DG Specialist peut valider les envois.",
+      "dgsa_required": "Vous n’avez pas accès aux rapports DGSA.",
+      "protected_account": "Seul un administrateur peut gérer ce compte."
+    },
+    "review": {
+      "required": "Cet envoi doit d’abord être validé par un DG Specialist.",
+      "changed": "L’envoi a changé depuis sa validation. Soumettez la nouvelle version au contrôle.",
+      "not_found": "Contrôle introuvable.",
+      "incomplete": "Complétez la déclaration DG et les documents avant la soumission.",
+      "inconsistent": "Les documents ne correspondent pas à l’envoi. Ouvrez l’assistant et soumettez à nouveau.",
+      "too_large": "Cette demande est trop volumineuse. La limite est de 3 Mo.",
+      "comment_required": "Expliquez les modifications nécessaires.",
+      "already_decided": "Ce contrôle a déjà été traité. Actualisez la page.",
+      "owner_required": "Seul l’auteur ou l’administrateur peut supprimer ce contrôle."
     }
   },
   "instructions": {
@@ -1319,7 +1311,8 @@
       "shipment": "Expéditions",
       "documents": "Documents",
       "report": "Rapports",
-      "trip": "Trajets"
+      "trip": "Trajets",
+      "dg_review": "Contrôles DG"
     },
     "actions": {
       "auth.login": "Connexion",
@@ -1347,7 +1340,12 @@
       "trip.updated": "Trajet conservé mis à jour",
       "trip.forgotten": "Trajet conservé supprimé",
       "settings.history_discarded": "Historique vidé avant la désactivation",
-      "auth.recovery_codes_replaced": "Codes de récupération remplacés"
+      "auth.recovery_codes_replaced": "Codes de récupération remplacés",
+      "dg_review": {
+        "submitted": "Contrôle DG soumis",
+        "decided": "Décision de contrôle DG",
+        "forgotten": "Contrôle DG supprimé"
+      }
     }
   },
   "trips": {
@@ -1394,7 +1392,7 @@
     "failed": "Le brouillon n'a pas pu être enregistré — votre saisie est toujours à l'écran.",
     "discard": "Supprimer le brouillon",
     "resumed": "Votre saisie précédente est de retour ; vous reprenez où vous en étiez.",
-    "notKeptHere": "Cette installation ne conserve rien : un rechargement perd votre saisie.",
+    "notKeptHere": "Ce brouillon n’est pas enregistré automatiquement. Téléchargez-le pour continuer plus tard.",
     "download": "Télécharger le brouillon",
     "open": "Ouvrir un brouillon",
     "opened": "Brouillon ouvert.",
@@ -1429,7 +1427,7 @@
   "overview": {
     "title": "Aperçu",
     "intro": "Voici ce qui demande votre attention aujourd’hui",
-    "introNoHistory": "Cette installation ne conserve aucune expédition, il n'y a donc rien à reprendre. Commencer reste possible ici.",
+    "introNoHistory": "Créez un envoi ou suivez un contrôle DG soumis. L’historique des envois est désactivé.",
     "resumeTitle": "Reprendre où vous en étiez",
     "resume": "Reprendre",
     "todayTitle": "Aujourd'hui",
@@ -1560,5 +1558,83 @@
     "save": "Enregistrer les modifications",
     "saving": "Enregistrement…",
     "security": "Sécurité et récupération"
+  },
+  "roles": {
+    "superUser": "Super User",
+    "dgSpecialist": "DG Specialist",
+    "protected": "Seul un administrateur peut gérer ce compte.",
+    "managementHint": "Les administrateurs attribuent tous les rôles. Les Super Users gèrent les utilisateurs et les autres Super Users.",
+    "superSettingsHint": "Gérez les coordonnées et préférences de l’organisation. L’administrateur gère le système et les droits DG."
+  },
+  "dgReview": {
+    "title": "Contrôle DG",
+    "eyebrow": "Marchandises dangereuses",
+    "queueHint": "Contrôlez les envois soumis. Le DG Specialist valide la version examinée.",
+    "mineHint": "Suivez le contrôle et la validation de vos envois.",
+    "pending": "En attente de contrôle",
+    "approved": "Validé",
+    "changes_requested": "Modifications demandées",
+    "requiredHint": "Cet envoi contient des marchandises dangereuses. Soumettez-le au contrôle avant de télécharger ou envoyer les documents.",
+    "storageHint": "La soumission conserve cette version, avec les données des documents et l’éventuelle signature, pour le DG Specialist, indépendamment de l’historique. Supprimer la demande révoque sa validation.",
+    "submit": "Soumettre au contrôle",
+    "submitting": "Envoi en cours…",
+    "view": "Voir le contrôle",
+    "refresh": "Actualiser",
+    "finishFirst": "Complétez d’abord les documents sélectionnés et la déclaration DG.",
+    "back": "Tous les contrôles",
+    "disabledHint": "Le contrôle DG obligatoire est désactivé. Les contrôles existants restent disponibles.",
+    "filter": "Statut",
+    "count": "{{count}} contrôles",
+    "empty": "Aucun contrôle trouvé",
+    "emptyHint": "Les envois apparaissent ici après soumission à la dernière étape de l’assistant.",
+    "submittedBy": "Soumis par {{name}} · {{date}}",
+    "reviewedBy": "Examiné par {{name}} · {{date}}",
+    "submittedShipment": "Envoi soumis",
+    "snapshotHint": "Voici les données de la version soumise. La validation porte uniquement sur ce contenu.",
+    "declaration": "Déclaration DG",
+    "packaging": "Emballage et ligne de marchandises liée",
+    "decision": "Enregistrer la décision",
+    "decisionHint": "Vérifiez la saisie et tous les champs des documents. La validation interne ne remplace aucune déclaration ou signature requise.",
+    "comment": "Commentaire — obligatoire pour demander des modifications",
+    "approve": "Valider l’envoi",
+    "requestChanges": "Demander des modifications",
+    "openWizard": "Ouvrir dans l’assistant",
+    "forget": "Supprimer le contrôle",
+    "forgetHint": "L’envoi conservé pour ce contrôle sera supprimé. Toute validation sera révoquée et les documents liés pourront nécessiter un nouveau contrôle.",
+    "settingsTitle": "Contrôle et rapports DG",
+    "settingsHint": "Définissez quand un spécialiste doit intervenir et qui peut utiliser les rapports DGSA.",
+    "enabledSetting": "Validation DG obligatoire",
+    "enabledHint": "Activé par défaut. Un DG Specialist doit valider les envois DG avant le téléchargement, l’envoi par e-mail ou l’enregistrement définitif. Toute modification exige un nouveau contrôle.",
+    "superDgsaSetting": "Accès des Super Users aux rapports DGSA",
+    "superDgsaHint": "Désactivé par défaut. Les administrateurs et DG Specialists y ont toujours accès. Cette option permet aussi aux Super Users de créer et consulter les rapports.",
+    "yes": "Oui",
+    "no": "Non",
+    "fields": {
+      "consignor_name": "Expéditeur",
+      "consignor_address": "Adresse de l’expéditeur",
+      "consignee_name": "Destinataire",
+      "consignee_address": "Adresse du destinataire",
+      "shipment_reference": "Référence de l’envoi",
+      "reference": "Référence",
+      "un_number": "Numéro ONU",
+      "proper_shipping_name": "Désignation officielle",
+      "class": "Classe de danger",
+      "packing_group": "Groupe d’emballage",
+      "quantity_packages": "Nombre de colis",
+      "type_of_package": "Type d’emballage",
+      "adr_total_quantity": "Quantité totale",
+      "classification_code": "Code de classification",
+      "labels": "Étiquettes",
+      "hazard_number": "Numéro d’identification du danger",
+      "tunnel_code": "Code tunnel",
+      "transport_category": "Catégorie de transport",
+      "line_id": "Ligne de marchandises",
+      "vehicle": "Unité de transport",
+      "loading_point": "Lieu de chargement",
+      "discharge_point": "Lieu de déchargement"
+    },
+    "signature": "Signature dans les documents",
+    "signatureAlt": "Signature soumise",
+    "privacyLink": "Les contrôles DG soumis sont conservés séparément. Consultez vos contrôles."
   }
 }

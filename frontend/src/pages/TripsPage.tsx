@@ -1,3 +1,4 @@
+import { canOversee } from "../permissions";
 import HistoryStatus from "../components/HistoryStatus";
 /**
  * The groupage trips this installation kept.
@@ -65,9 +66,9 @@ export default function TripsPage({ user }: { user?: User | null }) {
   const { t, i18n } = useTranslation();
   const { publicSettings } = usePreferences();
   const { id } = useParams();
-  const admin = user?.role === "admin";
+  const admin = canOversee(user);
 
-  if (!publicSettings?.history_enabled) return <HistoryStatus title={t("trips.title")} admin={admin} />;
+  if (!publicSettings?.history_enabled) return <HistoryStatus title={t("trips.title")} admin={user?.role === "admin"} />;
 
   if (id) return <TripView id={Number(id)} language={i18n.language} />;
   return <TripList language={i18n.language} admin={admin} />;

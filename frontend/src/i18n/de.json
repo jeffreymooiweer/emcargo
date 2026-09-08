@@ -13,7 +13,7 @@
     "menu": "Menü",
     "openMenu": "Menü öffnen",
     "closeMenu": "Menü schließen",
-    "legal": "Haftungsausschluss",
+    "legal": "Nutzungsbedingungen",
     "collapseMenu": "Menü einklappen",
     "expandMenu": "Menü ausklappen",
     "groupage": "Sammelgut",
@@ -458,7 +458,7 @@
     "auditRetention": "Aufbewahrung Audit-Protokoll (Tage)",
     "auditRetentionHint": "Wie lange eine Zeile im Audit-Protokoll bleibt. Älteres wird beim Start entfernt. 365 ist ein Jahr.",
     "historyEnabled": "Sendungen speichern (Verlauf)",
-    "historyEnabledHint": "Ein: der Exportschritt speichert jede Sendung, sobald ihre Dokumente heruntergeladen werden, und die Seiten Sendungen, Fahrten und Artikel, das Adressbuch und der Jahresbericht des Gefahrgutbeauftragten kommen hinzu. Aus: nichts wird gespeichert, und Ausschalten geht erst, wenn die gespeicherten Sendungen und Fahrten gelöscht sind — dieser Bildschirm fragt zuerst.",
+    "historyEnabledHint": "Speichern Sie abgeschlossene Sendungen und nutzen Sie Fahrten, Artikel, Adressen und DGSA-Berichte. Vor dem Ausschalten müssen gespeicherte Sendungen und Fahrten gelöscht werden. DG-Prüfungen werden separat gespeichert.",
     "historyDiscardTitle": "Verlauf ausschalten und das Gespeicherte löschen?",
     "historyDiscardBody": "Der Verlauf enthält noch {{shipments}} gespeicherte Sendung(en) und {{trips}} gespeicherte Fahrt(en). Ausschalten löscht sie endgültig; das Adressbuch, die Artikel und die Jahresberichte bleiben erhalten. Das lässt sich nicht rückgängig machen.",
     "historyDiscardConfirm": "Löschen und ausschalten"
@@ -479,7 +479,8 @@
     "multimodal": "Multimodal",
     "multimodalDesc": "Kombination von Verkehrsträgern — alle Formulare",
     "locked": "in Entwicklung",
-    "lockedReason": "Diese Verkehrsträger ist noch nicht freigegeben. Die Prüfungen sind unvollständig, und ein halb richtiges Dokument ist schlimmer als keines. Der Straßenverkehr steht zur Verfügung."
+    "lockedReason": "Diese Verkehrsträger ist noch nicht freigegeben. Die Prüfungen sind unvollständig, und ein halb richtiges Dokument ist schlimmer als keines. Der Straßenverkehr steht zur Verfügung.",
+    "inDevelopment": "In Entwicklung"
   },
   "forms": {
     "title": "Welche Formulare möchten Sie erstellen?",
@@ -581,7 +582,7 @@
     "checkWarnings": "Hinweise zu diesem Dokument:",
     "dgBlocked": "Die Gefahrgutklassifizierung ist unvollständig. Erfassen Sie UN-Nummer, Proper Shipping Name, Klasse und Verpackungsangaben im Gefahrgutschritt.",
     "exporting": "Export läuft…",
-    "exportNotice": "Achtung: erzeugte Dokumente sind Entwürfe. Vor der Verwendung von einer befugten Person prüfen, ergänzen und unterschreiben lassen. Siehe Haftungsausschluss.",
+    "exportNotice": "Prüfen Sie die endgültigen Dateien und lassen Sie diese bei Bedarf durch eine befugte Person unterzeichnen. Siehe Nutzungsbedingungen.",
     "documentLanguage": "Sprache der Dokumente",
     "documentLanguageRule": "5.4.1.4.1: eine Amtssprache des Versandlandes und, wenn das nicht Deutsch, Englisch oder Französisch ist, zusätzlich in einer dieser drei. Bei Niederländisch setzt die Anwendung beide Namen in das Feld.",
     "downloadAll": "Dokumentenpaket herunterladen ({{count}})",
@@ -610,41 +611,15 @@
     "download": "UN-Karten herunterladen ({{count}})"
   },
   "legal": {
-    "title": "Haftungsausschluss und Lizenz",
-    "updated": "Zuletzt aktualisiert: 12. Juli 2026 · EMCargo v1.4.0",
-    "intro": "EMCargo ist ein Hilfsmittel, das Beförderungs- und Begleitpapiere auf Grundlage Ihrer Eingaben vorbereitet. Die Anwendung erteilt keine rechtliche, zollrechtliche oder sicherheitstechnische Beratung. Lesen Sie die nachstehenden Bedingungen sorgfältig; mit der Nutzung von EMCargo erkennen Sie sie an. Diese deutsche Fassung ist eine Übersetzung; bei Abweichungen ist die niederländische Fassung maßgebend.",
-    "sections": [
-      {
-        "heading": "1. Entwurf — kein endgültiges Dokument",
-        "body": "Jedes von EMCargo erzeugte Dokument ist ein Entwurf. Vor Verwendung, Übergabe, Einreichung oder Unterzeichnung muss es von einer dazu befugten und qualifizierten Person vollständig geprüft, ergänzt und unterschrieben werden. Unterschriftsfelder, Angaben des Frachtführers und operative Felder werden bewusst nicht vorausgefüllt."
-      },
-      {
-        "heading": "2. Gefahrgut",
-        "body": "Klassifizierung, Verpackung, Kennzeichnung, Bezettelung und Dokumentation gefährlicher Güter (ADR, RID, ADN, IMDG, IATA DGR) liegen in der ausschließlichen Verantwortung des Absenders und der übrigen gesetzlich benannten Beteiligten. EMCargo macht aus einer freien Bezeichnung niemals selbsttätig eine endgültige Klassifizierung und ersetzt weder zertifizierte Stammdaten noch einen Gefahrgutbeauftragten oder die geltenden, autorisierten Vorschriften."
-      },
-      {
-        "heading": "3. Keine Gewährleistung (AS IS)",
-        "body": "Die Software und alle erzeugten Dokumente werden \"AS IS\" und \"AS AVAILABLE\" bereitgestellt, ohne jede ausdrückliche oder stillschweigende Gewährleistung, einschließlich der Gewährleistung der Marktgängigkeit, der Eignung für einen bestimmten Zweck, der Richtigkeit, Aktualität, Vollständigkeit oder Nichtverletzung von Rechten Dritter. Es wird nicht dafür eingestanden, dass Referenzdaten oder Formularvorlagen richtig, aktuell oder vollständig sind."
-      },
-      {
-        "heading": "4. Haftungsausschluss",
-        "body": "Soweit nach anwendbarem Recht zulässig, schließen die Urheber, Rechteinhaber und Beitragenden von EMCargo jede Haftung für unmittelbare, mittelbare, beiläufig entstandene, besondere, Straf- oder Folgeschäden aus — einschließlich entgangenen Gewinns, Betriebsunterbrechung, Bußgeldern, Sanktionen, Verzögerungen, beschlagnahmter oder zurückgewiesener Sendungen, Verlust oder Beschädigung von Gütern, Umweltschäden, Personenschäden oder Datenverlust — die aus der Nutzung oder der Unmöglichkeit der Nutzung der Anwendung oder der erzeugten Dokumente entstehen oder damit zusammenhängen, unabhängig vom Rechtsgrund und selbst dann, wenn auf die Möglichkeit solcher Schäden hingewiesen wurde. Sie nutzen EMCargo vollständig auf eigenes Risiko."
-      },
-      {
-        "heading": "5. Freistellung",
-        "body": "Sie stellen die Urheber und Rechteinhaber von EMCargo von allen Ansprüchen Dritter frei, die aus Ihrer Nutzung der Anwendung oder der erzeugten Dokumente entstehen oder damit zusammenhängen."
-      },
-      {
-        "heading": "6. Lizenz — Apache License 2.0 mit Commons Clause",
-        "body": "EMCargo wird unter der Apache License, Version 2.0, ergänzt um die Commons Clause, lizenziert. Nach der Apache License 2.0 wird die Software ohne Gewährleistung und mit Haftungsbeschränkung bereitgestellt (Abschnitte 7 und 8 dieser Lizenz). Die Nutzung innerhalb Ihrer eigenen Organisation ist gestattet; der Verkauf, Weiterverkauf, das Hosting als kostenpflichtiger Dienst oder eine sonstige kommerzielle Weiterverbreitung der Software selbst bedarf der vorherigen schriftlichen Zustimmung des Rechteinhabers (Commons Clause). Der vollständige Text steht in der Datei LICENSE des Repositorys."
-      },
-      {
-        "heading": "7. Anwendbares Recht",
-        "body": "Auf diesen Haftungsausschluss ist niederländisches Recht anwendbar, soweit zwingendes Recht dem nicht entgegensteht. Sollte eine Bestimmung nichtig oder nicht durchsetzbar sein, bleiben die übrigen Bestimmungen in vollem Umfang wirksam."
-      }
-    ],
+    "title": "Nutzungsbedingungen",
+    "updated": "Version 0.2 · Entwurf · 8. September 2026",
+    "intro": "Bedingungen für EMCargo auf Grundlage des bereitgestellten Entwurfs. Vertragspartner, rechtliche Kontaktdaten und Geltungsbeginn stehen noch nicht fest. Dieser Entwurf wird nicht als bereits vereinbart dargestellt.",
     "creditsHeading": "Symbole",
-    "creditsBody": "Die Symbole in dieser Oberfläche — für Meldungen, das Menü, die Verkehrsträger, den Import und den Assistenten — stammen aus frei verwendbaren Sets, unter der Bedingung, dass der Urheber genannt wird:"
+    "creditsBody": "Die Symbole in dieser Oberfläche — für Meldungen, das Menü, die Verkehrsträger, den Import und den Assistenten — stammen aus frei verwendbaren Sets, unter der Bedingung, dass der Urheber genannt wird:",
+    "sourceLanguage": "Der vollständige Text unten ist auf Niederländisch verfügbar. Sie können ihn herunterladen und aufbewahren.",
+    "download": "Bedingungen herunterladen",
+    "expandAll": "Alle Artikel öffnen",
+    "collapseAll": "Artikel einklappen"
   },
   "compliance": {
     "title": "Gefahrgut-Konformitätsprüfung",
@@ -690,7 +665,7 @@
     "qValueFor": "Position {{position}}: Q = {{value}}",
     "qExceeded": "ÜBERSCHREITET das Maximum von 1,0",
     "caoHint": "Cargo Aircraft Only gilt für: {{products}}. Vermerken Sie dies auf der Shipper's Declaration und in den AWB-Handling-Information.",
-    "disclaimer": "Diese Prüfungen sind eine Hilfestellung auf Grundlage des ADR 2025 und der IATA DGR 67. Ausgabe und ersetzen weder einen Gefahrgutbeauftragten noch die amtlichen Vorschriften. Siehe Haftungsausschluss.",
+    "disclaimer": "Diese Prüfungen unterstützen die Beurteilung und ersetzen weder einen Gefahrgutbeauftragten noch geltende Vorschriften. Siehe Nutzungsbedingungen.",
     "segGroupsTitle": "Trenngruppen IMDG 7.2.5 (Säuren, Laugen, Cyanide, …)",
     "adnExemptionTitle": "ADN 1.1.3.6.1 — Freistellung nach Bruttomasse",
     "adnTotalMass": "{{total}} kg von höchstens {{threshold}} kg",
@@ -847,6 +822,23 @@
       "invalid": "Wählen Sie ein gültiges, nicht animiertes JPG-, PNG- oder WebP-Bild.",
       "too_large": "Wählen Sie ein Bild mit maximal 5 MB und 16 Megapixeln.",
       "not_found": "Profilfoto nicht gefunden."
+    },
+    "permissions": {
+      "manager_required": "Verwaltungsrechte sind erforderlich.",
+      "specialist_required": "Nur ein DG Specialist kann Sendungen freigeben.",
+      "dgsa_required": "Sie haben keinen Zugriff auf DGSA-Berichte.",
+      "protected_account": "Nur ein Admin kann dieses Konto verwalten."
+    },
+    "review": {
+      "required": "Diese Sendung muss zuerst von einem DG Specialist freigegeben werden.",
+      "changed": "Die Sendung wurde nach der Freigabe geändert. Reichen Sie die neue Version zur Prüfung ein.",
+      "not_found": "Prüfung nicht gefunden.",
+      "incomplete": "Vervollständigen Sie Gefahrgutangaben und Dokumente vor der Einreichung.",
+      "inconsistent": "Dokumentdaten stimmen nicht mit der Sendung überein. Öffnen Sie den Assistenten und reichen Sie erneut ein.",
+      "too_large": "Diese Anfrage ist zu groß. Das Limit beträgt 3 MB.",
+      "comment_required": "Erläutern Sie die erforderlichen Änderungen.",
+      "already_decided": "Diese Prüfung wurde bereits entschieden. Aktualisieren Sie die Seite.",
+      "owner_required": "Nur der Einreicher oder Admin kann diese Prüfung löschen."
     }
   },
   "instructions": {
@@ -1319,7 +1311,8 @@
       "shipment": "Sendungen",
       "documents": "Dokumente",
       "report": "Berichte",
-      "trip": "Fahrten"
+      "trip": "Fahrten",
+      "dg_review": "DG-Prüfungen"
     },
     "actions": {
       "auth.login": "Angemeldet",
@@ -1347,7 +1340,12 @@
       "trip.updated": "Gespeicherte Fahrt aktualisiert",
       "trip.forgotten": "Gespeicherte Fahrt entfernt",
       "settings.history_discarded": "Verlauf vor dem Ausschalten geleert",
-      "auth.recovery_codes_replaced": "Wiederherstellungscodes ersetzt"
+      "auth.recovery_codes_replaced": "Wiederherstellungscodes ersetzt",
+      "dg_review": {
+        "submitted": "DG-Prüfung eingereicht",
+        "decided": "DG-Prüfung entschieden",
+        "forgotten": "DG-Prüfung gelöscht"
+      }
     }
   },
   "trips": {
@@ -1394,7 +1392,7 @@
     "failed": "Der Entwurf konnte nicht gesichert werden — Ihre Eingabe steht noch am Bildschirm.",
     "discard": "Entwurf verwerfen",
     "resumed": "Ihre frühere Eingabe ist zurück; Sie stehen wieder dort, wo Sie aufgehört haben.",
-    "notKeptHere": "Diese Installation speichert nichts: beim Neuladen ist Ihre Eingabe weg.",
+    "notKeptHere": "Dieser Entwurf wird nicht automatisch gespeichert. Laden Sie ihn herunter, um später fortzufahren.",
     "download": "Entwurf herunterladen",
     "open": "Entwurf öffnen",
     "opened": "Entwurf geöffnet.",
@@ -1429,7 +1427,7 @@
   "overview": {
     "title": "Übersicht",
     "intro": "Das braucht heute Ihre Aufmerksamkeit",
-    "introNoHistory": "Diese Installation speichert keine Sendungen, es gibt also nichts, worauf man zurückkommen könnte. Beginnen geht hier trotzdem.",
+    "introNoHistory": "Starten Sie eine Sendung oder verfolgen Sie eine DG-Prüfung. Der Sendungsverlauf ist ausgeschaltet.",
     "resumeTitle": "Weiter, wo Sie aufgehört haben",
     "resume": "Weiter",
     "todayTitle": "Heute",
@@ -1560,5 +1558,83 @@
     "save": "Änderungen speichern",
     "saving": "Wird gespeichert…",
     "security": "Sicherheit und Wiederherstellung"
+  },
+  "roles": {
+    "superUser": "Super User",
+    "dgSpecialist": "DG Specialist",
+    "protected": "Nur ein Admin kann dieses Konto verwalten.",
+    "managementHint": "Admins vergeben alle Rollen. Super Users verwalten Benutzer und andere Super Users.",
+    "superSettingsHint": "Verwalten Sie Organisationsdaten und Standardwerte. System- und DG-Berechtigungen verwaltet der Admin."
+  },
+  "dgReview": {
+    "title": "Gefahrgutprüfung",
+    "eyebrow": "Gefahrgut",
+    "queueHint": "Prüfen Sie eingereichte Sendungen. Der DG Specialist gibt die geprüfte Version frei.",
+    "mineHint": "Verfolgen Sie Prüfung und Freigabe Ihrer Sendungen.",
+    "pending": "Wartet auf Prüfung",
+    "approved": "Freigegeben",
+    "changes_requested": "Änderungen erforderlich",
+    "requiredHint": "Diese Sendung enthält Gefahrgut. Reichen Sie sie vor dem Herunterladen oder Versenden der Dokumente zur Prüfung ein.",
+    "storageHint": "Die Einreichung speichert diese Version einschließlich Dokumentdaten und etwaiger Unterschrift für den DG Specialist, unabhängig vom Sendungsverlauf. Das spätere Löschen widerruft die Freigabe.",
+    "submit": "Zur Prüfung einreichen",
+    "submitting": "Wird eingereicht…",
+    "view": "Prüfung ansehen",
+    "refresh": "Aktualisieren",
+    "finishFirst": "Vervollständigen Sie zuerst die gewählten Dokumente und Gefahrgutangaben.",
+    "back": "Alle Prüfungen",
+    "disabledHint": "Die Pflichtprüfung ist ausgeschaltet. Vorhandene Prüfungen bleiben verfügbar.",
+    "filter": "Status",
+    "count": "{{count}} Prüfungen",
+    "empty": "Keine Prüfungen gefunden",
+    "emptyHint": "Sendungen erscheinen hier nach Einreichung im letzten Assistentenschritt.",
+    "submittedBy": "Eingereicht von {{name}} · {{date}}",
+    "reviewedBy": "Geprüft von {{name}} · {{date}}",
+    "submittedShipment": "Eingereichte Sendung",
+    "snapshotHint": "Dies sind die Daten der eingereichten Version. Die Freigabe gilt nur für diesen Dokumentinhalt.",
+    "declaration": "Gefahrgutangaben",
+    "packaging": "Verpackung und zugehörige Warenposition",
+    "decision": "Entscheidung festhalten",
+    "decisionHint": "Prüfen Sie Eingaben und Dokumentfelder. Die interne Freigabe ersetzt keine erforderliche Erklärung oder Unterschrift.",
+    "comment": "Kommentar — bei Änderungswunsch erforderlich",
+    "approve": "Sendung freigeben",
+    "requestChanges": "Änderungen anfordern",
+    "openWizard": "Im Assistenten öffnen",
+    "forget": "Prüfung löschen",
+    "forgetHint": "Die gespeicherte Sendung dieser Prüfung wird gelöscht. Eine Freigabe verfällt; verknüpfte Dokumente benötigen gegebenenfalls eine neue Prüfung.",
+    "settingsTitle": "DG-Prüfung und Berichte",
+    "settingsHint": "Legen Sie fest, wann eine Fachprüfung nötig ist und wer DGSA-Berichte nutzen darf.",
+    "enabledSetting": "DG-Freigabe erforderlich",
+    "enabledHint": "Standardmäßig aktiv. Gefahrgutsendungen benötigen die Freigabe eines DG Specialist, bevor Dokumente heruntergeladen, versendet oder abschließend gespeichert werden. Änderungen erfordern eine neue Prüfung.",
+    "superDgsaSetting": "DGSA-Berichte für Super Users",
+    "superDgsaHint": "Standardmäßig aus. Admins und DG Specialists haben immer Zugriff. Diese Option erlaubt auch Super Users, Berichte zu erstellen und einzusehen.",
+    "yes": "Ja",
+    "no": "Nein",
+    "fields": {
+      "consignor_name": "Absender",
+      "consignor_address": "Absenderadresse",
+      "consignee_name": "Empfänger",
+      "consignee_address": "Empfängeradresse",
+      "shipment_reference": "Sendungsreferenz",
+      "reference": "Referenz",
+      "un_number": "UN-Nummer",
+      "proper_shipping_name": "Offizielle Benennung",
+      "class": "Gefahrklasse",
+      "packing_group": "Verpackungsgruppe",
+      "quantity_packages": "Anzahl Versandstücke",
+      "type_of_package": "Verpackungsart",
+      "adr_total_quantity": "Gesamtmenge",
+      "classification_code": "Klassifizierungscode",
+      "labels": "Gefahrzettel",
+      "hazard_number": "Gefahrnummer",
+      "tunnel_code": "Tunnelcode",
+      "transport_category": "Beförderungskategorie",
+      "line_id": "Warenposition",
+      "vehicle": "Beförderungseinheit",
+      "loading_point": "Ladestelle",
+      "discharge_point": "Entladestelle"
+    },
+    "signature": "Unterschrift in den Dokumenten",
+    "signatureAlt": "Eingereichte Unterschrift",
+    "privacyLink": "Eingereichte DG-Prüfungen werden separat gespeichert. Sehen Sie Ihre Prüfungen an."
   }
 }

@@ -324,11 +324,11 @@ def test_the_request_form_is_rate_limited(limited_client, sent):
 
 
 def admin_client(db, monkeypatch):
-    from app.core.deps import require_admin
+    from app.core.deps import get_current_user
 
     monkeypatch.setattr(auth_route.limiter, "enabled", False)
     app.dependency_overrides[get_db] = lambda: db
-    app.dependency_overrides[require_admin] = lambda: db.get(User, 1)
+    app.dependency_overrides[get_current_user] = lambda: db.get(User, 1)
     return TestClient(app)
 
 

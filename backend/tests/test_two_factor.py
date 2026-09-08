@@ -468,9 +468,9 @@ def test_second_factor_management_limits_code_guesses(signed_in, db, monkeypatch
 
 def test_an_administrator_can_clear_a_lost_factor(client, db):
     enable_totp(db, 2)
-    app.dependency_overrides[require_admin] = lambda: db.get(User, 1)
+    app.dependency_overrides[get_current_user] = lambda: db.get(User, 1)
     response = client.delete("/api/users/2/two-factor")
-    app.dependency_overrides.pop(require_admin, None)
+    app.dependency_overrides.pop(get_current_user, None)
 
     assert response.status_code == 200
     assert two_factor.is_active(db, 2) is False

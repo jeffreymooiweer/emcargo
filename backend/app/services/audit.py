@@ -32,6 +32,9 @@ logger = logging.getLogger(__name__)
 #: Every action the log can carry, and what its summary is allowed to hold.
 #: The interface translates the codes; the summaries are short and factual.
 ACTIONS: dict[str, str] = {
+    "dg_review.submitted": "a shipment submitted for specialist review (reference only)",
+    "dg_review.decided": "specialist release or request for changes (status only)",
+    "dg_review.forgotten": "a review and its release removed",
     "auth.login": "signed in (the second factor's method when one was used)",
     "auth.login_failed": "a sign-in refused: unknown name, wrong password, inactive account, wrong code",
     "auth.logout": "signed out",

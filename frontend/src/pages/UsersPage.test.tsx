@@ -77,3 +77,18 @@ it("creates an account only from the completed create form", async () => {
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   expect(api.createUser).toHaveBeenCalledWith({ username: "newperson", email: "new@example.com", role: "user", password: "strong-password", send_welcome: false });
 });
+
+
+it("shows all roles but prevents a Super User from editing privileged accounts or assigning their roles", async () => {
+  const specialist = { ...people[1], id: 8, username: "DG colleague", role: "dg_specialist" };
+  api.listUsers.mockResolvedValue([...people, specialist]);
+  render(<ToastProvider><UsersPage user={{ ...people[1], role: "super_user" }} /></ToastProvider>);
+  expect(await screen.findByRole("button", { name: "directory.edit Ada" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "directory.edit DG colleague" })).toBeDisabled();
+  await userEvent.click(screen.getByRole("button", { name: "users.newUser" }));
+  const editor = within(screen.getByRole("dialog"));
+  const roles = within(editor.getByLabelText("users.role"));
+  expect(roles.getByRole("option", { name: "roles.superUser" })).toBeInTheDocument();
+  expect(roles.queryByRole("option", { name: "users.roleAdmin" })).toBeNull();
+  expect(roles.queryByRole("option", { name: "roles.dgSpecialist" })).toBeNull();
+});

@@ -13,7 +13,7 @@
     "menu": "Menu",
     "openMenu": "Menu openen",
     "closeMenu": "Menu sluiten",
-    "legal": "Disclaimer",
+    "legal": "Gebruikersvoorwaarden",
     "collapseMenu": "Menu inklappen",
     "expandMenu": "Menu uitklappen",
     "groupage": "Groepage",
@@ -458,7 +458,7 @@
     "auditRetention": "Bewaartermijn auditlog (dagen)",
     "auditRetentionHint": "Hoe lang een regel in het auditlog blijft staan. Bij het opstarten wordt wat ouder is verwijderd. 365 is één jaar.",
     "historyEnabled": "Zendingen bewaren (historie)",
-    "historyEnabledHint": "Aan: de exportstap bewaart elke zending zodra de documenten worden gedownload, en de pagina's Zendingen, Ritten en Artikelen, het adresboek en het jaarrapport van de veiligheidsadviseur komen erbij. Uit: niets wordt bewaard, en uitzetten kan pas als de bewaarde zendingen en ritten verwijderd zijn — dat vraagt dit scherm eerst.",
+    "historyEnabledHint": "Bewaar afgeronde zendingen en werk met ritten, artikelen, adressen en DGSA-rapportage. Uitzetten kan pas na het verwijderen van opgeslagen zendingen en ritten. Ingediende DG-controles worden apart bewaard.",
     "historyDiscardTitle": "Historie uitzetten en de bewaarde gegevens verwijderen?",
     "historyDiscardBody": "De historie bevat nog {{shipments}} bewaarde zending(en) en {{trips}} bewaarde rit(ten). Uitzetten verwijdert ze definitief; het adresboek, de artikelen en de jaarrapporten blijven staan. Dit kan niet ongedaan worden gemaakt.",
     "historyDiscardConfirm": "Verwijderen en uitzetten"
@@ -479,7 +479,8 @@
     "multimodal": "Multimodaal",
     "multimodalDesc": "Combinatie van modaliteiten — alle formulieren",
     "locked": "in ontwikkeling",
-    "lockedReason": "Deze modaliteit is nog niet vrijgegeven. De regelgevingscontroles zijn nog niet compleet en een half kloppend document is erger dan geen document. Wegvervoer is wel beschikbaar."
+    "lockedReason": "Deze modaliteit is nog niet vrijgegeven. De regelgevingscontroles zijn nog niet compleet en een half kloppend document is erger dan geen document. Wegvervoer is wel beschikbaar.",
+    "inDevelopment": "In ontwikkeling"
   },
   "forms": {
     "title": "Welke formulieren wilt u opmaken?",
@@ -581,7 +582,7 @@
     "checkWarnings": "Aandachtspunten voor dit document:",
     "dgBlocked": "Gevaarlijke-stoffenclassificatie is onvolledig. Vul UN-nummer, Proper Shipping Name, klasse en verpakkingsgegevens in bij de gevaarlijke-stoffenstap.",
     "exporting": "Bezig met exporteren…",
-    "exportNotice": "Let op: gegenereerde documenten zijn concepten. Controleer, vul aan en onderteken door een bevoegde persoon vóór gebruik. Zie de disclaimer.",
+    "exportNotice": "Controleer de uiteindelijke bestanden en laat ze waar vereist ondertekenen door een bevoegde persoon. Zie de gebruikersvoorwaarden.",
     "documentLanguage": "Taal van de documenten",
     "documentLanguageRule": "5.4.1.4.1: een officiële taal van het land van verzending, en is dat geen Duits, Engels of Frans, dan bovendien in een van die drie. Bij Nederlands zet de app beide namen in het veld.",
     "downloadAll": "Documentenpakket downloaden ({{count}})",
@@ -610,41 +611,15 @@
     "download": "UN-kaarten downloaden ({{count}})"
   },
   "legal": {
-    "title": "Disclaimer en licentie",
-    "updated": "Laatst bijgewerkt: 12 juli 2026 · EMCargo v1.4.0",
-    "intro": "EMCargo is een hulpmiddel dat vervoers- en begeleidingsdocumenten voorbereidt op basis van uw invoer. De applicatie geeft geen juridisch, douanetechnisch of veiligheidskundig advies. Lees onderstaande voorwaarden zorgvuldig; door EMCargo te gebruiken aanvaardt u ze.",
-    "sections": [
-      {
-        "heading": "1. Concept — geen definitief document",
-        "body": "Elk door EMCargo voortgebracht document is een concept. Vóór gebruik, overdracht, indiening of ondertekening moet het volledig worden gecontroleerd, aangevuld en ondertekend door een daartoe bevoegde en gekwalificeerde persoon. Handtekeningvelden, carriergegevens en operationele velden worden bewust niet vooraf ingevuld."
-      },
-      {
-        "heading": "2. Gevaarlijke stoffen",
-        "body": "Classificatie, verpakking, markering, etikettering en documentatie van gevaarlijke stoffen (ADR, RID, ADN, IMDG, IATA DGR) vallen onder de exclusieve verantwoordelijkheid van de afzender en andere wettelijk aangewezen partijen. EMCargo zet een vrije omschrijving nooit automatisch om in een definitieve classificatie en vervangt geen gecertificeerde masterdata, veiligheidsadviseur of de actuele, geautoriseerde regelgeving."
-      },
-      {
-        "heading": "3. Geen garanties (AS IS)",
-        "body": "De software en alle gegenereerde documenten worden geleverd \"AS IS\" en \"AS AVAILABLE\", zonder enige expliciete of impliciete garantie, waaronder garanties van verkoopbaarheid, geschiktheid voor een bepaald doel, juistheid, actualiteit, volledigheid of niet-inbreuk. Er wordt geen garantie gegeven dat referentiedata of formuliersjablonen juist, actueel of compleet zijn."
-      },
-      {
-        "heading": "4. Uitsluiting van aansprakelijkheid",
-        "body": "Voor zover maximaal toegestaan onder het toepasselijke recht sluiten de maker(s), rechthebbende(n) en bijdragers van EMCargo elke aansprakelijkheid uit voor enige directe, indirecte, incidentele, bijzondere, punitieve of gevolgschade — waaronder winstderving, bedrijfsstilstand, boetes, sancties, vertragingen, in beslag genomen of geweigerde zendingen, verlies van of schade aan goederen, milieuschade, persoonlijk letsel of verlies van gegevens — voortvloeiend uit of verband houdend met het gebruik van, of het onvermogen tot gebruik van, de applicatie of de gegenereerde documenten, ongeacht de rechtsgrond en zelfs indien op de mogelijkheid van dergelijke schade is gewezen. U gebruikt EMCargo volledig op eigen risico."
-      },
-      {
-        "heading": "5. Vrijwaring",
-        "body": "U vrijwaart de maker(s) en rechthebbende(n) van EMCargo tegen alle aanspraken van derden die voortvloeien uit of verband houden met uw gebruik van de applicatie of de gegenereerde documenten."
-      },
-      {
-        "heading": "6. Licentie — Apache License 2.0 met Commons Clause",
-        "body": "EMCargo wordt in licentie gegeven onder de Apache License, Version 2.0, aangevuld met de Commons Clause. Onder de Apache License 2.0 wordt de software zonder garanties en met beperking van aansprakelijkheid geleverd (secties 7 en 8 van die licentie). Gebruik binnen uw eigen organisatie is toegestaan; het verkopen, doorverkopen, hosten als betaalde dienst of anderszins commercieel herdistribueren van de software zelf vereist voorafgaande schriftelijke toestemming van de rechthebbende (Commons Clause). De volledige tekst staat in het LICENSE-bestand van de repository."
-      },
-      {
-        "heading": "7. Toepasselijk recht",
-        "body": "Op deze disclaimer is Nederlands recht van toepassing, voor zover dwingend recht zich daar niet tegen verzet. Indien een bepaling nietig of niet-afdwingbaar wordt geacht, blijven de overige bepalingen onverkort van kracht."
-      }
-    ],
+    "title": "Gebruikersvoorwaarden",
+    "updated": "Versie 0.2 · concept · 8 september 2026",
+    "intro": "Voorwaarden voor het gebruik van EMCargo, gebaseerd op het aangeleverde concept. De identificatie van de contractspartij, juridische contactgegevens en ingangsdatum zijn nog niet vastgesteld. Deze concepttekst wordt niet als reeds overeengekomen voorwaarden gepresenteerd.",
     "creditsHeading": "Iconen",
-    "creditsBody": "De iconen in dit scherm — voor meldingen, het menu, de vervoerswijzen, importeren en de assistent — komen uit vrij te gebruiken sets, op voorwaarde dat de maker wordt vermeld:"
+    "creditsBody": "De iconen in dit scherm — voor meldingen, het menu, de vervoerswijzen, importeren en de assistent — komen uit vrij te gebruiken sets, op voorwaarde dat de maker wordt vermeld:",
+    "sourceLanguage": "De volledige tekst hieronder is in het Nederlands beschikbaar. U kunt de tekst downloaden en bewaren.",
+    "download": "Voorwaarden downloaden",
+    "expandAll": "Alle artikelen openen",
+    "collapseAll": "Artikelen inklappen"
   },
   "compliance": {
     "title": "Nalevingscontrole gevaarlijke stoffen",
@@ -690,7 +665,7 @@
     "qValueFor": "Positie {{position}}: Q = {{value}}",
     "qExceeded": "OVERSCHRIJDT het maximum van 1,0",
     "caoHint": "Cargo Aircraft Only van toepassing op: {{products}}. Vermeld dit op de Shipper's Declaration en de AWB-handling information.",
-    "disclaimer": "Deze controles zijn begeleiding op basis van ADR 2025 en IATA DGR 67e editie en vervangen geen veiligheidsadviseur of de officiële regelgeving. Zie de disclaimer.",
+    "disclaimer": "Deze controles ondersteunen de beoordeling en vervangen geen veiligheidsadviseur of de geldende regelgeving. Zie de gebruikersvoorwaarden.",
     "segGroupsTitle": "Scheidingsgroepen IMDG 7.2.5 (zuren, alkaliën, cyaniden, …)",
     "adnExemptionTitle": "ADN 1.1.3.6.1 — vrijstelling op brutomassa",
     "adnTotalMass": "{{total}} kg van maximaal {{threshold}} kg",
@@ -847,6 +822,23 @@
       "invalid": "Kies een geldige, niet-geanimeerde JPG-, PNG- of WebP-afbeelding.",
       "too_large": "Kies een afbeelding van maximaal 5 MB en 16 megapixels.",
       "not_found": "Profielfoto niet gevonden."
+    },
+    "permissions": {
+      "manager_required": "Beheerdersrechten zijn vereist.",
+      "specialist_required": "Alleen een DG Specialist kan zendingen vrijgeven.",
+      "dgsa_required": "U hebt geen toegang tot DGSA-rapporten.",
+      "protected_account": "Alleen een admin kan dit account beheren."
+    },
+    "review": {
+      "required": "Deze zending moet eerst door een DG Specialist worden vrijgegeven.",
+      "changed": "De zending is gewijzigd sinds de vrijgave. Dien de nieuwe versie in voor controle.",
+      "not_found": "Controle niet gevonden.",
+      "incomplete": "Maak de DG-aangifte en geselecteerde documenten compleet voordat u indient.",
+      "inconsistent": "De documentgegevens komen niet overeen met de zending. Open de wizard en dien opnieuw in.",
+      "too_large": "Deze aanvraag is te groot. Het maximum is 3 MB.",
+      "comment_required": "Licht toe wat er aangepast moet worden.",
+      "already_decided": "Deze controle is al beoordeeld. Vernieuw de pagina.",
+      "owner_required": "Alleen de indiener of admin kan deze controle verwijderen."
     }
   },
   "instructions": {
@@ -1319,7 +1311,8 @@
       "shipment": "Zendingen",
       "documents": "Documenten",
       "report": "Rapporten",
-      "trip": "Ritten"
+      "trip": "Ritten",
+      "dg_review": "DG-controles"
     },
     "actions": {
       "auth.login": "Ingelogd",
@@ -1347,7 +1340,12 @@
       "trip.updated": "Bewaarde rit bijgewerkt",
       "trip.forgotten": "Bewaarde rit verwijderd",
       "settings.history_discarded": "Historie geleegd voor het uitzetten",
-      "auth.recovery_codes_replaced": "Herstelcodes vervangen"
+      "auth.recovery_codes_replaced": "Herstelcodes vervangen",
+      "dg_review": {
+        "submitted": "DG-controle ingediend",
+        "decided": "DG-controle beoordeeld",
+        "forgotten": "DG-controle verwijderd"
+      }
     }
   },
   "trips": {
@@ -1394,7 +1392,7 @@
     "failed": "Concept kon niet worden bewaard — uw invoer staat nog op het scherm.",
     "discard": "Concept weggooien",
     "resumed": "Uw vorige invoer is teruggezet; u staat weer waar u gebleven was.",
-    "notKeptHere": "Deze installatie bewaart niets: bij herladen is uw invoer weg.",
+    "notKeptHere": "Dit concept wordt niet automatisch opgeslagen. Download het om later verder te gaan.",
     "download": "Concept downloaden",
     "open": "Concept openen",
     "opened": "Concept geopend.",
@@ -1429,7 +1427,7 @@
   "overview": {
     "title": "Overzicht",
     "intro": "Dit vraagt vandaag uw aandacht",
-    "introNoHistory": "Deze installatie bewaart geen zendingen, dus er is niets om op terug te komen. Beginnen kan hier wel.",
+    "introNoHistory": "Start een nieuwe zending of volg een ingediende DG-controle. Zendinghistorie staat uit.",
     "resumeTitle": "Verder waar u gebleven was",
     "resume": "Verder",
     "todayTitle": "Vandaag",
@@ -1560,5 +1558,83 @@
     "save": "Wijzigingen opslaan",
     "saving": "Opslaan…",
     "security": "Beveiliging en herstel"
+  },
+  "roles": {
+    "superUser": "Super User",
+    "dgSpecialist": "DG Specialist",
+    "protected": "Alleen een admin kan dit account beheren.",
+    "managementHint": "De admin wijst alle rollen toe. Super Users beheren gebruikers en andere Super Users.",
+    "superSettingsHint": "Beheer de organisatiegegevens en standaardvoorkeuren. Systeeminstellingen en DG-bevoegdheden beheert de admin."
+  },
+  "dgReview": {
+    "title": "DG-controle",
+    "eyebrow": "Gevaarlijke goederen",
+    "queueHint": "Controleer ingediende zendingen. De DG Specialist geeft de beoordeelde versie vrij.",
+    "mineHint": "Volg de controle en vrijgave van uw zendingen.",
+    "pending": "Wacht op controle",
+    "approved": "Vrijgegeven",
+    "changes_requested": "Aanpassing nodig",
+    "requiredHint": "Deze zending bevat gevaarlijke goederen. Dien de zending in voor controle voordat u documenten downloadt of verstuurt.",
+    "storageHint": "Bij indienen wordt deze versie, inclusief documentgegevens en eventuele handtekening, opgeslagen voor de DG Specialist. Dit staat los van de zendinghistorie. U kunt de aanvraag later verwijderen; de vrijgave vervalt dan.",
+    "submit": "Indienen voor controle",
+    "submitting": "Wordt ingediend…",
+    "view": "Controle bekijken",
+    "refresh": "Vernieuwen",
+    "finishFirst": "Maak eerst de geselecteerde documenten en DG-invoer compleet.",
+    "back": "Alle controles",
+    "disabledHint": "Verplichte DG-controle staat uit. Bestaande controles blijven beschikbaar.",
+    "filter": "Status",
+    "count": "{{count}} controles",
+    "empty": "Geen controles gevonden",
+    "emptyHint": "Een zending verschijnt hier zodra deze vanuit de laatste wizardstap is ingediend.",
+    "submittedBy": "Ingediend door {{name}} · {{date}}",
+    "reviewedBy": "Beoordeeld door {{name}} · {{date}}",
+    "submittedShipment": "Ingediende zending",
+    "snapshotHint": "Dit zijn de gegevens van de ingediende versie. De vrijgave geldt uitsluitend voor deze documentinhoud.",
+    "declaration": "DG-aangifte",
+    "packaging": "Verpakking en bijbehorende goederenregel",
+    "decision": "Beoordeling vastleggen",
+    "decisionHint": "Controleer de invoer en alle documentvelden. Vrijgave is een interne beoordeling en vervangt geen vereiste verklaring of handtekening.",
+    "comment": "Toelichting — verplicht bij terugsturen",
+    "approve": "Zending vrijgeven",
+    "requestChanges": "Terug voor aanpassing",
+    "openWizard": "Openen in wizard",
+    "forget": "Controle verwijderen",
+    "forgetHint": "De opgeslagen zending voor deze controle wordt verwijderd. Een bestaande vrijgave vervalt en gekoppelde documenten kunnen opnieuw controle vereisen.",
+    "settingsTitle": "DG-controle en rapportage",
+    "settingsHint": "Bepaal wanneer een specialist moet controleren en wie DGSA-rapporten mag gebruiken.",
+    "enabledSetting": "Verplichte DG-vrijgave",
+    "enabledHint": "Standaard aan. Zendingen met gevaarlijke goederen moeten door een DG Specialist worden vrijgegeven voordat documenten gedownload, gemaild of definitief opgeslagen worden. Wijzigingen vereisen opnieuw controle.",
+    "superDgsaSetting": "Super User toegang tot DGSA-rapporten",
+    "superDgsaHint": "Standaard uit. De admin en DG Specialist hebben altijd toegang. Met deze optie mag ook de Super User rapporten opmaken en bekijken.",
+    "yes": "Ja",
+    "no": "Nee",
+    "fields": {
+      "consignor_name": "Afzender",
+      "consignor_address": "Adres afzender",
+      "consignee_name": "Ontvanger",
+      "consignee_address": "Adres ontvanger",
+      "shipment_reference": "Zendingreferentie",
+      "reference": "Referentie",
+      "un_number": "UN-nummer",
+      "proper_shipping_name": "Officiële vervoersnaam",
+      "class": "Gevarenklasse",
+      "packing_group": "Verpakkingsgroep",
+      "quantity_packages": "Aantal verpakkingen",
+      "type_of_package": "Verpakkingstype",
+      "adr_total_quantity": "Totale hoeveelheid",
+      "classification_code": "Classificatiecode",
+      "labels": "Etiketten",
+      "hazard_number": "Gevaarsidentificatienummer",
+      "tunnel_code": "Tunnelcode",
+      "transport_category": "Vervoerscategorie",
+      "line_id": "Goederenregel",
+      "vehicle": "Transporteenheid",
+      "loading_point": "Laadplaats",
+      "discharge_point": "Losplaats"
+    },
+    "signature": "Handtekening in de documenten",
+    "signatureAlt": "Ingediende handtekening",
+    "privacyLink": "Ingediende DG-controles worden afzonderlijk bewaard. Bekijk uw controles."
   }
 }

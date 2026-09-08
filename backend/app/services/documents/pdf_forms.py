@@ -569,12 +569,8 @@ def fill_pdf_document(
 
     fields = build_fields(document_key, values, lines, dangerous_goods, lang)
 
-    disclaimer = (
-        "CONCEPT — gegenereerd met EMCargo. Controleer, vul aan en onderteken door een "
-        "bevoegde persoon voor gebruik. Geen aansprakelijkheid; geleverd AS IS onder de "
-        "Apache License 2.0 met Commons Clause. Zie DISCLAIMER.md. / DRAFT — generated with "
-        "EMCargo; verify, complete and sign before use. No liability; provided AS IS."
-    )
+    from app.services.documents.notices import output_notice
+    disclaimer = output_notice(lang)
 
     if fitz is not None:
         return _fill_with_pymupdf(template_path, fields, disclaimer, document_key, signature_png)

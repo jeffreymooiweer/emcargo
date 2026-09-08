@@ -18,6 +18,7 @@ class ShipmentIn(BaseModel):
     read here; the bundle is kept for "the documents again".
     """
 
+    dg_review_id: str | None = Field(default=None, max_length=36)
     modality: str = Field(default="", max_length=16)
     language: str = Field(default="nl", max_length=8)
     profiles: list[str] = Field(default_factory=list)

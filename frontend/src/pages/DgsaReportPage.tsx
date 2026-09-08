@@ -1,3 +1,5 @@
+import { canUseDgsa } from "../permissions";
+import { Navigate } from "react-router";
 /** The safety adviser's annual report (ADR 1.8.3.3), drawn over the kept
  *  shipments of one calendar year.
  *
@@ -68,11 +70,19 @@ function Table({ headers, rows, caption }: { headers: string[]; rows: (string | 
 }
 
 export default function DgsaReportPage({ user }: { user?: User | null }) {
+  const { publicSettings, loaded } = usePreferences();
+  const { t } = useTranslation();
+  if (!loaded) return <p role="status">{t("wizard.loading")}</p>;
+  if (!canUseDgsa(user, publicSettings)) return <Navigate to="/shipments" replace />;
+  return <DgsaReportContent user={user} />;
+}
+
+function DgsaReportContent({ user }: { user?: User | null }) {
   const { t, i18n } = useTranslation();
   const toast = useToast();
   const { publicSettings } = usePreferences();
   const historyOn = !!publicSettings?.history_enabled;
-  const admin = user?.role === "admin";
+  const admin = !!user && ["admin", "super_user", "dg_specialist"].includes(user.role);
   const language = documentLanguage(i18n.language);
 
   const [years, setYears] = useState<number[]>([]);

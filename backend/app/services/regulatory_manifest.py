@@ -238,7 +238,7 @@ def build_manifest(today: date | None = None) -> dict[str, Any]:
         "disclaimer": (
             "A compilation of facts, offered as an aid to filling in documents. "
             "The published editions of ADR, RID, ADN, the IMDG Code and the IATA "
-            "DGR remain authoritative; see DISCLAIMER.md."
+            "DGR remain authoritative; see TERMS.nl.md."
         ),
     }
 

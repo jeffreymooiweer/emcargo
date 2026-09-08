@@ -502,3 +502,60 @@ body { font-feature-settings: "cv11", "ss01"; }
   .editor-form { padding: 20px; }
   .history-status-panel { flex-direction: column; }
 }
+
+/* Review states use text as well as colour, including in high contrast mode. */
+.emcargo-initials { color: #2879ed; }
+.dark .emcargo-initials, .auth-art-brand .emcargo-initials { color: #79b1ff; }
+.mode-card:disabled { cursor: default; transform: none; box-shadow: none; border-color: var(--line); }
+.mode-card:disabled .mode-card-visual { filter: grayscale(1); opacity: .5; }
+.mode-card:disabled .mode-card-content { color: #697586; }
+.mode-card:disabled:hover img { transform: none; }
+.mode-card:disabled .mode-card-rule { display: none; }
+.review-gate, .review-summary, .legal-introduction { display: flex; align-items: flex-start; gap: 1.2rem; padding: 1.5rem; }
+.review-gate > svg, .review-summary > svg, .legal-introduction > svg { flex: 0 0 auto; color: #387ee6; }
+.review-gate h3, .review-decision h3 { font-size: 1.1rem; font-weight: 650; margin-bottom: .45rem; }
+.review-storage-hint { margin-top: .6rem; font-size: .82rem; color: #637086; max-width: 70ch; }
+.dark .review-storage-hint { color: #a3b1c6; }
+.review-policy-note, .review-comment { padding: 1rem; border-left: 3px solid #83a9e0; background: rgb(88 132 200 / .07); white-space: pre-wrap; }
+.review-comment { margin-top: 1rem; }
+.review-summary p { margin-top: .6rem; font-size: .86rem; }
+.review-status { display: inline-flex; padding: .35rem .65rem; border-radius: .45rem; font-size: .78rem; font-weight: 600; white-space: nowrap; }
+.review-status[data-status="pending"] { background: #edf2fc; color: #34588b; }
+.review-status[data-status="approved"] { background: #e3f4ed; color: #166345; }
+.review-status[data-status="changes_requested"] { background: #fff0d6; color: #88540d; }
+.dark .review-status[data-status="pending"] { background: #213652; color: #b2d1ff; }
+.dark .review-status[data-status="approved"] { background: #1c3b30; color: #9ae1c1; }
+.dark .review-status[data-status="changes_requested"] { background: #44341e; color: #f7d096; }
+.review-filter, .review-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.2rem; }
+.review-filter label { display: flex; align-items: center; gap: 1rem; font-size: .875rem; }
+.review-list > li + li { border-top: 1px solid rgb(128 145 168 / .2); }
+.review-list a { display: flex; align-items: center; gap: 1rem; padding: 1.4rem; }
+.review-list a:hover { background: rgb(128 145 168 / .06); }
+.review-list a > div { flex: 1; min-width: 0; }
+.review-list strong { display: block; overflow-wrap: anywhere; }
+.review-list p { font-size: .8rem; color: #6b7890; margin-top: .4rem; }
+.dark .review-list p { color: #a3b1c6; }
+.review-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem 2rem; }
+.review-fields > div { min-width: 0; border-bottom: 1px solid rgb(128 145 168 / .15); padding-bottom: .6rem; }
+.review-fields dt { font-size: .75rem; color: #637086; text-transform: capitalize; }
+.dark .review-fields dt { color: #a3b1c6; }
+.review-fields dd { margin-top: .35rem; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .875rem; }
+.review-fields .review-fields { grid-template-columns: 1fr; }
+.review-goods li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .7rem; padding: .8rem 0; border-top: 1px solid rgb(128 145 168 / .2); font-size: .875rem; }
+.review-declaration { border-top: 1px solid rgb(128 145 168 / .2); padding: 1rem 0; }
+.review-declaration summary { cursor: pointer; padding: .5rem 0; font-weight: 600; }
+.review-declaration .review-fields { margin-top: 1rem; }
+.review-decision { display: grid; gap: 1rem; padding: 1.5rem; }
+.review-decision p, .review-decision label { font-size: .875rem; }
+.legal-workspace { max-width: 1040px; }
+.legal-articles > details + details { border-top: 1px solid rgb(128 145 168 / .2); }
+.legal-articles summary { padding: 1.4rem; cursor: pointer; font-weight: 600; }
+.legal-body { padding: 0 1.4rem 1.5rem; max-width: 86ch; }
+.legal-body p { font-size: .9rem; line-height: 1.85; margin-top: 1rem; white-space: pre-line; }
+@media (max-width: 640px) {
+  .review-fields { grid-template-columns: 1fr; }
+  .review-gate, .review-summary, .legal-introduction { padding: 1.1rem; gap: .8rem; }
+  .review-list a { flex-wrap: wrap; padding: 1.1rem; }
+  .review-list a > div { flex-basis: 100%; }
+  .review-footer { padding-inline: 0; }
+}

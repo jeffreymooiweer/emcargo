@@ -16,7 +16,7 @@ Legal basis of the generated lines:
   of packages, net quantity per package and packing instruction.
 
 All results are an aid to filling in; the consignor stays responsible
-(DISCLAIMER.md).
+(TERMS.nl.md).
 """
 from __future__ import annotations
 

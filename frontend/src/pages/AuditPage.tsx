@@ -24,7 +24,7 @@ const buttonSecondary =
 const PER_PAGE = 50;
 
 /** The groups the action filter offers before the individual codes. */
-export const ACTION_GROUPS = ["auth", "user", "settings", "shipment", "trip", "documents", "report"];
+export const ACTION_GROUPS = ["auth", "user", "settings", "shipment", "dg_review", "trip", "documents", "report"];
 
 function when(iso: string, language: string): string {
   try {

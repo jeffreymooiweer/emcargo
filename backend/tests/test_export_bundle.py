@@ -322,3 +322,7 @@ def test_a_refusal_from_the_mail_server_is_passed_on(data_dir, monkeypatch):
     })
     assert response.status_code == 400
     assert "smtp.example.com:587" in response.json()["detail"]
+
+
+# These fixtures exercise document/retention behaviour with optional review off.
+pytestmark = pytest.mark.usefixtures("dg_review_disabled")

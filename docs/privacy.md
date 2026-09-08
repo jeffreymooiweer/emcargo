@@ -10,7 +10,7 @@ Everything persistent lives in the `/data` volume:
 | Stored | Why |
 |---|---|
 | User accounts | Logging in |
-| Profile photos users choose to upload | Their account menu and the administrator's user directory; stored as a small image without camera metadata, readable only by the owner and administrators, and removable under Settings / My details |
+| Profile photos users choose to upload | Their account menu and the operational managers’ user directory; stored as a small image without camera metadata, readable only by the owner, Super Users and administrators, and removable under Settings / My details |
 | Catalogue reference data | Materials, profiles, locations, UN numbers |
 | Catalogue sync status | So startup knows what is current |
 | Equipment **you** imported | Your own library |
@@ -20,6 +20,7 @@ Everything persistent lives in the `/data` volume:
 | Kept shipments — **only** with the history switched on | The shipments the organisation chose to keep; see [The shipment history](#the-shipment-history) |
 | The address book — **only** with the history switched on | Parties (name, address, contact) somebody pressed **Save** on in the details step, shared by everyone on the installation |
 | The articles library — **only** with the history switched on | Your own article codes with the UN number, names, packing group and packaging you gave them, shared by everyone on the installation |
+| Submitted DG reviews | The explicitly submitted version, including document inputs and any signature; independent of optional history, visible to its submitter, specialists and admins until removed |
 | The safety adviser's annual reports — **only** with the history switched on | The answers an adviser saved on the DGSA report form, one record per year and scope; the figures are recounted from the kept shipments each time |
 | The audit log — organisation application only | Who did what and when, as metadata: the action, the account, a reference or a document key, the address the request came from. Never the contents of a shipment; see [The audit log](#the-audit-log) |
 
@@ -28,18 +29,18 @@ That is the whole list.
 Settings are stored per account, so they follow you to a second device rather than staying
 behind in one browser. They hold what you chose to put there: your consignor name and
 address, a contact, a carrier, a loading point, an emergency number — and, if you draw one,
-**your signature**. That last one is worth naming explicitly, because it is the only image
-EMCargo keeps. It is saved only when you draw or upload it on the settings screen,
-clearing it removes it, and it never leaves your server. If you would rather not keep one,
-leave that section on "skip" and sign the printed documents with a pen.
+**your signature**. Saving a personal signature keeps it for future forms; removing
+it from personal settings does not erase copies already submitted for review or
+kept in shipment history. Profile photos and branding images are also stored.
+The document signature is included in exports and any mail the user sends.
 
 ## What is deliberately not stored
 
-- **No shipment history**, unless an administrator switched one on. Once you close a
-  shipment, its package lines are gone. An organisation application whose administrator
-  switched **Keep shipments** on keeps them instead — see [The shipment
-  history](#the-shipment-history) for exactly what, and how it is switched off again.
-- **No job database with material lists.** Nothing is written down while you work.
+- **No completed shipment history unless enabled.** Explicitly submitted DG
+  reviews are a separate exception: they retain the submitted version until the
+  submitter or admin deletes it, whether history is on or off.
+- **Drafts are autosaved only while history is enabled.** Without history, an
+  unsubmitted draft must be downloaded to continue later.
 - **No document archive.** Exports are written to a temporary file, streamed to your
   browser and deleted immediately afterwards.
 - **No operational equipment data in the repository or the Docker image.** The equipment
@@ -51,7 +52,8 @@ leave that section on "skip" and sign the printed documents with a pen.
   [The shipment history](#the-shipment-history) — and only when somebody presses the
   button.
 
-This is a deliberate choice. If a job is finished, there is nothing left to leak.
+The operator manages access, backups and retention for all stored data, including
+review submissions. Finishing a job does not delete its retained records.
 
 ## What leaves your server
 
@@ -69,8 +71,8 @@ startup. Switch it off on the settings screen or with `CATALOG_AUTO_SYNC=false`.
 **The update check** asks GitHub's public release listing whether a newer EMCargo
 exists, only while an administrator is signed in, and sends nothing but the request
 itself. Switch it off on the settings screen or with `UPDATE_CHECK_ENABLED=false`;
-off means EMCargo never asks. Either way the application cannot update itself —
-the answer only tells the administrator there is something to pull.
+off means EMCargo never asks. Where the optional update service is configured, an administrator can install
+an update from the application; this triggers the separate image download below.
 
 **The assistant's model download** happens once, only when an administrator clicks
 *install* on the settings screen: the pinned llama.cpp build and the Qwen3 model file
@@ -165,7 +167,7 @@ that produced its documents, and the structured export with the derived findings
 editions they were computed against. The documents themselves are **not** archived; they
 are rendered again from the kept request when asked for.
 
-**Who sees it.** An administrator sees every kept shipment. Anybody else sees the
+**Who sees it.** Admins, Super Users and DG Specialists see every kept shipment. Other users see the
 shipments of their own **department**, and a user without a department sees the ones
 nobody's department claims — so an organisation that never makes a department has
 everybody seeing everything, and one that does has each department seeing its own. A
@@ -192,12 +194,12 @@ department rule as shipments, are listed on their own page, reopen on the groupa
 and are removed there or from their record. Switching the history off counts them along
 with the shipments and deletes them in the same confirmed step.
 
-**What does not change.** Nothing is written
-while you work: a shipment is kept only when its documents are downloaded or you press
-the button, and a trip only when you press the button. And with the switch off, the
-addresses the shipments and trips pages use answer 404 on the server, exactly as an
-address that does not exist — the promise is enforced by what answers, not merely
-described in a setting.
+**Drafts and review submissions.** The history feature autosaves a private draft
+while it is being edited. DG submissions are explicitly saved separately and are
+not completed-history entries. Disabling or clearing history does not erase those
+submissions or their signatures. See [DG review](dg-review.md) for removal and
+release revocation. With history off, its own API routes return 404; the review
+queue remains available to authorised accounts.
 
 ## The audit log
 
@@ -217,7 +219,8 @@ sees it.
 **What a line never holds.** The contents of a shipment. The summary of a kept shipment
 is its reference; of a document download, the document key; of a settings change, the
 *names* of the settings that changed — the mail password among them, never its value;
-of a mailed bundle, the document keys and how many recipients, never who. A refused
+of a mailed bundle, the document keys and how many recipients, never who. DG review
+events record the reference or decision status, not the submitted data or comments. A refused
 sign-in records the name that was tried and why it was refused, never the password. The
 test suite searches the whole table for the consignment's parties and goods after a full
 round of keeping, exporting and mailing, and finds none of them.

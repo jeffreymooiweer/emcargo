@@ -69,6 +69,7 @@ class UnCardsRequest(BaseModel):
 
 
 class DocumentExportRequest(BaseModel):
+    dg_review_id: str | None = Field(default=None, max_length=36)
     document_key: str
     values: dict = Field(default_factory=dict)
     lines: list[dict] = Field(default_factory=list)
@@ -99,6 +100,7 @@ class DocumentBundleRequest(BaseModel):
     complaint when the shipment has no dangerous goods.
     """
 
+    dg_review_id: str | None = Field(default=None, max_length=36)
     documents: list[DocumentExportRequest] = Field(default_factory=list)
     dangerous_goods: list[dict] | None = None
     profiles: list[str] = []

@@ -143,6 +143,14 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
+  organisationSettings: () => request<OrganisationSettings>("/settings/organisation"),
+  saveOrganisationSettings: (payload: OrganisationSettings) => request<OrganisationSettings>("/settings/organisation", { method: "PUT", body: JSON.stringify(payload) }),
+  dgReviews: (status = "", page = 1) => request<{ items: DgReview[]; total: number; page: number }>(`/dg-reviews?status=${encodeURIComponent(status)}&page=${page}`),
+  dgReview: (id: string) => request<DgReview & { shipment: ShipmentIn }>(`/dg-reviews/${encodeURIComponent(id)}`),
+  dgReviewStatus: (payload: ShipmentIn) => request<DgReview | null>("/dg-reviews/status", { method: "POST", body: JSON.stringify(payload) }),
+  submitDgReview: (payload: ShipmentIn) => request<DgReview>("/dg-reviews", { method: "POST", body: JSON.stringify(payload) }),
+  decideDgReview: (id: string, status: "approved" | "changes_requested", comment: string) => request<DgReview>(`/dg-reviews/${encodeURIComponent(id)}/decision`, { method: "POST", body: JSON.stringify({ status, comment }) }),
+  forgetDgReview: (id: string) => request<{ ok: boolean }>(`/dg-reviews/${encodeURIComponent(id)}`, { method: "DELETE" }),
   /** Signing in is one step or two. With a second factor the answer carries
    *  a challenge instead of a session; the code goes to `loginTwoFactor`. */
   login: (username: string, password: string) =>
@@ -914,6 +922,7 @@ export interface ShipmentPage {
  *  structured export from the parts itself, so the kept record is produced
  *  by the same code as the downloadable one. */
 export interface ShipmentIn {
+  dg_review_id?: string;
   modality: string;
   language: string;
   profiles: string[];
@@ -1200,6 +1209,8 @@ export interface InstanceSettings {
    *  the server refuses to switch it off while kept shipments or trips
    *  exist; `historyCounts` says how many and `discardHistory` deletes them. */
   history_enabled: boolean;
+  dg_review_enabled?: boolean;
+  super_user_dgsa_enabled?: boolean;
   organisation_name: string;
   organisation_address: string;
   /** What the screen calls itself; empty means EMCargo. The logo and the
@@ -1241,6 +1252,8 @@ export interface PublicSettings {
   /** Whether this installation keeps its shipments. Optional so an older
    *  mocked answer still type-checks; the server always sends it. */
   history_enabled?: boolean;
+  dg_review_enabled?: boolean;
+  super_user_dgsa_enabled?: boolean;
 }
 
 /** The lists the settings screen offers, from the backend that owns them. */
@@ -2311,4 +2324,18 @@ export interface UnitConversion {
   /** Filled when one of the two could not be determined, for example "per_item"
    *  with a count and no weight per item. Not an error but an outcome. */
   missing: string | null;
+}
+
+
+export type OrganisationSettings = Pick<InstanceSettings, "organisation_name" | "organisation_address" | "default_language" | "default_theme">;
+export interface DgReview {
+  id: string;
+  reference: string;
+  modality: string;
+  status: "pending" | "approved" | "changes_requested";
+  created_by: string;
+  created_at: string;
+  reviewed_by: string;
+  reviewed_at: string | null;
+  comment: string;
 }

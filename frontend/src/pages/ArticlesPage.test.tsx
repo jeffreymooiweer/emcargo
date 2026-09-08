@@ -1,3 +1,4 @@
+import { MemoryRouter } from "react-router";
 /**
  * The articles library page: lists, adds, edits, imports; and says where the
  * history is off that there is nothing to keep articles beside.
@@ -51,7 +52,7 @@ beforeEach(() => {
 function renderPage() {
   return render(
     <ToastProvider>
-      <ArticlesPage />
+      <MemoryRouter><ArticlesPage /></MemoryRouter>
     </ToastProvider>,
   );
 }

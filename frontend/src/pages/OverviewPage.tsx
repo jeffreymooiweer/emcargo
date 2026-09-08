@@ -1,3 +1,4 @@
+import { ShieldIcon } from "../components/icons";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -64,6 +65,7 @@ export default function OverviewPage({ user }: { user?: User }) {
         </div>
         <Link to="/" className="action-primary"><PlusIcon className="h-5 w-5" />{t("nav.new")}</Link>
       </div>
+      <Link to="/dg-reviews" className="surface review-summary"><ShieldIcon className="h-7 w-7" /><div><h3 className="font-semibold">{t("dgReview.title")}</h3><p>{t(user?.role === "dg_specialist" || user?.role === "admin" ? "dgReview.queueHint" : "dgReview.mineHint")}</p></div></Link>
       {error && <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
         <span>{t("overview.loadError")}</span>
         <button className="action-secondary" onClick={() => setReload((value) => value + 1)}>{t("overview.retry")}</button>

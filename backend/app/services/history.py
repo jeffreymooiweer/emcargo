@@ -125,7 +125,7 @@ def _index(record: Shipment, export: dict[str, Any], payload: ShipmentIn) -> Non
 
 
 def keep(db: Session, user: User, payload: ShipmentIn,
-         existing: Shipment | None = None) -> Shipment:
+         existing: Shipment | None = None, *, commit: bool = True) -> Shipment:
     """Keep a shipment — a new row, or the same row brought up to date."""
     export = build_shipment_export(
         payload.values, payload.lines, payload.dangerous_goods,
@@ -157,7 +157,10 @@ def keep(db: Session, user: User, payload: ShipmentIn,
     record.export_json = export_json
     if existing is None:
         db.add(record)
-    db.commit()
+    if commit:
+        db.commit()
+    else:
+        db.flush()
     db.refresh(record)
     return record
 

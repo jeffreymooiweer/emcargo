@@ -1,7 +1,7 @@
 import AvatarSettings from "../components/AvatarSettings";
 import { useEffect, useId, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { useToast } from "../toast/ToastProvider";
 import ConfirmDialog from "../toast/ConfirmDialog";
 import UpdatePanel from "../components/UpdatePanel";
@@ -9,6 +9,7 @@ import NumberInput from "../components/NumberInput";
 import {
   AssistantStatus,
   InstanceSettings,
+  OrganisationSettings,
   SettingsOptions,
   ThemeChoice,
   UnCardStoreStatus,
@@ -45,6 +46,7 @@ const TABS = [
   { key: "details", label: "settings.tabDetails", admin: false, group: "personal", icon: UserIcon },
   { key: "security", label: "settingsNav.security", admin: false, group: "personal", icon: ShieldIcon },
   { key: "admin", label: "settingsNav.organisation", admin: true, group: "organisation", icon: BuildingIcon },
+  { key: "dg", label: "dgReview.settingsTitle", admin: true, group: "organisation", icon: ShieldIcon },
   { key: "branding", label: "settings.adminBranding", admin: true, group: "organisation", icon: PaletteIcon },
   { key: "mail", label: "settings.mailTitle", admin: true, group: "organisation", icon: MailIcon },
   { key: "updates", label: "settings.adminUpdates", admin: true, group: "system", icon: RefreshIcon },
@@ -56,7 +58,7 @@ const TABS = [
 type TabKey = (typeof TABS)[number]["key"];
 
 /** The personal tabs share one draft and therefore one save button. */
-const ADMIN_TABS: TabKey[] = ["admin", "branding", "mail", "network", "security", "cards"];
+const ADMIN_TABS: TabKey[] = ["admin", "dg", "branding", "mail", "network", "security", "cards"];
 const PERSONAL_TABS: TabKey[] = ["appearance", "shipment", "details"];
 
 interface Props {
@@ -122,7 +124,7 @@ export default function SettingsPage({ user, onUserChange }: Props) {
     }
   };
 
-  const tabs = TABS.filter((tab) => !tab.admin || user.role === "admin");
+  const tabs = TABS.filter((tab) => !tab.admin || user.role === "admin" || (user.role === "super_user" && tab.key === "admin"));
   const active = tabs.some((tab) => tab.key === tab_) ? tab_ : "appearance";
 
   return (
@@ -352,6 +354,7 @@ export default function SettingsPage({ user, onUserChange }: Props) {
 
       {active === "security" && <TwoFactorPanel />}
       {ADMIN_TABS.includes(active) && user.role === "admin" && <AdminSettings section={active} />}
+      {active === "admin" && user.role === "super_user" && <OrganisationPanel />}
       {active === "updates" && user.role === "admin" && <UpdatePanel />}
       {active === "cards" && user.role === "admin" && <UnCardsAdminPanel />}
       {active === "assistant" && user.role === "admin" && <AssistantAdmin />}
@@ -427,7 +430,7 @@ function AdminSettings({ section }: { section: TabKey }) {
     toast.success(t("settings.saved"));
     // The menu and the export step read the public settings; a switch
     // saved here must show there without a page reload.
-    if (stored.history_enabled !== settings.history_enabled) void reload();
+    void reload();
   };
 
   const submit = async () => {
@@ -525,6 +528,11 @@ function AdminSettings({ section }: { section: TabKey }) {
         </div>
       </section>
 
+      <section hidden={section !== "dg"} className={`${panelClass} p-5 space-y-5`}>
+        <div><h3 className="font-semibold">{t("dgReview.settingsTitle")}</h3><p className="mt-2 text-sm text-slate-500">{t("dgReview.settingsHint")}</p><Link to="/users" className="mt-3 inline-flex text-sm font-medium underline">{t("nav.users")}</Link></div>
+        <Toggle label={t("dgReview.enabledSetting")} hint={t("dgReview.enabledHint")} checked={draft.dg_review_enabled !== false} onChange={value => set("dg_review_enabled", value)} />
+        <Toggle label={t("dgReview.superDgsaSetting")} hint={t("dgReview.superDgsaHint")} checked={draft.super_user_dgsa_enabled === true} onChange={value => set("super_user_dgsa_enabled", value)} />
+      </section>
       <section hidden={section !== "branding"} className={`${panelClass} p-5 space-y-5`}>
         <div>
           <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
@@ -1235,4 +1243,32 @@ function BrandingPictures() {
       </div>
     </div>
   );
+}
+
+
+function OrganisationPanel() {
+  const { t } = useTranslation();
+  const toast = useToast();
+  const { reload } = usePreferences();
+  const [draft, setDraft] = useState<OrganisationSettings | null>(null);
+  const [failure, setFailure] = useState("");
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { api.organisationSettings().then(setDraft).catch(e => setFailure(String(e))); }, []);
+  async function save() {
+    if (!draft) return;
+    setBusy(true);
+    try { setDraft(await api.saveOrganisationSettings(draft)); await reload(); toast.success(t("settings.saved")); }
+    catch (e) { setFailure(String(e)); }
+    finally { setBusy(false); }
+  }
+  return <section className={`${panelClass} p-5 space-y-5`}><div><h3 className="font-semibold">{t("settingsNav.organisation")}</h3><p className="mt-2 text-sm text-slate-500">{t("roles.superSettingsHint")}</p></div>
+    {failure && <p role="alert">{failure}</p>}
+    {draft && <>
+      <Field label={t("settings.organisationName")} value={draft.organisation_name} onChange={organisation_name => setDraft({ ...draft, organisation_name })} />
+      <label className="block text-sm">{t("settings.organisationAddress")}<textarea className={`${inputClass} mt-2`} value={draft.organisation_address} onChange={e => setDraft({ ...draft, organisation_address: e.target.value })} /></label>
+      <label className="block text-sm">{t("settings.adminDefaultLanguage")}<select className={`${inputClass} mt-2`} value={draft.default_language} onChange={e => setDraft({ ...draft, default_language: e.target.value })}>{SUPPORTED_LANGUAGES.map(language => <option key={language} value={language}>{LANGUAGE_NAMES[language]}</option>)}</select></label>
+      <label className="block text-sm">{t("settings.adminDefaultTheme")}<select className={`${inputClass} mt-2`} value={draft.default_theme} onChange={e => setDraft({ ...draft, default_theme: e.target.value as ThemeChoice })}>{THEMES.map(theme => <option key={theme} value={theme}>{t(`settings.theme${theme[0].toUpperCase()}${theme.slice(1)}`)}</option>)}</select></label>
+      <button className={buttonPrimary} disabled={busy} onClick={() => void save()}>{t("settings.save")}</button>
+    </>}
+  </section>;
 }
