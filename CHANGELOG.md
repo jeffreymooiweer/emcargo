@@ -2,6 +2,35 @@
 
 All notable changes are documented here, following [Semantic Versioning](https://semver.org/).
 
+## [2.1.1] — 2026-09-08
+
+### Simpler goods entry
+
+- Replace nested goods cards with a flat, responsive list. Keep description,
+  quantity, unit and one localized total immediately visible and editable.
+  Move dimensions, per-item figures and completed substance explanations into
+  the named Details disclosure; retain the confirmed UN identity on the row.
+- Combine file import, Excel paste and the template behind one Import action.
+  Preserve column mapping, append/replace choices and import undo. Opening the
+  dialog traps focus; Escape returns to its trigger. Cancelled file parsing
+  cannot apply a late response, including when a file was dropped.
+- Keep unanswered substance questions and actionable calculation errors visible.
+  Show names alongside multiple UN candidates. Rejecting a suggestion keeps its
+  existing meaning and does not declare goods non-dangerous.
+- Shorten mobile progress labels and the Continue action in all four languages.
+  Separate long document names and readiness messages in the desktop summary.
+
+### Calculation stability
+
+- Preserve a saved line's total when recalculating unchanged goods. Previously,
+  a rounded per-piece value could override the independently rounded total:
+  two 25 L petrol packages could change from 37.25 kg to 37.24 kg on reopening.
+  Older snapshots and manual totals remain supported; a per-piece-only saved
+  weight still works. No database migration is required.
+- Record actual mobile and desktop screenshots, regression results and the
+  independent focused review in [the 2.1.1 review](docs/design/review-2.1.1.md).
+  Container publication remains exclusive to GHCR.
+
 ## [2.1.0] — 2026-09-08
 
 ### A quieter workspace

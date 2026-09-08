@@ -122,14 +122,15 @@ export default function ShipmentPanel({
           <summary className="cursor-pointer text-sm font-semibold text-slate-700 dark:text-slate-200">{t("panel.preparing")}</summary>
           <ul className="mt-2 space-y-1.5">
             {documents.map((doc) => (
-              <li key={doc.key} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              <li key={doc.key} className="grid grid-cols-[8px_minmax(0,1fr)] items-start gap-x-2 gap-y-0.5">
                 <span
                   className={`mt-1.5 h-2 w-2 shrink-0 self-start rounded-full ${dotColour[doc.state]}`}
                   aria-hidden
                 />
-                <span className="min-w-0 flex-1 text-sm text-slate-700 dark:text-slate-200">
+                <span className="min-w-0 break-words text-sm text-slate-700 dark:text-slate-200">
                   {doc.label}
                 </span>
+                <div className="col-start-2 min-w-0 break-words">
                 {doc.state === "ready" ? (
                   <span className="text-xs text-emerald-700 dark:text-emerald-300">
                     {t("panel.ready")}
@@ -155,6 +156,7 @@ export default function ShipmentPanel({
                     {t("panel.missingUnknown")}
                   </span>
                 )}
+                </div>
               </li>
             ))}
           </ul>

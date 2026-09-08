@@ -147,7 +147,7 @@
     "removeLine": "Verwijderen",
     "noLines": "Voeg minstens één goederenregel met omschrijving toe.",
     "importExcel": "Importeren",
-    "importTitle": "Importeren uit bestand of tekst",
+    "importTitle": "Goederen importeren",
     "importHint": "Plak gekopieerde kolommen uit Excel (omschrijving | aantal | eenheid), of download de template en upload een bestand.",
     "importExampleTitle": "Voorbeeld",
     "importExample": "staal hoekprofiel 80x80x8x6000 | 8 | stuks",
@@ -207,7 +207,22 @@
     "typeOfPackage": "Verpakkingssoort",
     "netPerPackage": "Netto per verpakking",
     "derivedLater": "Uit de tabellen",
-    "moreActions": "Meer acties"
+    "moreActions": "Meer acties",
+    "simpleIntro": "Wat neemt u mee? Voeg een artikel of goederenlijst toe.",
+    "simplePlaceholder": "Bijv. benzine 25 L of stalen platen",
+    "importAction": "Importeren",
+    "importIntro": "Kies een bestand of plak uw lijst uit Excel.",
+    "dgIdentityNeeded": "Stof nog invullen",
+    "dgCandidateRejected": "Suggestie afgewezen",
+    "dgMarked": "Gevaarlijke stof",
+    "continue": "Verder",
+    "continueTo": "Verder: {{step}}",
+    "shortStep": {
+      "lines": "Goederen",
+      "dg": "Stoffen",
+      "details": "Gegevens",
+      "export": "Controle"
+    }
   },
   "import": {
     "downloadTemplate": "Template downloaden",

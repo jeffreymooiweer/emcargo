@@ -1567,8 +1567,9 @@ export default function WizardPage() {
           />
 
           <WizardActions>
-            <button type="button" onClick={goFromLines} disabled={loading} className={buttonPrimary}>
-              {needsDg ? t("wizard.step3dg") : t("wizard.toShipmentDetails")}
+            <button type="button" onClick={goFromLines} disabled={loading} className={buttonPrimary + " wizard-next"}
+              aria-label={t("review.continueTo", { step: needsDg ? t("wizard.step3dg") : t("wizard.toShipmentDetails") })}>
+              {t("review.continue")}<span aria-hidden="true">→</span>
             </button>
           </WizardActions>
         </div>

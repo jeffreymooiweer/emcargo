@@ -1,16 +1,6 @@
-/**
- * Getting a list of goods in, from the goods step itself.
- *
- * Three things are pinned. The entrance: pasting and choosing a file are
- * actions with names on the step, not an icon inside a dialog somebody has to
- * open first. The question: a file whose heading row was recognised leaves
- * nothing to ask about and simply goes in, while a guessed one shows its column
- * mapping before anything is imported — asking every time is how a column
- * question becomes something people click past. And the choice: a shipment with
- * nothing in it is not asked whether to add or replace, because there is
- * nothing to replace.
- */
-import { render, screen, waitFor } from "@testing-library/react";
+/** Import keeps the main goods list quiet while retaining mapping decisions,
+ * append/replace semantics, direct paste entry and cancellation safety. */
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
@@ -52,23 +42,40 @@ function renderImport(hasLines: boolean, onImport = vi.fn()) {
 
 beforeEach(() => {
   vi.restoreAllMocks();
+  HTMLDialogElement.prototype.showModal = function () { this.open = true; };
+  HTMLDialogElement.prototype.close = function () { this.open = false; };
 });
 
 describe("the entrance on the goods step", () => {
-  it("offers pasting and choosing a file by name, without opening anything", () => {
+  it("offers one named import action and keeps the main surface quiet", async () => {
     renderImport(false);
-    expect(screen.getByRole("button", { name: "review.importPaste" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "review.importAction" })).toBeInTheDocument();
+    expect(screen.queryByRole("textbox")).toBeNull();
+    expect(screen.queryByRole("button", { name: "import.downloadTemplate" })).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "review.importAction" }));
+    expect(screen.getByRole("dialog", { name: "review.importTitle" })).toBeInTheDocument();
+    expect(screen.getByLabelText("review.importPaste")).toBeInTheDocument();
     expect(screen.getByText("review.importFile")).toBeInTheDocument();
-    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.getByRole("button", { name: "import.downloadTemplate" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "review.importTitle" })).toHaveFocus();
   });
 
-  it("the paste area opens in place and takes the focus", async () => {
-    renderImport(false);
-    await userEvent.click(screen.getByRole("button", { name: "review.importPaste" }));
-    const area = screen.getByLabelText("review.importPaste");
-    expect(area).toBeInTheDocument();
-    await waitFor(() => expect(area).toHaveFocus());
+  it("closing with Escape returns focus without changing the goods", async () => {
+    const onImport = renderImport(true);
+    const trigger = screen.getByRole("button", { name: "review.importAction" });
+    await userEvent.click(trigger);
+    await userEvent.type(screen.getByLabelText("review.importPaste"), "unfinished input");
+    fireEvent(screen.getByRole("dialog"), new Event("cancel", { bubbles: false, cancelable: true }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(trigger).toHaveFocus();
+    expect(onImport).not.toHaveBeenCalled();
   });
+
+  it("a direct paste shortcut opens with the textarea focused", () => {
+    render(<ToastProvider><GoodsImport initialPaste hasLines={false} onImport={vi.fn()} /></ToastProvider>);
+    expect(screen.getByLabelText("review.importPaste")).toHaveFocus();
+  });
+
 });
 
 describe("asking only where there is doubt", () => {
@@ -78,6 +85,7 @@ describe("asking only where there is doubt", () => {
       rows: [["Omschrijving", "Aantal", "Eenheid"], ["Stalen hoekprofiel", "8", "stuks"]],
     });
     const onImport = renderImport(false);
+    await userEvent.click(screen.getByRole("button", { name: "review.importAction" }));
     await userEvent.upload(screen.getByLabelText("review.importFile", { selector: "input" }), FILE);
     await waitFor(() => expect(onImport).toHaveBeenCalledWith("Stalen hoekprofiel | 8 | stuks", "replace"));
     // Nothing was asked, so nothing is left standing.
@@ -90,6 +98,7 @@ describe("asking only where there is doubt", () => {
       rows: [["Stalen hoekprofiel", "8", "stuks"]],
     });
     const onImport = renderImport(false);
+    await userEvent.click(screen.getByRole("button", { name: "review.importAction" }));
     await userEvent.upload(screen.getByLabelText("review.importFile", { selector: "input" }), FILE);
     expect(await screen.findByText("import.guessedColumns")).toBeInTheDocument();
     expect(onImport).not.toHaveBeenCalled();
@@ -101,6 +110,7 @@ describe("asking only where there is doubt", () => {
       rows: [["Stalen hoekprofiel", "8", "stuks"], ["", "3", "stuks"], ["", "", ""]],
     });
     renderImport(false);
+    await userEvent.click(screen.getByRole("button", { name: "review.importAction" }));
     await userEvent.upload(screen.getByLabelText("review.importFile", { selector: "input" }), FILE);
     expect(await screen.findByText(/review.importRead:1/)).toBeInTheDocument();
     expect(screen.getByText(/review.importSkipped:2/)).toBeInTheDocument();
@@ -110,7 +120,7 @@ describe("asking only where there is doubt", () => {
 describe("adding or replacing", () => {
   it("an empty shipment is not asked which of the two it wants", async () => {
     const onImport = renderImport(false);
-    await userEvent.click(screen.getByRole("button", { name: "review.importPaste" }));
+    await userEvent.click(screen.getByRole("button", { name: "review.importAction" }));
     await userEvent.type(screen.getByLabelText("review.importPaste"), "Stalen plaat | 4 | stuks");
     expect(screen.queryByRole("button", { name: "review.importAppend" })).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "review.importConfirm" }));
@@ -119,7 +129,7 @@ describe("adding or replacing", () => {
 
   it("a shipment with lines is offered both, by name", async () => {
     const onImport = renderImport(true);
-    await userEvent.click(screen.getByRole("button", { name: "review.importPaste" }));
+    await userEvent.click(screen.getByRole("button", { name: "review.importAction" }));
     await userEvent.type(screen.getByLabelText("review.importPaste"), "Stalen plaat | 4 | stuks");
     expect(screen.getByRole("button", { name: "review.importReplace" })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "review.importAppend" }));
@@ -132,6 +142,7 @@ describe("adding or replacing", () => {
       rows: [["Omschrijving", "Aantal", "Eenheid"], ["Stalen hoekprofiel", "8", "stuks"]],
     });
     const onImport = renderImport(true);
+    await userEvent.click(screen.getByRole("button", { name: "review.importAction" }));
     await userEvent.upload(screen.getByLabelText("review.importFile", { selector: "input" }), FILE);
     expect(await screen.findByRole("button", { name: "review.importAppend" })).toBeInTheDocument();
     expect(onImport).not.toHaveBeenCalled();
@@ -139,8 +150,33 @@ describe("adding or replacing", () => {
 
   it("nothing is imported from an empty paste", async () => {
     const onImport = renderImport(false);
-    await userEvent.click(screen.getByRole("button", { name: "review.importPaste" }));
+    await userEvent.click(screen.getByRole("button", { name: "review.importAction" }));
     expect(screen.getByRole("button", { name: "review.importConfirm" })).toBeDisabled();
     expect(onImport).not.toHaveBeenCalled();
   });
+});
+
+it("closing an in-flight file import cannot apply its late response", async () => {
+  let finish!: (value: any) => void;
+  vi.spyOn(api, "parseWizardImportFile").mockImplementation(() => new Promise(resolve => { finish = resolve; }));
+  const onImport = renderImport(false);
+  await userEvent.click(screen.getByRole("button", { name: "review.importAction" }));
+  await userEvent.upload(screen.getByLabelText("review.importFile", { selector: "input" }), FILE);
+  await userEvent.click(screen.getByRole("button", { name: "review.cancel" }));
+  finish({text: "Staal | 1 | stuks", analysis: RECOGNISED, rows: []});
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  expect(onImport).not.toHaveBeenCalled();
+});
+
+it("opens dropped-file progress immediately so new entry cannot race with replacement", async () => {
+  let finish!: (value: any) => void;
+  vi.spyOn(api, "parseWizardImportFile").mockImplementation(() => new Promise(resolve => { finish = resolve; }));
+  const onImport = vi.fn();
+  render(<ToastProvider><GoodsImport dropped={FILE} hasLines={false} onImport={onImport} /></ToastProvider>);
+  expect(screen.getByRole("dialog", { name: "review.importTitle" })).toBeInTheDocument();
+  expect(screen.getByLabelText("review.importPaste")).toBeDisabled();
+  await userEvent.click(screen.getByRole("button", { name: "review.cancel" }));
+  finish({text: "Staal | 1 | stuks", analysis: RECOGNISED, rows: []});
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  expect(onImport).not.toHaveBeenCalled();
 });

@@ -1,45 +1,13 @@
 /**
- * The goods step: one compact line per goods line, edited where it stands.
- *
- * Until v1.192.0 every line was a read-only card and everything changeable
- * lived behind an edit icon, in a dialog. That shape was the right answer to
- * the wrong question. It replaced a table of thirteen input fields — which
- * genuinely did not fit any screen — but it charged three actions and a window
- * for changing a number: the baseline measured five quantity corrections at
- * fifteen actions and five dialogs, none of which was the number itself.
- *
- * What is here now is the middle the two shapes missed. Four things live on the
- * line, because they are what a consignment is made of and what people come
- * back to change: the description, the quantity, the unit, and — read-only —
- * what EMCargo worked out from them. The thirteen fields are not back:
- * dimensions, wall thickness, cargo form, own weights and the article stay in
- * the detail dialog, one click away, exactly as they were.
- *
- * The row wraps rather than switching layouts. On a phone the description takes
- * the width and the quantity, the unit and the outcome fall underneath it; on a
- * laptop it is one line. One implementation, so the validation, the focus order
- * and the keyboard are the same everywhere — a second layout is a second set of
- * bugs.
- *
- * **Getting a list in.** Pasting from Excel and choosing a file are actions on
- * this panel rather than a dialog to find, and the panel takes a dropped file —
- * see ``GoodsImport``. What came out is said above the list: how many lines are
- * settled, how many want looking at, and a filter that narrows to those. Fifty
- * imported lines with one that needs attention used to be fifty cards of
- * scrolling with nothing pointing at it.
- *
- * **Derived figures while the calculation runs.** Typing clears the result, and
- * the wizard recalculates six-tenths of a second after the typing stops. A line
- * whose own text has not changed keeps showing what was worked out for it,
- * dimmed and marked *to be rechecked*; the line being edited shows no figures at
- * all, because a weight that belongs to the previous description is not a
- * weight. Nothing on this screen shows a number for input it was not computed
- * from.
+ * A goods list with direct quantity editing and details on demand.
+ * Successful lines show their result once; only exceptions and unanswered
+ * substance questions add explanation. A compact row must never hide a safety
+ * question, label an unanswered substance safe, or display a stale calculation
+ * as current. Import has its own surface so it does not dominate every edit.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LineItem, UnitCatalogue, api, ArticleRef } from "../api/client";
-import { useToast } from "../toast/ToastProvider";
 import EquipmentCombobox from "./EquipmentCombobox";
 import GoodsImport from "./GoodsImport";
 import LineDetails, { ROUND_TYPES, WALL_PROFILE_TYPES, isDangerous } from "./LineDetails";
@@ -103,12 +71,6 @@ export interface DraftLine {
   weight_each_kg?: number | "";
 }
 
-const panelClass = "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800";
-const fieldClass =
-  "border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 " +
-  "dark:text-slate-100 rounded-lg px-3 py-2.5 text-sm min-h-[44px]";
-const labelClass = "text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400";
-
 interface Props {
   draftLines: DraftLine[];
   resultLines?: LineItem[];
@@ -120,13 +82,6 @@ interface Props {
   onLineWeightChange?: (lineId: number, field: "weight_each_kg" | "weight_total_kg", value: number | null) => void;
   initialPaste?: boolean;
   translateMessage: (msg: string) => string;
-}
-
-function statusColor(status: string) {
-  if (status === "ok") return "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300";
-  if (status === "error") return "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300";
-  if (status === "needs_review") return "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300";
-  return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300";
 }
 
 /** What was answered to a line's substance question, if anything.
@@ -208,35 +163,6 @@ function TrashIcon() {
   );
 }
 
-function RowAction({ label, onClick, icon, danger, disabled, expanded, controls }: {
-  label: string;
-  onClick: () => void;
-  icon: React.ReactNode;
-  danger?: boolean;
-  disabled?: boolean;
-  /** Set on a disclosure, so the button says whether the line is open. */
-  expanded?: boolean;
-  controls?: string;
-}) {
-  const tone = danger
-    ? "text-slate-500 hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-950/40 dark:hover:text-red-400"
-    : "text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100";
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={label}
-      aria-expanded={expanded}
-      aria-controls={controls}
-      title={label}
-      className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors disabled:opacity-40 disabled:pointer-events-none ${tone}`}
-    >
-      {icon}
-    </button>
-  );
-}
-
 export default function ReviewLinesPanel({
   draftLines,
   resultLines,
@@ -249,8 +175,8 @@ export default function ReviewLinesPanel({
   translateMessage,
   initialPaste,
 }: Props) {
-  const { t } = useTranslation();
-  const toast = useToast();
+  const { t, i18n } = useTranslation();
+  const number = new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 3 });
   const canRemove = draftLines.length > 1;
 
   // Which line is open, by id rather than by index: a line can be removed or
@@ -272,17 +198,6 @@ export default function ReviewLinesPanel({
 
   const updateDraft = (id: number, patch: Partial<DraftLine>) => {
     onDraftChange(draftLines.map((line) => (line.id === id ? { ...line, ...patch } : line)));
-  };
-
-  // A toast button is pressed long after the render that created it, so it
-  // must not patch the lines as they were then. This ref is what "the lines"
-  // means at the moment the user answers.
-  const latest = useRef({ draftLines, onDraftChange });
-  latest.current = { draftLines, onDraftChange };
-
-  const patchLine = (id: number, patch: Partial<DraftLine>) => {
-    const { draftLines: lines, onDraftChange: change } = latest.current;
-    change(lines.map((line) => (line.id === id ? { ...line, ...patch } : line)));
   };
 
   /**
@@ -395,232 +310,123 @@ export default function ReviewLinesPanel({
     if (attention + unanswered === 0 && onlyAttention) setOnlyAttention(false);
   }, [attention, unanswered, onlyAttention]);
 
-  const anyStale = useMemo(
-    () => draftLines.some((line, index) => outcomeFor(line, index).stale && line.description.trim()),
-    // outcomeFor reads the refs, which change with the results.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [draftLines, resultLines],
-  );
 
   return (
-    <div
-      className={`${panelClass} goods-panel ${dragging ? "ring-2 ring-brand-400" : ""}`}
+    <section
+      aria-label={t("review.linesTitle")}
+      className={"goods-panel" + (dragging ? " goods-dragging" : "")}
       onDragOver={onImport ? (event) => {
         if (!event.dataTransfer.types.includes("Files")) return;
-        event.preventDefault();
-        setDragging(true);
+        event.preventDefault(); setDragging(true);
       } : undefined}
       onDragLeave={onImport ? (event) => {
-        if (event.currentTarget.contains(event.relatedTarget as Node)) return;
-        setDragging(false);
+        if (!event.currentTarget.contains(event.relatedTarget as Node)) setDragging(false);
       } : undefined}
       onDrop={onImport ? (event) => {
         const file = event.dataTransfer.files?.[0];
         if (!file) return;
-        event.preventDefault();
-        setDragging(false);
-        setDropped(file);
+        event.preventDefault(); setDragging(false); setDropped(file);
       } : undefined}
     >
-      <div className="border-b border-slate-100 px-4 py-4 dark:border-slate-800 sm:px-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h3 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">{t("review.linesTitle")}</h3>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{t("review.intro")}</p>
-          </div>
-          {onImport && (
-            <div className="goods-import w-full min-w-0">
-              <GoodsImport
-                initialPaste={initialPaste}
-                hasLines={hasLines}
-                onImport={onImport}
-                dropped={dropped}
-                onDroppedHandled={() => setDropped(null)}
-              />
-            </div>
-          )}
-        </div>
-        {dragging && (
-          <p className="mt-2 rounded-lg border border-dashed border-brand-300 bg-brand-50 px-3 py-2 text-xs text-brand-800 dark:border-brand-700 dark:bg-brand-950/40 dark:text-brand-200">
-            {t("review.importDrop")}
-          </p>
-        )}
+      <div className="goods-heading">
+        <h3>{t("review.linesTitle")}</h3>
+        {onImport && <GoodsImport initialPaste={initialPaste} hasLines={hasLines} onImport={onImport}
+          dropped={dropped} onDroppedHandled={() => setDropped(null)} />}
       </div>
-
-      <div className="p-3 sm:p-4">
-        {/* Column names for the row below, on the widths where the row is one
-            line. Every control carries its own name for a screen reader, so
-            this is the sighted reader's half of the same labelling. */}
-        <div className="goods-column-head">
-          <span className="w-6" />
-          <span className={`${labelClass} min-w-[14rem] flex-1`}>{t("review.description")}</span>
-          <span className={`${labelClass} w-20`}>{t("review.quantity")}</span>
-          <span className={`${labelClass} w-32`}>{t("review.unit")}</span>
-          <span className={`${labelClass} w-28 text-right`}>{t("review.weightTotal")}</span>
+      {!hasLines && <p className="goods-empty-hint">{t("review.simpleIntro")}</p>}
+      {dragging && <p className="goods-drop-hint">{t("review.importDrop")}</p>}
+      {draftLines.length > 1 && attention + unanswered > 0 && (
+        <div className="goods-attention">
+          <span>{t("review.attentionSummary", { ok: settled - attention, attention })}
+            {unanswered > 0 && ` · ${t("review.unansweredSummary", { count: unanswered })}`}</span>
+          <button type="button" onClick={() => setOnlyAttention((on) => !on)}>
+            {onlyAttention ? t("review.showAllLines") : t("review.onlyAttention")}
+          </button>
         </div>
-
-        {attention + unanswered > 0 && (
-          <div className="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-900/50 dark:bg-amber-950/30">
-            <span className="text-xs text-amber-900 dark:text-amber-200">
-              {t("review.attentionSummary", { ok: settled - attention, attention })}
-              {unanswered > 0 && ` · ${t("review.unansweredSummary", { count: unanswered })}`}
-            </span>
-            <button
-              type="button"
-              onClick={() => setOnlyAttention((on) => !on)}
-              className="rounded-lg border border-amber-300 px-2.5 py-1 text-xs font-medium text-amber-900 dark:border-amber-800 dark:text-amber-200"
-            >
-              {onlyAttention ? t("review.showAllLines") : t("review.onlyAttention")}
-            </button>
-          </div>
-        )}
-
-        <ul className="space-y-2">
-          {draftLines.map((line, index) => {
-            const { item, stale } = outcomeFor(line, index);
-            if (onlyAttention && !needsAttention(item) && !hasOpenQuestion(line, item)) return null;
-            const open = openId === line.id;
-            const panelId = `line-panel-${line.id}`;
-            return (
-              <li
-                key={line.id}
-                className={`goods-row rounded-xl border px-2 py-2 ${
-                  open
-                    ? "border-brand-300 dark:border-brand-800"
-                    : "border-slate-200 dark:border-slate-700"
-                }`}
-              >
-                <div className="goods-fields">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                    {index + 1}
-                  </span>
-                  <div className="goods-description min-w-0 basis-[14rem] flex-1">
-                    <EquipmentCombobox
-                      value={line.description}
-                      onChange={(value) => updateDraft(line.id, { description: value })}
-                      inputRef={(element) => {
-                        if (element) inputs.current.set(line.id, element);
-                        else inputs.current.delete(line.id);
-                      }}
-                      onKeyDown={(event) => onFieldKeyDown(event, index)}
-                      aria-label={t("review.descriptionOfLine", { number: index + 1 })}
-                    />
-                  </div>
-                  <NumberInput
-                    className={`${fieldClass} goods-quantity w-20`}
-                    inputMode="decimal"
-                    value={line.quantity}
+      )}
+      <ul className="goods-list">
+        {draftLines.map((line, index) => {
+          const { item, stale } = outcomeFor(line, index);
+          if (onlyAttention && !needsAttention(item) && !hasOpenQuestion(line, item)) return null;
+          const open = openId === line.id;
+          const panelId = `line-panel-${line.id}`;
+          const decision = decisionOf(line);
+          const dgLabel = line.confirmed_un ? `UN ${line.confirmed_un}`
+            : decision === "other" ? t("review.dgIdentityNeeded")
+            : decision === "rejected" ? [isDangerous(line, item) ? t("review.dgMarked") : "", t("review.dgCandidateRejected")].filter(Boolean).join(" · ")
+            : isDangerous(line, item) && !hasOpenQuestion(line, item) ? t("review.dgMarked") : null;
+          return (
+            <li key={line.id} className={"goods-row" + (open ? " goods-row-open" : "")}
+              data-empty={!line.description.trim()}>
+              <div className="goods-fields">
+                <span className="goods-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                <div className="goods-description">
+                  <EquipmentCombobox value={line.description}
+                    placeholder={t("review.simplePlaceholder")}
+                    onChange={(value) => updateDraft(line.id, { description: value })}
+                    inputRef={(element) => {
+                      if (element) inputs.current.set(line.id, element);
+                      else inputs.current.delete(line.id);
+                    }}
+                    onKeyDown={(event) => onFieldKeyDown(event, index)}
+                    aria-label={t("review.descriptionOfLine", { number: index + 1 })} />
+                </div>
+                <label className="goods-quantity-field">
+                  <span className="goods-field-label">{t("review.quantity")}</span>
+                  <NumberInput className="goods-number" inputMode="decimal" value={line.quantity}
                     aria-label={t("review.quantityOfLine", { number: index + 1 })}
                     onKeyDown={(event) => onFieldKeyDown(event, index)}
-                    onChange={(event) =>
-                      updateDraft(line.id, {
-                        quantity: event.target.value === "" ? "" : Number(event.target.value),
-                      })
-                    }
-                  />
-                  <div className="goods-unit w-32">
-                    <UnitSelect
-                      value={line.unit}
-                      onChange={(unit) => updateDraft(line.id, { unit })}
-                      category={item?.material_category}
-                      catalogue={catalogue}
-                      className={`${fieldClass} w-full`}
-                      aria-label={t("review.unitOfLine", { number: index + 1 })}
-                    />
-                  </div>
-                  <div
-                    className={`goods-weight w-28 text-right text-sm tabular-nums ${
-                      stale ? "text-slate-400 dark:text-slate-500" : "text-slate-800 dark:text-slate-100"
-                    }`}
-                  >
-                    {item?.weight_total_kg != null ? (
-                      <>
-                        {item.weight_total_kg}
-                        <span className="ml-1 text-xs text-slate-500 dark:text-slate-400">kg</span>
-                      </>
-                    ) : (
-                      <span className="text-slate-400">—</span>
-                    )}
-                  </div>
-                  <div className="goods-outcome w-28">
-                    {stale ? (
-                      <span className="inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                        {t("review.toBeRechecked")}
-                      </span>
-                    ) : item ? (
-                      <span className={`inline-block rounded-full px-2 py-0.5 text-xs ${statusColor(item.status)}`}>
-                        {t(`status.${item.status}` as "status.ok")}
-                      </span>
-                    ) : (
-                      <span className="text-slate-400">—</span>
-                    )}
-                  </div>
-                  <div className="goods-actions flex shrink-0 items-center gap-1">
-                    <RowAction
-                      // A dangerous line has more behind the arrow than a
-                      // plain one — its substance — and the button says so
-                      // rather than leaving somebody to find out.
-                      label={
-                        open
-                          ? t("review.closeDetails")
-                          : isDangerous(line, item)
-                            ? t("review.lineDetailsDg")
-                            : t("review.lineDetails")
-                      }
-                      onClick={() => setOpenId(open ? null : line.id)}
-                      icon={<DetailsIcon open={open} />}
-                      expanded={open}
-                      controls={panelId}
-                    />
-                    <details className="goods-menu relative">
-                      <summary className="flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" aria-label={t("review.moreActions")}><span aria-hidden="true">•••</span></summary>
-                      <div className="absolute right-0 top-12 z-20 min-w-40 rounded-lg border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-slate-900">
-                        <button type="button" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); onDuplicateLine(line.id); }} className="flex min-h-[44px] w-full items-center gap-2 rounded px-3 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-800"><CopyIcon />{t("review.duplicateLine")}</button>
-                        <button type="button" disabled={!canRemove} onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); onRemoveLine(line.id); }} className="flex min-h-[44px] w-full items-center gap-2 rounded px-3 text-left text-sm text-red-600 hover:bg-red-50 disabled:opacity-40 dark:text-red-300 dark:hover:bg-red-950"><TrashIcon />{t("review.removeLine")}</button>
-                      </div>
-                    </details>
-                  </div>
+                    onChange={(event) => updateDraft(line.id, {
+                      quantity: event.target.value === "" ? "" : Number(event.target.value),
+                    })} />
+                </label>
+                <div className="goods-unit-field">
+                  <label className="goods-field-label" htmlFor={`goods-unit-${line.id}`}>{t("review.unit")}</label>
+                  <UnitSelect id={`goods-unit-${line.id}`} value={line.unit}
+                    onChange={(unit) => updateDraft(line.id, { unit })}
+                    category={item?.material_category} catalogue={catalogue} className="goods-unit-input"
+                    aria-label={t("review.unitOfLine", { number: index + 1 })} />
                 </div>
-                <Derived
-                  line={line}
-                  item={item}
-                  stale={stale}
-                  translateMessage={translateMessage}
-                />
-                <SubstanceQuestion line={line} item={item} onAnswer={(patch) => answer(line, patch)} />
-                {open && (
-                  <LineDetails
-                    line={line}
-                    result={item}
-                    position={index + 1}
-                    catalogue={catalogue}
-                    id={panelId}
-                    onChange={(patch) => updateDraft(line.id, patch)}
-                    onWeightChange={
-                      onLineWeightChange && item
-                        ? (weightField, value) => onLineWeightChange(item.line_id, weightField, value)
-                        : undefined
-                    }
-                  />
-                )}
-              </li>
-            );
-          })}
-        </ul>
-
-        <button
-          type="button"
-          onClick={onAddLine}
-          className="goods-add mt-3 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-300 text-sm font-medium text-slate-600 dark:border-slate-700 dark:text-slate-300"
-        >
-          <PlusIcon />
-          {t("review.addLine")}
-        </button>
-        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-          {anyStale ? t("review.recheckingHint") : t("review.keyboardHint")}
-        </p>
-      </div>
-    </div>
+                <div className={"goods-weight" + (stale ? " goods-weight-pending" : "")}>
+                  <span className="goods-field-label">{t("review.weightTotal")}</span>
+                  <div>{item?.weight_total_kg != null
+                    ? <><span>{number.format(item.weight_total_kg)}</span><span className="goods-weight-unit"> kg</span></>
+                    : <span>—</span>}</div>
+                </div>
+                <details className="goods-menu" onKeyDown={(event) => {
+                  if (event.key === "Escape") { event.currentTarget.open = false; event.currentTarget.querySelector("summary")?.focus(); }
+                }}>
+                  <summary aria-label={t("review.moreActions")}><span aria-hidden="true">•••</span></summary>
+                  <div className="goods-menu-options">
+                    <button type="button" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); onDuplicateLine(line.id); }}><CopyIcon />{t("review.duplicateLine")}</button>
+                    <button type="button" disabled={!canRemove} onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); onRemoveLine(line.id); }}><TrashIcon />{t("review.removeLine")}</button>
+                  </div>
+                </details>
+              </div>
+              <div className="goods-row-meta">
+                <div className="goods-row-state">
+                  {stale && line.description.trim() && <span className="goods-pending">{t("review.toBeRechecked")}</span>}
+                  {!stale && item && item.status !== "ok" && <span className="goods-problem">{t(`status.${item.status}` as "status.ok")}</span>}
+                  {dgLabel && <span className={isDangerous(line, item) ? "goods-substance" : "goods-decision"}>{dgLabel}</span>}
+                </div>
+                <button type="button" className="goods-details" onClick={() => setOpenId(open ? null : line.id)}
+                  aria-expanded={open} aria-controls={panelId}
+                  aria-label={open ? t("review.closeDetails") : isDangerous(line, item) ? t("review.lineDetailsDg") : t("review.lineDetails")}>
+                  {t("review.lineDetails")}<DetailsIcon open={open} />
+                </button>
+              </div>
+              <Derived line={line} item={item} stale={stale} expanded={open} translateMessage={translateMessage} />
+              <SubstanceQuestion line={line} item={item} expanded={open} onAnswer={(patch) => answer(line, patch)} />
+              {open && <LineDetails line={line} result={item} position={index + 1} catalogue={catalogue} id={panelId}
+                onChange={(patch) => updateDraft(line.id, patch)}
+                onWeightChange={onLineWeightChange && item
+                  ? (weightField, value) => onLineWeightChange(item.line_id, weightField, value) : undefined} />}
+            </li>
+          );
+        })}
+      </ul>
+      <button type="button" onClick={onAddLine} className="goods-add"><PlusIcon />{t("review.addLine")}</button>
+    </section>
   );
 }
 
@@ -637,7 +443,8 @@ export default function ReviewLinesPanel({
  * An answered line says what was answered, with a way back to the question. A
  * decision you cannot find again is a decision you cannot check.
  */
-function SubstanceQuestion({ line, item, onAnswer }: {
+function SubstanceQuestion({ line, item, expanded, onAnswer }: {
+  expanded: boolean;
   line: DraftLine;
   item: LineItem | null;
   onAnswer: (patch: Partial<DraftLine>) => void;
@@ -647,16 +454,17 @@ function SubstanceQuestion({ line, item, onAnswer }: {
   if (candidates.length === 0) return null;
   const decision = decisionOf(line);
 
-  const chip = "rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors";
+  const chip = "min-h-[44px] rounded-lg border px-2.5 py-2 text-xs font-medium transition-colors";
 
   if (decision) {
+    if (!expanded) return null;
     const said = decision === "confirmed"
       ? t("review.dgAnsweredConfirmed", { un: line.confirmed_un ?? candidates[0].un })
       : decision === "other"
         ? t("review.dgAnsweredOther")
         : t("review.dgAnsweredRejected");
     return (
-      <div className="mt-1 flex flex-wrap items-center gap-2 pl-8 pr-2">
+      <div className="goods-answer">
         <span className="text-xs text-slate-500 dark:text-slate-400">{said}</span>
         <button
           type="button"
@@ -691,6 +499,7 @@ function SubstanceQuestion({ line, item, onAnswer }: {
             title={candidates.length > 1 ? candidate.name : undefined}
           >
             {t("review.dgTake", { un: candidate.un })}
+            {candidates.length > 1 && <span className="block text-left font-normal">{candidate.name}</span>}
           </button>
         ))}
         <button
@@ -715,10 +524,11 @@ function SubstanceQuestion({ line, item, onAnswer }: {
 
 /**
  * Under the row: what was worked out and what is worth knowing about the line,
- * as text rather than as fields. This is where the card's "show more" went —
- * the same facts, without a second tap to reach them.
+ * as text rather than as fields. Supporting dimensions and per-item figures
+ * belong with Details; actionable messages stay on the collapsed line.
  */
-function Derived({ line, item, stale, translateMessage }: {
+function Derived({ line, item, stale, expanded, translateMessage }: {
+  expanded: boolean;
   line: DraftLine;
   item: LineItem | null;
   stale: boolean;
@@ -753,52 +563,12 @@ function Derived({ line, item, stale, translateMessage }: {
   }
 
   const messages = item?.messages ?? [];
-  const chips = (
-    <>
-      {item?.dangerous_goods && !line.dangerous_goods && (item.dg_name_candidates?.length ?? 0) === 0 && (
-        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
-          {t("review.dgDetected")}
-        </span>
-      )}
-      {line.dangerous_goods && !line.confirmed_un && (
-        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
-          {t("review.dgYes")}
-        </span>
-      )}
-      {line.confirmed_un && (
-        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
-          UN {line.confirmed_un}
-        </span>
-      )}
-      {line.article?.code && (
-        <span
-          className="rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-800 dark:bg-sky-900/40 dark:text-sky-300"
-          title={t("articles.onLine")}
-        >
-          {line.article.code}
-        </span>
-      )}
-    </>
-  );
-
-  if (parts.length === 0 && messages.length === 0 && !line.confirmed_un && !line.dangerous_goods
-      && !line.article?.code && !item?.dangerous_goods) {
-    return null;
-  }
-
+  if (!expanded && messages.length === 0) return null;
   return (
-    <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 pl-8 pr-2">
-      {parts.length > 0 && (
-        <span className={`text-xs ${stale ? "text-slate-400 dark:text-slate-500" : "text-slate-500 dark:text-slate-400"}`}>
-          {parts.join(" · ")}
-        </span>
-      )}
-      {chips}
-      {messages.length > 0 && (
-        <span className="text-xs text-amber-700 dark:text-amber-300">
-          {messages.map(translateMessage).join(", ")}
-        </span>
-      )}
+    <div className="goods-derived">
+      {expanded && parts.length > 0 && <span className={stale ? "goods-pending" : undefined}>{parts.join(" · ")}</span>}
+      {expanded && line.article?.code && <span>{line.article.code}</span>}
+      {messages.length > 0 && <span className="goods-problem">{messages.map(translateMessage).join(", ")}</span>}
     </div>
   );
 }

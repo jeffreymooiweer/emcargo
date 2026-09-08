@@ -148,12 +148,13 @@ describe("editing a line where it stands", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  it("the row carries the four fields and not the thirteen", () => {
+  it("keeps dimensions one Details action away from the compact row", async () => {
     renderPanel([{ ...draft, length_cm: 200, width_cm: 80, height_cm: 40 }], [resultLine([])]);
-    // Dimensions are shown as text under the row, not as fields on it.
-    expect(screen.getByText(/200 × 80 × 40 cm/)).toBeInTheDocument();
+    expect(screen.queryByText(/200 × 80 × 40 cm/)).toBeNull();
     expect(screen.queryByLabelText("review.length_cm")).toBeNull();
     expect(screen.queryByLabelText("review.wallThickness")).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "review.lineDetails" }));
+    expect(screen.getByLabelText("review.length_cm")).toHaveValue(200);
   });
 
   it("the arrow opens the rest of the fields under the row, not over it", async () => {
@@ -350,6 +351,8 @@ describe("the substance question, answered on its line", () => {
         onChange={onChange}
       />,
     );
+    expect(screen.getByText("review.dgCandidateRejected")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "review.lineDetails" }));
     expect(screen.getByText("review.dgAnsweredRejected")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "review.dgChangeAnswer" }));
     // The question is back, and nothing was decided on the user's behalf.
@@ -363,7 +366,9 @@ describe("the substance question, answered on its line", () => {
     ];
     const onDraftChange = renderPanel([draft], [resultLine(acids)]);
     expect(screen.getByText("review.dgAskMany")).toBeInTheDocument();
-    const takes = screen.getAllByRole("button", { name: "review.dgTake" });
+    const takes = screen.getAllByRole("button", { name: /review.dgTake/ });
+    expect(takes[0]).toHaveTextContent(acids[0].name);
+    expect(takes[1]).toHaveTextContent(acids[1].name);
     expect(takes).toHaveLength(2);
     await userEvent.click(takes[1]);
     const updated = onDraftChange.mock.calls[onDraftChange.mock.calls.length - 1][0] as DraftLine[];
@@ -373,7 +378,8 @@ describe("the substance question, answered on its line", () => {
   it("an answer from before v1.195.0 is read as one", () => {
     // Only the old fields, as a shipment saved by an earlier release has them.
     renderPanel([{ ...draft, confirmed_un: "1203" }], [resultLine(petrol)]);
-    expect(screen.getByText("review.dgAnsweredConfirmed")).toBeInTheDocument();
+    expect(screen.getByText("UN 1203")).toBeInTheDocument();
+    expect(screen.queryByText("review.dgAnsweredConfirmed")).toBeNull();
     expect(screen.queryByText("review.dgAskOne")).toBeNull();
   });
 
@@ -385,7 +391,9 @@ describe("the substance question, answered on its line", () => {
 
   it("an unanswered question counts as something that wants the user", () => {
     renderPanel([draft], [resultLine(petrol)]);
-    expect(screen.getByText(/review.unansweredSummary/)).toBeInTheDocument();
+    expect(screen.getByText("review.dgAskOne")).toBeInTheDocument();
+    // A single row carries its question directly; a second summary adds noise.
+    expect(screen.queryByText(/review.unansweredSummary/)).toBeNull();
   });
 });
 
@@ -399,4 +407,21 @@ describe("what openQuestions reports to the rest of the wizard", () => {
   it("counts nothing without a calculation to ask about", () => {
     expect(openQuestions([draft], undefined)).toBe(0);
   });
+});
+
+it("shows a confirmed petrol result once and keeps its answer revisable", async () => {
+  renderPanel([{ ...draft, description: "Benzine 25L", quantity: 1, dangerous_goods: true, confirmed_un: "1203" }],
+    [resultLine(petrol, { weight_total_kg: 18.62, weight_each_kg: 18.62 })]);
+  expect(screen.getByText("18,62")).toBeInTheDocument();
+  expect(screen.getAllByText("UN 1203")).toHaveLength(1);
+  expect(screen.queryByText("status.ok")).toBeNull();
+  expect(screen.queryByText(/kg\/review.each/)).toBeNull();
+  await userEvent.click(screen.getByRole("button", { name: "review.lineDetailsDg" }));
+  expect(screen.getByRole("button", { name: "review.dgChangeAnswer" })).toBeInTheDocument();
+});
+
+it("keeps errors visible when detail fields are closed", () => {
+  renderPanel([draft], [resultLine([], {status: "error", messages: ["Missing dimensions"]})]);
+  expect(screen.getByText("Missing dimensions")).toBeInTheDocument();
+  expect(screen.queryByLabelText("review.length_cm")).toBeNull();
 });

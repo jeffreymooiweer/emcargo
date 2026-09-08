@@ -147,7 +147,7 @@
     "removeLine": "Entfernen",
     "noLines": "Fügen Sie mindestens eine Güterzeile mit Bezeichnung hinzu.",
     "importExcel": "Importieren",
-    "importTitle": "Aus Datei oder Text importieren",
+    "importTitle": "Waren importieren",
     "importHint": "Fügen Sie kopierte Spalten aus Excel ein (Bezeichnung | Menge | Einheit) oder laden Sie die Vorlage herunter und eine Datei hoch.",
     "importExampleTitle": "Beispiel",
     "importExample": "Stahl Winkelprofil 80x80x8x6000 | 8 | Stk.",
@@ -207,7 +207,22 @@
     "typeOfPackage": "Verpackungsart",
     "netPerPackage": "Netto je Verpackung",
     "derivedLater": "Aus den Tabellen",
-    "moreActions": "Weitere Aktionen"
+    "moreActions": "Weitere Aktionen",
+    "simpleIntro": "Was transportieren Sie? Fügen Sie einen Artikel oder eine Warenliste hinzu.",
+    "simplePlaceholder": "Z. B. Benzin 25 L oder Stahlplatten",
+    "importAction": "Importieren",
+    "importIntro": "Wählen Sie eine Datei oder fügen Sie Ihre Liste aus Excel ein.",
+    "dgIdentityNeeded": "Stoff noch angeben",
+    "dgCandidateRejected": "Vorschlag abgelehnt",
+    "dgMarked": "Gefahrgut",
+    "continue": "Weiter",
+    "continueTo": "Weiter: {{step}}",
+    "shortStep": {
+      "lines": "Waren",
+      "dg": "Stoffe",
+      "details": "Angaben",
+      "export": "Prüfen"
+    }
   },
   "import": {
     "downloadTemplate": "Vorlage herunterladen",

@@ -22,7 +22,8 @@ export default function WizardProgress({ steps, currentStep, visited = [], onGoT
           const reachable = done && !!onGoTo;
           const content = <>
             <span className="wizard-step-number" aria-hidden="true">{index + 1}</span>
-            <span className="min-w-0 break-words">{step.label}</span>
+            <span className="min-w-0 break-words wizard-step-long">{step.label}</span>
+            <span className="min-w-0 break-words wizard-step-short">{t(`review.shortStep.${step.key}`, { defaultValue: step.label })}</span>
           </>;
           return (
             <li key={step.key} aria-current={active ? "step" : undefined} className={done ? "wizard-step-done" : undefined}>
