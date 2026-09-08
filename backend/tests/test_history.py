@@ -54,7 +54,7 @@ def db(tmp_path, monkeypatch):
     monkeypatch.setenv("DATA_DIR", str(data_dir))
     monkeypatch.setenv("APP_ENV", "test")
     monkeypatch.setenv("CATALOG_AUTO_SYNC", "false")
-    monkeypatch.delenv("CARGOPILOT_HISTORY", raising=False)
+    monkeypatch.delenv("EMCARGO_HISTORY", raising=False)
     get_settings.cache_clear()
     engine = create_engine(f"sqlite:///{data_dir / 'test.db'}",
                            connect_args={"check_same_thread": False})
@@ -127,7 +127,7 @@ def test_without_the_switch_the_shipments_routes_do_not_exist(db, monkeypatch):
 
 
 def test_with_the_switch_they_do(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         assert client.get("/api/shipments").status_code == 200
         assert client.get("/api/settings/public").json()["history_enabled"] is True
         assert client.get("/api/health").json()["history"] is True
@@ -137,8 +137,8 @@ def test_the_open_application_ignores_the_switch(db, monkeypatch):
     # Both the legacy variable and a saved setting: the open application has
     # no administrator and keeps nothing, whatever either says.
     switch_history(db, True)
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true",
-                     CARGOPILOT_MODE="open") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true",
+                     EMCARGO_MODE="open") as client:
         assert client.get("/api/shipments").status_code == 404
         assert client.get("/api/health").json()["history"] is False
     assert settings_store.history_enabled(db) is False
@@ -160,7 +160,7 @@ def test_the_setting_switches_the_routes_on_and_off_without_a_restart(db, monkey
 
 def test_a_saved_setting_overrules_the_legacy_variable(db, monkeypatch):
     switch_history(db, False)
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         assert client.get("/api/shipments").status_code == 404
         assert client.get("/api/health").json()["history"] is False
 
@@ -201,10 +201,10 @@ def test_switching_off_an_empty_history_needs_no_deletion(db, monkeypatch):
 def test_start_up_switches_the_history_on_for_a_database_that_holds_shipments(db, monkeypatch, caplog):
     """The upgrade from the deploy-time variable: an installation that dropped
     it from its environment must not wake up with a hidden table."""
-    monkeypatch.setenv("CARGOPILOT_HISTORY", "true")
+    monkeypatch.setenv("EMCARGO_HISTORY", "true")
     get_settings.cache_clear()
     history.keep(db, ADA, history.ShipmentIn(**shipment()))
-    monkeypatch.delenv("CARGOPILOT_HISTORY")
+    monkeypatch.delenv("EMCARGO_HISTORY")
     get_settings.cache_clear()
     assert settings_store.history_enabled(db) is False
     with caplog.at_level(logging.WARNING):
@@ -225,7 +225,7 @@ def test_an_empty_table_is_left_alone(db):
 
 
 def test_keeping_builds_the_export_and_the_index_from_the_same_parts(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         created = client.post("/api/shipments", json=shipment())
         assert created.status_code == 200, created.text
         summary = created.json()
@@ -245,7 +245,7 @@ def test_keeping_builds_the_export_and_the_index_from_the_same_parts(db, monkeyp
 
         detail = client.get(f"/api/shipments/{summary['id']}").json()
         export = detail["export"]
-        assert export["format"] == "cargopilot.shipment"
+        assert export["format"] == "emcargo.shipment"
         assert export["consignment"]["reference"] == "CP-2026-100"
         assert export["regulations"] == ["ADR"]
         # The derived half is there, with the editions it was computed against.
@@ -254,7 +254,7 @@ def test_keeping_builds_the_export_and_the_index_from_the_same_parts(db, monkeyp
 
         as_file = client.get(f"/api/shipments/{summary['id']}/export.json")
         assert as_file.status_code == 200
-        assert 'filename="cargopilot-shipment-CP-2026-100.json"' in \
+        assert 'filename="emcargo-shipment-CP-2026-100.json"' in \
             as_file.headers["content-disposition"]
 
 
@@ -271,15 +271,15 @@ def test_a_reference_outside_latin_1_still_downloads(db, monkeypatch):
         response = client.get(f"/api/shipments/{kept.json()['id']}/export.json")
     assert response.status_code == 200
     assert response.headers["content-disposition"] == (
-        "attachment; filename=\"cargopilot-shipment-CP--1.json\"; "
-        "filename*=UTF-8''cargopilot-shipment-CP-%F0%9F%9A%9A-1.json")
+        "attachment; filename=\"emcargo-shipment-CP--1.json\"; "
+        "filename*=UTF-8''emcargo-shipment-CP-%F0%9F%9A%9A-1.json")
     assert attachment("plain.json") == 'attachment; filename="plain.json"'
     assert attachment('a"b\r\nc.json') == 'attachment; filename="a_b__c.json"'
     assert attachment("Zoë.json").startswith('attachment; filename="Zoe.json"; filename*=')
 
 
 def test_keeping_again_brings_the_same_row_up_to_date(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         first = client.post("/api/shipments", json=shipment()).json()
         changed = shipment(values={**CONSIGNMENT, "reference": "CP-2026-101"})
         second = client.put(f"/api/shipments/{first['id']}", json=changed).json()
@@ -289,7 +289,7 @@ def test_keeping_again_brings_the_same_row_up_to_date(db, monkeypatch):
 
 
 def test_the_list_filters_and_pages_newest_first(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         for reference, modality in (("A-1", "road"), ("B-2", "sea"), ("A-3", "road")):
             client.post("/api/shipments", json=shipment(
                 modality=modality, values={**CONSIGNMENT, "reference": reference}))
@@ -310,7 +310,7 @@ def test_the_list_filters_and_pages_newest_first(db, monkeypatch):
 
 
 def test_a_shipment_kept_without_ready_documents_says_so(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         kept = client.post("/api/shipments", json=shipment(bundle=None)).json()
         assert kept["has_documents"] is False
         again = client.post(f"/api/shipments/{kept['id']}/documents")
@@ -318,7 +318,7 @@ def test_a_shipment_kept_without_ready_documents_says_so(db, monkeypatch):
 
 
 def test_forgetting_removes_the_row(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         kept = client.post("/api/shipments", json=shipment()).json()
         assert client.delete(f"/api/shipments/{kept['id']}").json()["ok"] is True
         assert client.get(f"/api/shipments/{kept['id']}").status_code == 404
@@ -327,7 +327,7 @@ def test_forgetting_removes_the_row(db, monkeypatch):
 
 
 def test_a_record_too_large_is_refused_before_it_is_kept(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         bloated = shipment(snapshot={"blob": "x" * (history.MAX_RECORD_BYTES + 1)})
         assert client.post("/api/shipments", json=bloated).status_code == 413
     assert history.count(db) == 0
@@ -339,7 +339,7 @@ def test_a_record_too_large_is_refused_before_it_is_kept(db, monkeypatch):
 def test_a_draft_is_kept_but_is_not_a_kept_shipment(db, monkeypatch):
     """The point of the whole feature: a reload must not lose the entry, and a
     half-typed consignment must not turn up in the history as if it went."""
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         saved = client.put("/api/shipments/draft", json=shipment()).json()
         assert saved["is_draft"] is True
         # Not on the shipments page, and not counted as kept.
@@ -352,7 +352,7 @@ def test_a_draft_is_kept_but_is_not_a_kept_shipment(db, monkeypatch):
 
 
 def test_saving_the_draft_again_writes_the_same_row(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         first = client.put("/api/shipments/draft", json=shipment()).json()
         second = client.put("/api/shipments/draft", json=shipment(
             snapshot={"version": 1, "stepKey": "details"})).json()
@@ -362,7 +362,7 @@ def test_saving_the_draft_again_writes_the_same_row(db, monkeypatch):
 
 def test_keeping_the_draft_as_a_shipment_makes_it_one(db, monkeypatch):
     """No second row and no copying: the same row, with the flag off."""
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         draft = client.put("/api/shipments/draft", json=shipment()).json()
         kept = client.put(f"/api/shipments/{draft['id']}", json=shipment()).json()
         assert kept["id"] == draft["id"]
@@ -372,7 +372,7 @@ def test_keeping_the_draft_as_a_shipment_makes_it_one(db, monkeypatch):
 
 
 def test_a_discarded_draft_leaves_nothing(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         client.put("/api/shipments/draft", json=shipment())
         assert client.delete("/api/shipments/draft").json()["ok"] is True
         assert client.get("/api/shipments/draft").json() is None
@@ -381,7 +381,7 @@ def test_a_discarded_draft_leaves_nothing(db, monkeypatch):
 def test_nobody_elses_draft(db, monkeypatch):
     """A draft is unfinished entry, not a record a colleague may read: the
     department rules that open a kept shipment to others stop here."""
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         client.put("/api/shipments/draft", json=shipment())
         other = User(id=2, username="bob", role="user", active=True)
         assert history.running_draft(db, other) is None
@@ -390,7 +390,7 @@ def test_nobody_elses_draft(db, monkeypatch):
 def test_the_annual_report_counts_shipments_and_not_drafts(db, monkeypatch):
     from datetime import datetime
 
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         client.post("/api/shipments", json=shipment())
         client.put("/api/shipments/draft", json=shipment())
         year = datetime.now().year
@@ -401,9 +401,9 @@ def test_the_annual_report_counts_shipments_and_not_drafts(db, monkeypatch):
 def test_switching_the_history_off_discards_the_drafts(db, monkeypatch):
     """Off means nothing is kept. A draft does not stand in the way of the
     switch — it is not a kept shipment — but it must not survive it either."""
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         client.put("/api/shipments/draft", json=shipment())
-    admin = administrator(db, monkeypatch, CARGOPILOT_HISTORY="true")
+    admin = administrator(db, monkeypatch, EMCARGO_HISTORY="true")
     with admin as client:
         settings = client.get("/api/settings/instance").json()
         settings["history_enabled"] = False
@@ -415,7 +415,7 @@ def test_switching_the_history_off_discards_the_drafts(db, monkeypatch):
 
 
 def test_the_documents_again_are_the_kept_bundle_rerendered(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         kept = client.post("/api/shipments", json=shipment()).json()
         again = client.post(f"/api/shipments/{kept['id']}/documents")
         assert again.status_code == 200, again.text
@@ -491,7 +491,7 @@ def test_a_failed_step_leaves_the_version_where_it_was(tmp_path, monkeypatch):
 def test_public_settings_say_whether_shipments_are_kept(db, monkeypatch):
     assert settings_store.public_settings(db).history_enabled is False
     # The legacy variable is the starting value ...
-    monkeypatch.setenv("CARGOPILOT_HISTORY", "true")
+    monkeypatch.setenv("EMCARGO_HISTORY", "true")
     get_settings.cache_clear()
     assert settings_store.public_settings(db).history_enabled is True
     # ... and the administrator's setting decides from then on.

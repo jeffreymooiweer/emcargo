@@ -52,12 +52,12 @@ _CONFIG = Path(__file__).resolve().parents[2] / "config" / "iftdgn_d16a.json"
 _lock = threading.Lock()
 _cache: dict[str, Any] = {}
 
-#: The dangerous goods regulations code (8273) per CargoPilot profile. The
+#: The dangerous goods regulations code (8273) per EMCargo profile. The
 #: D.16A list has no code for ADN — ADNR's is a different agreement — so ADN
 #: travels as "mutually defined" and says so in the additional information.
 REGULATION_CODES = {"ADR": "ADR", "RID": "RID", "IMDG": "IMD", "IATA": "ICA", "ADN": "ZZZ"}
 
-#: UN/ECE Recommendation 19 mode codes, per CargoPilot modality.
+#: UN/ECE Recommendation 19 mode codes, per EMCargo modality.
 MODE_CODES = {"road": "3", "rail": "2", "sea": "1", "inland": "8", "air": "4"}
 
 #: Which regime a modality's DGS segment reports when several profiles apply.

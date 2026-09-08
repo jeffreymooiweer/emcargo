@@ -50,7 +50,7 @@ DOCKER_SOCKET = Path("/var/run/docker.sock")
 #: check's version number never described.
 IMAGE_REPOSITORY = "ghcr.io/jeffreymooiweer/emcargo"
 
-HELPER_NAME_PREFIX = "cargopilot-updater"
+HELPER_NAME_PREFIX = "emcargo-updater"
 
 
 class UpdateError(Exception):
@@ -249,7 +249,7 @@ def start_update(target_version: str) -> dict[str, Any]:
 
     # The publish workflow tags images with the bare version — docker/metadata
     # -action's semver pattern strips the "v" from the git tag — so the image
-    # for release v1.136.0 lives at ...cargopilot:1.136.0, not :v1.136.0.
+    # for release v1.136.0 lives at ...emcargo:1.136.0, not :v1.136.0.
     reference = f"{IMAGE_REPOSITORY}:{target_version}"
     with docker_client() as client:
         write_state({"phase": "pulling", "to": target_version})
@@ -277,7 +277,7 @@ def start_update(target_version: str) -> dict[str, Any]:
                     "AutoRemove": True,
                     "NetworkMode": "none",
                 },
-                "Labels": {"io.cargopilot.updater": "true"},
+                "Labels": {"io.emcargo.updater": "true"},
             },
         )
         if create.status_code not in (200, 201):

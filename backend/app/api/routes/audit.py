@@ -51,4 +51,4 @@ def audit_export(
 ):
     body = audit.export_csv(db, actor=actor, action=action, since=since, until=until)
     return PlainTextResponse(body, media_type="text/csv",
-                             headers={"Content-Disposition": 'attachment; filename="cargopilot-audit.csv"'})
+                             headers={"Content-Disposition": 'attachment; filename="emcargo-audit.csv"'})

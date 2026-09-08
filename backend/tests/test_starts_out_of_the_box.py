@@ -1,6 +1,6 @@
 """The app has to start with the settings it is shipped with.
 
-This is the test that was missing. From v1.25.0 to v1.29.2 CargoPilot refused to
+This is the test that was missing. From v1.25.0 to v1.29.2 EMCargo refused to
 start as soon as `APP_SECRET_KEY` was at its default value or empty, and as soon
 as `CORS_ALLOWED_ORIGINS` was `*` — and those *are* this application's defaults,
 plus what the Unraid template passes. Every installation that had not filled in
@@ -45,7 +45,7 @@ def start_with(env_dir: Path, **overrides) -> subprocess.CompletedProcess:
         "HOME": os.environ.get("HOME", ""),
         "PYTHONPATH": str(BACKEND),
         "DATA_DIR": str(env_dir),
-        "DATABASE_URL": f"sqlite:///{env_dir}/cargopilot.db",
+        "DATABASE_URL": f"sqlite:///{env_dir}/emcargo.db",
         # Without this, startup tries to fetch catalogues from the internet.
         "CATALOG_AUTO_SYNC": "false",
     }
@@ -68,7 +68,7 @@ def test_the_app_starts_with_nothing_configured(tmp_path):
 
 
 def test_the_app_starts_the_way_the_unraid_template_configures_it(tmp_path):
-    """The template in unraid/CargoPilot.xml passes APP_SECRET_KEY empty."""
+    """The template in unraid/EMCargo.xml passes APP_SECRET_KEY empty."""
     result = start_with(tmp_path, APP_SECRET_KEY="")
     assert "STARTED" in result.stdout, result.stderr[-3000:]
 

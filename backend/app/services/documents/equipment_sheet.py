@@ -7,7 +7,7 @@ loaded and points at the transport document to identify them, which is exactly
 what this application holds; so the list is printed, one line per item with the
 provision beside it, as a checklist with nothing ticked.
 
-Nothing here is a finding. CargoPilot cannot see a vehicle, so it can never
+Nothing here is a finding. EMCargo cannot see a vehicle, so it can never
 establish that a wheel chock is in the cab — the sheet says so in the same
 words the panel does, and the fire extinguisher line carries the three mass
 rows of 8.1.4.1 because the maximum permissible mass of the unit is the

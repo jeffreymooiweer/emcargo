@@ -37,7 +37,7 @@ def pages_of(path):
         return [(page.get_text(), len(page.get_images())) for page in pdf]
 
 
-def test_the_default_paper_is_cargopilots(tmp_path):
+def test_the_default_paper_is_emcargos(tmp_path):
     brand.set_current(None)
     path = render_equipment_sheet(CONSIGNMENT, [], DG, language="en")
     text, images = pages_of(path)[0]

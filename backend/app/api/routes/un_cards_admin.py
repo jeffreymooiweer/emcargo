@@ -1,7 +1,7 @@
 """Managing the UN card store: status, download, import, removal.
 
 Admin-only throughout. The download endpoint fetches exclusively from the
-pinned CargoPilot release feed — no caller-supplied URL ever reaches the
+pinned EMCargo release feed — no caller-supplied URL ever reaches the
 server-side HTTP client — and both import paths run the same verification
 and atomic swap in :mod:`app.services.documents.un_card_store`. Checking the
 remote feed happens only when the administrator asks (``remote=true``);
@@ -64,7 +64,7 @@ async def import_uploaded_package(
     file: UploadFile = File(...),
     admin: User = Depends(require_admin),
 ):
-    """Install a manually supplied cargopilot-un-cards.zip.
+    """Install a manually supplied emcargo-un-cards.zip.
 
     The same validation and atomic swap as the download path, so an
     air-gapped installation is not a less safe one.

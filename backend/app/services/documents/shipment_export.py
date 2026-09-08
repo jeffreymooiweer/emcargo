@@ -55,8 +55,8 @@ from app.version import get_version
 #: The format's own version, not the application's. Bump the major when a
 #: reader that understood the previous version would misread this one; bump the
 #: minor when something is added that an old reader can safely ignore.
-FORMAT = "cargopilot.shipment"
-FORMAT_VERSION = "1.0"
+FORMAT = "emcargo.shipment"
+FORMAT_VERSION = "2.0"
 
 
 def _clean(value: Any) -> Any:

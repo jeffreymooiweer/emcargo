@@ -38,7 +38,7 @@ def db(tmp_path, monkeypatch):
     monkeypatch.setenv("DATA_DIR", str(data_dir))
     monkeypatch.setenv("APP_ENV", "test")
     monkeypatch.setenv("CATALOG_AUTO_SYNC", "false")
-    monkeypatch.setenv("CARGOPILOT_HISTORY", "true")
+    monkeypatch.setenv("EMCARGO_HISTORY", "true")
     get_settings.cache_clear()
     engine = create_engine(f"sqlite:///{data_dir / 'test.db'}",
                            connect_args={"check_same_thread": False})

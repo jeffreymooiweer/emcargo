@@ -40,7 +40,7 @@ PUBLISHED_SECRETS = {
     "dev-secret",
     "ci-secret",
     "secret",
-    "cargopilot",
+    "emcargo",
     "please-change",
     "your-secret-key",
     # Appears verbatim in .env.example and is long enough to slip past the
@@ -51,7 +51,7 @@ PUBLISHED_SECRETS = {
 # The same for the first admin password: this appears in docs/development.md
 # and in AGENTS.md as an example.
 PUBLISHED_ADMIN_PASSWORDS = {
-    "cargopilot123",
+    "emcargo123",
     "admin",
     "password",
     "changeme",
@@ -161,7 +161,7 @@ def configuration_warnings(settings) -> list[str]:
             "credentials, so a call from another website cannot carry the login "
             "cookie — the interface served by this application is unaffected. "
             "Better to name the addresses you reach EMCargo on:"
-            "\n    CORS_ALLOWED_ORIGINS=https://cargopilot.example.com"
+            "\n    CORS_ALLOWED_ORIGINS=https://emcargo.example.com"
         )
 
     password = str(settings.admin_password or "")

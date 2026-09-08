@@ -224,14 +224,14 @@ def test_the_mail_carries_the_uploaded_logo_with_the_right_subtype(admin, db):
     message = mail_templates.test_message("nl")
     built = mail.build_message(
         InstanceSettings(mail_enabled=True, mail_host="smtp.example.com",
-                         mail_from="cargopilot@example.com"),
+                         mail_from="emcargo@example.com"),
         "ada@example.com", message.subject, message.text, html=message.html)
     images = [p for p in built.walk() if p.get_content_maintype() == "image"]
     logo = next(p for p in images if p.get("Content-ID") == f"<{mail_templates.LOGO_CID}>")
     assert logo.get_content_type() == "image/jpeg"
     assert logo.get_payload(decode=True) == JPEG
 
-    # Back to CargoPilot's own once it is removed.
+    # Back to EMCargo's own once it is removed.
     admin.delete("/api/branding/logo")
     assert mail_templates.logo_image()[1] == "png"
 
@@ -242,7 +242,7 @@ def test_the_mail_carries_the_uploaded_logo_with_the_right_subtype(admin, db):
 def test_the_open_application_shows_what_its_operator_placed_by_hand(db, monkeypatch):
     """No screen to upload from, so the operator drops the files into
     DATA_DIR/branding and sets BRAND_NAME; the door reads the same."""
-    monkeypatch.setenv("CARGOPILOT_MODE", "open")
+    monkeypatch.setenv("EMCARGO_MODE", "open")
     monkeypatch.setenv("BRAND_NAME", "Open Haven")
     get_settings.cache_clear()
     folder = branding.directory()

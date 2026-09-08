@@ -1,4 +1,4 @@
-# Dangerous goods: what CargoPilot covers, per mode
+# Dangerous goods: what EMCargo covers, per mode
 
 An assessment of the dangerous goods functionality against what the five transport
 regimes ask of a consignor, written to answer one question honestly: **where would someone
@@ -20,7 +20,7 @@ relying on this application be caught out?**
 Two columns run through this document. They do not have the same standing and it would be
 dishonest to present them as if they did.
 
-**What CargoPilot does** is established from the code and the data in this repository.
+**What EMCargo does** is established from the code and the data in this repository.
 Every claim in that column was read out of `backend/app/services/dg/`,
 `backend/app/config/` or `backend/seed/dg/` while writing this, not remembered.
 
@@ -80,7 +80,7 @@ Before any software helps, the work divides into three:
 3. **Does the paperwork say what it must say?** In the right order, in a permitted
    language, with the declarations signed by someone entitled to sign them.
 
-CargoPilot is built for the third question, does a great deal of the first, and answers
+EMCargo is built for the third question, does a great deal of the first, and answers
 part of the second. It does not attempt the parts of the second that depend on the
 vessel, the aircraft or the route — and those are not marginal. The *vehicle* half moved
 inside in v1.82.0: which tank may carry which goods is now answered from ADR 4.3.
@@ -409,7 +409,7 @@ saying so on the strength of a recollection that happened to be right.
 *"For UN Nos. 0081, 0082, 0084, 0241, 0331, 0332, 0482, 1005 and 1017, the total maximum
 quantity per transport unit shall be 50 kg"* — and the matching multiplier, spelled out in
 RID 1.1.3.6.4, is **× 20** rather than the × 50 of ordinary transport category 1.
-CargoPilot applied × 50 to all nine. 50 kg of chlorine (UN 1017) or anhydrous ammonia
+EMCargo applied × 50 to all nine. 50 kg of chlorine (UN 1017) or anhydrous ammonia
 (UN 1005) therefore scored 2,500 points and lost the 1.1.3.6 exemption, when 50 × 20 is
 exactly the 1,000 the text allows. The application was insisting on orange plates, a driver
 certificate, written instructions and an ADR vehicle for consignments entitled to the
@@ -443,7 +443,7 @@ not admitted for carriage** — the Dutch table writes a prohibition by leaving 
 and writes "not subject to ADR" the same way, so the fourteen prohibited entries come from
 the 2023 export, which names them in words. Both are in the manifest errata.
 
-This is the mode CargoPilot serves best, and the reason is simple: ADR Table A is the
+This is the mode EMCargo serves best, and the reason is simple: ADR Table A is the
 dataset it was built on.
 
 **Not checked, and worth knowing:**
@@ -454,7 +454,7 @@ dataset it was built on.
   goods carried under 1.1.3 out of that determination entirely, except where the 3.4.13
   marking applies; and the table of 8.6.4 turns the code into the tunnel categories that
   are barred, with B1000C and C5000D splitting on the total net explosive mass per
-  transport unit. The result reaches the export as well as the panel. What CargoPilot still
+  transport unit. The result reaches the export as well as the panel. What EMCargo still
   does not know is which tunnels lie on the route and which category they carry — that is
   the carrier's, under 1.9.5 — and whether the goods travel in tanks or in bulk, which is
   stricter for five of the twelve codes. Both are said next to the answer.
@@ -488,7 +488,7 @@ dataset it was built on.
   now answer whether the tank that actually turned up may carry it** — see below. The
   equipment of **8.1.4 and 8.1.5 is derived** since v1.53.0, because 8.1.5.1 chooses it by
   the hazard label numbers of the goods loaded and points at the transport document to
-  identify them — which is what CargoPilot holds. It is a checklist and not a finding; the
+  identify them — which is what EMCargo holds. It is a checklist and not a finding; the
   application cannot see what is in the cab.
 - **Placarding and marking are derived since v1.57.0, for carriage in packages.** The
   useful half of 5.3 turned out to be the refusals. 5.3.1.5 gives a vehicle carrying
@@ -570,7 +570,7 @@ assumption:
   per *transport unit*. RID 1.1.3.6.1 and 1.1.3.6.2 are `(Reserved)` where ADR has text.
 
 So the arithmetic was right all along, and the old warning that "RID has its own 1.1.3.6
-which CargoPilot does not hold" was true but unhelpfully vague — it invited the user to
+which EMCargo does not hold" was true but unhelpfully vague — it invited the user to
 distrust a number that is in fact the number RID prescribes. The panel now cites
 1.1.3.6.3/1.1.3.6.4 and names the difference in unit instead of hedging.
 
@@ -588,7 +588,7 @@ points total.
 1.1.3.6.3 reads, in both ADR and RID: *"For UN Nos. 0081, 0082, 0084, 0241, 0331, 0332,
 0482, 1005 and 1017, the total maximum quantity per transport unit shall be 50 kg."* RID
 1.1.3.6.4 gives the matching multiplier in words — those goods count **× 20**, not × 50.
-CargoPilot applied × 50 to all of transport category 1, so 50 kg of chlorine scored 2500
+EMCargo applied × 50 to all of transport category 1, so 50 kg of chlorine scored 2500
 and lost an exemption the text grants at exactly 1000. The application was demanding orange
 plates, a driver certificate and an ADR vehicle for loads that do not need them. Fixed in
 v1.33.0 for both ADR and RID.
@@ -604,7 +604,7 @@ where 5.3.2.1 marking is prescribed — contains no tunnel restriction code.
 - ~~**The hazard identification number before the UN number.**~~ On the document since
   v1.88.0. RID 5.4.1.1.1 (j) requires it when 5.3.2.1 marking is prescribed, in the order
   (j), (a), (b), (c), (d) with no information interspersed — the RID's own example is
-  `663, UN 1098 ALLYL ALCOHOL, 6.1(3), I`, and that is now the line CargoPilot composes. What
+  `663, UN 1098 ALLYL ALCOHOL, 6.1(3), I`, and that is now the line EMCargo composes. What
   decides it is 5.3.2.1.1, read in the English edition and the German: the plate is
   prescribed for tank-wagons, battery-wagons, wagons with demountable tanks, tank-containers,
   MEGCs, portable tanks and wagons or containers for carriage in bulk. For a full load of
@@ -652,7 +652,7 @@ and both came from OTIF's own pages rather than from ADR on loan:
   triggers, and classes 6.1, 8 and 9 are not among the counterparts. This is the one place
   where the ADR chapter could never have stood in — 7.5.3 is about how a train is made up,
   and a road transport unit travels alone, so borrowing would have produced no answer rather
-  than a rough one. Since CargoPilot cannot see the rest of the train, a consignment with a
+  than a rough one. Since EMCargo cannot see the rest of the train, a consignment with a
   class 1 wagon and no counterpart of its own still gets the provision, addressed to the
   carrier.
 - **CW 28 instead of CV28.** RID column (18) names the foodstuffs provision CW 28; the
@@ -824,7 +824,7 @@ exempt" since v1.32.0 while the arithmetic granted the exemption anyway — with
   by the boatmaster and the shore facility before a tank vessel is loaded or unloaded, and
   the regulation prints the model rather than describing it. So it is served as the edition
   sets it, in the language asked for, or reported missing with the edition that would
-  produce it — and CargoPilot fills in nothing on it: every answer there is agreed between
+  produce it — and EMCargo fills in nothing on it: every answer there is agreed between
   vessel and shore at the moment of loading.
 - **Anything else vessel-specific** for dry cargo: requirements following from the vessel
   type, degassing and venting. The degassing checklist of 8.6.4 is the same kind of model
@@ -945,7 +945,7 @@ required-field set for the Shipper's Declaration is the strictest of the five.
 
 **The significant limitation:**
 
-- **The Q value still depends on user-supplied n and M.** CargoPilot does not hold IATA's
+- **The Q value still depends on user-supplied n and M.** EMCargo does not hold IATA's
   quantity tables, so the net quantity and maximum permitted net quantity for the
   applicable packing instruction must be entered manually. Since v1.30.0 the result makes
   this explicit: the API and compliance panel report `checked`, `incomplete`, `exceeded`
@@ -957,7 +957,7 @@ required-field set for the Shipper's Declaration is the strictest of the five.
 **Also absent:**
 
 - **Every automatic quantity limit.** Net per package, per aircraft type, passenger versus
-  cargo aircraft. Without the tables CargoPilot cannot derive M or compare the shipment
+  cargo aircraft. Without the tables EMCargo cannot derive M or compare the shipment
   automatically.
 - **State and operator variations.** Not held at all. In practice these decide a great deal
   of what actually flies, and an airline's variation can be stricter than the DGR.
@@ -967,7 +967,7 @@ required-field set for the Shipper's Declaration is the strictest of the five.
   supplies.
 
 **Assessment:** the segregation and the declaration are sound. Missing Q input is now
-visible, but the quantity side remains incomplete because CargoPilot cannot derive the
+visible, but the quantity side remains incomplete because EMCargo cannot derive the
 per-package limits from IATA Table 4.2.
 
 ## Gaps ranked by what they cost
@@ -976,9 +976,9 @@ Ordered by how much harm someone could take before noticing, not by effort.
 
 | # | Gap | Why it ranks here |
 |---|---|---|
-| 1 | **IATA quantity limits absent; Q depends on user-entered M** | CargoPilot warns when the Q check did not run — since v1.33.0 on the document as well as the screen — but it cannot derive the applicable passenger/cargo-aircraft limit or verify the entered M against Table 4.2. **[verify]** |
+| 1 | **IATA quantity limits absent; Q depends on user-entered M** | EMCargo warns when the Q check did not run — since v1.33.0 on the document as well as the screen — but it cannot derive the applicable passenger/cargo-aircraft limit or verify the entered M against Table 4.2. **[verify]** |
 | 2 | **The ADN tank vessel regime: the substance is answered, the vessel is not** | Closed for the substance side. Table C is read from three books since v1.80.0 — the UNECE English and French editions and the printed Dutch one — and 677 of its 678 rows are settled on every cell. The application answers the vessel *type* of column (6) and the signals of column (19), admits or refuses the carriage on column (8), and since v1.83.0 hands over the checklist of 8.6.3. What is still absent is the vessel itself: design, tank type, equipment, opening pressure and filling degree are shown as conditions to verify, and the 7.2 operational regime and chapter 9.3 construction are a different discipline. |
-| 3 | **Route data absent: which tunnels, and in which category** | Closed for the part that is CargoPilot's since v1.50.0 — 8.6.3.2, 8.6.3.3 and the table of 8.6.4 are applied and the load's code reaches the export. What is left is the route itself, which 1.9.5 puts with the carrier, and the tanks/bulk branch of five codes. |
+| 3 | **Route data absent: which tunnels, and in which category** | Closed for the part that is EMCargo's since v1.50.0 — 8.6.3.2, 8.6.3.3 and the table of 8.6.4 are applied and the load's code reaches the export. What is left is the route itself, which 1.9.5 puts with the carrier, and the tanks/bulk branch of five codes. |
 | 4 | **Mixed loading for ADN answered with ADR's 7.5.2** | Closed, and since v1.119.0 closed completely. v1.38.0 read RID's 7.5.2.1 and found it identical to ADR's, footnotes included; v1.41.0 gave rail its own table and its own protective distance. v1.59.0 gave inland waterway ADN 7.1.4.3 — how many metres, not whether — v1.61.0 read column (12) for the cone provisions, v1.64.0 applied the class 1 hold table of 7.1.4.3.4. v1.119.0 read the rest of the chapter: 7.1.4.2 (bulk class 5.1 excludes everything else), 7.1.4.10 (the foodstuffs precaution on special provision 802, in place of the borrowed CV28) and the container exceptions of 7.1.4.4/7.1.4.5 — and the ADR table no longer runs for an inland-only selection at all. |
 | 5 | **LQ/EQ conditions not checked** | The arithmetic of 3.4/3.5 is verified correct and 3.5.1.3/3.5.1.4 are applied since v1.50.0, but the mark, the packagings and the 3.5.3 tests are declarations the application cannot see. A line "within the limits" is a candidate, not an exemption — and the panel says so. |
 | 6 | **IMDG stowage category shown, not enforced** | Lower because on-deck/under-deck is usually the carrier's call, not the consignor's. **[verify]** |
@@ -1089,7 +1089,7 @@ reading and not as a coincidence.
 **Not worth building, or not buildable here:**
 
 - **IATA quantity tables.** Table 4.2 is copyrighted and is not available as open data.
-  CargoPilot can accept n and M, do the arithmetic and state clearly when input is missing;
+  EMCargo can accept n and M, do the arithmetic and state clearly when input is missing;
   it cannot safely manufacture the source limits.
 - ~~**The IMDG Code's own text.**~~ This entry was wrong, and it is worth saying how.
   The consolidated Code is indeed sold by the IMO — but resolution MSC.556(108), which
@@ -1105,7 +1105,7 @@ reading and not as a coincidence.
 
 ---
 
-*This assessment is maintained up to CargoPilot v1.152.0. Between v1.129.0 and
+*This assessment is maintained up to EMCargo v1.152.0. Between v1.129.0 and
 v1.149.0 the work was outside the regulatory checks — the UN-card pipeline, the ZIP
 export, in-app updating, user administration, the mail server, password reset,
 two-factor authentication and the four-language mail templates — with two exceptions

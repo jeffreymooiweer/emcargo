@@ -1,7 +1,7 @@
 """Looking for a usable source for the NHM goods codes.
 
 Box 24 of the CIM asks for a six-digit NHM code (Nomenclature Harmonisée
-Marchandises, the UIC's goods nomenclature for rail). CargoPilot currently has a
+Marchandises, the UIC's goods nomenclature for rail). EMCargo currently has a
 free text field for it with a note that the code cannot be derived from a
 description and that the user has to look it up. That is true, but it is not an
 answer.
@@ -15,7 +15,7 @@ What this survey wants to know about a source:
 
 1. Is it reachable and readable by machine?
 2. Does it carry six-digit codes with a description, or only chapters?
-3. How many codes are there, and do they cover the goods CargoPilot knows?
+3. How many codes are there, and do they cover the goods EMCargo knows?
 4. On what terms is it published — the code-with-description is a factual table,
    but that has to be established per source.
 
@@ -37,7 +37,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-UA = {"User-Agent": "CargoPilot data survey (github.com/jeffreymooiweer/CargoPilot)"}
+UA = {"User-Agent": "EMCargo data survey (github.com/jeffreymooiweer/emcargo)"}
 
 # Candidates, from most to least likely to be usable. The NHM follows the chapter
 # structure of the Harmonised System (HS/CN), so a CN source supplies at least the
@@ -104,7 +104,7 @@ def describe(name: str, url: str, note: str) -> None:
 def coverage_hint() -> None:
     """What it ultimately comes down to: does a source cover *our* goods?
 
-    CargoPilot knows some 400 materials. An NHM list covering steel, timber,
+    EMCargo knows some 400 materials. An NHM list covering steel, timber,
     cement and chemicals is usable, even if it is not complete; a list that does
     not do that does not solve the problem.
     """
@@ -116,7 +116,7 @@ def coverage_hint() -> None:
         return
     names = materials if isinstance(materials, list) else materials.get("entries", [])
     print(f"\n===== what a source has to be measured against =====")
-    print(f"  materials in CargoPilot: {len(names)}")
+    print(f"  materials in EMCargo: {len(names)}")
 
 
 def main(argv: list[str] | None = None) -> int:

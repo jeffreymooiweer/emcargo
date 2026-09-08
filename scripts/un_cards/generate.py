@@ -1,4 +1,4 @@
-"""Generate CargoPilot UN cards: UN####_<MODALITY>.pdf, manifest and package.
+"""Generate EMCargo UN cards: UN####_<MODALITY>.pdf, manifest and package.
 
 Usage (from the repository root):
 
@@ -7,7 +7,7 @@ Usage (from the repository root):
 
     # the complete current set, manifest and downloadable package
     python scripts/un_cards/generate.py --scope all --out /tmp/cards \
-        --zip /tmp/cargopilot-un-cards.zip
+        --zip /tmp/emcargo-un-cards.zip
 
 Each UN number × modality yields one PDF named ``UN####_<MODALITY>.pdf`` in a
 per-modality directory; a UN number with several transport entries in the

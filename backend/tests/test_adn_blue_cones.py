@@ -4,7 +4,7 @@ The ADN has a table A of its own. Its first columns identify the goods exactly
 as the ADR's do, and then it asks a vessel's questions: whether the goods may go
 in packages, in bulk or in a tank vessel, what equipment must be aboard, how the
 holds are ventilated — and **how many blue cones or blue lights the vessel
-shows**. That last one is column (12), and until v1.61.0 CargoPilot did not hold
+shows**. That last one is column (12), and until v1.61.0 EMCargo did not hold
 it.
 
 Two provisions were the poorer for it, in different ways:

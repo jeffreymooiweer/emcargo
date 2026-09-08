@@ -40,7 +40,7 @@ import fitz  # PyMuPDF
 ROOT = Path(__file__).resolve().parents[1]
 REGISTER = ROOT / "backend" / "seed" / "dg" / "sources.json"
 DEFAULT_OUT = ROOT / "backend" / "seed" / "models"
-STORES = (Path("/data/regulations"), Path("/tmp/cargopilot-regulations"))
+STORES = (Path("/data/regulations"), Path("/tmp/emcargo-regulations"))
 
 
 def sha256(path: Path) -> str:

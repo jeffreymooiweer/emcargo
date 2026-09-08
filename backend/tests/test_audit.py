@@ -48,8 +48,8 @@ def db(tmp_path, monkeypatch):
     monkeypatch.setenv("DATA_DIR", str(data_dir))
     monkeypatch.setenv("APP_ENV", "test")
     monkeypatch.setenv("CATALOG_AUTO_SYNC", "false")
-    monkeypatch.delenv("CARGOPILOT_MODE", raising=False)
-    monkeypatch.setenv("CARGOPILOT_HISTORY", "true")
+    monkeypatch.delenv("EMCARGO_MODE", raising=False)
+    monkeypatch.setenv("EMCARGO_HISTORY", "true")
     get_settings.cache_clear()
     engine = create_engine(f"sqlite:///{data_dir / 'test.db'}",
                            connect_args={"check_same_thread": False})
@@ -239,7 +239,7 @@ def test_the_filters_narrow_the_page(db):
 
 
 def test_the_open_application_writes_nothing(db, monkeypatch):
-    monkeypatch.setenv("CARGOPILOT_MODE", "open")
+    monkeypatch.setenv("EMCARGO_MODE", "open")
     get_settings.cache_clear()
     with application(db) as client:
         assert client.post("/api/documents/export", json=doc("cmr")).status_code == 200

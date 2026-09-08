@@ -2,7 +2,7 @@
 
 Three properties, each of which the messages shipped without at first:
 
-1. **The reader's language, not the sender's.** A colleague whose CargoPilot
+1. **The reader's language, not the sender's.** A colleague whose EMCargo
    is in German got an English invitation, because the wording lived in the
    code as one English string.
 2. **A letter, not a wall of text** — and one that arrives intact, with the
@@ -20,7 +20,7 @@ from app.services import mail, mail_templates
 
 def configured() -> InstanceSettings:
     return InstanceSettings(mail_enabled=True, mail_host="smtp.example.com",
-                            mail_from="cargopilot@example.com")
+                            mail_from="emcargo@example.com")
 
 
 ALL_BUILDERS = [
@@ -196,7 +196,7 @@ def test_a_long_link_may_break_anywhere():
     table, and a table wider than the screen is exactly what pushed the
     message off to the right. No single wrapping rule is honoured by every
     client, so all three are given."""
-    long_link = ("https://cargopilot.example.nl/reset-password?token="
+    long_link = ("https://emcargo.example.nl/reset-password?token="
                  "lTQayKEQt0IqTAxhxtSbKPaK4gB87E2_mHj_HlT29Jg")
     html = mail_templates.invite_message("nl", "berry", long_link, 7).html
     assert long_link in html

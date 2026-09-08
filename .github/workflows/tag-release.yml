@@ -181,15 +181,15 @@ jobs:
           VERSION: ${{ steps.release.outputs.version }}
         run: |
           (cd frontend && npm ci --no-audit && npm run build)
-          STAGE="cargopilot-$VERSION"
+          STAGE="emcargo-$VERSION"
           rm -rf "$STAGE" && mkdir -p "$STAGE"
           cp -r backend templates deploy CHANGELOG.md VERSION LICENSE DISCLAIMER.md "$STAGE/"
           rm -rf "$STAGE/backend/tests" "$STAGE/backend/static"
           find "$STAGE" -name __pycache__ -type d -prune -exec rm -rf {} +
           cp -r frontend/dist "$STAGE/backend/static"
-          tar -czf "cargopilot-$VERSION-native.tar.gz" "$STAGE"
-          sha256sum "cargopilot-$VERSION-native.tar.gz" > "cargopilot-$VERSION-native.tar.gz.sha256"
-          ls -la cargopilot-"$VERSION"-native.tar.gz*
+          tar -czf "emcargo-$VERSION-native.tar.gz" "$STAGE"
+          sha256sum "emcargo-$VERSION-native.tar.gz" > "emcargo-$VERSION-native.tar.gz.sha256"
+          ls -la emcargo-"$VERSION"-native.tar.gz*
 
       - name: Attach the native bundle to the release
         env:
@@ -197,7 +197,7 @@ jobs:
           VERSION: ${{ steps.release.outputs.version }}
         run: |
           TAG="${{ steps.release.outputs.tag }}"
-          gh release upload "$TAG" "cargopilot-$VERSION-native.tar.gz" "cargopilot-$VERSION-native.tar.gz.sha256" --clobber
+          gh release upload "$TAG" "emcargo-$VERSION-native.tar.gz" "emcargo-$VERSION-native.tar.gz.sha256" --clobber
 
       # This used to say: build the image once more, now on the tag ref. That
       # cost four to six minutes to compile precisely the same commit again, plus

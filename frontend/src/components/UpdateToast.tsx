@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 import { api, User } from "../api/client";
 import { useToast } from "../toast/ToastProvider";
 
-export const DISMISSED_KEY = "cargopilot-update-dismissed";
+export const DISMISSED_KEY = "emcargo-update-dismissed";
 
 export default function UpdateToast({ user }: { user: User }) {
   const { t } = useTranslation();

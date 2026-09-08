@@ -1,6 +1,6 @@
 """Which edition of which regulations sits in this installation.
 
-CargoPilot computes with five rule sets, each with its own revision rhythm: ADR
+EMCargo computes with five rule sets, each with its own revision rhythm: ADR
 every two years, the IMDG Code every two years with a transitional year, the
 IATA DGR *every* year. Until now that provenance was spread over the seeds, the
 compliance configuration and the documentation, and there was no way to see from

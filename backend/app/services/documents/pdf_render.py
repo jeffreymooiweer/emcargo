@@ -1,4 +1,4 @@
-"""Generate clean PDFs for self-designed CargoPilot documents with reportlab.
+"""Generate clean PDFs for self-designed EMCargo documents with reportlab.
 
 Used for documents without an official fillable form (packing list, delivery
 note, IMO MMDGF, VGM, shipping instructions, ADR/ADN). Official fillable forms

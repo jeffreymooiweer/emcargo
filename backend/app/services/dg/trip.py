@@ -1,6 +1,6 @@
 """Several consignments on one vehicle, judged as one load.
 
-Everything else in CargoPilot reasons about a consignment, because a consignment
+Everything else in EMCargo reasons about a consignment, because a consignment
 is what somebody fills in. The ADR does not look at anybody's administration; it
 looks at what is physically on the vehicle. Three rules are therefore decided
 over the whole load and cannot be decided per consignment, however carefully

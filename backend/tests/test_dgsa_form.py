@@ -40,7 +40,7 @@ def db(tmp_path, monkeypatch):
     monkeypatch.setenv("DATA_DIR", str(data_dir))
     monkeypatch.setenv("APP_ENV", "test")
     monkeypatch.setenv("CATALOG_AUTO_SYNC", "false")
-    monkeypatch.setenv("CARGOPILOT_HISTORY", "true")
+    monkeypatch.setenv("EMCARGO_HISTORY", "true")
     monkeypatch.setenv("BRAND_NAME", "Mooiweer Logistics")
     get_settings.cache_clear()
     engine = create_engine(f"sqlite:///{data_dir / 'test.db'}",
@@ -218,12 +218,12 @@ def test_the_pdf_route_and_the_missing_history(db, a_year, monkeypatch):
         response = root.get("/api/shipments/report.pdf?year=2026&language=nl")
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/pdf"
-        assert response.headers["content-disposition"].endswith('cargopilot-dgsa-report-2026.pdf"')
+        assert response.headers["content-disposition"].endswith('emcargo-dgsa-report-2026.pdf"')
         with fitz.open(stream=response.content, filetype="pdf") as pdf:
             text = "\n".join(page.get_text() for page in pdf)
         assert "Route test" in text and "Jaarverslag veiligheidsadviseur" in text
         assert "Mooiweer Logistics" in text  # the brand on every page
-    monkeypatch.setenv("CARGOPILOT_HISTORY", "false")
+    monkeypatch.setenv("EMCARGO_HISTORY", "false")
     get_settings.cache_clear()
     with client_as(db, 1) as root:
         assert root.get("/api/shipments/report/form?year=2026").status_code == 404

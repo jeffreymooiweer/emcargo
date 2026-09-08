@@ -1,5 +1,9 @@
 # Roadmap research
 
+> Historical design/research notes. For the current interface and setup, use the
+> [user guide](user-guide.md), [configuration](configuration.md) and
+> [design verification notes](design/README.md).
+
 *Groundwork for the items on the [roadmap](../ROADMAP.md) — deliberately not a plan.
 Each section records what was found out about a subject before anyone commits to
 building it: what the market does, what the regulation says (measured where it could
@@ -12,7 +16,7 @@ answer. Verified facts are cited; anything not yet verified says so.*
 
 ## Package marks and labels (new)
 
-**The idea.** CargoPilot refuses to print placards, and rightly — a laser print is not
+**The idea.** EMCargo refuses to print placards, and rightly — a laser print is not
 a placard. The marks and labels **on the package** of chapter 5.2 are different: they
 are routinely printed on A4 sticker sheets in practice, and the application already
 knows per substance which label models and marks apply. This is the clearest gap
@@ -56,9 +60,9 @@ consignors are not obliged to switch.
 **The technical anchor:** the eFTI data set is built on the **UN/CEFACT Multi-Modal
 Transport reference data model (MMT-RDM)**, and eCMR is being aligned to it
 ([eFTI4ALL](https://efti4all.eu/odette-2025-ecmr-efti-fit-together/)). That is the
-model to map CargoPilot's fields against — once, in a document, before any code.
+model to map EMCargo's fields against — once, in a document, before any code.
 
-**What CargoPilot should and should not become:** not an eFTI platform (that is a
+**What EMCargo should and should not become:** not an eFTI platform (that is a
 certification regime for platform providers), but a system whose every shipment can
 leave as structured data so that a certified platform, or a plugin talking to one, can
 take it from there. The per-party signature flow (consignor, carrier, consignee — the
@@ -89,7 +93,7 @@ what a shipments store can aggregate.
 
 **Dependency, hard:** this requires the shipments page and therefore the history.
 Without stored shipments there is nothing to report. **Shipped in v1.177.0** on that
-basis: the counts CargoPilot can prove (shipments per month, mode, regulation,
+basis: the counts EMCargo can prove (shipments per month, mode, regulation,
 department, class and UN number, kilograms and litres apart, the 1.1.3.6 outcome per
 shipment, the documents issued) as a page and a workbook, and the adviser's duties of
 1.8.3.3 — read in the official Dutch edition — as headings with nothing filled in. The
@@ -106,7 +110,7 @@ be worse than a blank, and the blank is still the deliberate part.
 ## Own articles library (new)
 
 DGOffice links a company's own article codes to UN numbers so one code fills the whole
-document. CargoPilot holds the pieces already: the goods catalogue (1,093 goods), the
+document. EMCargo holds the pieces already: the goods catalogue (1,093 goods), the
 equipment library, and per-substance classification. The missing layer is
 *"our article X = UN 1263, PG II, technical name Y, default packaging Z"* — entered
 once, reused every shipment. Same restriction-level gating as the address book, and
@@ -192,7 +196,7 @@ OpenStreetMap data.
 `hazmat_tunnel` — is sparse. A route that *silently* misses an untagged tunnel is the
 half-right-document problem in map form. A plan must treat OSM coverage measurement
 (for the operator's actual region) as step one, and the module's output as advisory
-with the tunnel code of the load printed beside it — the code CargoPilot already
+with the tunnel code of the load printed beside it — the code EMCargo already
 derives. ADR 1.9.5 keeps route choice with the carrier; the module plans, it does not
 authorise.
 
@@ -206,7 +210,7 @@ commercial benchmark ([EasyCargo](https://www.easycargo3d.com/en/),
 [3DPACK.ING](https://3dpack.ing/)) draws the **centre of gravity live** and accounts
 for weight in placement.
 
-**What nobody in that market has:** segregation. CargoPilot derives IMDG/ADR
+**What nobody in that market has:** segregation. EMCargo derives IMDG/ADR
 segregation per pair of substances; drawing it spatially (these two drums may not
 share this container, that one must be 2.4 m away) is the differentiator. **When
 planned:** decide build-vs-wrap (a TS/WebGL front over an own solver, versus porting
@@ -337,7 +341,7 @@ not mean re-wording.
 The pattern to copy is **[HACS](https://hacs.xyz/)** (Home Assistant Community
 Store): community code lives in the authors' own GitHub repositories, the store
 indexes them, the app installs from the index, and the curated core stays separate.
-That model gives CargoPilot: a hub website that is an *index*, not a file host;
+That model gives EMCargo: a hub website that is an *index*, not a file host;
 admin-only install (already the stated intent); and a natural quality boundary
 (regulatory checks stay in core — a plugin must not be able to silently alter what a
 document claims, which should be written down as a hard rule in the plugin API design).
@@ -373,7 +377,7 @@ validates a Shipper's Declaration against the DGR, and its
 exists precisely to let other systems submit and retrieve checks;
 [DG Digital](https://www.iata.org/en/pressroom/2026-releases/2026-03-12-01/) (launched
 March 2026) digitalises the DGD end-to-end. **This reframes the air unlock:** instead
-of needing Table 4.2 as data, CargoPilot could hand the declaration to IATA's own
+of needing Table 4.2 as data, EMCargo could hand the declaration to IATA's own
 checker through a paid, operator-supplied API key — the measured-source principle kept,
 because the source is IATA itself. To investigate when air is planned: licensing
 terms, cost, offline behaviour (an air-gapped installation cannot call out — the

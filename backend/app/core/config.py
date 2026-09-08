@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore", populate_by_name=True)
 
     app_name: str = "EMCargo"
     app_env: str = "production"
@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     #: A value that is neither is read as ``organisation`` and reported: the
     #: closed application is the one a typo may safely land in, and the mode
     #: is printed by ``/api/health`` so the operator can see what they got.
-    cargopilot_mode: str = "organisation"
+    emcargo_mode: str = "organisation"
     #: Whether the organisation application keeps the shipments it makes.
     #: Since v1.188.0 this is an administrator's setting on the screen —
     #: *Keep shipments* under Administration — and the variable is only its
@@ -32,9 +32,9 @@ class Settings(BaseSettings):
     #: Kept so an installation that set it before keeps its history across
     #: the upgrade. The open application ignores it: nothing is kept about
     #: anyone there.
-    cargopilot_history: bool = False
+    emcargo_history: bool = False
     app_secret_key: str = "change-me"
-    database_url: str = "sqlite:////data/cargopilot.db"
+    database_url: str = "sqlite:////data/emcargo.db"
     data_dir: Path = Path("/data")
     admin_username: str | None = None
     admin_email: str | None = None
@@ -117,7 +117,7 @@ class Settings(BaseSettings):
     @property
     def mode(self) -> str:
         """``open`` or ``organisation``, with anything else read as the latter."""
-        value = (self.cargopilot_mode or "").strip().lower()
+        value = (self.emcargo_mode or "").strip().lower()
         return value if value in ("open", "organisation") else "organisation"
 
     @property

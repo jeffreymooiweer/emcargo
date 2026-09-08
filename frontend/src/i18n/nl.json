@@ -416,7 +416,7 @@
     "mailTesting": "Bezig met versturen…",
     "mailTestSent": "Testbericht verstuurd naar {{to}}.",
     "publicUrl": "Adres van deze installatie",
-    "publicUrlHint": "Wordt gebruikt voor links in uitgaande mail, bijvoorbeeld https://cargopilot.example.nl. Leeg laten als de browser EMCargo rechtstreeks bereikt.",
+    "publicUrlHint": "Wordt gebruikt voor links in uitgaande mail, bijvoorbeeld https://emcargo.example.nl. Leeg laten als de browser EMCargo rechtstreeks bereikt.",
     "cardLinks": "QR-code met UN-kaarten op documenten",
     "cardLinksHint": "Zet een QR-code op elk vervoersdocument die de UN-kaarten van deze zending opent. De pagina erachter vraagt niet om inloggen — dat is de bedoeling: de chauffeur langs de weg en de hulpverlener ter plaatse hebben hier geen account. De pagina toont alleen de UN-nummers en of er een kaart van is; niets over de zending, de partijen of de hoeveelheden. Uit tenzij u dit aanzet.",
     "cardLinksNeedsUrl": "Vul eerst het publieke adres hierboven in. Zonder dat adres wordt er geen QR-code afgedrukt: een code op papier die nergens heen leidt is erger dan geen code, want wie het papier vasthoudt kan dat niet zien.",

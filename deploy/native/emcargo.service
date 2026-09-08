@@ -8,14 +8,14 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=cargopilot
-Group=cargopilot
-WorkingDirectory=/opt/cargopilot/current/backend
-EnvironmentFile=/etc/cargopilot/cargopilot.env
+User=emcargo
+Group=emcargo
+WorkingDirectory=/opt/emcargo/current/backend
+EnvironmentFile=/etc/emcargo/emcargo.env
 # INSTALL_METHOD tells the settings screen which update route applies: the
 # in-app updater needs a Docker socket and does not exist here.
 Environment=INSTALL_METHOD=native
-ExecStart=/opt/cargopilot/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8080
+ExecStart=/opt/emcargo/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8080
 Restart=on-failure
 RestartSec=5
 
@@ -24,7 +24,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/var/lib/cargopilot
+ReadWritePaths=/var/lib/emcargo
 ProtectKernelTunables=true
 ProtectControlGroups=true
 RestrictSUIDSGID=true

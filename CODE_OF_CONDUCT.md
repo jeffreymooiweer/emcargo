@@ -56,7 +56,7 @@ privately to the maintainer.
 Because this repository publishes no personal email address, please use GitHub's private
 reporting to open a confidential thread:
 
-> **[Open a private report](https://github.com/jeffreymooiweer/CargoPilot/security/advisories/new)**
+> **[Open a private report](https://github.com/jeffreymooiweer/emcargo/security/advisories/new)**
 > — the repository's **Security** tab → *Report a vulnerability*. It is the only private
 > channel this repository has, so it doubles as the conduct channel. Say in the first line
 > that the report concerns conduct rather than a vulnerability.

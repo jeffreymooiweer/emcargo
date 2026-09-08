@@ -179,7 +179,7 @@ def test_the_socket_is_not_mounted_twice(data_dir, tmp_path, monkeypatch):
                 "Id": own_id,
                 "Config": {"Image": updater.IMAGE_REPOSITORY + ":1.135.0"},
                 "HostConfig": {"Binds": [
-                    "/mnt/user/appdata/cargopilot:/data:rw",
+                    "/mnt/user/appdata/emcargo:/data:rw",
                     mounted,
                 ]},
             })
@@ -196,7 +196,7 @@ def test_the_socket_is_not_mounted_twice(data_dir, tmp_path, monkeypatch):
 
     sockets = [b for b in seen if updater._bind_destination(b) == sock]
     assert sockets == [mounted]
-    assert "/mnt/user/appdata/cargopilot:/data:rw" in seen
+    assert "/mnt/user/appdata/emcargo:/data:rw" in seen
 
 
 def test_bind_destination_reads_every_shape_docker_writes():
@@ -248,7 +248,7 @@ def test_the_helper_rolls_back_when_the_successor_will_not_start(tmp_path, monke
         log.append(f"{method} {path} {dict(request.url.params)}")
         if path == f"/containers/{old_id}/json":
             return httpx.Response(200, json={
-                "Id": old_id, "Name": "/cargopilot",
+                "Id": old_id, "Name": "/emcargo",
                 "Config": {"Env": ["A=1"]},
                 "HostConfig": {"Binds": ["/srv:/data"]},
                 "NetworkSettings": {"Networks": {}},
@@ -279,7 +279,7 @@ def test_the_helper_rolls_back_when_the_successor_will_not_start(tmp_path, monke
     state = json.loads((tmp_path / "update-state.json").read_text())
     assert state["phase"] == "failed"
     # The rollback renamed the old container back and started it again.
-    assert any("rename" in line and "cargopilot" in line for line in log)
+    assert any("rename" in line and "emcargo" in line for line in log)
     assert f"POST /containers/{old_id}/start {{}}" in log
 
 

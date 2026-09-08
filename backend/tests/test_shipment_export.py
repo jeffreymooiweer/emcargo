@@ -62,7 +62,7 @@ def export(**kwargs):
 def test_it_names_its_own_format_and_version_first():
     """A reader has to be able to tell what it is holding before parsing it."""
     result = export()
-    assert result["format"] == FORMAT == "cargopilot.shipment"
+    assert result["format"] == FORMAT == "emcargo.shipment"
     assert result["format_version"] == FORMAT_VERSION
     assert list(result)[:2] == ["format", "format_version"]
 

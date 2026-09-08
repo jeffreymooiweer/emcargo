@@ -285,7 +285,7 @@ def test_the_code_stays_readable_on_the_documents_that_carry_the_most():
     sizes = []
     for count in (1, 2, 5, 12, 30):
         goods = [{"products": [{"un_number": f"{1000 + i}"} for i in range(count)]}]
-        block = _card_qr_block("https://cargopilot.example.com", goods, styles,
+        block = _card_qr_block("https://emcargo.example.com", goods, styles,
                                "en", "ADR")
         drawing = block[0]._cellvalues[0][0]
         widget = drawing.contents[0]

@@ -60,7 +60,7 @@ a language nobody wrote a rule for is a language nobody checked.
 
 ### Two things wrong with the update notice
 
-**The two sentences ran together.** *CargoPilot 1.206.0 is available This installation does
+**The two sentences ran together.** *EMCargo 1.206.0 is available This installation does
 not update itself…* — the notice is the version line plus the hint, joined with a space, and
 the version line never ended in a full stop. It does now, in all four languages; the stop
 belongs to the sentence, not to the join.
@@ -478,7 +478,7 @@ nothing there to go back to.
 which, above the form and on the fields themselves, instead of walking on quietly. It
 says it on **Next** and never while somebody is halfway through typing: the marks appear
 on the press and clear the moment something is typed. A second press carries on anyway —
-CargoPilot does not block a document it cannot finish, the export step keeps saying what
+EMCargo does not block a document it cannot finish, the export step keeps saying what
 is missing, and the server has the last word on what a document needs.
 
 Measured on the same tasks: correcting an error named on the final overview went from 11
@@ -568,7 +568,7 @@ description, its quantity and its unit behind an edit icon, in a dialog, and the
 fifteen actions and five windows, none of which was the number itself, and nine of the
 twenty-six actions a three-line shipment needed were the dialog opening and closing.
 
-Those four things — description, quantity, unit, and what CargoPilot worked out from
+Those four things — description, quantity, unit, and what EMCargo worked out from
 them — are on the line now. The thirteen fields the old table died of are not back:
 dimensions, wall thickness, packaging, own weights and the article stay in the detail
 dialog, one click away under **Details**. The row wraps rather than switching layouts, so
@@ -750,7 +750,7 @@ JSON, built from the same parts.
   the gateway's own identifiers).
 - **The directory stays out of the repository.** Its licence allows use but
   not modified redistribution; `backend/app/config/iftdgn_d16a.json` holds
-  the segment table and the code values CargoPilot uses with their
+  the segment table and the code values EMCargo uses with their
   checksums, and the test suite verifies them against the directory
   whenever it is at hand.
 
@@ -758,7 +758,7 @@ JSON, built from the same parts.
 
 ### The history switch is the administrator's
 
-`CARGOPILOT_HISTORY` dated from the three privacy levels; with two
+`EMCARGO_HISTORY` dated from the three privacy levels; with two
 applications and one history it was the last feature switch that could only
 be flipped at deploy time. It is now a setting on the screen.
 
@@ -776,7 +776,7 @@ be flipped at deploy time. It is now a setting on the screen.
 - **Never a hidden table.** A database that holds kept shipments while the
   setting says off — an installation that dropped the variable from its
   environment after upgrading — gets the setting switched back on at
-  start-up, with a line in the log. `CARGOPILOT_HISTORY_DISCARD` is gone;
+  start-up, with a line in the log. `EMCARGO_HISTORY_DISCARD` is gone;
   nothing is deleted at start-up any more, ever.
 - **The variable is the starting value only**, like every other setting with
   a screen counterpart: read until an administrator saves the Administration
@@ -805,11 +805,11 @@ for it. An installation that keeps its shipments may now keep the trip too.
   where the exemption fell away; the record shows the judgement as it stood,
   reopens the load on the groupage page through `?trip=<id>`, or removes it.
   Who sees which trips follows the departments rule the shipments use.
-- **Only with the switch.** Without `CARGOPILOT_HISTORY=true` the trips
+- **Only with the switch.** Without `EMCARGO_HISTORY=true` the trips
   addresses do not exist and the groupage page says, as before, that the
   trip is not stored. Switching the history off counts the kept trips with
   the shipments, refuses to start while either is there, and deletes both
-  with `CARGOPILOT_HISTORY_DISCARD`. Schema step seven adds the table to an
+  with `EMCARGO_HISTORY_DISCARD`. Schema step seven adds the table to an
   existing database; the audit log gets `trip.kept`, `trip.updated` and
   `trip.forgotten`.
 
@@ -968,18 +968,18 @@ applied. The route is on the same screen, so the application now reads it.
 
 Docker stays the first-class route in, and now it is not the only one.
 Every release from this one carries a **native bundle**,
-`cargopilot-<version>-native.tar.gz`, beside its notes on the GitHub
+`emcargo-<version>-native.tar.gz`, beside its notes on the GitHub
 release: the backend, the built web interface, the templates, the changelog
 and the deploy files — the tree the image carries, as a tarball.
 
 - **A native service** under systemd on Debian, Ubuntu and the like.
   `deploy/native/install.sh` downloads a release, unpacks it under
-  `/opt/cargopilot/releases/<version>`, makes a virtual environment, writes
+  `/opt/emcargo/releases/<version>`, makes a virtual environment, writes
   the environment file from the example if there is none, installs the unit
   and starts it. `update.sh` does the same for a newer release and moves the
   `current` link; rolling back is moving it back. The data lives in
-  `/var/lib/cargopilot` and is never touched by an update.
-- **Kubernetes** manifests in `deploy/kubernetes/cargopilot.yaml`: a
+  `/var/lib/emcargo` and is never touched by an update.
+- **Kubernetes** manifests in `deploy/kubernetes/emcargo.yaml`: a
   namespace, a persistent volume claim, a secret for the first
   administrator's password, a config map, a deployment of one replica with
   the `Recreate` strategy (SQLite on one volume), a service and an ingress.
@@ -1054,14 +1054,14 @@ and their checklist codes.
 
 ### The installation's name and logo on every document
 
-Every document CargoPilot draws itself — the packing list, the delivery
+Every document EMCargo draws itself — the packing list, the delivery
 note, the placarding sheet, the label sheet, the equipment list, the stowage
 plan, the on-board pack, the packing certificate and the rest — is now
 printed on the installation's paper: the brand name and the uploaded logo in
 the header of every page, the name and the page number in the foot, and the
 "generated with" line naming the installation rather than the software.
-Where no brand is set, the documents carry CargoPilot's own name and logo,
-as before. The disclaimer keeps naming CargoPilot: the licence is the
+Where no brand is set, the documents carry EMCargo's own name and logo,
+as before. The disclaimer keeps naming EMCargo: the licence is the
 software's, not the installation's.
 
 The official forms — CMR, CIM, AVC — are somebody else's paper, filled in
@@ -1126,7 +1126,7 @@ date left empty. It opens on the goods step without the record's identity,
 so keeping it makes a new entry instead of overwriting the old one.
 
 Both live beside the history, and like everything the history brings, exist
-only with `CARGOPILOT_HISTORY=true`; the open application has neither. The
+only with `EMCARGO_HISTORY=true`; the open application has neither. The
 address book is schema step 3, applied on an older database at start-up.
 
 ### Fixed
@@ -1208,7 +1208,7 @@ thing.
 
 ### The shipment history
 
-`CARGOPILOT_HISTORY=true` makes the organisation application keep the
+`EMCARGO_HISTORY=true` makes the organisation application keep the
 shipments it makes. Off — the default, and what every installation was until
 now — nothing changes: a shipment drawn up is a shipment forgotten.
 
@@ -1218,7 +1218,7 @@ the control. So the shipments routes are not mounted without the switch, and
 answer 404 like any address the installation does not have; the open
 application ignores the switch altogether; and an installation whose
 database still holds kept shipments while the switch is off **refuses to
-start**, naming the count and `CARGOPILOT_HISTORY_DISCARD`, the second
+start**, naming the count and `EMCARGO_HISTORY_DISCARD`, the second
 variable that lets the next start delete them. Nothing is deleted by
 default.
 
@@ -1263,7 +1263,7 @@ that keeps its shipments there is one.
 
 ### Branding: the installation's own name, logo and tile pictures
 
-An organisation that hosts CargoPilot for its own people would rather see its
+An organisation that hosts EMCargo for its own people would rather see its
 own name on the door and its own pictures on the tiles. **Settings →
 Administration → Branding** now holds three things: a name, a logo, and a
 picture per transport mode. The header, the sign-in page, the browser tab, the
@@ -1303,7 +1303,7 @@ actually has — a JPEG labelled PNG is a broken image too.
 
 ### The open application
 
-`CARGOPILOT_MODE=open` runs CargoPilot as a public installation anyone may use
+`EMCARGO_MODE=open` runs EMCargo as a public installation anyone may use
 without an account and without leaving anything behind. It is the first half of
 the roadmap's two modes; the organisation application — what every installation
 was until now — is unchanged and remains the default.
@@ -1350,7 +1350,7 @@ and [Privacy](docs/privacy.md) gained the section a visitor reads.
 
 Also: `ADMIN_*` is ignored in the open application, with no warning about a
 missing administrator; accounts left in the database by an earlier organisation
-life are reported at start-up and left alone. `CARGOPILOT_MODE` set to anything
+life are reported at start-up and left alone. `EMCARGO_MODE` set to anything
 but the two words runs the organisation application and says so in the log.
 
 ## [1.170.2] — 2026-09-04
@@ -1486,7 +1486,7 @@ pinned as `ctu_circ_1498`.
 
 ### Groupage: several consignments on one vehicle, judged as one load
 
-Every other screen in CargoPilot reasons about a consignment, because a consignment is
+Every other screen in EMCargo reasons about a consignment, because a consignment is
 what somebody fills in. The ADR does not look at anybody's administration — it looks at
 what is physically on the vehicle. Three of its rules are decided per transport unit and
 cannot be decided per consignment however carefully each one is completed.
@@ -1561,7 +1561,7 @@ not from memory.
 
 ### A QR code on documents, and the first door that opens without a key
 
-Every transport document CargoPilot renders can now carry a QR code that opens this
+Every transport document EMCargo renders can now carry a QR code that opens this
 installation's UN cards for the UN numbers on that document. It is off until an
 administrator turns it on, under **Settings → QR code with UN cards on documents**.
 
@@ -1869,7 +1869,7 @@ actually were. They are now three, ordered by what the server knows about you:
 | **3 — Kept** | The organisation's people, signed in | Accounts, settings, and the shipments made |
 
 Level 1 to 2 changes who gets in; level 2 to 3 changes what is kept. **Level 2 is what
-CargoPilot does today**, so it is the default and the only level reachable without a
+EMCargo does today**, so it is the default and the only level reachable without a
 migration.
 
 - **The level is an environment variable the application can read and not write.** A
@@ -2057,11 +2057,11 @@ which has to be cut from the edition rather than drawn.
 
 Every exporter in this application produced paper. This one produces the shipment: what
 was filled in, what is carried, and — the part that makes it more than a form dump —
-**what CargoPilot worked out**. Offered on every transport mode as *Structured shipment
+**what EMCargo worked out**. Offered on every transport mode as *Structured shipment
 export (JSON)*, documented in [Shipment export](docs/shipment-export.md).
 
 The EU eFTI Regulation applies in full from **9 July 2027**, from when authorities must
-accept freight information electronically through certified platforms. CargoPilot is not
+accept freight information electronically through certified platforms. EMCargo is not
 going to become one — that is a certification regime for platform providers, and this is
 a documentation tool. What it can be is trivially connectable to one, and that starts
 with a shipment being able to leave at all.
@@ -2437,7 +2437,7 @@ border measured from the outside edge, and says "on each side".
     that hazmat tagging is sparse and coverage must be measured first;
   - open-source truck-loading solvers exist with axle-load support (xflp),
     and no commercial load planner does segregation — which is exactly what
-    CargoPilot could add to the 3D module;
+    EMCargo could add to the 3D module;
   - HACS (Home Assistant Community Store) is the model for the community hub:
     an index of authors' own repositories, not a file host, with admin-only
     install;
@@ -2488,7 +2488,7 @@ border measured from the outside edge, and says "on each side".
 
 ### Changed
 
-- **The roadmap plans installing CargoPilot without Docker.** It ships as a
+- **The roadmap plans installing EMCargo without Docker.** It ships as a
   container and assumes one; that stays the default and the tested path, but it
   is currently also the only way in. Planned: a native installation on common
   Linux distributions with a systemd unit, and Helm charts or manifests for
@@ -2734,13 +2734,13 @@ Outgoing mail, rewritten as letters.
 ### Changed
 
 - **Messages are written in the reader's language.** All four of them, and
-  the reader's own choice decides — a colleague whose CargoPilot is in
+  the reader's own choice decides — a colleague whose EMCargo is in
   German gets a German invitation, whoever made the account. A brand-new
   account has no preference yet and gets the installation's default; the
   covering letter with a consignment's documents follows the language the
   papers themselves are drawn up in, because its reader is a carrier rather
   than a user of this installation.
-- **Every message is a letter now**: the CargoPilot logo, a heading, a
+- **Every message is a letter now**: the EMCargo logo, a heading, a
   button where there is something to open. Plain text goes along in the same
   message, saying exactly the same things — it is what a client that refuses
   HTML, a screen reader, or a forwarded copy falls back to.
@@ -2863,7 +2863,7 @@ The documents of a consignment can be mailed straight from the export step.
 
 ### Notes
 
-- The archive is deleted the moment the message is out. CargoPilot keeps no
+- The archive is deleted the moment the message is out. EMCargo keeps no
   copy of a consignment's documents.
 - One message may carry 15 MB of attachments. Beyond that the size and the
   limit are named, rather than leaving the relay to answer with a code.
@@ -2872,7 +2872,7 @@ The documents of a consignment can be mailed straight from the export step.
 
 ## [1.141.0] — 2026-08-21
 
-An administrator can point CargoPilot at a mail server.
+An administrator can point EMCargo at a mail server.
 
 ### Added
 
@@ -2898,7 +2898,7 @@ An administrator can point CargoPilot at a mail server.
   stored password, so the port can be corrected without retyping it.
 
 Sending is off until it is configured, and nothing is sent through it yet
-beyond the test message — what CargoPilot mails is a decision per feature,
+beyond the test message — what EMCargo mails is a decision per feature,
 not something a mail server setting quietly grants itself.
 
 ## [1.140.0] — 2026-08-20
@@ -2975,8 +2975,8 @@ in-app update and an honest 404.
 ### Fixed
 
 - **The updater pulls the tag that actually exists.** Release images are
-  published as `cargopilot:1.136.0`; the updater asked for
-  `cargopilot:v1.136.0` and got HTTP 404 from Docker Hub, reported faithfully
+  published as `emcargo:1.136.0`; the updater asked for
+  `emcargo:v1.136.0` and got HTTP 404 from Docker Hub, reported faithfully
   in the panel. It now asks for the bare version, and a test pins the exact
   tag the pull requests so the prefix cannot creep back.
 - **Both tag spellings are published.** Every release image now carries
@@ -3023,7 +3023,7 @@ halves of that are fixed.
 
 ### Fixed
 
-- **The Docker socket is now usable by the application.** CargoPilot runs as
+- **The Docker socket is now usable by the application.** EMCargo runs as
   uid 1000, while the socket the operator mounts belongs to root (Unraid) or
   the docker group (most distributions) — every call was denied and the
   capability silently reported unavailable. The start script now joins the
@@ -3074,7 +3074,7 @@ Docker API.
   (which is not "up to date").
 - **Update and restart, opt-in.** With `UPDATE_APPLY_ENABLED=true` **and** the Docker
   socket mounted into the container, an update button appears whenever a newer
-  release exists. Pressing it pulls `jeffersonmouze/cargopilot` at the release's own
+  release exists. Pressing it pulls `ghcr.io/jeffreymooiweer/emcargo` at the release's own
   tag — the version is never caller input, the repository is pinned in code and
   verified against the running container's own image — and hands the swap to a
   short-lived helper container started **from the new image**: stop, rename aside,
@@ -3204,7 +3204,7 @@ store nobody's installation had filled. The models now ship with the application
 
 ## [1.129.0] — 2026-08-19
 
-CargoPilot now generates its own UN cards. The third-party card set that filled
+EMCargo now generates its own UN cards. The third-party card set that filled
 `un_cards/` since v1.66.0 is gone — from the repository and from the Docker image — and
 in its place stands a pipeline whose every value is measured: one A4 datasheet per UN
 number **per regime** (`UN1203_ADR.pdf`, `UN1203_ADN.pdf`, `UN1203_IMDG.pdf`), rendered
@@ -3237,10 +3237,10 @@ and imported by an administrator. See the new [docs/un-cards.md](docs/un-cards.m
   filename ↔ UN ↔ modality agreement, `%PDF` header, SHA-256 against the manifest, the
   UN number present in the text, no third-party branding — and a set that fails does
   not ship. Published sets are GitHub Releases tagged `un-cards-YYYY.MM.DD-N` carrying
-  `cargopilot-un-cards.zip`, `manifest.json` and `generation-report.json`.
+  `emcargo-un-cards.zip`, `manifest.json` and `generation-report.json`.
 - **Settings → UN Cards** (administrators). Shows the installed set — generation date,
   per-regime counts, editions, size — and offers **Check for a new set** (reads the
-  pinned CargoPilot release feed, only when clicked), **Download & import latest**,
+  pinned EMCargo release feed, only when clicked), **Download & import latest**,
   **Import from ZIP** for installations without outbound access, and **Remove**. Every
   import is atomic: member names must match exactly the shapes the generator produces
   (which rules out Zip Slip outright), sizes are capped, every card is hashed against
@@ -3851,7 +3851,7 @@ and imported by an administrator. See the new [docs/un-cards.md](docs/un-cards.m
   start after an update, an automatic update check with an unobtrusive notification
   (behind the outbound-connections switch), and updating from inside the application
   where the installation allows it. And companion modules, each in its own repository,
-  talking to CargoPilot over its API: a route planner, container handling in 3D, and a
+  talking to EMCargo over its API: a route planner, container handling in 3D, and a
   military transport module kept strictly outside the civilian core.
 
 ## [1.109.0] — 2026-08-17
@@ -4488,7 +4488,7 @@ fact about the consignment, not about the UN number, so each is a field.
 - **Every subsidiary label model was missing from the transport document.**
   5.4.1.1.1 (c) asks for the label model numbers of column (5), with the ones
   after the first in brackets; the RID's own example is
-  `663, UN 1098 ALLYL ALCOHOL, 6.1(3), I`. CargoPilot printed `6.1` and dropped
+  `663, UN 1098 ALLYL ALCOHOL, 6.1(3), I`. EMCargo printed `6.1` and dropped
   the `(3)`. The cause was a separator: the 2023 export writes `6.1+3` and the
   Dutch 2025 edition writes `6.1, 3`, and the reader split on the plus alone, so
   the whole cell stayed one token. **718 of the 3,158 rows of that table carry
@@ -4687,7 +4687,7 @@ fact about the consignment, not about the UN number, so each is a field.
 
 ### Added
 
-- **The placarding sheet (ADR 5.3).** CargoPilot has derived chapter 5.3 since
+- **The placarding sheet (ADR 5.3).** EMCargo has derived chapter 5.3 since
   v1.53.0 and shown the answer on screen, which is where it stayed. The person
   who needs it is standing at the back of a trailer with plates in his hand,
   and a browser panel is not a thing you hold while doing that. The sheet lists
@@ -4708,7 +4708,7 @@ fact about the consignment, not about the UN number, so each is a field.
   for, or an honest "not here" naming the edition that would produce it. The
   card appears on the export step only for an ADN shipment that actually
   travels in cargo tanks — a dry cargo vessel does not fill this list in.
-- CargoPilot fills in nothing on that checklist. Every answer on it is agreed
+- EMCargo fills in nothing on that checklist. Every answer on it is agreed
   between the vessel and the shore at the moment of loading, and a form this
   application had already ticked would be a claim about a conversation that has
   not happened.
@@ -4742,7 +4742,7 @@ fact about the consignment, not about the UN number, so each is a field.
 
 ### Added
 
-- **The tank on the yard is now part of the question.** CargoPilot showed the
+- **The tank on the yard is now part of the question.** EMCargo showed the
   tank code column (12) *requires*; it could not say whether the tank actually
   standing there may carry the goods. That is the consignor's question, and ADR
   answers it in two provisions that share nothing but their purpose:
@@ -5059,7 +5059,7 @@ fact about the consignment, not about the UN number, so each is a field.
 - **The instructions in writing (5.4.3), from the document store.** ADR and ADN
   5.4.3.4 do not describe the instructions, they print them: the document a
   crew carries has to correspond "in form and content" to a four-page model the
-  book sets out. So this is the one regulatory document CargoPilot does not
+  book sets out. So this is the one regulatory document EMCargo does not
   compose. The export step now offers the model per regime and per language,
   cut out of the edition in the document store — page ranges measured per
   edition with the new `scripts/find_instructions_pages.py` and written into
@@ -5214,7 +5214,7 @@ fact about the consignment, not about the UN number, so each is a field.
   Three pieces close that:
 
   - **A document store outside the repository** — `/data/regulations`, a volume
-    that outlives the container (override with `CARGOPILOT_REGULATIONS_DIR`; the
+    that outlives the container (override with `EMCARGO_REGULATIONS_DIR`; the
     CI cache path is read as a twin). The books stay out of git, as
     `docs/data-sources.md` has always promised.
   - **A register in the repository** — `backend/seed/dg/sources.json`, one entry
@@ -5613,7 +5613,7 @@ fact about the consignment, not about the UN number, so each is a field.
   shared-hold prohibition of 7.1.4.3.2 with the two substances it stands
   between. **Signals (7.1.5.0)** shows the number of blue cones or blue lights,
   which substance sets it under 7.1.5.0.4, and the container reduction of
-  7.1.5.0.2 that CargoPilot deliberately does not apply.
+  7.1.5.0.2 that EMCargo deliberately does not apply.
 
   A cone count of **nought is displayed as prominently as two**. It is the
   commonest answer and means the vessel shows no signal; a card that appeared
@@ -5720,7 +5720,7 @@ fact about the consignment, not about the UN number, so each is a field.
 ### Added
 
 - **The ADN's own table A, and with it the blue cones.** The inland waterway regime has a
-  substance table of its own and CargoPilot has never held it. Its first columns identify
+  substance table of its own and EMCargo has never held it. Its first columns identify
   the goods exactly as the ADR's do, and then it asks a vessel's questions instead of a
   vehicle's: whether the goods may go in packages, in bulk or in a tank vessel, what
   equipment must be aboard, how the holds are ventilated — and **column (12), the number of
@@ -6219,7 +6219,7 @@ fact about the consignment, not about the UN number, so each is a field.
 - **The transport unit's equipment is derived from the load (ADR 8.1.4 and 8.1.5).**
   Equipment was the one heading in `docs/dg-coverage.md` that called itself "the most common
   real-world failure" and was absent from every mode. That had a reason worth naming:
-  CargoPilot cannot see a vehicle and can therefore never establish *that* a wheel chock is
+  EMCargo cannot see a vehicle and can therefore never establish *that* a wheel chock is
   in the cab.
 
   What the app *can* do is derive the list — and 8.1.5.1 asks for exactly that: the
@@ -6362,7 +6362,7 @@ fact about the consignment, not about the UN number, so each is a field.
     over the whole unit rather than read per line. The worked example from the ADR itself —
     UN 0161, 3,000 kg, prohibited by D and E — is fixed as a test.
 
-  The outcome appears in the compliance panel and with the export. What CargoPilot does not
+  The outcome appears in the compliance panel and with the export. What EMCargo does not
   know is stated alongside it: which tunnels lie on the route and what category they fall
   in (that is the carrier's, 1.9.5), and whether carriage is in bulk or in tanks — which is
   stricter for five of the twelve codes.
@@ -6622,7 +6622,7 @@ fact about the consignment, not about the UN number, so each is a field.
 
 - **An administrator section.** Instance-wide, behind `require_admin`, and it exists mainly
   for one question: *does this installation talk to the internet?* Address autocomplete and
-  the startup catalogue sync are the only two requests CargoPilot makes outward, and they
+  the startup catalogue sync are the only two requests EMCargo makes outward, and they
   now have switches next to each other. Also there: the language and theme new users start
   with, the organisation name and address offered as a consignor to anyone who has not
   filled in their own, whether the UN card download is offered, and how long a session
@@ -6671,7 +6671,7 @@ fact about the consignment, not about the UN number, so each is a field.
   environment variables that now have a screen counterpart — including when each takes
   effect, because the catalogue sync is read at startup and cannot take effect sooner.
 - `docs/user-guide.md` has a **Settings** section, with the administrator part separate.
-- `docs/privacy.md` names the stored signature explicitly. It is the only image CargoPilot
+- `docs/privacy.md` names the stored signature explicitly. It is the only image EMCargo
   keeps, it is opt-in, and a document about what is *not* stored has to be exact about what
   now is.
 
@@ -6868,7 +6868,7 @@ is never what you meant to remove.
 ### Added
 
 - **Table 7.5.2.2 is read instead of pointed at.** When a consignment held class 1 packages
-  of more than one compatibility group, CargoPilot counted the groups and handed the
+  of more than one compatibility group, EMCargo counted the groups and handed the
   question back: *check the compatibility groups.* That is honest, and it is also the one
   question the user cannot answer — they do not have the book. The table is now in the
   configuration and gets read: an empty cell is a refusal, an X passes without a word, and
@@ -6907,7 +6907,7 @@ is never what you meant to remove.
 
   This is the one provision where borrowing the ADR chapter would not have produced a rougher
   answer but no answer at all: 7.5.3 is about how a train is made up, and a road transport
-  unit travels alone. Since CargoPilot cannot see the rest of the train, a consignment with a
+  unit travels alone. Since EMCargo cannot see the rest of the train, a consignment with a
   class 1 wagon and no counterpart of its own still gets the provision, addressed to the
   carrier, rather than silence.
 
@@ -6920,7 +6920,7 @@ is never what you meant to remove.
   from one provision into another had been silently approving that combination.
 
 - **Rail cited a code the RID does not have.** RID column (18) names the foodstuffs provision
-  **CW 28**; CargoPilot quoted ADR's CV28 on rail too. The text of 7.5.4 is identical in both
+  **CW 28**; EMCargo quoted ADR's CV28 on rail too. The text of 7.5.4 is identical in both
   regimes so nothing changes about the requirement, but a CIM quoting a code that does not
   exist in its own regime is the same category of defect as the tunnel code that used to be
   printed on it: information the application added itself.
@@ -7046,7 +7046,7 @@ is never what you meant to remove.
 ### Fixed
 
 - **Blasting explosives with ammonium nitrate were refused, though footnote (d) permits
-  them.** The message CargoPilot showed even named the exception — and then blocked the
+  them.** The message EMCargo showed even named the exception — and then blocked the
   load anyway. The check asked whether the consignment contained any class 1 package and
   any package of another class, and raised one error over the whole consignment. Table
   7.5.2.1 does not work that way: it sets label against label, and three of its cells hold
@@ -7089,7 +7089,7 @@ is never what you meant to remove.
 
 ### Verified
 
-- **Rail was checked before these permissions were extended to it.** CargoPilot answers RID
+- **Rail was checked before these permissions were extended to it.** EMCargo answers RID
   and ADN mixed loading with ADR's table under a stated basis note. Borrowing another
   regime's prohibitions is conservative; borrowing its permissions is not, and this release
   turns three cells from refusals into permissions. RID 2025, table 7.5.2.1 on page 1101,
@@ -7335,7 +7335,7 @@ carries a unit.
 The land regulations are read instead of recalled, and reading them found two things the
 application had wrong.
 
-Every rule about road, rail and inland waterway in CargoPilot came from an ADR Table A data
+Every rule about road, rail and inland waterway in EMCargo came from an ADR Table A data
 export plus general knowledge of how the three regimes are structured. The documentation
 said the regulatory texts were out of reach and marked every such rule as unverified. That
 premise was false: **ADR and ADN are published free of charge by UNECE and RID by OTIF.**
@@ -7366,7 +7366,7 @@ development container, not the documents.
 - **Nine substances were counted at more than twice their proper weight.** Note (a) to the
   table in ADR/RID 1.1.3.6.3 allows UN 0081, 0082, 0084, 0241, 0331, 0332, 0482, 1005 and
   1017 up to 50 kg rather than the 20 kg of transport category 1, and RID 1.1.3.6.4 gives
-  the matching multiplier: times 20, not times 50. CargoPilot applied times 50 to all of
+  the matching multiplier: times 20, not times 50. EMCargo applied times 50 to all of
   category 1, so 50 kg of chlorine or anhydrous ammonia scored 2,500 points and lost an
   exemption the text grants at exactly 1,000 — the application demanded orange plates, a
   driver certificate, written instructions and an ADR vehicle for loads entitled to go
@@ -7388,7 +7388,7 @@ development container, not the documents.
 - **Rail stops hedging about its own chapter.** RID 1.1.3.6.3 prescribes the same five
   transport categories with the same maxima (0, 20, 333, 1000, unlimited) and 1.1.3.6.4 the
   same multipliers (50, 3, 1) against the same calculated value of 1,000. The arithmetic was
-  right all along. The old note said RID "has its own 1.1.3.6 which CargoPilot does not
+  right all along. The old note said RID "has its own 1.1.3.6 which EMCargo does not
   hold" — true, but it invited the user to distrust a number that is the number RID
   prescribes. The panel now cites 1.1.3.6.3/1.1.3.6.4 and names the one real difference:
   RID counts per wagon or large container, ADR per transport unit.
@@ -7403,7 +7403,7 @@ development container, not the documents.
   inland waterway carry provision numbers; sea and air keep their `[verify]` markers,
   because the IMDG Code and the DGR genuinely cannot be read here. The gap ranking loses
   two entries and gains an ordered list of what to build next, starting with RID and ADN
-  mixed loading — which no longer needs anything CargoPilot cannot get.
+  mixed loading — which no longer needs anything EMCargo cannot get.
 
 - The pinned example image and Docker Hub cleanup tags in the installation and privacy
   guides, and the sample health response, moved off v1.29.3.
@@ -7491,7 +7491,7 @@ A release-metadata and documentation cleanup following v1.30.0.
 
 - Synchronise the frontend lockfile version with the canonical application version before a release tag is created.
 - Restore the changelog to one continuous file; the temporary archive through v1.29.5 is merged back before tagging.
-- Update the dangerous-goods coverage assessment: a missing IATA Q calculation is no longer silent since v1.30.0, although n and M still require manual input because CargoPilot does not contain IATA quantity tables.
+- Update the dangerous-goods coverage assessment: a missing IATA Q calculation is no longer silent since v1.30.0, although n and M still require manual input because EMCargo does not contain IATA quantity tables.
 
 ### Changed
 
@@ -7507,7 +7507,7 @@ The compliance boundary, authentication boundary and build boundary are now expl
 - **The IATA compliance contract now uses one canonical profile name.** `IATA_DGR` is accepted end to end by the wizard, API and calculation engine. The previous `IATA` value remains a temporary compatibility alias, while unknown profiles still fail with HTTP 422.
 - **An absent IATA Q calculation no longer looks like approval.** Compliance results say whether Q was checked, incomplete, exceeded or not checked, and the panel warns when all-packed-in-one may apply but n/M data is absent.
 - **Changing a password now ends every existing session for that user.** Tokens carry a one-way fingerprint of the current password hash; after a password change old cookies no longer authenticate and the current cookie is cleared.
-- **Interrupted export cleanup covers the formats CargoPilot actually creates.** PDF, ZIP, XLSX and temporary files are removed case-insensitively at startup; one undeletable file no longer stops the rest, and unrelated files and directories are untouched.
+- **Interrupted export cleanup covers the formats EMCargo actually creates.** PDF, ZIP, XLSX and temporary files are removed case-insensitively at startup; one undeletable file no longer stops the rest, and unrelated files and directories are untouched.
 
 ### Added
 
@@ -7534,7 +7534,7 @@ Road, rail and inland waterway were being treated as one regime. They are three.
 - **The tunnel restriction code no longer appears on rail and inland waterway
   documents.** It comes from column 15 of ADR Table A and belongs on the road document
   under 5.4.1.1.1 (k). RID Table A has no such column and the ADN transport document does
-  not carry one — yet CargoPilot printed `(D/E)` on a CIM consignment note and on an ADN
+  not carry one — yet EMCargo printed `(D/E)` on a CIM consignment note and on an ADN
   document. That is not a missing check but wrong information the application added by
   itself. The code is now written only when the ADR profile is selected. The CMR is
   unaffected.
@@ -7543,14 +7543,14 @@ Road, rail and inland waterway were being treated as one regime. They are three.
 
 - **A calculation now says which tables it was made with.** The 1.1.3.6 points and the
   mixed loading of 7.5.2 are computed from the ADR tables. RID and ADN have their own
-  versions of those chapters and they are not in CargoPilot. Selecting RID or ADN gave an
+  versions of those chapters and they are not in EMCargo. Selecting RID or ADN gave an
   outcome that silently read as *the RID outcome*. The compliance panel now carries a
   note naming the basis, in all three interface languages. The numbers themselves are
   unchanged — a road shipment sees no note, and 1200 points stay 1200 points.
 
 ### Added
 
-- **`docs/dg-coverage.md`** — an assessment, per mode, of what CargoPilot actually checks
+- **`docs/dg-coverage.md`** — an assessment, per mode, of what EMCargo actually checks
   against what the regime requires, with the gaps ranked by how much damage the gap can
   do. It separates what was read out of the code from what comes from knowledge of the
   regimes, and marks the latter as unverified: the regulatory texts are not in this
@@ -7603,7 +7603,7 @@ that fixes it.** No configuration change is needed on your side.
 
 ### Fixed
 
-- **CargoPilot refused to start on its own default settings.** Since v1.25.0 the
+- **EMCargo refused to start on its own default settings.** Since v1.25.0 the
   application stopped at startup when `APP_SECRET_KEY` was published, empty or shorter
   than 32 characters, or when `CORS_ALLOWED_ORIGINS` was `*`. Those are the values it
   ships with — `app_secret_key: str = "change-me"` and `cors_allowed_origins: str = "*"`
@@ -7617,7 +7617,7 @@ that fixes it.** No configuration change is needed on your side.
   application with its own data directory does not need to ask the user for a signing
   key — it can make one.
 
-  It does now. On first start CargoPilot generates a key, stores it as `secret_key` in
+  It does now. On first start EMCargo generates a key, stores it as `secret_key` in
   `DATA_DIR` with owner-only permissions, and uses it from then on. It survives restarts
   and container recreation because it lives on the mounted volume. A key you set yourself
   still wins, as long as it is not a published value and is long enough. The result is
@@ -7656,7 +7656,7 @@ Following the rules and being pleasant to use are the same job, not a trade-off.
 - **A sea or air document now gets the English shipping name instead of refusing to
   export.** 1.29.1 got the regulation right and the experience wrong. If you drafted a
   German road document and then added a sea leg, the German name stayed in the field and
-  the export **blocked**, telling you to retype `GASOLINE` — a word CargoPilot had just
+  the export **blocked**, telling you to retype `GASOLINE` — a word EMCargo had just
   printed in the error message. That is making the user do what the application already
   knows.
 
@@ -7667,7 +7667,7 @@ Following the rules and being pleasant to use are the same job, not a trade-off.
   5.4.1.1.1 description line, in the DG table and in the filled IATA PDF — and the export
   says what it did rather than what you still have to do.
 
-  Only what CargoPilot derived itself is adjusted. Wording you typed — a technical name
+  Only what EMCargo derived itself is adjusted. Wording you typed — a technical name
   on an N.O.S. entry, your own addition — is left exactly as it stands: we cannot judge
   it and must not silently overwrite it.
 
@@ -7835,10 +7835,10 @@ Both were closed in 1.29.1; the second one turned out not to be a gap in the dat
 ### Added
 
 - **`scripts/probe_nhm_sources.py`** and a workflow to run it. Box 24 wants a six-digit
-  NHM code and CargoPilot cannot supply a list, so the field says look it up elsewhere.
+  NHM code and EMCargo cannot supply a list, so the field says look it up elsewhere.
   Inventing six-digit codes is not an option here, so this measures first: is a candidate
   source reachable, does it carry six-digit codes *with* descriptions — a list of bare
-  numbers is useless to someone choosing one — and does it cover the goods CargoPilot
+  numbers is useless to someone choosing one — and does it cover the goods EMCargo
   knows. The same order that worked for the Dangerous Goods List.
 
   It records nothing. Until a source turns up that holds up, box 24 stays a free-text
@@ -7959,7 +7959,7 @@ whoever asked `/api/regulatory`. Someone making an air declaration in 2027 saw n
   named as out of scope rather than left to look complete.
 
 - **An `Authorization` field on the IATA declaration** — the approval, exemption or DGR
-  reference a shipment flies under. The template CargoPilot fills has no form field for
+  reference a shipment flies under. The template EMCargo fills has no form field for
   it (that box sits inside the goods table), so it is written as its own labelled line
   under that table. Left empty it is omitted entirely: an empty box with the word
   "Authorization" in it suggests something was approved.
@@ -7976,14 +7976,14 @@ whoever asked `/api/regulatory`. Someone making an air declaration in 2027 saw n
 > **Reverted in [1.29.3](#1293--2026-08-04). Do not run this version or anything up to
 > 1.29.2 unless you set `APP_SECRET_KEY` and `CORS_ALLOWED_ORIGINS` yourself.** What this
 > release introduced — refusing to start on a published or empty signing key — matched the
-> values CargoPilot itself shipped with, so installations that had not configured both by
+> values EMCargo itself shipped with, so installations that had not configured both by
 > hand simply died at startup. The signing key is generated automatically from 1.29.3
 > onwards; see [Configuration](docs/configuration.md#the-signing-key-looks-after-itself).
 >
 > The note as it read at the time:
 >
 > > **Upgrading may stop your container on purpose.** If you never set `APP_SECRET_KEY`,
-> > CargoPilot now refuses to start and tells you what to put there — including a
+> > EMCargo now refuses to start and tells you what to put there — including a
 > > ready-made key. Changing the key logs everyone out; nothing else is lost.
 
 ### Fixed
@@ -8035,7 +8035,7 @@ Checks that run on their own, and one gap they found.
   publishing; the tests only ran locally, so a broken test could travel all the way to
   a release.
 - **A version-consistency test.** The number lives in four places and they must agree.
-  This is not theoretical: an external review of CargoPilot produced a list of problems
+  This is not theoretical: an external review of EMCargo produced a list of problems
   that were largely already fixed, because the reviewer was reading
   `frontend/package.json` at 1.14.1 while the rest of the project was far past it. The
   test also insists the changelog leads with the current version.
@@ -8360,7 +8360,7 @@ The remaining segregation provisions, as far as they go.
   compounds" for the "ammonium salts" of SG22 — the warning says so, because the match is
   wider than the provision.
 - **Provisions whose target is ordinary cargo are raised as requirements.** Foodstuffs,
-  animal and vegetable oils, odour-absorbing cargo, liquid organic substances. CargoPilot
+  animal and vegetable oils, odour-absorbing cargo, liquid organic substances. EMCargo
   does not know what non-dangerous cargo travels alongside, so these appear whenever the
   substance is in the shipment — the same shape as the existing ADR CV28 foodstuff
   warning. SG26 is conditional and only appears next to class 2.1 or 3.
@@ -8517,7 +8517,7 @@ Documentation rewritten, in English, and split up.
 
 ### Changed
 
-- **The README is now about the app, not about everything.** It says what CargoPilot is,
+- **The README is now about the app, not about everything.** It says what EMCargo is,
   what it does for you and how to start it, and links onward. Installation instructions,
   environment variables, data provenance and developer setup have moved into `docs/`.
 - **All documentation is in English**, including the changelog and the roadmap.
@@ -8747,7 +8747,7 @@ Dangerous goods: automatic completion per transport mode, and sea segregation.
 ### Added
 
 - **Automatic completion of dangerous goods data** (`POST /api/dg/prepare`): you enter
-  only the UN number per package (or search by substance name) and CargoPilot derives the
+  only the UN number per package (or search by substance name) and EMCargo derives the
   proper shipping name, class, subsidiary risks, packing group, packing instruction,
   transport category, tunnel code, Kemler number and LQ/EQ limits. Number of packages,
   packaging type and masses are taken from the packages already entered. Only empty fields
@@ -8956,13 +8956,13 @@ database.
 
 ## [1.4.0] — 2026-07-13
 
-CargoPilot is fully civilian: military forms removed.
+EMCargo is fully civilian: military forms removed.
 
 ### Removed
 
 - The internal military form has been removed completely: the wizard step with its
   questions, the Excel template, the export endpoints, the PDF rendering and all
-  references in the interface. Military use gets a separate private fork (CargoPilot MIL)
+  references in the interface. Military use gets a separate private fork (EMCargo MIL)
   with its own forms.
 - Military flags and help texts (weapons, ammunition, ITAR, TBB) and external references
   to defence portals

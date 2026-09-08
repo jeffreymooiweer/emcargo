@@ -51,7 +51,7 @@ jobs:
       - name: Volumes already fetched
         uses: actions/cache/restore@v4
         with:
-          path: /tmp/cargopilot-regulations
+          path: /tmp/emcargo-regulations
           key: regulations-${{ github.run_id }}
           restore-keys: |
             regulations-
@@ -81,8 +81,8 @@ jobs:
           if [ "$PROBE" = "true" ]; then EXTRA="--probe"; fi
           if [ "$DUMP" = "true" ]; then EXTRA="$EXTRA --dump"; fi
           if [ -n "$PROBE_PAGE" ]; then EXTRA="$EXTRA --probe-page $PROBE_PAGE"; fi
-          PDF=/tmp/cargopilot-regulations/adn.pdf
-          if [ "$LANGUAGE" = "fr" ]; then PDF=/tmp/cargopilot-regulations/adn_fr.pdf; fi
+          PDF=/tmp/emcargo-regulations/adn.pdf
+          if [ "$LANGUAGE" = "fr" ]; then PDF=/tmp/emcargo-regulations/adn_fr.pdf; fi
           if [ "$LANGUAGE" = "nl" ]; then
             # The printed Dutch edition sets table C the ordinary way round,
             # so it is read across the page and not down it.
@@ -109,5 +109,5 @@ jobs:
         if: always()
         uses: actions/cache/save@v4
         with:
-          path: /tmp/cargopilot-regulations
+          path: /tmp/emcargo-regulations
           key: regulations-${{ github.run_id }}

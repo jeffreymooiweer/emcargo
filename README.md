@@ -2,6 +2,8 @@
 
 # EMCargo
 
+Developed and maintained by **Jeffrey Mooiweer**.
+
 **Turn a list of packages into finished transport documents.**
 
 Paste your load, and EMCargo works out the weights and volumes, fills in the official
@@ -31,11 +33,10 @@ CMR, CIM, AVC and IATA forms, and checks your dangerous goods before you print.
 
 EMCargo uses a dark navy workspace with a persistent desktop sidebar, a mobile
 navigation drawer, three visible shipment stages and a bottom action bar.
-Dangerous-goods assessment remains mandatory within the goods stage. Existing
-light/system preferences, custom branding, saved drafts and shipment files stay
-compatible. CargoPilot storage keys and database filenames are intentionally kept
-so upgrading does not discard existing data. The original licence and attribution
-remain in LICENSE.
+Dangerous-goods assessment remains mandatory within the goods stage. The complete source now uses EMCargo identifiers, including storage and native
+installation names. Existing installations require the steps in
+[Identity migration](docs/identity-migration.md) before upgrading. The original
+licence remains in LICENSE.
 
 Images for this repository are published to `ghcr.io/jeffreymooiweer/emcargo`.
 Use `docker compose up --build -d` to build locally before a release is available.
@@ -105,7 +106,7 @@ docker compose up -d --build
 Open <http://localhost:8080> and log in with the admin account from your `.env`.
 
 Want an installation anyone may use without an account, that keeps nothing about
-anyone? Set `CARGOPILOT_MODE=open` — see [Privacy](docs/privacy.md#two-applications)
+anyone? Set `EMCARGO_MODE=open` — see [Privacy](docs/privacy.md#two-applications)
 for exactly what that promises and [Configuration](docs/configuration.md) for how.
 
 Running Unraid, or want the full set of options? See **[Getting started](docs/getting-started.md)**.

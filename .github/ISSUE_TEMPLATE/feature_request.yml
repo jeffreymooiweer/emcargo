@@ -1,12 +1,12 @@
 name: Idea or feature request
-description: Something CargoPilot could do that it does not do yet
+description: Something EMCargo could do that it does not do yet
 labels: ["enhancement"]
 body:
   - type: markdown
     attributes:
       value: |
-        CargoPilot is a personal project maintained by one person, so ideas are collected
-        rather than promised. The [roadmap](https://github.com/jeffreymooiweer/CargoPilot/blob/main/ROADMAP.md)
+        EMCargo is a personal project maintained by one person, so ideas are collected
+        rather than promised. The [roadmap](https://github.com/jeffreymooiweer/emcargo/blob/main/ROADMAP.md)
         shows what is already planned — worth a look first.
 
         The most useful thing you can describe is **the situation you are in**, not the

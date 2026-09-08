@@ -1,6 +1,6 @@
 # User guide
 
-A walk through CargoPilot, from opening the app to downloading your paperwork. The whole
+A walk through EMCargo, from opening the app to downloading your paperwork. The whole
 flow is one wizard; you can go back to any earlier step at any time.
 
 - [1. Pick a transport mode](#1-pick-a-transport-mode)
@@ -14,6 +14,23 @@ flow is one wizard; you can go back to any earlier step at any time.
 - [Language](#language)
 - [Tips](#tips)
 
+## Overview and navigation
+
+The desktop sidebar provides the overview, new shipment, shipments, trips, library
+and administration. On smaller screens, open the menu in the top bar. Availability
+of account and history features depends on the installation mode and your role.
+
+The overview lets you resume a draft, search recent shipments or start directly by
+pasting an Excel list. Counts and document availability come from actual saved data.
+
+The shipment header shows three stages: goods, shipment details and documents.
+Dangerous-goods questions are part of the goods stage and remain mandatory when
+applicable; the sections below explain these tasks separately. The desktop summary
+shows totals beside the goods. The bottom action bar contains the next action and
+**Save and close**; failed saves stay visible so you can retry without losing input.
+
+New installations use the dark theme. Existing explicit theme choices are preserved.
+
 ## 1. Pick a transport mode
 
 Click **New shipment** and choose how the goods travel. **Road, rail, sea and inland
@@ -26,10 +43,10 @@ goods (ADR for road, RID for rail, IMDG for sea, ADN for inland waterway, IATA D
 air), and which kind of locations the route fields suggest.
 
 Always ship the same way? Set a fixed transport mode under [Settings](#settings) and
-CargoPilot opens straight into it; *change transport mode* at the top of the wizard brings
+EMCargo opens straight into it; *change transport mode* at the top of the wizard brings
 the tiles back.
 
-You do not choose forms here. CargoPilot assembles the document set from the shipment
+You do not choose forms here. EMCargo assembles the document set from the shipment
 itself and shows the advice on the [export step](#5-export-and-your-documents), where you
 can still adjust it.
 
@@ -39,7 +56,7 @@ Three ways to get your load in:
 
 **Type it.** Each line carries its description, its quantity and its unit as fields you
 type in directly; the catalogue searches while you type the description. **Enter** makes
-the next line, so a list can be typed without touching the mouse. What CargoPilot works
+the next line, so a list can be typed without touching the mouse. What EMCargo works
 out — the weight, the measurements, the volume — appears under the line as you go.
 Dimensions you want to set yourself, the packaging, the wall thickness and your own
 weights are under **Details** on the line.
@@ -58,7 +75,7 @@ Columns are separated by a pipe (`|`) or a tab, in the order
 takes a file dropped on it. **Download template** next to it gives you the exact layout if
 you want it.
 
-Your file rarely has the template's layout, and it does not have to. CargoPilot reads the
+Your file rarely has the template's layout, and it does not have to. EMCargo reads the
 header row and works out which column is which. When it recognises the names there is
 nothing to ask and the lines simply go in; when it does not, it guesses by position,
 **tells you it guessed** in an amber panel, and waits for you to look before importing
@@ -67,7 +84,7 @@ Stalen hoekprofiel 80x80x8x6000` rather than "column 2" — so you can see at a 
 whether it picked the right one.
 
 Two things worth knowing there. A column you do not need can be left unmapped. And if
-your file starts with a header row that CargoPilot did not recognise, tick **first row is
+your file starts with a header row that EMCargo did not recognise, tick **first row is
 a header**, or that row is imported as a piece of cargo.
 
 **Adding or replacing.** With nothing in the shipment yet there is nothing to replace, so
@@ -77,7 +94,7 @@ which is what makes replacing safe to offer at all.
 
 ### What happens next
 
-CargoPilot reads each line and tries to recognise the material and any dimensions in it,
+EMCargo reads each line and tries to recognise the material and any dimensions in it,
 in Dutch, English, German or French. `Steel angle 80x80x8x6000` becomes steel, 80 × 80 × 8 mm,
 6000 mm long, and so does `Stahl Winkelprofil 80x80x8x6000`. From there it calculates the weight, the material volume and the transport volume.
 
@@ -99,7 +116,7 @@ from the summary if you know the real weighbridge figure.
 
 ### Dangerous goods on a line
 
-Tick **Dangerous goods** under **Details** on any package that contains them. CargoPilot
+Tick **Dangerous goods** under **Details** on any package that contains them. EMCargo
 also spots UN numbers written in a description (`UN 1203`) and ticks the box for you.
 
 And it recognises substances by name. Type `petrol` or `benzine` and the line asks you,
@@ -139,7 +156,7 @@ spreadsheet template, an export and an import in the same columns.
 Enter the **UN number**, confirm the chip from the previous step, or search by
 substance name. That is usually all you need to type.
 
-From that one number CargoPilot works out the proper shipping name, the class and
+From that one number EMCargo works out the proper shipping name, the class and
 division, subsidiary risks, packing group, packing instruction, transport category,
 tunnel code, Kemler number, limited and excepted quantity limits, the EmS emergency
 schedules for sea transport and the air freight rules. Quantities, packaging type and
@@ -273,7 +290,7 @@ the UN cards and the instructions in writing for the journey's regimes as well.
 Anything the server has to leave out (an incomplete document, a UN card it does not
 hold) is named in a README inside the archive rather than silently missing. Every
 document downloads as a PDF and carries a draft notice. Two entries in the list are not
-paper: the **Structured export (JSON)**, the whole shipment as data with what CargoPilot
+paper: the **Structured export (JSON)**, the whole shipment as data with what EMCargo
 derived (see [The structured shipment export](shipment-export.md)), and — for a shipment
 with dangerous goods — the **Dangerous goods notification (UN/EDIFACT IFTDGN)**, the EDI
 message a port community system or a forwarder's gateway reads, as an `.edi` file (see
@@ -297,7 +314,7 @@ which no card exists is named as missing rather than papered over with another r
 card. They are not part of the transport documentation.
 
 The card set itself is not bundled with the application: an administrator installs it
-once under **Settings → UN Cards**, either straight from the CargoPilot releases or from
+once under **Settings → UN Cards**, either straight from the EMCargo releases or from
 an uploaded ZIP (see [un-cards.md](un-cards.md)). Until then the wizard simply says no
 cards are available.
 
@@ -369,7 +386,7 @@ Who sees which trips follows the same department rule as the shipments.
 
 ## Shipments: the history, where the installation keeps one
 
-By default CargoPilot keeps no shipments: once the papers are downloaded, the shipment is
+By default EMCargo keeps no shipments: once the papers are downloaded, the shipment is
 gone. An administrator can switch a history on under **Settings → Administration → Keep
 shipments** (see [Configuration](configuration.md#shipment-history)), and then two things
 appear. Switching it off again is refused while kept shipments or trips exist: the screen
@@ -445,7 +462,7 @@ using. Sign in somewhere else and it comes with you.
 **Appearance.** Light, dark or follow the system, and the interface language.
 
 **Defaults for a shipment.** If you always ship by the same mode, pick it here and
-CargoPilot opens straight into it — the transport-mode tiles are still one click away, via
+EMCargo opens straight into it — the transport-mode tiles are still one click away, via
 *change transport mode* at the top of the wizard. You can also set the unit a new package
 line starts with.
 
@@ -475,7 +492,7 @@ server; without one, ask your administrator to set a new password for you.
 
 ### After an update
 
-When your administrator pulls a newer CargoPilot image, the first sign-in afterwards shows
+When your administrator pulls a newer EMCargo image, the first sign-in afterwards shows
 a **what's new** card with the release notes between the version you last used and the one
 now running. Close it and it will not return until the next update; the card follows your
 account, so a second device does not show the same notes twice. The notes themselves are
@@ -497,9 +514,9 @@ verification policy**: off, required for administrators, or required for everyon
 **Branding** the installation gets its own face: a name for the header, the sign-in page
 and the browser tab, a logo shown in its own colours in both themes and carried in
 outgoing mail, and a picture per transport mode for the tiles on the first screen. Both
-the name and the logo are printed on every document CargoPilot draws itself, in the
+the name and the logo are printed on every document EMCargo draws itself, in the
 header and the foot of every page, and the "generated with" line names the installation
-rather than the software; where nothing is set, the documents carry CargoPilot's own
+rather than the software; where nothing is set, the documents carry EMCargo's own
 name and logo. The official forms (CMR, CIM, AVC) are filled in and not rebranded. The
 pictures apply the moment they are uploaded and each has a way back to the default; the
 name is saved with the button. See [Configuration](configuration.md#branding) for the
@@ -554,7 +571,7 @@ the error messages and the documents you download.
 One thing follows the regulations rather than your choice. The proper shipping name of a
 dangerous substance is prescribed per mode: a German CMR or CIM may carry the German name
 from ADR Table A, but a sea or air document must be in English (IMDG 5.4.1.4.1, IATA DGR
-8.1.2.1). CargoPilot puts the right one on each document and tells you when it did.
+8.1.2.1). EMCargo puts the right one on each document and tells you when it did.
 See [Dangerous goods](dangerous-goods.md#what-one-un-number-gives-you).
 
 ## Tips

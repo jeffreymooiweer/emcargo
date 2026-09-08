@@ -245,7 +245,7 @@ def is_english_name(entry: dict[str, Any], name: Any) -> bool:
 
 
 def is_derived_name(entry: dict[str, Any], name: Any) -> bool:
-    """Is this a name CargoPilot itself put in the field?
+    """Is this a name EMCargo itself put in the field?
 
     Only what the app derived is adjusted for another document. Wording of the
     user's own — a technical name with an n.o.s. entry, an addition by the
@@ -264,10 +264,10 @@ def resolve_for_profile(product: dict[str, Any], profile: str,
     The language of the name belongs to the document, not to the consignment.
     One consignment produces a CMR with "BENZIN ODER OTTOKRAFTSTOFF" and an IMO
     DGF with "GASOLINE", from the same data. So there is no point in refusing
-    the export and making the user retype the English: CargoPilot knows what has
+    the export and making the user retype the English: EMCargo knows what has
     to be there and puts it there itself.
 
-    Only what CargoPilot derived itself is adjusted. If there is wording of the
+    Only what EMCargo derived itself is adjusted. If there is wording of the
     user's own — a technical name with an n.o.s. entry, an addition by the
     consignor — it stays; we cannot assess that and certainly must not overwrite
     it silently.

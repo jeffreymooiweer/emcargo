@@ -65,7 +65,7 @@ def sent(db, monkeypatch):
     messages: list[dict] = []
     settings = InstanceSettings(
         mail_enabled=True, mail_host="smtp.example.com",
-        mail_from="cargopilot@example.com")
+        mail_from="emcargo@example.com")
     monkeypatch.setattr(auth_route, "instance_settings", lambda db: settings)
     monkeypatch.setattr(
         auth_route.mail, "send",

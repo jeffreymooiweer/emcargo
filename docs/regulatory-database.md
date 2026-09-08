@@ -1,6 +1,6 @@
 # The regulatory database
 
-Every dangerous-goods answer CargoPilot gives was read out of a book. This page
+Every dangerous-goods answer EMCargo gives was read out of a book. This page
 describes the machinery that keeps that honest: where the books live, how facts
 get out of them, and what to do when a new edition appears.
 
@@ -10,8 +10,8 @@ get out of them, and what to do when a new edition appears.
 publishers (UNECE, OTIF, IMO, Rijksoverheid, mindef.nl)
         │  download or operator-supplied file
         ▼
-document store          /data/regulations (outside git; CARGOPILOT_REGULATIONS_DIR
-        │               overrides; /tmp/cargopilot-regulations is the CI cache twin)
+document store          /data/regulations (outside git; EMCARGO_REGULATIONS_DIR
+        │               overrides; a temporary regulations cache is the CI cache twin)
         │  scripts/regulations_store.py — status / fetch / add / verify
         ▼
 register                backend/seed/dg/sources.json (in git: editions, URLs,
@@ -43,7 +43,7 @@ Two rules carry the whole design, and neither is negotiable:
 
 `/data/regulations` is a volume, not a directory in the container image: it
 survives the container. On an installation it is the same `/data` the database
-lives on. The CI workflows keep a twin under `/tmp/cargopilot-regulations` via
+lives on. The CI workflows keep a twin under a temporary regulations cache via
 `actions/cache`, and `read_land_regulations.py` looks in the store first.
 
 ```

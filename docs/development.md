@@ -1,6 +1,6 @@
 # Development
 
-CargoPilot is one product with two processes: a **FastAPI** backend on Python 3.12 and a
+EMCargo is one product with two processes: a **FastAPI** backend on Python 3.12 and a
 **React 18 + TypeScript** frontend built with Vite. Data lives in a file-based SQLite
 database; there is no separate database service.
 
@@ -22,11 +22,11 @@ cd backend
 python -m pip install -r requirements.txt
 mkdir -p ../data
 
-DATABASE_URL=sqlite:////absolute/path/to/repo/data/cargopilot.db \
+DATABASE_URL=sqlite:////absolute/path/to/repo/data/emcargo.db \
 DATA_DIR=/absolute/path/to/repo/data \
 APP_ENV=development \
 APP_SECRET_KEY=dev-secret \
-ADMIN_USERNAME=admin ADMIN_EMAIL=admin@example.local ADMIN_PASSWORD=cargopilot123 \
+ADMIN_USERNAME=admin ADMIN_EMAIL=admin@example.local ADMIN_PASSWORD=emcargo123 \
 CATALOG_AUTO_SYNC=false \
   uvicorn app.main:app --reload --port 8080
 ```
@@ -235,7 +235,7 @@ python scripts/bump_version.py 1.37.0
 3. Run the **Tag release** workflow from GitHub Actions with the version number. It
    verifies the version files, then creates the tag and the GitHub Release from the
    changelog entry. It does not commit anything.
-4. **CI** already built and pushed `jeffersonmouze/cargopilot:latest` and `:<short-sha>` on
+4. **CI** already built and pushed `ghcr.io/jeffreymooiweer/emcargo:latest` and `:<short-sha>` on
    the merge in step 2. Step 3 adds `:<version>` and `:v<version>` to that same image;
    nothing is rebuilt. Both spellings are published because the in-app updater asked for
    the `v` form up to v1.136.0 and for the bare form from v1.137.0 on — an installation of
@@ -274,7 +274,7 @@ files in that directory is not the number of things that run.
 | `ci.yml` | push to `main`, every pull request, on request | Backend tests, Frontend build, Docker build |
 | `tag-release.yml` | on request (and on a merged `agent/release-v*` branch) | tag, GitHub Release, and it renames main's image to the version |
 | `read-land-regulations.yml` | on request | quotes ADR/RID/ADN; commits nothing |
-| `cleanup-dockerhub.yml`, `probe-*.yml`, `extract-imdg-*.yml` | on request | maintenance and research |
+| `probe-*.yml`, `extract-imdg-*.yml` | on request | maintenance and research |
 
 Until v1.39.0 there were two workflows *both named* `CI` — `ci.yml` and `dockerhub.yml` —
 each triggered by the same pushes, so `pytest` ran twice and `npm ci` ran twice on every
@@ -295,7 +295,7 @@ a publication hangs off those.
 
 ## The UN cards
 
-Since v1.129.0 CargoPilot generates its own UN cards from the measured seed tables in
+Since v1.129.0 EMCargo generates its own UN cards from the measured seed tables in
 `backend/seed/dg/` — the generator lives in `scripts/un_cards/`, the **Generate UN
 cards** workflow publishes the set as a GitHub Release, and an administrator imports it
 under **Settings → UN Cards**. The cards are in neither the repository nor the Docker
@@ -311,3 +311,10 @@ cross-checked its EmS readings against `ems.json` — 2,282 agreed, none disagre
 `backend/tests/test_dg_card_data.py` still guards the values. The source PDFs are no
 longer bundled, so re-running that extraction needs the original set; replacing the
 dataset with values read from the official IMDG Code is the intended way forward.
+
+## Browser preview
+
+Vite allows the supervised preview hostname explicitly. Start the development
+server with the documented preview service when available; the backend must also
+be running for authenticated workflows. A successful sign-in page render verifies
+connectivity only, not complete browser QA.

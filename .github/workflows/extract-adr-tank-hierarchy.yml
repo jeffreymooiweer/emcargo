@@ -69,7 +69,7 @@ jobs:
       - name: Volumes already fetched
         uses: actions/cache/restore@v4
         with:
-          path: /tmp/cargopilot-regulations
+          path: /tmp/emcargo-regulations
           key: regulations-${{ github.run_id }}
           restore-keys: |
             regulations-
@@ -102,7 +102,7 @@ jobs:
           set -euo pipefail
           if [ "$LANGUAGE" = "compare" ]; then
             python scripts/extract_adr_tank_hierarchy.py \
-              --pdf /tmp/cargopilot-regulations/adr2.pdf --language en --out en.json
+              --pdf /tmp/emcargo-regulations/adr2.pdf --language en --out en.json
             python scripts/extract_adr_tank_hierarchy.py \
               --pdf "$(python scripts/regulations_store.py path adr_nl_2025)" \
               --language nl --out nl.json
@@ -118,7 +118,7 @@ jobs:
           case "$LANGUAGE" in
             nl) PDF=$(python scripts/regulations_store.py path adr_nl_2025) ;;
             de) PDF=$(python scripts/regulations_store.py path adr_de_2) ;;
-            *)  PDF=/tmp/cargopilot-regulations/adr2.pdf ;;
+            *)  PDF=/tmp/emcargo-regulations/adr2.pdf ;;
           esac
           ARGS=(--pdf "$PDF" --language "$LANGUAGE" --out "hierarchy_$LANGUAGE.json")
           if [ "$PROBE" = "true" ]; then ARGS+=(--probe); fi
@@ -144,7 +144,7 @@ jobs:
         if: always()
         id: store
         run: |
-          SIZE=$(du -sm /tmp/cargopilot-regulations 2>/dev/null | cut -f1 || echo 0)
+          SIZE=$(du -sm /tmp/emcargo-regulations 2>/dev/null | cut -f1 || echo 0)
           echo "megabytes=$SIZE" >> "$GITHUB_OUTPUT"
           echo "the store holds ${SIZE} MB"
 
@@ -152,7 +152,7 @@ jobs:
         if: ${{ always() && steps.store.outputs.megabytes > 10 }}
         uses: actions/cache/save@v4
         with:
-          path: /tmp/cargopilot-regulations
+          path: /tmp/emcargo-regulations
           key: regulations-${{ github.run_id }}
 
       # Last, and that is the whole point. The development container reads this

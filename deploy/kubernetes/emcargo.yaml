@@ -8,20 +8,20 @@
 # it. Updating is a rollout of a new image tag (`kubectl set image`), not the
 # in-app updater, which needs a Docker socket a pod does not have.
 #
-#   kubectl apply -f cargopilot.yaml
-#   kubectl -n cargopilot set image deployment/cargopilot cargopilot=ghcr.io/jeffreymooiweer/emcargo:1.181.0
+#   kubectl apply -f emcargo.yaml
+#   kubectl -n emcargo set image deployment/emcargo emcargo=ghcr.io/jeffreymooiweer/emcargo:1.181.0
 #
 # See docs/installation-native.md for the walk-through.
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: cargopilot
+  name: emcargo
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: cargopilot-data
-  namespace: cargopilot
+  name: emcargo-data
+  namespace: emcargo
 spec:
   accessModes: ["ReadWriteOnce"]
   resources:
@@ -31,8 +31,8 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: cargopilot-admin
-  namespace: cargopilot
+  name: emcargo-admin
+  namespace: emcargo
 type: Opaque
 stringData:
   # The first administrator, created on the first start. Change it before applying.
@@ -41,17 +41,17 @@ stringData:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cargopilot-config
-  namespace: cargopilot
+  name: emcargo-config
+  namespace: emcargo
 data:
   APP_ENV: "production"
-  CARGOPILOT_MODE: "organisation"
+  EMCARGO_MODE: "organisation"
   DATA_DIR: "/data"
-  DATABASE_URL: "sqlite:////data/cargopilot.db"
+  DATABASE_URL: "sqlite:////data/emcargo.db"
   ADMIN_USERNAME: "admin"
   ADMIN_EMAIL: "admin@example.local"
-  CORS_ALLOWED_ORIGINS: "https://cargopilot.example.com"
-  PUBLIC_URL: "https://cargopilot.example.com"
+  CORS_ALLOWED_ORIGINS: "https://emcargo.example.com"
+  PUBLIC_URL: "https://emcargo.example.com"
   TRUSTED_PROXY_HEADERS: "true"
   TRUSTED_PROXY_COUNT: "1"
   # Tells the settings screen which update route applies here.
@@ -60,24 +60,24 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cargopilot
-  namespace: cargopilot
+  name: emcargo
+  namespace: emcargo
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      app: cargopilot
+      app: emcargo
   template:
     metadata:
       labels:
-        app: cargopilot
+        app: emcargo
     spec:
       securityContext:
         fsGroup: 1000
       containers:
-        - name: cargopilot
+        - name: emcargo
           image: ghcr.io/jeffreymooiweer/emcargo:latest
           imagePullPolicy: IfNotPresent
           ports:
@@ -85,9 +85,9 @@ spec:
               name: http
           envFrom:
             - configMapRef:
-                name: cargopilot-config
+                name: emcargo-config
             - secretRef:
-                name: cargopilot-admin
+                name: emcargo-admin
           volumeMounts:
             - name: data
               mountPath: /data
@@ -112,16 +112,16 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: cargopilot-data
+            claimName: emcargo-data
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: cargopilot
-  namespace: cargopilot
+  name: emcargo
+  namespace: emcargo
 spec:
   selector:
-    app: cargopilot
+    app: emcargo
   ports:
     - port: 80
       targetPort: http
@@ -130,23 +130,23 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: cargopilot
-  namespace: cargopilot
+  name: emcargo
+  namespace: emcargo
   annotations:
     # Your ingress controller's TLS annotations go here (cert-manager, for example).
     nginx.ingress.kubernetes.io/proxy-body-size: "64m"
 spec:
   rules:
-    - host: cargopilot.example.com
+    - host: emcargo.example.com
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: cargopilot
+                name: emcargo
                 port:
                   name: http
   tls:
-    - hosts: ["cargopilot.example.com"]
-      secretName: cargopilot-tls
+    - hosts: ["emcargo.example.com"]
+      secretName: emcargo-tls

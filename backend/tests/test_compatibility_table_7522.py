@@ -1,6 +1,6 @@
 """Table 7.5.2.2 read instead of referred on — and RID reads differently.
 
-Until v1.41.0 CargoPilot only counted how many compatibility groups there were
+Until v1.41.0 EMCargo only counted how many compatibility groups there were
 and handed the question back: "check the compatibility groups". That is honest in
 itself, but it is also precisely the question the user cannot answer — they do
 not have the books. The table is now in the configuration and is read.

@@ -1,9 +1,9 @@
 {
-  "_comment": "The register of source documents behind every regulatory fact in this repository. The documents themselves live in a store OUTSIDE the repository — /data/regulations on an installation, override with CARGOPILOT_REGULATIONS_DIR — because regulatory texts are not ours to redistribute and docs/data-sources.md promises they never enter the repository. What is recorded here is metadata: where a document comes from, which edition it is, and the sha256 of the exact file the facts were read from, so a future reading can prove it read the same book. Managed with scripts/regulations_store.py; architecture and update procedure in docs/regulatory-database.md.",
+  "_comment": "The register of source documents behind every regulatory fact in this repository. The documents themselves live in a store OUTSIDE the repository — /data/regulations on an installation, override with EMCARGO_REGULATIONS_DIR — because regulatory texts are not ours to redistribute and docs/data-sources.md promises they never enter the repository. What is recorded here is metadata: where a document comes from, which edition it is, and the sha256 of the exact file the facts were read from, so a future reading can prove it read the same book. Managed with scripts/regulations_store.py; architecture and update procedure in docs/regulatory-database.md.",
   "store": {
     "default_path": "/data/regulations",
-    "environment_variable": "CARGOPILOT_REGULATIONS_DIR",
-    "fallback_path": "/tmp/cargopilot-regulations",
+    "environment_variable": "EMCARGO_REGULATIONS_DIR",
+    "fallback_path": "/tmp/emcargo-regulations",
     "note": "The fallback is the cache path the CI workflows already persist with actions/cache. A document is looked up by its filename below, identical in every location."
   },
   "documents": [

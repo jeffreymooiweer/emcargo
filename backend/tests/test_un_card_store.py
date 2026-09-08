@@ -203,7 +203,7 @@ def test_status_and_upload_import_through_the_api(data_dir, tmp_path):
             package = make_package(tmp_path / "p.zip")
             response = client.post(
                 "/api/un-cards/import",
-                files={"file": ("cargopilot-un-cards.zip",
+                files={"file": ("emcargo-un-cards.zip",
                                 package.read_bytes(), "application/zip")})
             assert response.status_code == 200, response.text
             assert response.json()["imported"] == 1

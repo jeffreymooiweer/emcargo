@@ -44,8 +44,8 @@ def db(tmp_path, monkeypatch):
     monkeypatch.setenv("DATA_DIR", str(data_dir))
     monkeypatch.setenv("APP_ENV", "test")
     monkeypatch.setenv("CATALOG_AUTO_SYNC", "false")
-    monkeypatch.delenv("CARGOPILOT_MODE", raising=False)
-    monkeypatch.delenv("CARGOPILOT_HISTORY", raising=False)
+    monkeypatch.delenv("EMCARGO_MODE", raising=False)
+    monkeypatch.delenv("EMCARGO_HISTORY", raising=False)
     get_settings.cache_clear()
     engine = create_engine(f"sqlite:///{data_dir / 'test.db'}",
                            connect_args={"check_same_thread": False})
@@ -102,7 +102,7 @@ def trip(**overrides) -> dict:
 
 
 def test_without_the_switch_the_trips_routes_do_not_exist(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="false") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="false") as client:
         assert client.get("/api/trips").status_code == 404
         assert client.post("/api/trips", json=trip()).status_code == 404
         # The calculation itself is still there for everybody.
@@ -114,7 +114,7 @@ def test_without_the_switch_the_trips_routes_do_not_exist(db, monkeypatch):
 
 
 def test_keeping_runs_the_check_and_indexes_its_answer(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         kept = client.post("/api/trips", json=trip())
         assert kept.status_code == 200, kept.text
         row = kept.json()
@@ -137,7 +137,7 @@ def test_keeping_runs_the_check_and_indexes_its_answer(db, monkeypatch):
 
 
 def test_a_trip_that_stays_exempt_is_indexed_so(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         payload = trip(consignments=[
             {"name": "A", "entries": [{"products": [petrol("100")]}]},
             {"name": "B", "entries": [{"products": [petrol("100")]}]}])
@@ -146,14 +146,14 @@ def test_a_trip_that_stays_exempt_is_indexed_so(db, monkeypatch):
 
 
 def test_one_consignment_is_not_a_trip(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         alone = trip(consignments=trip()["consignments"][:1])
         assert client.post("/api/trips", json=alone).status_code == 422
     assert trips.count(db) == 0
 
 
 def test_keeping_again_brings_the_same_row_up_to_date(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         first = client.post("/api/trips", json=trip()).json()
         second = client.put(f"/api/trips/{first['id']}",
                             json=trip(name="Renamed", unit_max_mass_tonnes=None)).json()
@@ -164,7 +164,7 @@ def test_keeping_again_brings_the_same_row_up_to_date(db, monkeypatch):
 
 def test_an_unknown_regime_is_refused_not_judged_as_adr(db, monkeypatch):
     """"IDMG" was kept and judged under ADR's points until v1.190.0."""
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         refused = client.post("/api/trips", json=trip(profiles=["IDMG"]))
         assert refused.status_code == 422
         assert "IDMG" in refused.text
@@ -177,7 +177,7 @@ def test_an_unknown_regime_is_refused_not_judged_as_adr(db, monkeypatch):
 
 
 def test_the_list_filters_and_follows_the_departments(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         client.post("/api/trips", json=trip(name="Monday"))
         client.post("/api/trips", json=trip(name="Tuesday"))
     with application(db, monkeypatch, as_user=2) as bob:
@@ -197,7 +197,7 @@ def test_the_list_filters_and_follows_the_departments(db, monkeypatch):
 
 
 def test_forgetting_removes_the_row(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         kept = client.post("/api/trips", json=trip()).json()
         assert client.delete(f"/api/trips/{kept['id']}").json()["ok"] is True
         assert client.get(f"/api/trips/{kept['id']}").status_code == 404
@@ -209,7 +209,7 @@ def test_a_removed_department_leaves_no_trip_behind_under_its_id(db, monkeypatch
     """SQLite hands a new department the old id; a trip still carrying it
     would be that department's. Until v1.190.0 the removal cleared users
     and shipments and forgot the trips."""
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         kept = client.post("/api/trips", json=trip()).json()
         assert kept["department_id"] == 1
     gone = departments.remove(db, db.get(Department, 1))
@@ -225,19 +225,19 @@ def test_a_removed_department_leaves_no_trip_behind_under_its_id(db, monkeypatch
 
 
 def test_trips_are_counted_when_the_history_is_switched_off(db, monkeypatch):
-    monkeypatch.setenv("CARGOPILOT_HISTORY", "true")
+    monkeypatch.setenv("EMCARGO_HISTORY", "true")
     get_settings.cache_clear()
     trips.keep(db, ADA, TripIn(**trip()))
     assert history.kept_counts(db) == {"shipments": 0, "trips": 1}
     # Start-up with the setting off and a trip in the table switches it on.
-    monkeypatch.setenv("CARGOPILOT_HISTORY", "false")
+    monkeypatch.setenv("EMCARGO_HISTORY", "false")
     get_settings.cache_clear()
     assert history.adopt_kept_data(db) is True
     assert trips.count(db) == 1
 
 
 def test_discarding_the_history_deletes_trips_too(db, monkeypatch, caplog):
-    monkeypatch.setenv("CARGOPILOT_HISTORY", "true")
+    monkeypatch.setenv("EMCARGO_HISTORY", "true")
     get_settings.cache_clear()
     trips.keep(db, ADA, TripIn(**trip()))
     with caplog.at_level(logging.WARNING):
@@ -250,7 +250,7 @@ def test_discarding_the_history_deletes_trips_too(db, monkeypatch, caplog):
 
 
 def test_the_audit_log_names_the_trip_and_nothing_on_it(db, monkeypatch):
-    with application(db, monkeypatch, CARGOPILOT_HISTORY="true") as client:
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         kept = client.post("/api/trips", json=trip()).json()
         client.put(f"/api/trips/{kept['id']}", json=trip())
         client.delete(f"/api/trips/{kept['id']}")

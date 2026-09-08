@@ -416,7 +416,7 @@
     "mailTesting": "Sending…",
     "mailTestSent": "Test message sent to {{to}}.",
     "publicUrl": "Address of this installation",
-    "publicUrlHint": "Used for the links in outgoing mail, for example https://cargopilot.example.com. Leave empty when the browser reaches EMCargo directly.",
+    "publicUrlHint": "Used for the links in outgoing mail, for example https://emcargo.example.com. Leave empty when the browser reaches EMCargo directly.",
     "cardLinks": "QR code with UN cards on documents",
     "cardLinksHint": "Puts a QR code on every transport document that opens this consignment's UN cards. The page behind it does not ask for a sign-in — deliberately: the driver at the roadside and the responder on the scene have no account here. It shows only the UN numbers and whether a card exists for each; nothing about the consignment, the parties or the quantities. Off unless you turn it on.",
     "cardLinksNeedsUrl": "Fill in the public address above first. Without it no QR code is printed: a code on paper that leads nowhere is worse than no code, because whoever holds the paper cannot tell the difference.",

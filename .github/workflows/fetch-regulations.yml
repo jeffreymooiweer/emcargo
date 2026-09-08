@@ -64,7 +64,7 @@ jobs:
 
       - uses: actions/cache/restore@v4
         with:
-          path: /tmp/cargopilot-regulations
+          path: /tmp/emcargo-regulations
           key: regulations-${{ github.run_id }}
           restore-keys: |
             regulations-
@@ -107,26 +107,26 @@ jobs:
         run: |
           set -euo pipefail
           pip install --quiet gdown
-          mkdir -p /tmp/cargopilot-regulations/incoming
+          mkdir -p /tmp/emcargo-regulations/incoming
           # Drive rations the public links: after some tens of files in one
           # go it refuses the next with "many accesses". Measured on a folder
           # of forty files, which failed on the last one. What did arrive is
           # still worth listing, surveying and adopting, so the failure is
           # reported and the step goes on.
-          gdown --folder "$FOLDER" -O /tmp/cargopilot-regulations/incoming \
+          gdown --folder "$FOLDER" -O /tmp/emcargo-regulations/incoming \
             || echo "::warning::gdown ended with an error (Drive's access ration, most likely); what did arrive is listed below"
           echo "=== incoming (recursive: a Drive folder arrives as a tree) ==="
-          find /tmp/cargopilot-regulations/incoming -type f -printf '%10s  %p\n' | sort -k2
+          find /tmp/emcargo-regulations/incoming -type f -printf '%10s  %p\n' | sort -k2
           # Reconnaissance before anything is registered: what each PDF is,
           # whether it has a text layer, and where its readable parts sit.
           pip install --quiet pymupdf
-          python scripts/survey_incoming.py /tmp/cargopilot-regulations/incoming
+          python scripts/survey_incoming.py /tmp/emcargo-regulations/incoming
           # One mapping per line, not per word: the files an operator uploads
           # are named "ADR 2025 French.pdf" as often as not, and splitting the
           # input on spaces would cut such a name in three.
           printf '%s\n' "$ADOPT_AS" > /tmp/adopt-as.txt
           python scripts/regulations_store.py adopt \
-            /tmp/cargopilot-regulations/incoming --map-file /tmp/adopt-as.txt
+            /tmp/emcargo-regulations/incoming --map-file /tmp/adopt-as.txt
 
       - name: Where the instructions model sits
         if: ${{ inputs.find_instructions != '' }}
@@ -157,7 +157,7 @@ jobs:
         run: |
           set -euo pipefail
           pip install --quiet pymupdf
-          python scripts/dump_pdf_text.py /tmp/cargopilot-regulations "$PATTERN"
+          python scripts/dump_pdf_text.py /tmp/emcargo-regulations "$PATTERN"
 
       # The way back. The cache is repository-internal storage the container
       # cannot read; an artifact is repository-internal storage it can, for a
@@ -169,14 +169,14 @@ jobs:
           ARTIFACT_PATH: ${{ inputs.artifact_path }}
         run: |
           set -euo pipefail
-          test -e "/tmp/cargopilot-regulations/$ARTIFACT_PATH"
+          test -e "/tmp/emcargo-regulations/$ARTIFACT_PATH"
           echo "=== $ARTIFACT_PATH ==="
-          find "/tmp/cargopilot-regulations/$ARTIFACT_PATH" -type f -printf '%10s  %p\n' | sort -k2
+          find "/tmp/emcargo-regulations/$ARTIFACT_PATH" -type f -printf '%10s  %p\n' | sort -k2
       - uses: actions/upload-artifact@v4
         if: ${{ inputs.artifact_path != '' }}
         with:
           name: store-part
-          path: /tmp/cargopilot-regulations/${{ inputs.artifact_path }}
+          path: /tmp/emcargo-regulations/${{ inputs.artifact_path }}
           retention-days: 1
           if-no-files-found: error
 
@@ -198,7 +198,7 @@ jobs:
           gh release list --json name,isDraft,tagName --limit 50 \
             | python3 -c "import json,sys; [print(r['tagName']) for r in json.load(sys.stdin) if r['isDraft'] and r['tagName'].startswith('store-part-')]" \
             | xargs -r -n1 gh release delete --yes
-          (cd /tmp/cargopilot-regulations && zip -q -r /tmp/store-part.zip "$ARTIFACT_PATH")
+          (cd /tmp/emcargo-regulations && zip -q -r /tmp/store-part.zip "$ARTIFACT_PATH")
           ls -l /tmp/store-part.zip
           gh release create "store-part-${{ github.run_id }}" /tmp/store-part.zip \
             --draft --title "store part ${{ github.run_id }} (draft, delete after reading)" \
@@ -219,5 +219,5 @@ jobs:
       - uses: actions/cache/save@v4
         if: always()
         with:
-          path: /tmp/cargopilot-regulations
+          path: /tmp/emcargo-regulations
           key: regulations-${{ github.run_id }}

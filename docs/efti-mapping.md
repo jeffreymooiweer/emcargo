@@ -37,7 +37,7 @@ exchange, and [Commission Delegated Regulation (EU) 2024/2024](http://data.europ
 `backend/seed/efti/`. The regulation is reusable under the Commission's reuse decision;
 the seed carries the ELI and the checksum of the file it was built from.
 
-## What CargoPilot is in this
+## What EMCargo is in this
 
 Not an eFTI platform. That is a certification regime for platform providers, and the
 platform holds the data, answers the authority and keeps the audit trail. What a
@@ -77,7 +77,7 @@ supplementary component follows its element and is not counted twice.
 1. **The party model.** The Annex holds an address as postcode, post office box, street,
    city, country, sub-division, building number, department and house number
    (`eFTI54`–`eFTI62` for the consignor, and the same for the consignee, the carrier,
-   the acceptance and the receipt location). CargoPilot holds every address as one block
+   the acceptance and the receipt location). EMCargo holds every address as one block
    of text, the way it is written on a consignment note. The country can be read off
    it — and is, for the customs conditions — but the rest cannot be separated reliably
    without asking for it separately, and asking is a change to the details step, the

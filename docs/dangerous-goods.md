@@ -1,6 +1,6 @@
 # Dangerous goods
 
-CargoPilot aims to need one thing from you: the **UN number**. Everything the regulations
+EMCargo aims to need one thing from you: the **UN number**. Everything the regulations
 derive from that number, it derives for you — and then it checks the result.
 
 > [!IMPORTANT]
@@ -19,7 +19,7 @@ derive from that number, it derives for you — and then it checks the result.
 
 ## What one UN number gives you
 
-Type `1203`, or search for "gasoline". CargoPilot fills in:
+Type `1203`, or search for "gasoline". EMCargo fills in:
 
 | | |
 |---|---|
@@ -45,7 +45,7 @@ Quantities, packaging type and masses come from the packages you already entered
 empty fields are filled — your own corrections always survive.
 
 **About the language of the shipping name.** ADR Table A carries an English and a German
-name per UN number. Which one CargoPilot uses depends on the mode, not on the screen:
+name per UN number. Which one EMCargo uses depends on the mode, not on the screen:
 ADR 5.4.1.4.1 — and along the same line RID and ADN — wants the transport document in an
 official language of the forwarding country, so a German reader preparing a CMR or CIM
 gets `BENZIN ODER OTTOKRAFTSTOFF`. IMDG 5.4.1.4.1 wants English, French or Spanish and
@@ -67,7 +67,7 @@ accept French, so a sea document could carry it if the names were held.
 The language belongs to the document rather than to the shipment, so it is resolved when
 the name goes on paper. Draft a German road document and add a sea leg afterwards, and
 the IMO form gets `GASOLINE` while the CMR keeps `BENZIN ODER OTTOKRAFTSTOFF`; the export
-tells you it did so. Only what CargoPilot derived itself is adjusted — wording you typed,
+tells you it did so. Only what EMCargo derived itself is adjusted — wording you typed,
 such as a technical name on an N.O.S. entry, is left exactly as it stands.
 
 **Dutch is the one language that cannot stand alone.** ADR 5.4.1.4.1 asks for an official
@@ -83,7 +83,7 @@ one — the English name stays on its own.
 **One UN number, several Table A rows.** Paint has three packing groups; aerosols have
 twelve rows and *no* packing group at all, told apart only by the classification code of
 column (3b) — 5A is non-flammable, 5F flammable, 5T toxic — and each with its own transport
-category, tunnel code and labels. CargoPilot narrows the rows by whatever you have already
+category, tunnel code and labels. EMCargo narrows the rows by whatever you have already
 filled in, the classification code first, and where more than one row is still in the
 running it says so: how many, what they differ in, and which field settles it. Until
 v1.51.0 it warned only when the *packing group* varied, so a shipment of ordinary flammable
@@ -92,12 +92,12 @@ instead of 2, which is a points factor three times too low, and tunnel code E in
 
 **About divisions.** ADR Table A lists gases as class "2" and explosives as class "1",
 with the real division hiding in the labels column (2.1 / 2.2 / 2.3) or the
-classification code (`1.4S`). CargoPilot resolves the actual division, because
+classification code (`1.4S`). EMCargo resolves the actual division, because
 segregation and loading compatibility depend on it.
 
 ### The description line, written for you
 
-Each rulebook wants the same facts in a different order. CargoPilot assembles the
+Each rulebook wants the same facts in a different order. EMCargo assembles the
 official line per profile and shows it before you export:
 
 | Profile | Example |
@@ -135,11 +135,11 @@ goods' own codes are.
 
 Two things the answer does not cover, and both are stated next to it: which tunnels lie on
 the route and what category they carry — 1.9.5 puts that with the carrier — and carriage in
-tanks or in bulk, which is stricter for five of the twelve codes and which CargoPilot,
+tanks or in bulk, which is stricter for five of the twelve codes and which EMCargo,
 being a packaged-goods tool, does not model.
 
 **ADR 8.1.4 and 8.1.5 — what has to be aboard.** Equipment was absent from every mode, and
-for a reason: CargoPilot cannot see a vehicle, so it can never establish that a wheel chock
+for a reason: EMCargo cannot see a vehicle, so it can never establish that a wheel chock
 is in the cab. What it can do is derive the list, and 8.1.5.1 asks for exactly that — the
 equipment is chosen *according to the hazard label numbers of the goods loaded*, and the
 article points at the transport document to identify them. So since v1.53.0 the panel shows
@@ -156,7 +156,7 @@ checklist, and the panel says so.
 on mixed compatibility groups within class 1, and on the CV28 separation of foodstuffs
 from labels 6.1/6.2 and certain class 9 substances.
 
-Three cells of table 7.5.2.1 are not prohibitions but footnotes, and CargoPilot honours
+Three cells of table 7.5.2.1 are not prohibitions but footnotes, and EMCargo honours
 them per pair rather than per consignment — one forbidden combination does not condemn a
 permitted one, and one permitted combination does not excuse the rest:
 
@@ -170,7 +170,7 @@ Footnote (d) comes with a condition that carries real consequences, so the panel
 document both state it: the aggregate must be treated as blasting explosives of class 1
 for placarding, segregation, stowage and the maximum permissible load of 7.5.5.2.1.
 
-**Rail was checked before these permissions were extended to it.** CargoPilot answers RID
+**Rail was checked before these permissions were extended to it.** EMCargo answers RID
 and ADN mixed loading with ADR's table under a stated basis note, and borrowing another
 regime's *prohibitions* is conservative in a way that borrowing its *permissions* is not.
 RID 2025, table 7.5.2.1 on page 1101, carries footnotes (a) to (d) in the same words and
@@ -193,7 +193,7 @@ well under 3,000.
 chlorine reaches exactly 1,000 and keeps the exemption.
 
 **ADR/IMDG 3.4 and 3.5 — limited and excepted quantities.** Enter the net quantity per
-inner packaging and CargoPilot compares it against the LQ value of column 7a and the
+inner packaging and EMCargo compares it against the LQ value of column 7a and the
 E code of column 7b, per line. For LQ it also holds the package to the 30 kg gross limit
 of 3.4.2 (naming the 20 kg tray limit of 3.4.3); for EQ it checks both the inner and the
 outer limit of table 3.5.1.2 and warns when a position exceeds the 1,000-package cap of
@@ -230,7 +230,7 @@ through unnoticed.
 can say different things about the same pair. The Code settles it: *"In case of
 conflicting provisions, the provisions of column 16b of the Dangerous Goods List, always
 take precedence."* Nitric acid next to sulphur is the plain case — the table says "away
-from", but the acid carries SG16, "separated from". CargoPilot applies the precedence and
+from", but the acid carries SG16, "separated from". EMCargo applies the precedence and
 says so in both findings: the 16b provision is marked as governing, the table entry stays
 visible with a note explaining that it has been superseded. Nothing is removed, so you can
 always see what the table said and why it did not decide.
@@ -275,7 +275,7 @@ sounds like an extra requirement; the section actually says no segregation needs
 applied between substances listed in the same table. Two organic peroxides from table
 7.2.6.3.4 may travel together.
 
-CargoPilot reports that exemption but **never uses it to remove a warning**. Hiding a
+EMCargo reports that exemption but **never uses it to remove a warning**. Hiding a
 segregation finding is a worse failure than showing one too many, so the finding and the
 exemption appear side by side, each naming its section, and the judgement stays with the
 shipper.
@@ -362,7 +362,7 @@ required fields follow from it.
 **The checks do not, entirely, and that is worth knowing.** Sea and air have their own
 checks. Road, rail and inland waterway share one set: the 1.1.3.6 points and the 7.5.2
 mixed-loading table are computed with the **ADR** tables, because those are the ones
-CargoPilot holds. RID and ADN have their own versions of both chapters. When you pick rail
+EMCargo holds. RID and ADN have their own versions of both chapters. When you pick rail
 or inland waterway the compliance panel says so, in as many words, next to the points
 table — an indication is worth having, a false certainty is not.
 
@@ -387,10 +387,10 @@ two cards, not the whole library. If a UN number has more than one card, all of 
 included; deciding which variant applies is not something this app should guess at.
 
 The cards are for your own records. They are not transport documents, they are not
-attached to anything CargoPilot generates, and they do not replace the current edition of
+attached to anything EMCargo generates, and they do not replace the current edition of
 the regulations.
 
-Since v1.129.0 the cards are **CargoPilot's own**: one datasheet per UN number *and*
+Since v1.129.0 the cards are **EMCargo's own**: one datasheet per UN number *and*
 regime (`UN1203_ADR.pdf`, `UN1203_IMDG.pdf`, …), generated from the same measured
 regulatory tables the compliance checks run on, with the official label artwork cut from
 the UNECE English ADR 2025 and the V/CV/S provision texts printed verbatim. The set is
@@ -422,7 +422,7 @@ precedence over the segregation table, so it is the one column that must not be 
 
 What is left of the older data is the per-substance material the list does not carry —
 marine pollutant status and bulk carriage, which come from the 41-22 UN cards. For those
-CargoPilot carries a *difference layer*: the changes 42-24 makes, laid over the 41-22
+EMCargo carries a *difference layer*: the changes 42-24 makes, laid over the 41-22
 data, in `backend/seed/dg/imdg_42_24.json`.
 
 Two things make that workable:
@@ -441,7 +441,7 @@ Two things make that workable:
 
 What the layer deliberately does **not** do is silently rewrite a classification. UN 3423
 becomes class 6.1 with a subsidiary 8 in 42-24 while ADR 2025 still lists it as class 8.
-CargoPilot keeps computing segregation on the ADR classification and says so in a warning,
+EMCargo keeps computing segregation on the ADR classification and says so in a warning,
 because quietly swapping the class would change the outcome with nothing on screen to
 explain why.
 
@@ -463,7 +463,7 @@ which the source reports without giving.
 | IMDG class segregation table | Complete, Amendment 40-20 (unchanged in 42-24) |
 | Class 1 compatibility matrix | Complete, groups A to S |
 
-Where a value genuinely differs by packing group, CargoPilot **shows both options rather
+Where a value genuinely differs by packing group, EMCargo **shows both options rather
 than guessing**. Forty-three UN numbers have a different EmS schedule per packing group —
 UN 1826 (nitrating acid mixture) is treated as oxidising in group I and corrosive in
 group II — and UN 3166 (vehicles) differs between gas and liquid propulsion.

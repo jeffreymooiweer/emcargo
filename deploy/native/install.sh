@@ -3,9 +3,9 @@
 #
 # What it does, and only this:
 #   1. creates the service user and the directories
-#        /opt/cargopilot          the releases (one directory per version) and the venv
-#        /var/lib/cargopilot      the data: database, uploads, branding, UN cards
-#        /etc/cargopilot          the environment file
+#        /opt/emcargo          the releases (one directory per version) and the venv
+#        /var/lib/emcargo      the data: database, uploads, branding, UN cards
+#        /etc/emcargo          the environment file
 #   2. downloads the native bundle of a release from GitHub (or unpacks a
 #      local one), makes a virtual environment and installs the runtime
 #        requirements into it
@@ -13,18 +13,18 @@
 #
 # Re-running it with a newer version is the update: the bundle is unpacked
 # next to the old one and the `current` link is moved. Nothing under
-# /var/lib/cargopilot is touched by either.
+# /var/lib/emcargo is touched by either.
 #
 #   sudo ./install.sh                  # the latest release
 #   sudo ./install.sh 1.181.0          # a named release
-#   sudo ./install.sh --bundle cargopilot-1.181.0-native.tar.gz
+#   sudo ./install.sh --bundle emcargo-1.181.0-native.tar.gz
 set -euo pipefail
 
 REPO="jeffreymooiweer/emcargo"
-PREFIX="/opt/cargopilot"
-DATA_DIR="/var/lib/cargopilot"
-CONF_DIR="/etc/cargopilot"
-SERVICE_USER="cargopilot"
+PREFIX="/opt/emcargo"
+DATA_DIR="/var/lib/emcargo"
+CONF_DIR="/etc/emcargo"
+SERVICE_USER="emcargo"
 PYTHON="${PYTHON:-python3}"
 
 VERSION=""
@@ -70,8 +70,8 @@ if [ -z "$BUNDLE" ]; then
       | "$PYTHON" -c 'import json, sys; print(json.load(sys.stdin)["tag_name"].lstrip("v"))')"
   fi
   VERSION="${VERSION#v}"
-  BUNDLE="$WORK/cargopilot-$VERSION-native.tar.gz"
-  URL="https://github.com/$REPO/releases/download/v$VERSION/cargopilot-$VERSION-native.tar.gz"
+  BUNDLE="$WORK/emcargo-$VERSION-native.tar.gz"
+  URL="https://github.com/$REPO/releases/download/v$VERSION/emcargo-$VERSION-native.tar.gz"
   echo "Downloading $URL"
   curl -fsSL -o "$BUNDLE" "$URL"
 else
@@ -93,24 +93,24 @@ fi
 "$PREFIX/venv/bin/pip" install --quiet -r "$RELEASE_DIR/backend/requirements-runtime.txt"
 
 # --- 4. configuration, kept if present -----------------------------------------------
-if [ ! -f "$CONF_DIR/cargopilot.env" ]; then
-  cp "$RELEASE_DIR/deploy/native/cargopilot.env.example" "$CONF_DIR/cargopilot.env"
-  chmod 640 "$CONF_DIR/cargopilot.env"
-  chown root:"$SERVICE_USER" "$CONF_DIR/cargopilot.env"
-  echo "Wrote $CONF_DIR/cargopilot.env — set ADMIN_PASSWORD and the addresses before the first start."
+if [ ! -f "$CONF_DIR/emcargo.env" ]; then
+  cp "$RELEASE_DIR/deploy/native/emcargo.env.example" "$CONF_DIR/emcargo.env"
+  chmod 640 "$CONF_DIR/emcargo.env"
+  chown root:"$SERVICE_USER" "$CONF_DIR/emcargo.env"
+  echo "Wrote $CONF_DIR/emcargo.env — set ADMIN_PASSWORD and the addresses before the first start."
 fi
 
 # --- 5. the service ---------------------------------------------------------------------
 ln -sfn "$RELEASE_DIR" "$PREFIX/current"
 chown -R "$SERVICE_USER:$SERVICE_USER" "$PREFIX"
-install -m 644 "$RELEASE_DIR/deploy/native/cargopilot.service" /etc/systemd/system/cargopilot.service
+install -m 644 "$RELEASE_DIR/deploy/native/emcargo.service" /etc/systemd/system/emcargo.service
 systemctl daemon-reload
-systemctl enable cargopilot >/dev/null
-systemctl restart cargopilot
+systemctl enable emcargo >/dev/null
+systemctl restart emcargo
 
 echo
 echo "EMCargo $VERSION is installed and running on http://127.0.0.1:8080"
 echo "  data:      $DATA_DIR"
-echo "  settings:  $CONF_DIR/cargopilot.env"
-echo "  logs:      journalctl -u cargopilot -f"
+echo "  settings:  $CONF_DIR/emcargo.env"
+echo "  logs:      journalctl -u emcargo -f"
 echo "Put a reverse proxy with TLS in front of it; see docs/installation-native.md."

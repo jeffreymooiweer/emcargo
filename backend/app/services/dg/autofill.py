@@ -117,7 +117,7 @@ def _un_prefixed(value: Any) -> str:
 
 #: The columns of Table A that differ between the rows of one UN number and that
 #: the application fills in from them. Two rows that agree on all of these are
-#: interchangeable for everything CargoPilot derives, and choosing between them
+#: interchangeable for everything EMCargo derives, and choosing between them
 #: is not worth a word to the user.
 TABLE_A_VARIANT_FIELDS = (
     "packing_group",

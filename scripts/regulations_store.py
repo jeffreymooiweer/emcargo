@@ -29,8 +29,8 @@ This tool connects the register to a directory that lasts:
         Exit non-zero if any present document contradicts its pinned hash.
 
 The store is ``/data/regulations`` (a volume that outlives the container),
-overridable with ``CARGOPILOT_REGULATIONS_DIR``; the CI cache path
-``/tmp/cargopilot-regulations`` is read as a fallback so runner-fetched
+overridable with ``EMCARGO_REGULATIONS_DIR``; the CI cache path
+``/tmp/emcargo-regulations`` is read as a fallback so runner-fetched
 volumes count too. A hash pinned once is never silently rewritten: a mismatch
 is an error to look at, because either the publisher changed the file or the
 store copy is damaged — and those two need different answers.

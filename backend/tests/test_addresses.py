@@ -41,7 +41,7 @@ def db(tmp_path, monkeypatch):
 
 
 def application(db, monkeypatch, history: bool) -> TestClient:
-    monkeypatch.setenv("CARGOPILOT_HISTORY", "true" if history else "false")
+    monkeypatch.setenv("EMCARGO_HISTORY", "true" if history else "false")
     get_settings.cache_clear()
     app = create_app()
     app.dependency_overrides[get_db] = lambda: db

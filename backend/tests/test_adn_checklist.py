@@ -13,7 +13,7 @@ untouched — and 8.6.3 is reached the same way through the general one.
 
 What the application does *not* do is fill the checklist in. Every answer on it
 is agreed between the vessel and the shore at the moment of loading; a form
-CargoPilot had already ticked would be a claim about a conversation that has
+EMCargo had already ticked would be a claim about a conversation that has
 not happened.
 """
 import json

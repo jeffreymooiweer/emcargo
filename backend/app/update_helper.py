@@ -112,7 +112,7 @@ def main() -> int:
         write_state({"phase": "failed", "error": "old container not found"})
         return 1
     old = inspect.json()
-    name = (old.get("Name") or "").lstrip("/") or "cargopilot"
+    name = (old.get("Name") or "").lstrip("/") or "emcargo"
     aside = f"{name}-previous-{int(time.time())}"
     new_id = None
 

@@ -277,7 +277,7 @@ def test_check_compliance_includes_lq_eq_for_land_and_sea_profiles():
 
 
 def test_check_compliance_omits_lq_eq_for_air_only():
-    # Air has its own LQ system in the Y packing instructions, which CargoPilot
+    # Air has its own LQ system in the Y packing instructions, which EMCargo
     # does not carry; showing an ADR result would be a claim.
     outcome = check_compliance(_entry([_product()]), ["IATA_DGR"], "nl")
     assert "lq_eq" not in outcome

@@ -69,7 +69,7 @@ beforeEach(() => {
     ...kept[0],
     snapshot: {},
     export: {
-      format: "cargopilot.shipment",
+      format: "emcargo.shipment",
       regulations: ["ADR"],
       // The wizard's own field name; a consignment is named by its reference,
       // not by its consignor, or three from one shipper look alike.
@@ -146,7 +146,7 @@ describe("de rit bewaren", () => {
     // mock with another id.
     api.shipment.mockResolvedValueOnce({
       ...kept[0], snapshot: {},
-      export: { format: "cargopilot.shipment", regulations: ["ADR"],
+      export: { format: "emcargo.shipment", regulations: ["ADR"],
         consignment: { reference: "CP-2026-100" },
         dangerous_goods: [{ line_id: "1", products: [{ un_number: "1203" }] }] },
     });

@@ -37,7 +37,7 @@ def db(tmp_path, monkeypatch):
     monkeypatch.setenv("DATA_DIR", str(data_dir))
     monkeypatch.setenv("APP_ENV", "test")
     monkeypatch.setenv("CATALOG_AUTO_SYNC", "false")
-    monkeypatch.setenv("CARGOPILOT_HISTORY", "true")
+    monkeypatch.setenv("EMCARGO_HISTORY", "true")
     get_settings.cache_clear()
     engine = create_engine(f"sqlite:///{data_dir / 'test.db'}",
                            connect_args={"check_same_thread": False})
@@ -177,7 +177,7 @@ def test_the_routes_and_the_workbook(db, a_year):
 
         workbook = root.get("/api/shipments/report.xlsx?year=2026&language=en")
         assert workbook.status_code == 200
-        assert workbook.headers["content-disposition"].endswith('cargopilot-dgsa-report-2026.xlsx"')
+        assert workbook.headers["content-disposition"].endswith('emcargo-dgsa-report-2026.xlsx"')
         book = load_workbook(io.BytesIO(workbook.content))
         assert book.sheetnames == ["Summary", "By month", "By mode of transport", "By regulation",
                                    "By department", "By class", "By UN number", "Documents",
@@ -193,7 +193,7 @@ def test_the_routes_and_the_workbook(db, a_year):
 
 
 def test_without_the_history_there_is_no_report(db, monkeypatch):
-    monkeypatch.setenv("CARGOPILOT_HISTORY", "false")
+    monkeypatch.setenv("EMCARGO_HISTORY", "false")
     get_settings.cache_clear()
     with client_as(db, 1) as root:
         assert root.get("/api/shipments/report?year=2026").status_code == 404

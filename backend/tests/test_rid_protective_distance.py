@@ -1,6 +1,6 @@
 """RID 7.5.3: the provision ADR could not stand in for.
 
-For nearly everything that separates rail from road, CargoPilot used the ADR
+For nearly everything that separates rail from road, EMCargo used the ADR
 table with a basis note under it: usable as an indication, check it against the
 text. For 7.5.3 that was not possible, and it is worth saying why: **ADR has no
 counterpart to it.** 7.5.3 is about how a train is assembled, and a transport
@@ -31,7 +31,7 @@ this provision.
 flammable and oxidising sides. Class 8, 6.1 and 9 are not among them, however
 dangerous they may otherwise be.
 
-And what CargoPilot cannot know here, it says: the rest of the train is not in
+And what EMCargo cannot know here, it says: the rest of the train is not in
 the application. A consignment with one class 1 wagon and nothing else therefore
 gets not "nothing to worry about" but the provision itself, to pass on to the
 carrier.
@@ -94,7 +94,7 @@ def test_elke_genoemde_tegenhanger_telt(counterpart):
 
 
 def test_een_zending_zonder_tegenhanger_krijgt_de_bepaling_toch_te_horen():
-    """CargoPilot does not see the train, and that must not look like a clear road."""
+    """EMCargo does not see the train, and that must not look like a clear road."""
     found = findings(wagons(("Wagen 1", [BLACK_POWDER])))
 
     assert len(found) == 1

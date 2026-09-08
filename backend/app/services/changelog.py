@@ -1,6 +1,6 @@
 """The changelog, parsed so the interface can say what an update brought.
 
-CargoPilot updates itself the way any single-container app does: the operator
+EMCargo updates itself the way any single-container app does: the operator
 pulls a newer image and the next login is silently a different program. The
 what's-new card closes that gap — after an update, the entries between the
 version a user last saw and the version now running are shown once.

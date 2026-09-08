@@ -6,7 +6,7 @@ three are published free of charge. ``scripts/read_land_regulations.py`` fetches
 them and quotes the provisions; the source is named per test so that somebody
 with the text in front of them can check whether it was read correctly.
 
-The reason is that CargoPilot had these rules from an ADR data export and from
+The reason is that EMCargo had these rules from an ADR data export and from
 general knowledge of the regimes. That is not the same as having read the
 regulations, and the difference turned out to sit in exactly the two places where
 it costs money and safety.
@@ -76,7 +76,7 @@ def test_the_exception_applies_on_rail_as_well():
 def test_rail_no_longer_hedges_about_its_own_chapter():
     """The basis has been checked: RID computes the same as ADR.
 
-    The old note said RID "has a 1.1.3.6 of its own that is not in CargoPilot".
+    The old note said RID "has a 1.1.3.6 of its own that is not in EMCargo".
     That was true and too cautious: the categories, the factors and the value
     1000 are identical. What differs is the unit.
     """

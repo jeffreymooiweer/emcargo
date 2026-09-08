@@ -1,5 +1,9 @@
 # The usability plan
 
+> Historical design/research notes. For the current interface and setup, use the
+> [user guide](user-guide.md), [configuration](configuration.md) and
+> [design verification notes](design/README.md).
+
 *Twelve releases that make the daily work measurably simpler, in the order the work
 has to happen. Written against v1.191.0 from an external UX review of v1.189.0,
 checked claim by claim against the code before a line of it was accepted.*
@@ -12,7 +16,7 @@ automatic decision they cannot see. Nothing here removes a regulatory check to r
 a click target.
 
 The shipment is the working object. The user says what is carried and where to;
-CargoPilot reuses what it already knows, asks only what is still missing, explains the
+EMCargo reuses what it already knows, asks only what is still missing, explains the
 document choice, and produces a complete package.
 
 ## What stays

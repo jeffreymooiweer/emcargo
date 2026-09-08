@@ -1,6 +1,6 @@
 """The placarding sheet, and the two defects building it uncovered.
 
-CargoPilot has derived chapter 5.3 since v1.53.0 and shown it on screen only.
+EMCargo has derived chapter 5.3 since v1.53.0 and shown it on screen only.
 The person who needs that answer is standing at the back of a trailer with
 plates in his hand; a browser panel is not a thing you hold while doing that.
 So the answer is now a sheet — and putting it on paper is what made two errors

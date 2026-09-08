@@ -1,4 +1,4 @@
-"""The eFTI common data set, and where CargoPilot's shipment lands in it.
+"""The eFTI common data set, and where EMCargo's shipment lands in it.
 
 Regulation (EU) 2020/1056 has the authorities accept freight transport
 information electronically from 9 July 2027, through certified eFTI
@@ -8,7 +8,7 @@ each (``eFTIxxx``), and per legal provision a subset saying which of them
 the provision asks for. The seed under ``backend/seed/efti`` is that Annex,
 read from the Official Journal by ``scripts/build_efti_seed.py``.
 
-CargoPilot is not an eFTI platform and does not become one — that is a
+EMCargo is not an eFTI platform and does not become one — that is a
 certification regime for platform providers. What it can be is connectable
 to one, and the first half of that is knowing, element by element, which
 eFTI data element each field of the structured shipment export answers,
@@ -24,7 +24,7 @@ A mapping entry has a ``kind``:
 
 * ``field`` — a value the export carries as such (a registry field, a
   goods line field, a dangerous goods product field);
-* ``derived`` — a value CargoPilot works out (a tunnel code from Table A,
+* ``derived`` — a value EMCargo works out (a tunnel code from Table A,
   the 1.1.3.6 points, a country read off a route field);
 * ``translated`` — a value the export carries in its own vocabulary that
   has to be translated into the element's code list first (a modality into

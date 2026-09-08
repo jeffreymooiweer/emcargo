@@ -77,7 +77,7 @@ describe("applyPreferences", () => {
     applyPreferences(preferences({ theme: "system" }));
 
     expect(document.documentElement.classList.contains("dark")).toBe(false);
-    expect(localStorage.getItem("cargopilot-theme")).toBeNull();
+    expect(localStorage.getItem("emcargo-theme")).toBeNull();
   });
 
   it("bewaart de taal als kopie, zodat de volgende start niet flikkert", () => {

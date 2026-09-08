@@ -1,6 +1,6 @@
 """The shipment history: keeping, listing and letting go.
 
-Everything else in CargoPilot forgets a shipment the moment its papers are
+Everything else in EMCargo forgets a shipment the moment its papers are
 downloaded. This module is the one place that remembers, and it does so only
 while an administrator of the organisation application has *Keep shipments*
 switched on — the routes that call it answer 404 otherwise, and

@@ -223,11 +223,11 @@ def init_app() -> bool:
     settings = get_settings()
     if settings.is_open:
         logger.info("Running as the open application: no accounts, nothing kept about anyone")
-    elif settings.cargopilot_mode.strip().lower() not in ("", "organisation"):
+    elif settings.emcargo_mode.strip().lower() not in ("", "organisation"):
         logger.warning(
-            "CARGOPILOT_MODE=%r is not a mode; running as the organisation "
+            "EMCARGO_MODE=%r is not a mode; running as the organisation "
             "application (the closed one). Use 'open' or 'organisation'.",
-            settings.cargopilot_mode)
+            settings.emcargo_mode)
     ensure_directories()
     # A database with no tables at all is fresh: create_all makes every table
     # in its current shape and the schema steps are stamped rather than run.

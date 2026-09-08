@@ -15,7 +15,7 @@ dropped, because ``NAD+CZ+++Afzender BV''`` and ``NAD+CZ+++Afzender BV+++''``
 are the same segment and the shorter is the one every reader expects.
 
 The reverse direction, ``parse``, exists for the tests and for the validator:
-a message CargoPilot wrote is read back and checked against the segment table
+a message EMCargo wrote is read back and checked against the segment table
 before it is handed out.
 """
 from __future__ import annotations

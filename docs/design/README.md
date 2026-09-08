@@ -20,25 +20,20 @@ cards and accessible primary actions.
 - Dangerous-goods assessment remains a required part of the goods stage. Grouping
   progress into three stages does not skip underlying checks.
 - Open installations remain anonymous and do not gain server-side history.
-- Existing custom branding and explicit light/system preferences survive.
-- CargoPilot database paths, browser keys, JSON format identifiers, native service
-  names and native bundle filenames are compatibility identifiers. LICENSE remains
-  unchanged. Updates and container images use this repository, never the upstream.
+- Preserve custom branding by migrating the complete data directory. Browser
+  preferences use new keys; export local drafts before upgrading.
+- Database paths, browser keys, JSON format identifiers, native services and bundle
+  names now use EMCargo. Follow [identity migration](../identity-migration.md) for
+  existing installations. The licence terms remain unchanged.
 
-## Verification in this change
+## Verification
 
-The frontend production build passed. All 343 frontend tests passed, followed by
-62 affected UI tests after the final table and row-layout changes. The final full
-backend run passed 2,653 tests and skipped three. Its six failures were version
-metadata checks caused by `backend/VERSION` lagging the other version files;
-these were corrected with the repository's version-bump script and rechecked.
-The earlier 194 affected branding, settings, export and installation tests passed.
+The EMCargo 2.0 interface passed backend and frontend automation and the production
+build. This documentation update additionally tests the new environment aliases,
+open-mode behaviour, settings and installation manifests.
 
-No production data or upstream CargoPilot repository was modified. No release has
-been deployed. Docker publication and visual browser verification are not claimed.
-
-Visual browser verification remains outstanding: both the initial browser
-connection and the supervised preview returned `ERR_BLOCKED_BY_CLIENT`. The
-reference images have been retained so desktop and mobile screenshots can be
-compared against them in a working browser environment. Do not describe this
-implementation as pixel-perfect or browser-verified until that comparison is done.
+The preview now opens the EMCargo sign-in screen in the cloud browser after
+explicitly configuring the preview host in Vite and restarting the preview.
+This confirms browser connectivity and initial rendering, not authenticated
+workflow verification or pixel-perfect agreement with the three references.
+Screenshot capture timed out, so no implementation screenshot is claimed here.

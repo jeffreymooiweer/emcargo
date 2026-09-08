@@ -10,7 +10,7 @@ party that checks them — a port authority, a terminal, a carrier's agent — a
 conveyance of one means of transport: what dangerous goods are on it, in what
 equipment, from where to where. Port community systems read it; a forwarder that gets
 one re-keys nothing. It is specified by UN/CEFACT in the UN/EDIFACT directories; the
-edition CargoPilot writes is **D.16A, revision 8 of the message (2016-06-08)**, the one
+edition EMCargo writes is **D.16A, revision 8 of the message (2016-06-08)**, the one
 in general use with port community systems.
 
 The export step offers it as **Dangerous goods notification (UN/EDIFACT IFTDGN)** on
@@ -24,7 +24,7 @@ The message is built from the document fields, the goods lines and the dangerous
 entries — the parts the structured export is built from — and from nothing else. A
 field the user left empty is absent from the message.
 
-| Segment | Where it sits | What CargoPilot puts there |
+| Segment | Where it sits | What EMCargo puts there |
 |---|---|---|
 | `UNB` / `UNZ` | interchange envelope | Character set UNOC (ISO 8859-1); the consignor as sender and the carrier (else the forwarder) as recipient, or the marked placeholders `SENDER` / `RECIPIENT`; the moment of writing as the control reference |
 | `UNH` / `UNT` | message header and trailer | `IFTDGN:D:16A:UN`, the segment count |
@@ -80,10 +80,10 @@ The export refuses, with a sentence in the user's language, a shipment without
 dangerous goods (there is nothing to notify), a product without a UN number or a class,
 a UN number that is not four digits, a quantity that is not a number greater than zero,
 and a product without any mass or quantity — the `MEA` in segment group 14 is mandatory
-and CargoPilot invents no number to satisfy it.
+and EMCargo invents no number to satisfy it.
 
 **How a quantity is read.** The quantity fields are free text, and since v1.190.0 every
-reader in CargoPilot — the compliance check, the trip check and this message — reads
+reader in EMCargo — the compliance check, the trip check and this message — reads
 them through the same rules: `1.250,5 L` and `1,250.5` are both 1250.5, `1.250` is
 1250, `12,5` is 12.5, and `1.2.3` is not a number. A negative quantity is not made
 positive; it is named as the problem it is. The rules are written out in
@@ -123,12 +123,12 @@ named *O'Neill & Sons* survives the trip.
 The D.16A directory is licensed by the United Nations: it may be used and copied within
 an organisation, but not modified and redistributed. It is therefore **not in this
 repository**. What the repository holds, in `backend/app/config/iftdgn_d16a.json`, is
-the segment table of the IFTDGN message, the elements and the code values CargoPilot
-uses, with short descriptions in CargoPilot's own words — the functional facts any
+the segment table of the IFTDGN message, the elements and the code values EMCargo
+uses, with short descriptions in EMCargo's own words — the functional facts any
 implementation of the message embeds — together with the checksums of the directory
 files they were verified against. The test suite checks that structure against the
 directory's own segment table and the code values against its code list whenever the
-directory is at hand (`CARGOPILOT_EDIFACT_D16A` pointing at the unpacked `d16a`
+directory is at hand (`EMCARGO_EDIFACT_D16A` pointing at the unpacked `d16a`
 folder), and skips those two checks otherwise. Three code lists the directory only
 points at — Recommendation 19 for the mode, 20 for the units, 21 for the package types —
 are named as such in the file.

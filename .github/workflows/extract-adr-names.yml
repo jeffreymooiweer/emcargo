@@ -70,7 +70,7 @@ jobs:
         id: volumes
         uses: actions/cache/restore@v4
         with:
-          path: /tmp/cargopilot-regulations
+          path: /tmp/emcargo-regulations
           key: regulations-${{ github.run_id }}
           restore-keys: |
             regulations-
@@ -141,7 +141,7 @@ jobs:
         if: always()
         uses: actions/cache/save@v4
         with:
-          path: /tmp/cargopilot-regulations
+          path: /tmp/emcargo-regulations
           key: regulations-${{ github.run_id }}
 
       - name: Commit

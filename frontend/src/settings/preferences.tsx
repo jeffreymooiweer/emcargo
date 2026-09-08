@@ -28,11 +28,11 @@ import { api, InstallationMode, PublicSettings, UserPreferences } from "../api/c
 import { documentLanguage } from "../i18n/language";
 import { applySystemTheme, applyTheme } from "../theme";
 
-export const LANGUAGE_STORAGE_KEY = "cargopilot-lang";
+export const LANGUAGE_STORAGE_KEY = "emcargo-lang";
 
 /** Where the open application keeps the preferences. One key, one JSON
  *  document, so clearing it is one line and nothing is left half-cleared. */
-export const BROWSER_PREFERENCES_KEY = "cargopilot-preferences";
+export const BROWSER_PREFERENCES_KEY = "emcargo-preferences";
 
 export const EMPTY_PREFERENCES: UserPreferences = {
   language: "",
