@@ -27,6 +27,18 @@ function renderAt(path = "/wizard/road", custom = false) {
 beforeEach(() => { vi.spyOn(window, "scrollTo").mockImplementation(() => {}); vi.clearAllMocks(); config.mode = "organisation"; config.publicSettings.history_enabled = true; api.health.mockResolvedValue({ version: "1.206.2" }); api.logout.mockResolvedValue({ ok: true }); });
 
 describe("the approved EMCargo navigation", () => {
+  it("keeps all four work pages directly discoverable when storage is off", async () => {
+    config.publicSettings.history_enabled = false;
+    renderAt();
+    for (const name of ["nav.overview", "nav.shipments", "nav.trips", "nav.articles"]) {
+      expect(screen.getByRole("link", { name })).toBeVisible();
+    }
+    await userEvent.click(screen.getByRole("button", { name: "nav.openMenu" }));
+    const menu = within(screen.getByRole("dialog"));
+    for (const name of ["nav.overview", "nav.shipments", "nav.trips", "nav.articles"]) {
+      expect(menu.getByRole("link", { name })).toBeVisible();
+    }
+  });
   it("starts a newly selected page at the top without moving an unchanged page", async () => {
     renderAt();
     expect(window.scrollTo).not.toHaveBeenCalled();

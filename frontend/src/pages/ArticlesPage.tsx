@@ -1,3 +1,5 @@
+import HistoryStatus from "../components/HistoryStatus";
+import type { User } from "../api/client";
 import { PlusIcon, ChevronDownIcon } from "../components/icons";
 /** The articles library: the organisation's own codes for what it ships.
  *
@@ -35,7 +37,7 @@ function empty(): ArticleIn {
   };
 }
 
-export default function ArticlesPage() {
+export default function ArticlesPage({ user }: { user?: User }) {
   const { t } = useTranslation();
   const toast = useToast();
   const { publicSettings } = usePreferences();
@@ -105,14 +107,7 @@ export default function ArticlesPage() {
     }
   };
 
-  if (!historyOn) {
-    return (
-      <div className={`${panelClass} p-5 sm:p-8`}>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{t("articles.title")}</h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{t("history.off")}</p>
-      </div>
-    );
-  }
+  if (!historyOn) return <HistoryStatus title={t("articles.title")} admin={user?.role === "admin"} />;
 
   return (
     <div className="collection-page page-enter space-y-4 sm:space-y-6">

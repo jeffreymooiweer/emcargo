@@ -50,6 +50,9 @@ class ApiError(HTTPException):
 #: Kept here rather than at the raise sites so that the set of codes is
 #: countable — a translation guard cannot check what it cannot enumerate.
 MESSAGES: dict[str, str] = {
+    "avatar.invalid": "Choose a valid, static JPG, PNG or WebP image.",
+    "avatar.too_large": "Choose an image up to 5 MB and 16 megapixels.",
+    "avatar.not_found": "Profile photo not found.",
     "update.unavailable": "In-app updating is unavailable. Check Settings / Updates for the installation requirements.",
     "update.no_update": "There is no newer release to install. Check for updates again.",
     "update.check_disabled": "Update checks are switched off",

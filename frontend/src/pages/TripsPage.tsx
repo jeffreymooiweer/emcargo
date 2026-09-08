@@ -1,3 +1,4 @@
+import HistoryStatus from "../components/HistoryStatus";
 /**
  * The groupage trips this installation kept.
  *
@@ -66,14 +67,7 @@ export default function TripsPage({ user }: { user?: User | null }) {
   const { id } = useParams();
   const admin = user?.role === "admin";
 
-  if (publicSettings && !publicSettings.history_enabled) {
-    return (
-      <div className={`${panelClass} p-5 sm:p-8 space-y-2`}>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{t("trips.title")}</h2>
-        <p className="text-sm text-slate-600 dark:text-slate-300">{t("history.off")}</p>
-      </div>
-    );
-  }
+  if (!publicSettings?.history_enabled) return <HistoryStatus title={t("trips.title")} admin={admin} />;
 
   if (id) return <TripView id={Number(id)} language={i18n.language} />;
   return <TripList language={i18n.language} admin={admin} />;

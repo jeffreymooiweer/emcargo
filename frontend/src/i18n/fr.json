@@ -846,6 +846,11 @@
       "in_progress": "Une mise à jour est déjà en cours",
       "unavailable": "La mise à jour dans l’application est indisponible. Consultez les prérequis dans Paramètres / Mises à jour.",
       "no_update": "Aucune version plus récente n’est disponible. Recherchez à nouveau les mises à jour."
+    },
+    "avatar": {
+      "invalid": "Choisissez une image JPG, PNG ou WebP valide et non animée.",
+      "too_large": "Choisissez une image de 5 Mo et 16 mégapixels maximum.",
+      "not_found": "Photo de profil introuvable."
     }
   },
   "instructions": {
@@ -1444,7 +1449,7 @@
     "morning": "Bonjour",
     "afternoon": "Bon après-midi",
     "evening": "Bonsoir",
-    "search": "Rechercher les envois récents par référence ou organisation",
+    "search": "Rechercher dans les envois récents",
     "loadError": "Certaines données n’ont pas pu être chargées. Réessayez.",
     "retry": "Réessayer",
     "loading": "Chargement des envois…",
@@ -1520,5 +1525,44 @@
   },
   "authArt": {
     "title": "Du départ à destination."
+  },
+  "profile": {
+    "open": "Mon profil",
+    "photo": "Photo de profil",
+    "hint": "JPG, PNG ou WebP, 5 Mo maximum. La photo est recadrée en carré et enregistrée immédiatement dans votre compte.",
+    "upload": "Choisir une photo",
+    "replace": "Remplacer la photo",
+    "remove": "Supprimer",
+    "saving": "Enregistrement de la photo…",
+    "saved": "Photo de profil enregistrée.",
+    "removed": "Photo de profil supprimée."
+  },
+  "historyAccess": {
+    "disabled": "La conservation est désactivée",
+    "unavailable": "Paramètres indisponibles",
+    "retryHint": "Les paramètres de conservation n’ont pas pu être chargés. Veuillez réessayer.",
+    "adminHint": "Activez « Conserver les envois » dans Organisation pour utiliser les envois, les tournées et les articles.",
+    "memberHint": "Demandez à un administrateur d’activer « Conserver les envois ».",
+    "settings": "Paramètres de l’organisation",
+    "retry": "Réessayer"
+  },
+  "directory": {
+    "intro": "Gérer les comptes, les accès et les services.",
+    "search": "Rechercher par nom, e-mail ou service",
+    "allRoles": "Tous les rôles",
+    "allStatuses": "Tous les statuts",
+    "status": "Statut",
+    "active": "Actif",
+    "activeAccount": "Compte actif",
+    "count": "{{shown}} utilisateurs sur {{total}}",
+    "loadFailed": "Impossible de charger les utilisateurs.",
+    "noResults": "Aucun utilisateur ne correspond à ces filtres.",
+    "empty": "Aucun utilisateur pour le moment.",
+    "edit": "Modifier",
+    "editTitle": "Modifier l’utilisateur",
+    "close": "Fermer",
+    "save": "Enregistrer les modifications",
+    "saving": "Enregistrement…",
+    "security": "Sécurité et récupération"
   }
 }

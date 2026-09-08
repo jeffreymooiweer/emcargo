@@ -846,6 +846,11 @@
       "in_progress": "Er wordt al een update uitgevoerd",
       "unavailable": "Bijwerken vanuit de app is niet beschikbaar. Bekijk de installatievereisten onder Instellingen / Updates.",
       "no_update": "Er is geen nieuwere release om te installeren. Controleer opnieuw op updates."
+    },
+    "avatar": {
+      "invalid": "Kies een geldige, niet-geanimeerde JPG-, PNG- of WebP-afbeelding.",
+      "too_large": "Kies een afbeelding van maximaal 5 MB en 16 megapixels.",
+      "not_found": "Profielfoto niet gevonden."
     }
   },
   "instructions": {
@@ -1444,7 +1449,7 @@
     "morning": "Goedemorgen",
     "afternoon": "Goedemiddag",
     "evening": "Goedenavond",
-    "search": "Zoek in recente zendingen op referentie of organisatie",
+    "search": "Zoek in recente zendingen",
     "loadError": "Niet alle gegevens konden worden geladen. Probeer het opnieuw.",
     "retry": "Opnieuw proberen",
     "loading": "Zendingen laden…",
@@ -1520,5 +1525,44 @@
   },
   "authArt": {
     "title": "Van vertrek tot bestemming."
+  },
+  "profile": {
+    "open": "Mijn profiel",
+    "photo": "Profielfoto",
+    "hint": "JPG, PNG of WebP, maximaal 5 MB. De foto wordt vierkant bijgesneden en direct bij uw account opgeslagen.",
+    "upload": "Foto kiezen",
+    "replace": "Foto vervangen",
+    "remove": "Verwijderen",
+    "saving": "Foto opslaan…",
+    "saved": "Profielfoto opgeslagen.",
+    "removed": "Profielfoto verwijderd."
+  },
+  "historyAccess": {
+    "disabled": "Opslag staat uit",
+    "unavailable": "Instellingen niet bereikbaar",
+    "retryHint": "De opslaginstellingen konden niet worden opgehaald. Probeer het opnieuw.",
+    "adminHint": "Schakel ‘Zendingen bewaren’ in onder Organisatie om zendingen, ritten en artikelen te gebruiken.",
+    "memberHint": "Vraag een beheerder om ‘Zendingen bewaren’ in te schakelen.",
+    "settings": "Naar organisatie-instellingen",
+    "retry": "Opnieuw proberen"
+  },
+  "directory": {
+    "intro": "Accounts, toegang en afdelingen beheren.",
+    "search": "Zoek op naam, e-mail of afdeling",
+    "allRoles": "Alle rollen",
+    "allStatuses": "Alle statussen",
+    "status": "Status",
+    "active": "Actief",
+    "activeAccount": "Account actief",
+    "count": "{{shown}} van {{total}} gebruikers",
+    "loadFailed": "De gebruikers konden niet worden geladen.",
+    "noResults": "Geen gebruikers met deze zoekcriteria.",
+    "empty": "Er zijn nog geen gebruikers.",
+    "edit": "Bewerken",
+    "editTitle": "Gebruiker bewerken",
+    "close": "Sluiten",
+    "save": "Wijzigingen opslaan",
+    "saving": "Opslaan…",
+    "security": "Beveiliging en herstel"
   }
 }
