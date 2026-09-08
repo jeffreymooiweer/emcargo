@@ -1,7 +1,7 @@
 /**
  * What the installation calls itself and looks like.
  *
- * An organisation that hosts CargoPilot for its own people would rather see
+ * An organisation that hosts EMCargo for its own people would rather see
  * its own name on the door and its own pictures on the tiles. The server
  * answers `/api/branding` without a sign-in — the sign-in page is the door,
  * and a door has its sign on the outside — so this provider sits above the
@@ -21,7 +21,7 @@ export const DEFAULT_BRANDING: Branding = { name: "", logo: null, modalities: {}
 
 /** The name the tab and the header fall back to. Not translated: it is the
  *  product's name, and the same in every language. */
-export const PRODUCT_NAME = "CargoPilot";
+export const PRODUCT_NAME = "EMCargo";
 
 interface BrandingValue {
   branding: Branding;

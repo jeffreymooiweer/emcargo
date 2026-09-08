@@ -1,8 +1,8 @@
 services:
-  cargopilot:
+  emcargo:
     build: .
-    image: jeffersonmouze/cargopilot:latest
-    container_name: cargopilot
+    image: ghcr.io/jeffreymooiweer/emcargo:latest
+    container_name: emcargo
     ports:
       - "8080:8080"
     env_file:

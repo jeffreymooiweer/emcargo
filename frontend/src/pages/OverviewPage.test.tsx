@@ -126,6 +126,7 @@ describe("the overview", () => {
     api.shipments.mockResolvedValue({ items: [kept], total: 1, page: 1, per_page: 5 });
     renderPage();
     expect(await screen.findByText("CP-2026-100")).toBeInTheDocument();
+    await userEvent.click(screen.getByLabelText("review.moreActions"));
     expect(screen.getByRole("link", { name: "overview.open" })).toHaveAttribute(
       "href",
       "/wizard/road?shipment=7",
@@ -156,4 +157,29 @@ describe("the overview", () => {
     // Starting still works.
     expect(screen.getByRole("button", { name: /modality\.road/ })).toBeInTheDocument();
   });
+});
+
+it("keeps a draft visible when discarding it failed", async () => {
+  api.runningDraft.mockResolvedValue(draft);
+  api.discardDraft.mockRejectedValue(new Error("offline"));
+  renderPage();
+  await userEvent.click(await screen.findByRole("button", { name: "draft.discard" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("overview.loadError");
+  expect(screen.getByRole("link", { name: "overview.resume" })).toBeInTheDocument();
+});
+
+it("filters the recent list without changing the saved shipments", async () => {
+  api.shipments.mockResolvedValue({ items: [kept], total: 1, page: 1, per_page: 5 });
+  renderPage();
+  await screen.findByText("CP-2026-100");
+  await userEvent.type(screen.getByRole("searchbox"), "unmatched");
+  expect(screen.queryByText("CP-2026-100")).toBeNull();
+  expect(screen.getByText("overview.noResults")).toBeInTheDocument();
+  await userEvent.clear(screen.getByRole("searchbox"));
+  expect(screen.getByText("CP-2026-100")).toBeInTheDocument();
+});
+
+it("opens the paste workflow directly in an available transport mode", async () => {
+  renderPage();
+  expect(screen.getByRole("link", { name: /overview.paste/ })).toHaveAttribute("href", "/wizard/road?input=paste");
 });

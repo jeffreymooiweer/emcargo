@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 WIKIDATA_SPARQL_URL = "https://query.wikidata.org/sparql"
 WIKIDATA_MATERIAL_SOURCE = "wikidata.org (P2054 density)"
 
-# Wikidata item → CargoPilot canonical material mapping
+# Wikidata item → EMCargo canonical material mapping
 WIKIDATA_MATERIAL_MAP: dict[str, dict] = {
     "Q11424": {
         "canonical_name": "steel",
@@ -124,7 +124,7 @@ def fetch_wikidata_densities(
         response = client.get(
             WIKIDATA_SPARQL_URL,
             params={"query": query},
-            headers={"Accept": "application/sparql-results+json", "User-Agent": "CargoPilot/1.0"},
+            headers={"Accept": "application/sparql-results+json", "User-Agent": "EMCargo/1.0"},
             timeout=timeout,
         )
         response.raise_for_status()

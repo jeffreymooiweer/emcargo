@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install CargoPilot as a native service on a Debian/Ubuntu-like host.
+# Install EMCargo as a native service on a Debian/Ubuntu-like host.
 #
 # What it does, and only this:
 #   1. creates the service user and the directories
@@ -20,7 +20,7 @@
 #   sudo ./install.sh --bundle cargopilot-1.181.0-native.tar.gz
 set -euo pipefail
 
-REPO="jeffreymooiweer/CargoPilot"
+REPO="jeffreymooiweer/emcargo"
 PREFIX="/opt/cargopilot"
 DATA_DIR="/var/lib/cargopilot"
 CONF_DIR="/etc/cargopilot"
@@ -46,7 +46,7 @@ for tool in curl tar; do
   command -v "$tool" >/dev/null 2>&1 || { echo "Missing: $tool" >&2; exit 1; }
 done
 if ! "$PYTHON" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)' 2>/dev/null; then
-  echo "CargoPilot needs Python 3.11 or newer; found: $("$PYTHON" --version 2>&1 || echo none)." >&2
+  echo "EMCargo needs Python 3.11 or newer; found: $("$PYTHON" --version 2>&1 || echo none)." >&2
   echo "On Debian/Ubuntu: apt install python3 python3-venv" >&2
   exit 1
 fi
@@ -109,7 +109,7 @@ systemctl enable cargopilot >/dev/null
 systemctl restart cargopilot
 
 echo
-echo "CargoPilot $VERSION is installed and running on http://127.0.0.1:8080"
+echo "EMCargo $VERSION is installed and running on http://127.0.0.1:8080"
 echo "  data:      $DATA_DIR"
 echo "  settings:  $CONF_DIR/cargopilot.env"
 echo "  logs:      journalctl -u cargopilot -f"

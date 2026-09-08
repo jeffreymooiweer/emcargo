@@ -1210,7 +1210,7 @@ export interface InstanceSettings {
   history_enabled: boolean;
   organisation_name: string;
   organisation_address: string;
-  /** What the screen calls itself; empty means CargoPilot. The logo and the
+  /** What the screen calls itself; empty means EMCargo. The logo and the
    *  tile pictures beside it are uploads, not settings — see `Branding`. */
   brand_name: string;
   two_factor_policy: "off" | "admins" | "everyone";
@@ -2090,7 +2090,7 @@ export interface AdrTunnelResult {
 
 /** ADR 8.1.4 / 8.1.5: the equipment the transport unit has to carry, derived
  *  from the hazard label numbers of the load as 8.1.5.1 prescribes. A checklist,
- *  not a finding — CargoPilot cannot see what is actually in the cab. */
+ *  not a finding — EMCargo cannot see what is actually in the cab. */
 export interface AdrEquipmentResult {
   items: { key: string; rule: string; text: string }[];
   /** The label numbers the list was derived from. */

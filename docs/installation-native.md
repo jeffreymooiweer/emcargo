@@ -1,6 +1,6 @@
 # Installing without Docker
 
-CargoPilot ships as a Docker image, and that stays the first-class way in: it is what
+EMCargo ships as a Docker image, and that stays the first-class way in: it is what
 every release is built and tested for. Two other routes exist for hosts that do not run
 Docker — a **native service** under systemd, and **Kubernetes** — and this page walks
 through both. Each has its own way of updating, and the settings screen names the one
@@ -25,7 +25,7 @@ and the Python dependencies come as wheels.
 **Install:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jeffreymooiweer/CargoPilot/main/deploy/native/install.sh -o install.sh
+curl -fsSL https://raw.githubusercontent.com/jeffreymooiweer/emcargo/main/deploy/native/install.sh -o install.sh
 sudo bash install.sh            # the latest release
 sudo bash install.sh 1.181.0    # or a named one
 ```
@@ -99,7 +99,7 @@ file lock on it; two pods on one volume would corrupt it. The deployment's strat
 **Update** is a rollout to the newer image tag; the pod is recreated and the volume stays:
 
 ```bash
-kubectl -n cargopilot set image deployment/cargopilot cargopilot=jeffersonmouze/cargopilot:1.182.0
+kubectl -n cargopilot set image deployment/cargopilot cargopilot=ghcr.io/jeffreymooiweer/emcargo:1.182.0
 ```
 
 The config map sets `INSTALL_METHOD=kubernetes`, so the settings screen shows that

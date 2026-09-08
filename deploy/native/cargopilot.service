@@ -1,8 +1,8 @@
-# CargoPilot as a systemd service on a Linux host without Docker.
+# EMCargo as a systemd service on a Linux host without Docker.
 # Installed by deploy/native/install.sh; see docs/installation-native.md.
 [Unit]
-Description=CargoPilot
-Documentation=https://github.com/jeffreymooiweer/CargoPilot/blob/main/docs/installation-native.md
+Description=EMCargo
+Documentation=https://github.com/jeffreymooiweer/emcargo/blob/main/docs/installation-native.md
 After=network-online.target
 Wants=network-online.target
 

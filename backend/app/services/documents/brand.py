@@ -1,8 +1,8 @@
 """Whose name is on the paper.
 
-Every document CargoPilot draws itself carries the installation's brand: the
+Every document EMCargo draws itself carries the installation's brand: the
 name an administrator set (``brand_name``, or ``BRAND_NAME`` in the
-environment) and the logo they uploaded, and CargoPilot's own name and logo
+environment) and the logo they uploaded, and EMCargo's own name and logo
 where nothing was set. The official forms — CMR, CIM, AVC — are not touched:
 they are somebody else's paper, filled in.
 
@@ -22,7 +22,7 @@ from pathlib import Path
 from PIL import Image as PILImage
 from sqlalchemy.orm import Session
 
-DEFAULT_NAME = "CargoPilot"
+DEFAULT_NAME = "EMCargo"
 DEFAULT_LOGO = Path(__file__).resolve().parents[2] / "assets" / "logo.png"
 
 

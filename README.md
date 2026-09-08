@@ -1,19 +1,17 @@
 <div align="center">
 
-# CargoPilot
+# EMCargo
 
 **Turn a list of packages into finished transport documents.**
 
-Paste your load, and CargoPilot works out the weights and volumes, fills in the official
+Paste your load, and EMCargo works out the weights and volumes, fills in the official
 CMR, CIM, AVC and IATA forms, and checks your dangerous goods before you print.
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/jeffersonmouze/cargopilot?logo=docker&logoColor=white&label=docker%20pulls&color=2496ED)](https://hub.docker.com/r/jeffersonmouze/cargopilot)
-[![Latest release](https://img.shields.io/github/v/release/jeffreymooiweer/CargoPilot?logo=github&label=release&color=2ea44f)](https://github.com/jeffreymooiweer/CargoPilot/releases/latest)
-[![Build](https://img.shields.io/github/actions/workflow/status/jeffreymooiweer/CargoPilot/ci.yml?branch=main&logo=githubactions&logoColor=white&label=build)](https://github.com/jeffreymooiweer/CargoPilot/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/jeffreymooiweer/emcargo?logo=github&label=release&color=2ea44f)](https://github.com/jeffreymooiweer/emcargo/releases/latest)
+[![Build](https://img.shields.io/github/actions/workflow/status/jeffreymooiweer/emcargo/ci.yml?branch=main&logo=githubactions&logoColor=white&label=build)](https://github.com/jeffreymooiweer/emcargo/actions/workflows/ci.yml)
 [![Status](https://img.shields.io/badge/status-under%20development-orange)](ROADMAP.md)
 [![Licence](https://img.shields.io/badge/licence-Apache--2.0%20%2B%20Commons%20Clause-blue)](LICENSE)
 
-[![Docker image size](https://img.shields.io/docker/image-size/jeffersonmouze/cargopilot/latest?logo=docker&logoColor=white&label=image%20size&color=2496ED)](https://hub.docker.com/r/jeffersonmouze/cargopilot)
 [![Backend](https://img.shields.io/badge/backend-FastAPI%20%C2%B7%20Python%203.12-009688?logo=fastapi&logoColor=white)](docs/development.md)
 [![Frontend](https://img.shields.io/badge/frontend-React%2018%20%C2%B7%20TypeScript-61DAFB?logo=react&logoColor=black)](docs/development.md)
 [![Unraid](https://img.shields.io/badge/Unraid-ready-F15A2C?logo=unraid&logoColor=white)](docs/getting-started.md#unraid)
@@ -25,18 +23,31 @@ CMR, CIM, AVC and IATA forms, and checks your dangerous goods before you print.
 ---
 
 > [!WARNING]
-> **CargoPilot is under active development.** Every document it produces is a **draft**.
+> **EMCargo is under active development.** Every document it produces is a **draft**.
 > Check it, complete it and have it signed by a qualified person before you use it.
 > See the [disclaimer](DISCLAIMER.md).
 
-## What is CargoPilot?
+## EMCargo interface
+
+EMCargo uses a dark navy workspace with a persistent desktop sidebar, a mobile
+navigation drawer, three visible shipment stages and a bottom action bar.
+Dangerous-goods assessment remains mandatory within the goods stage. Existing
+light/system preferences, custom branding, saved drafts and shipment files stay
+compatible. CargoPilot storage keys and database filenames are intentionally kept
+so upgrading does not discard existing data. The original licence and attribution
+remain in LICENSE.
+
+Images for this repository are published to `ghcr.io/jeffreymooiweer/emcargo`.
+Use `docker compose up --build -d` to build locally before a release is available.
+
+## What is EMCargo?
 
 Preparing freight paperwork is repetitive. The same addresses, the same reference
 numbers, the same weights — typed again into every form, each with its own layout and
 its own rules. Get a box number wrong on a dangerous goods declaration and the shipment
 stops at the gate.
 
-CargoPilot does that part for you. You enter your shipment once. It recognises what you
+EMCargo does that part for you. You enter your shipment once. It recognises what you
 are shipping, calculates the weights and volumes, and fills in the paperwork for the
 transport mode you picked. **Road, rail, sea and inland waterway are released today**;
 air and multimodal are built in but stay locked until their remaining regulatory checks
@@ -47,7 +58,7 @@ shipment history is kept.
 
 ## What it does
 
-**Understands your load.** Paste a list, or import an Excel or CSV file. CargoPilot
+**Understands your load.** Paste a list, or import an Excel or CSV file. EMCargo
 recognises materials and dimensions in Dutch, English, German and French — `Steel angle 80x80x8x6000` —
 and works out the weight from a built-in database of **1,093 goods**, from cement and
 timber to grain, chemicals and white goods. Anything it cannot work out, you can correct
@@ -61,7 +72,7 @@ produced as a clean PDF.
 single time and reused across every form you selected. After that you only see the
 fields a given form still needs.
 
-**Knows its way around dangerous goods.** Type a UN number and CargoPilot works out the
+**Knows its way around dangerous goods.** Type a UN number and EMCargo works out the
 proper shipping name, class and division, subsidiary risks, packing group, transport
 category, tunnel code, EmS emergency schedules and the air freight rules. It warns you
 about incompatible loads, calculates the ADR 1,000-point exemption and the IATA Q value,
@@ -85,8 +96,8 @@ start with, and whether this installation is allowed to reach the internet at al
 ## Try it in two minutes
 
 ```bash
-git clone https://github.com/jeffreymooiweer/CargoPilot.git
-cd CargoPilot
+git clone https://github.com/jeffreymooiweer/emcargo.git
+cd emcargo
 cp .env.example .env          # set ADMIN_PASSWORD; the rest has defaults
 docker compose up -d --build
 ```
@@ -105,8 +116,8 @@ Running Unraid, or want the full set of options? See **[Getting started](docs/ge
 |---|---|
 | **[Getting started](docs/getting-started.md)** | Install with Docker Compose or on Unraid, create the first admin account |
 | **[User guide](docs/user-guide.md)** | A walk through the app, from picking a transport mode to downloading your documents |
-| **[Documents](docs/documents.md)** | Every document CargoPilot produces, and which ones are official forms |
-| **[Dangerous goods](docs/dangerous-goods.md)** | What CargoPilot fills in automatically, and which checks it runs |
+| **[Documents](docs/documents.md)** | Every document EMCargo produces, and which ones are official forms |
+| **[Dangerous goods](docs/dangerous-goods.md)** | What EMCargo fills in automatically, and which checks it runs |
 | **[DG coverage](docs/dg-coverage.md)** | Per mode: what is checked, what is not, and which gaps matter most |
 | **[Document fields audit](docs/document-fields-audit.md)** | Chapter 5.4.1 provision by provision: which fields exist, which are guidance only, which are absent and why |
 | **[Shipment export](docs/shipment-export.md)** | The whole shipment as versioned JSON, findings included — the step towards eCMR and eFTI |
@@ -119,10 +130,10 @@ Also: **[Changelog](CHANGELOG.md)** · **[Roadmap](ROADMAP.md)** · **[Disclaime
 
 ## Found something wrong?
 
-CargoPilot is only worth as much as its data, and a wrong density or a misplaced box on a
+EMCargo is only worth as much as its data, and a wrong density or a misplaced box on a
 form is best spotted by someone actually shipping. Those reports are the most valuable
 ones this project gets — please
-[open an issue](https://github.com/jeffreymooiweer/CargoPilot/issues/new/choose).
+[open an issue](https://github.com/jeffreymooiweer/emcargo/issues/new/choose).
 
 It is a personal project, so code contributions work a little differently: ask first, in
 an issue. [CONTRIBUTING.md](CONTRIBUTING.md) explains why and what a useful report looks
@@ -164,7 +175,7 @@ needs nothing.
 
 ## Good to know
 
-CargoPilot is a **civilian** tool. It prepares paperwork; it does not give legal,
+EMCargo is a **civilian** tool. It prepares paperwork; it does not give legal,
 customs or safety advice, and it does not replace a dangerous goods safety adviser
 (DGSA). The current edition of ADR, RID, ADN, the IMDG Code and the IATA DGR is always
 the authority — not this app.
@@ -176,6 +187,6 @@ signature is only added if you draw or upload one yourself.
 
 Apache License 2.0 with the Commons Clause — see [LICENSE](LICENSE).
 
-You may use CargoPilot inside your own organisation. Selling it, reselling it, hosting
+You may use EMCargo inside your own organisation. Selling it, reselling it, hosting
 it as a paid service or otherwise commercially redistributing the software itself
 requires written permission from the copyright holder.

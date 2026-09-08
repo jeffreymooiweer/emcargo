@@ -115,7 +115,7 @@ def _iter_products(entries: list[dict[str, Any]]):
 
 
 #: The road, rail and inland waterway regimes each have a 1.1.3.6 and a mixed
-#: loading chapter, but they are not the same texts. CargoPilot carries the ADR
+#: loading chapter, but they are not the same texts. EMCargo carries the ADR
 #: tables; those of RID and ADN are not in it. Presenting that silently as a
 #: "RID result" gives the user a certainty that does not exist, so the basis is
 #: named the moment it differs from the chosen profile.
@@ -123,14 +123,14 @@ LAND_PROFILES = ("ADR", "RID", "ADN")
 
 BASIS_NOTE = {
     "nl": "Berekend met de tabellen van het ADR. {other} kent een eigen "
-          "{section}; die staat niet in CargoPilot. Gebruik deze uitkomst als "
+          "{section}; die staat niet in EMCargo. Gebruik deze uitkomst als "
           "indicatie en toets hem aan de tekst die voor jouw traject geldt.",
     "en": "Computed with the ADR tables. {other} has its own {section}, which "
-          "CargoPilot does not hold. Treat this as indicative and check it "
+          "EMCargo does not hold. Treat this as indicative and check it "
           "against the text that applies to your leg.",
     "de": "Mit den Tabellen des ADR berechnet. {other} hat einen eigenen "
-          "{section}, den CargoPilot nicht enthält. Nehmen Sie das Ergebnis als "
-          "Anhaltspunkt und prüfen Sie es an dem für Ihre Strecke geltenden Text.", "fr": "Calculé avec les tableaux de l'ADR. Le {other} possède son propre {section}, dont CargoPilot ne dispose pas. Prenez ce résultat à titre indicatif et vérifiez-le dans le texte applicable à votre trajet."}
+          "{section}, den EMCargo nicht enthält. Nehmen Sie das Ergebnis als "
+          "Anhaltspunkt und prüfen Sie es an dem für Ihre Strecke geltenden Text.", "fr": "Calculé avec les tableaux de l'ADR. Le {other} possède son propre {section}, dont EMCargo ne dispose pas. Prenez ce résultat à titre indicatif et vérifiez-le dans le texte applicable à votre trajet."}
 
 # 7.5.2 no longer needs the blanket hedge above. RID's 7.5.2.1 was read in
 # v1.38.0 and is word-identical to the ADR's, footnotes included; a rail-only
@@ -671,7 +671,7 @@ def _class1_compatibility(
 
     The table sets group against group. An empty cell is a prohibition, an X is
     "mixed loading permitted", and four cells carry a letter: then it is allowed,
-    but not without conditions. Until v1.41.0 CargoPilot only counted the groups
+    but not without conditions. Until v1.41.0 EMCargo only counted the groups
     and handed the question back to the user; now the table is read.
     """
     rules = get_compliance_rules()["adr_mixed_loading"]["rules"]
@@ -910,7 +910,7 @@ def check_rid_protective_distance(
             "products": "; ".join(f"{one} ↔ {other}" for one, other in pairs),
         }]
     # No counterpart in this consignment does not mean no distance is needed:
-    # the rest of the train is not in CargoPilot.
+    # the rest of the train is not in EMCargo.
     return [{
         "rule": "RID 7.5.3",
         "severity": "warning",
@@ -1209,20 +1209,20 @@ _TUNNEL_NOTE = {
     "nl": "Berekend voor vervoer in colli. Los gestort vervoer of vervoer in tanks "
           "geeft bij de codes B/D, B/E, C/D, C/E en D/E een strengere uitkomst. "
           "Welke tunnels op de route liggen en in welke categorie zij vallen, weet "
-          "CargoPilot niet — dat blijft aan de vervoerder (1.9.5).",
+          "EMCargo niet — dat blijft aan de vervoerder (1.9.5).",
     "en": "Computed for carriage in packages. Carriage in bulk or in tanks gives a "
           "stricter answer for the codes B/D, B/E, C/D, C/E and D/E. Which tunnels "
-          "lie on the route, and which category they are in, CargoPilot does not "
+          "lie on the route, and which category they are in, EMCargo does not "
           "know — that stays with the carrier (1.9.5).",
     "de": "Berechnet für die Beförderung in Versandstücken. Beförderung in loser "
           "Schüttung oder in Tanks ergibt bei den Codes B/D, B/E, C/D, C/E und D/E "
           "ein strengeres Ergebnis. Welche Tunnel auf der Strecke liegen und in "
-          "welche Kategorie sie fallen, weiß CargoPilot nicht — das bleibt beim "
+          "welche Kategorie sie fallen, weiß EMCargo nicht — das bleibt beim "
           "Beförderer (1.9.5).",
     "fr": "Calculé pour le transport en colis. Le transport en vrac ou en citernes "
           "donne un résultat plus strict pour les codes B/D, B/E, C/D, C/E et D/E. "
           "Quels tunnels se trouvent sur l'itinéraire, et dans quelle catégorie ils "
-          "sont classés, CargoPilot l'ignore — cela reste au transporteur (1.9.5).",
+          "sont classés, EMCargo l'ignore — cela reste au transporteur (1.9.5).",
 }
 
 
@@ -1476,20 +1476,20 @@ _EXTINGUISHER_EXEMPT_MESSAGE = {
 
 _EQUIPMENT_NOTE = {
     "nl": "Afgeleid uit de gevaarsetiketnummers van de lading, zoals 8.1.5.1 het "
-          "voorschrijft. Wat er werkelijk aan boord ligt, weet CargoPilot niet — dit is "
+          "voorschrijft. Wat er werkelijk aan boord ligt, weet EMCargo niet — dit is "
           "de lijst om mee af te vinken, geen vaststelling. De brandblusapparaten hangen "
           "bovendien aan de maximaal toegestane massa van de transporteenheid, en die is "
           "hier niet bekend.",
     "en": "Derived from the hazard label numbers of the load, the way 8.1.5.1 prescribes. "
-          "What is actually on board CargoPilot does not know — this is the list to check "
+          "What is actually on board EMCargo does not know — this is the list to check "
           "against, not a finding. The extinguishers moreover depend on the maximum "
           "permissible mass of the transport unit, which is not known here.",
     "de": "Abgeleitet aus den Gefahrzettelnummern der Ladung, wie 8.1.5.1 es vorschreibt. "
-          "Was tatsächlich an Bord ist, weiß CargoPilot nicht — dies ist die Liste zum "
+          "Was tatsächlich an Bord ist, weiß EMCargo nicht — dies ist die Liste zum "
           "Abhaken, keine Feststellung. Die Feuerlöscher hängen zudem von der "
           "höchstzulässigen Masse der Beförderungseinheit ab, die hier nicht bekannt ist.",
     "fr": "Déduit des numéros d'étiquette de danger du chargement, comme le prescrit le "
-          "8.1.5.1. Ce qui se trouve réellement à bord, CargoPilot l'ignore : ceci est la "
+          "8.1.5.1. Ce qui se trouve réellement à bord, EMCargo l'ignore : ceci est la "
           "liste à cocher, pas un constat. Les extincteurs dépendent en outre de la masse "
           "maximale admissible de l'unité de transport, inconnue ici.",
 }
@@ -2955,7 +2955,7 @@ def check_adn_signals(
     This is not a warning and that is the point of it. A vessel carrying
     dangerous goods on the inland waterways shows nought, one, two or three blue
     cones by day and the same number of blue lights by night, and which it is
-    follows from column (12) of the ADN's table A. Until v1.61.0 CargoPilot did
+    follows from column (12) of the ADN's table A. Until v1.61.0 EMCargo did
     not hold column (12) and so could not answer at all — not "unknown", not
     "check the text": the question had no place to be asked.
 
@@ -3665,7 +3665,7 @@ def check_adr_security(
     not knowing and knowing it is safe.
 
     Class 7 is still not answered: 1.10.3.1.3 measures it in activity against
-    3,000 A2, and CargoPilot is not told an activity.
+    3,000 A2, and EMCargo is not told an activity.
     """
     rules = get_compliance_rules()["adr_security"]
     lang = _lang(language)
@@ -3803,7 +3803,7 @@ def check_adr_placarding(
     failure", and the application named chapter 5.3 in its 1.1.3.6 output
     without deriving a word of it. The half about equipment closed in v1.53.0
     the same way this one does: by reading what the provision chooses on, and
-    finding that CargoPilot already holds it.
+    finding that EMCargo already holds it.
 
     **The point of this check is that it says no.** 5.3.1.5 gives a vehicle
     carrying packages exactly two reasons to placard — 5.3.1.5.1 for class 1
@@ -3832,7 +3832,7 @@ def check_adr_placarding(
     5.3.1 gives them their own subsections — and 5.3.2.1.4 for containers under
     exclusive use. Nor is the elevated temperature mark of 5.3.3 derived: it
     turns on a carriage temperature of 100 °C liquid or 240 °C solid, and
-    CargoPilot is not told the temperature.
+    EMCargo is not told the temperature.
     """
     rules = get_compliance_rules()["adr_placarding"]
     lang = _lang(language)
@@ -4039,7 +4039,7 @@ def check_adr_equipment(
 
     Equipment was the one heading in ``docs/dg-coverage.md`` that named itself
     "the most common real-world failure" and was absent from every mode. It is
-    absent for a reason worth stating: CargoPilot cannot see a vehicle, so it can
+    absent for a reason worth stating: EMCargo cannot see a vehicle, so it can
     never establish that a wheel chock is in the cab.
 
     What it *can* do is derive the list, and that turns out to be most of the
@@ -5200,11 +5200,11 @@ _LQ_MESSAGES = {
         "de": "Kein LQ-Wert (Spalte 7a) für diesen Stoff verfügbar; nicht geprüft.", "fr": 'Aucune valeur QL (colonne 7a) disponible pour cette matière ; non évaluée.'},
     "special_provision": {
         "nl": "Kolom 7a verwijst naar een bijzondere bepaling ({raw}); die tekst staat "
-              "niet in CargoPilot. Raadpleeg hoofdstuk 3.3.",
+              "niet in EMCargo. Raadpleeg hoofdstuk 3.3.",
         "en": "Column 7a refers to a special provision ({raw}); that text is not held "
-              "by CargoPilot. Consult chapter 3.3.",
+              "by EMCargo. Consult chapter 3.3.",
         "de": "Spalte 7a verweist auf eine Sondervorschrift ({raw}); dieser Text ist "
-              "nicht in CargoPilot enthalten. Ziehen Sie Kapitel 3.3 heran.", "fr": 'La colonne 7a renvoie à une disposition spéciale ({raw}) dont CargoPilot ne dispose pas. Consultez le chapitre 3.3.'},
+              "nicht in EMCargo enthalten. Ziehen Sie Kapitel 3.3 heran.", "fr": 'La colonne 7a renvoie à une disposition spéciale ({raw}) dont EMCargo ne dispose pas. Consultez le chapitre 3.3.'},
     "not_permitted": {
         "nl": "Kolom 7a is '0': vervoer als gelimiteerde hoeveelheid (3.4) is voor "
               "deze stof niet toegestaan.",
@@ -5329,11 +5329,11 @@ _EQ_MESSAGES = {
         "de": "Kein E-Code (Spalte 7b) für diesen Stoff verfügbar; nicht geprüft.", "fr": 'Aucun code E (colonne 7b) disponible pour cette matière ; non évalué.'},
     "special_provision": {
         "nl": "Kolom 7b verwijst naar een bijzondere bepaling ({raw}); die tekst staat "
-              "niet in CargoPilot. Raadpleeg hoofdstuk 3.3.",
+              "niet in EMCargo. Raadpleeg hoofdstuk 3.3.",
         "en": "Column 7b refers to a special provision ({raw}); that text is not held "
-              "by CargoPilot. Consult chapter 3.3.",
+              "by EMCargo. Consult chapter 3.3.",
         "de": "Spalte 7b verweist auf eine Sondervorschrift ({raw}); dieser Text ist "
-              "nicht in CargoPilot enthalten. Ziehen Sie Kapitel 3.3 heran.", "fr": 'La colonne 7b renvoie à une disposition spéciale ({raw}) dont CargoPilot ne dispose pas. Consultez le chapitre 3.3.'},
+              "nicht in EMCargo enthalten. Ziehen Sie Kapitel 3.3 heran.", "fr": 'La colonne 7b renvoie à une disposition spéciale ({raw}) dont EMCargo ne dispose pas. Consultez le chapitre 3.3.'},
     "not_permitted": {
         "nl": "E0: vervoer als vrijgestelde hoeveelheid (3.5) is voor deze stof niet "
               "toegestaan.",
@@ -5921,14 +5921,14 @@ def check_compliance(
             "message": pick(
                 {
                     "nl": "{edition} is verlopen op {on}. Deze controle rekent met een "
-                          "editie die niet meer geldt; werk CargoPilot bij of raadpleeg de "
+                          "editie die niet meer geldt; werk EMCargo bij of raadpleeg de "
                           "actuele uitgave.",
                     "en": "{edition} expired on {on}. This check is computing with an "
-                          "edition that no longer applies; update CargoPilot or consult the "
+                          "edition that no longer applies; update EMCargo or consult the "
                           "current edition.",
                     "de": "{edition} ist am {on} abgelaufen. Diese Prüfung rechnet mit einer "
-                          "Ausgabe, die nicht mehr gilt; aktualisieren Sie CargoPilot oder "
-                          "ziehen Sie die geltende Ausgabe heran.", "fr": "{edition} a expiré le {on}. Cette vérification calcule avec une édition qui n'est plus en vigueur ; mettez CargoPilot à jour ou consultez l'édition applicable."},
+                          "Ausgabe, die nicht mehr gilt; aktualisieren Sie EMCargo oder "
+                          "ziehen Sie die geltende Ausgabe heran.", "fr": "{edition} a expiré le {on}. Cette vérification calcule avec une édition qui n'est plus en vigueur ; mettez EMCargo à jour ou consultez l'édition applicable."},
                 language,
             ).format(edition=stale["edition"], on=stale["expired_on"]),
             "products": ", ".join(stale["profiles"]),

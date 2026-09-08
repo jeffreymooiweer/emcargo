@@ -104,7 +104,8 @@ export default function ShipmentPanel({
   const { t } = useTranslation();
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+    <div className="shipment-panel rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+      <h3 className="px-4 pt-4 text-base font-semibold">{t("panel.title")}</h3>
       <div className="grid grid-cols-2 gap-x-4 gap-y-3 px-4 py-3 sm:grid-cols-4 xl:grid-cols-2">
         <Count label={t("wizard.lines")} value={String(lines)} />
         <Count label={t("wizard.totalWeight")} value={weightKg != null ? `${weightKg} kg` : "—"} />
@@ -117,10 +118,8 @@ export default function ShipmentPanel({
       </div>
 
       {documents.length > 0 && (
-        <div className="border-t border-slate-200 px-4 py-3 dark:border-slate-800">
-          <p className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            {t("panel.preparing")}
-          </p>
+        <details className="shipment-documents border-t border-slate-200 px-4 py-3 dark:border-slate-800" open>
+          <summary className="cursor-pointer text-sm font-semibold text-slate-700 dark:text-slate-200">{t("panel.preparing")}</summary>
           <ul className="mt-2 space-y-1.5">
             {documents.map((doc) => (
               <li key={doc.key} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
@@ -159,7 +158,7 @@ export default function ShipmentPanel({
               </li>
             ))}
           </ul>
-        </div>
+        </details>
       )}
     </div>
   );

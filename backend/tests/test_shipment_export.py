@@ -69,7 +69,7 @@ def test_it_names_its_own_format_and_version_first():
 
 def test_it_records_which_release_produced_it():
     generator = export()["generator"]
-    assert generator["application"] == "CargoPilot"
+    assert generator["application"] == "EMCargo"
     assert generator["version"]
 
 

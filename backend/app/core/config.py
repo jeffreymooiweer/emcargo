@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    app_name: str = "CargoPilot"
+    app_name: str = "EMCargo"
     app_env: str = "production"
     #: Which of the two applications this image runs as.
     #:
@@ -75,7 +75,7 @@ class Settings(BaseSettings):
     geo_address_timeout_seconds: float = 8.0
     #: The mail server, for installations that would rather configure it in
     #: the environment than in the screen. Empty host means no mail server is
-    #: configured, which is the default: CargoPilot sends nothing until an
+    #: configured, which is the default: EMCargo sends nothing until an
     #: administrator says where to send it.
     smtp_host: str = ""
     smtp_port: int = 587
@@ -94,7 +94,7 @@ class Settings(BaseSettings):
     #: organisation application they are, like every other variable, the
     #: starting value a saved setting overrides.
     default_language: str = "nl"
-    default_theme: str = "system"
+    default_theme: str = "dark"
     address_lookup_enabled: bool = True
     un_cards_enabled: bool = True
     #: Whether documents carry a QR code that opens this installation's UN
@@ -104,7 +104,7 @@ class Settings(BaseSettings):
     #: The address the installation is reached on, for the links in those QR
     #: codes and in outgoing mail. Empty means: read it from the request.
     public_url: str = ""
-    #: What the screen calls itself. Empty means CargoPilot. The logo and the
+    #: What the screen calls itself. Empty means EMCargo. The logo and the
     #: tile images beside it are files in ``DATA_DIR/branding``, uploaded from
     #: the settings screen or placed there by the operator.
     brand_name: str = ""

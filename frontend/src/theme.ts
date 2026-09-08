@@ -10,7 +10,7 @@ export function getStoredTheme(): Theme | null {
 export function resolveTheme(): Theme {
   const stored = getStoredTheme();
   if (stored) return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return "dark";
 }
 
 export function applyTheme(theme: Theme) {

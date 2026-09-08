@@ -1,9 +1,9 @@
 {
   "dg_intro": {
-    "nl": "Vul per collo alleen het UN-nummer in — of zoek op stofnaam. CargoPilot leidt daaruit de juiste vervoersnaam, klasse en divisie, nevengevaren, verpakkingsgroep, vervoerscategorie, tunnelcode, EmS-code en de luchtvrachtregels af, en neemt aantallen en massa's over uit de colli-invoer. Controleer de afgeleide gegevens en vul aan wat alleen u kunt weten (netto hoeveelheid per verpakking, vlampunt, noodcontact).",
-    "en": "Per package, enter only the UN number — or search by substance name. CargoPilot derives the proper shipping name, class and division, subsidiary risks, packing group, transport category, tunnel code, EmS code and air transport rules from it, and reuses quantities and masses from the package entry. Review the derived data and add what only you can know (net quantity per packaging, flash point, emergency contact).",
-    "de": "Erfassen Sie je Versandstück nur die UN-Nummer — oder suchen Sie nach dem Stoffnamen. CargoPilot leitet daraus die richtige offizielle Benennung, Klasse und Unterklasse, Nebengefahren, Verpackungsgruppe, Beförderungskategorie, Tunnelbeschränkungscode, EmS-Code und die Regeln der Luftbeförderung ab und übernimmt Stückzahlen und Massen aus der Erfassung der Versandstücke. Prüfen Sie die abgeleiteten Angaben und ergänzen Sie, was nur Sie wissen können (Nettomenge je Verpackung, Flammpunkt, Notfallkontakt).",
-    "fr": "Par colis, n'indiquez que le numéro ONU — ou recherchez par nom de matière. CargoPilot en déduit la désignation officielle de transport, la classe et la division, les risques subsidiaires, le groupe d'emballage, la catégorie de transport, le code tunnel, le code EmS et les règles du transport aérien, et reprend les quantités et les masses saisies pour le colis. Vérifiez les données déduites et complétez ce que vous seul pouvez savoir (quantité nette par emballage, point d'éclair, contact d'urgence)."
+    "nl": "Vul per collo alleen het UN-nummer in — of zoek op stofnaam. EMCargo leidt daaruit de juiste vervoersnaam, klasse en divisie, nevengevaren, verpakkingsgroep, vervoerscategorie, tunnelcode, EmS-code en de luchtvrachtregels af, en neemt aantallen en massa's over uit de colli-invoer. Controleer de afgeleide gegevens en vul aan wat alleen u kunt weten (netto hoeveelheid per verpakking, vlampunt, noodcontact).",
+    "en": "Per package, enter only the UN number — or search by substance name. EMCargo derives the proper shipping name, class and division, subsidiary risks, packing group, transport category, tunnel code, EmS code and air transport rules from it, and reuses quantities and masses from the package entry. Review the derived data and add what only you can know (net quantity per packaging, flash point, emergency contact).",
+    "de": "Erfassen Sie je Versandstück nur die UN-Nummer — oder suchen Sie nach dem Stoffnamen. EMCargo leitet daraus die richtige offizielle Benennung, Klasse und Unterklasse, Nebengefahren, Verpackungsgruppe, Beförderungskategorie, Tunnelbeschränkungscode, EmS-Code und die Regeln der Luftbeförderung ab und übernimmt Stückzahlen und Massen aus der Erfassung der Versandstücke. Prüfen Sie die abgeleiteten Angaben und ergänzen Sie, was nur Sie wissen können (Nettomenge je Verpackung, Flammpunkt, Notfallkontakt).",
+    "fr": "Par colis, n'indiquez que le numéro ONU — ou recherchez par nom de matière. EMCargo en déduit la désignation officielle de transport, la classe et la division, les risques subsidiaires, le groupe d'emballage, la catégorie de transport, le code tunnel, le code EmS et les règles du transport aérien, et reprend les quantités et les masses saisies pour le colis. Vérifiez les données déduites et complétez ce que vous seul pouvez savoir (quantité nette par emballage, point d'éclair, contact d'urgence)."
   },
   "dg_fields": {
     "un_number": {
@@ -573,8 +573,8 @@
         "fr": "Cale ou pont"
       },
       "help": {
-        "nl": "In welk laadruim deze stof staat, of “dek”. ADN 7.1.4.11.1 vraagt de schipper in een stuwplan aan te geven welke goederen in de afzonderlijke laadruimen of aan dek zijn geplaatst; zonder dit veld kan CargoPilot dat plan niet opstellen.",
-        "en": "Which hold this substance is in, or “deck”. ADN 7.1.4.11.1 asks the boatmaster to set down in a stowage plan which goods are placed in the individual holds or on deck; without this field CargoPilot cannot draw that plan up.",
+        "nl": "In welk laadruim deze stof staat, of “dek”. ADN 7.1.4.11.1 vraagt de schipper in een stuwplan aan te geven welke goederen in de afzonderlijke laadruimen of aan dek zijn geplaatst; zonder dit veld kan EMCargo dat plan niet opstellen.",
+        "en": "Which hold this substance is in, or “deck”. ADN 7.1.4.11.1 asks the boatmaster to set down in a stowage plan which goods are placed in the individual holds or on deck; without this field EMCargo cannot draw that plan up.",
         "de": "In welchem Laderaum dieser Stoff steht, oder „Deck“. ADN 7.1.4.11.1 verlangt vom Schiffsführer einen Stauplan darüber, welche Güter in den einzelnen Laderäumen oder an Deck stehen.",
         "fr": "Dans quelle cale se trouve cette matière, ou « pont ». Le 7.1.4.11.1 de l'ADN demande au conducteur d'indiquer dans un plan d'arrimage quelles marchandises sont placées dans les différentes cales ou sur le pont."
       },
@@ -594,8 +594,8 @@
         "fr": "Numéro du conteneur"
       },
       "help": {
-        "nl": "Bij vervoer in containers volstaat volgens ADN 7.1.4.11.2 het containernummer in het stuwplan; de omschrijving van de goederen komt dan in een bijlage bij het plan. CargoPilot maakt die bijlage.",
-        "en": "For goods in containers ADN 7.1.4.11.2 lets the container number stand in the stowage plan; the description of the goods then goes in an annex to the plan, which CargoPilot draws up.",
+        "nl": "Bij vervoer in containers volstaat volgens ADN 7.1.4.11.2 het containernummer in het stuwplan; de omschrijving van de goederen komt dan in een bijlage bij het plan. EMCargo maakt die bijlage.",
+        "en": "For goods in containers ADN 7.1.4.11.2 lets the container number stand in the stowage plan; the description of the goods then goes in an annex to the plan, which EMCargo draws up.",
         "de": "Bei Beförderung in Containern genügt nach ADN 7.1.4.11.2 die Containernummer im Stauplan; die Beschreibung der Güter steht dann in einer Anlage zum Plan.",
         "fr": "Pour les marchandises en conteneurs, le 7.1.4.11.2 de l'ADN admet le numéro du conteneur dans le plan d'arrimage ; la description des marchandises figure alors en annexe."
       },

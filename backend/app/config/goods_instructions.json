@@ -14,10 +14,10 @@
         "fr": "Quelle est la taille d'une pièce ou d'un colis ? Indiquez longueur × largeur × hauteur, par exemple : 120 x 80 x 100 cm."
       },
       "help": {
-        "nl": "Met de afmetingen en de dichtheid uit de goederencatalogus rekent CargoPilot zelf het gewicht en het laadvolume uit. U mag deze vraag overslaan; het gewicht blijft dan leeg.",
-        "en": "With the dimensions and the density from the goods catalogue CargoPilot works out the weight and the loading volume itself. You may skip this question; the weight then stays empty.",
-        "de": "Mit den Abmessungen und der Dichte aus dem Warenkatalog berechnet CargoPilot Gewicht und Ladevolumen selbst. Sie können diese Frage überspringen; das Gewicht bleibt dann leer.",
-        "fr": "Avec les dimensions et la densité du catalogue de marchandises, CargoPilot calcule lui-même le poids et le volume de chargement. Vous pouvez passer cette question ; le poids restera alors vide."
+        "nl": "Met de afmetingen en de dichtheid uit de goederencatalogus rekent EMCargo zelf het gewicht en het laadvolume uit. U mag deze vraag overslaan; het gewicht blijft dan leeg.",
+        "en": "With the dimensions and the density from the goods catalogue EMCargo works out the weight and the loading volume itself. You may skip this question; the weight then stays empty.",
+        "de": "Mit den Abmessungen und der Dichte aus dem Warenkatalog berechnet EMCargo Gewicht und Ladevolumen selbst. Sie können diese Frage überspringen; das Gewicht bleibt dann leer.",
+        "fr": "Avec les dimensions et la densité du catalogue de marchandises, EMCargo calcule lui-même le poids et le volume de chargement. Vous pouvez passer cette question ; le poids restera alors vide."
       }
     },
     "goods_weight_each": {

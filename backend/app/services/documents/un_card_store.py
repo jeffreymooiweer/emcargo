@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 #: The one place releases are fetched from. Pinned on purpose: a server-side
 #: download that took a caller-supplied URL would be an SSRF hole.
-RELEASES_URL = "https://api.github.com/repos/jeffreymooiweer/CargoPilot/releases?per_page=30"
+RELEASES_URL = "https://api.github.com/repos/jeffreymooiweer/EMCargo/releases?per_page=30"
 RELEASE_TAG_PREFIX = "un-cards-"
 PACKAGE_NAME = "cargopilot-un-cards.zip"
 

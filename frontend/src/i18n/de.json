@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "CargoPilot",
+    "name": "EMCargo",
     "tagline": "Von der Materialliste zu den Transportdokumenten"
   },
   "nav": {
@@ -29,7 +29,10 @@
       "administration": "Verwaltung",
       "account": "Konto"
     },
-    "overview": "Übersicht"
+    "overview": "Übersicht",
+    "skipContent": "Zum Inhalt",
+    "library": "Bibliothek",
+    "manage": "Verwaltung"
   },
   "theme": {
     "dark": "Dunkel",
@@ -37,7 +40,7 @@
     "toggle": "Design wechseln"
   },
   "dashboard": {
-    "privacy": "CargoPilot speichert weder Verlauf noch eingefügte Daten oder Dokumentdateien auf dem Server. Nach dem Download wird alles aus dem Speicher entfernt."
+    "privacy": "EMCargo speichert weder Verlauf noch eingefügte Daten oder Dokumentdateien auf dem Server. Nach dem Download wird alles aus dem Speicher entfernt."
   },
   "login": {
     "title": "Anmelden",
@@ -110,7 +113,13 @@
     "newShipment": "Neue Sendung",
     "mode": "Verkehrsträger",
     "modeCarried": "Ihre Eingabe ist zu {{mode}} mitgekommen. Die Berechnung wird erneut durchgeführt.",
-    "attention": "{{count}} Punkt(e) zur Prüfung"
+    "attention": "{{count}} Punkt(e) zur Prüfung",
+    "progressLabel": "Sendungsfortschritt",
+    "toShipmentDetails": "Zu den Sendungsdaten",
+    "stageGoods": "Güter",
+    "stageDetails": "Sendungsdaten",
+    "stageReview": "Prüfen",
+    "saveAndClose": "Speichern und schließen"
   },
   "review": {
     "linesTitle": "Güter",
@@ -197,7 +206,8 @@
     "packingGroup": "Verpackungsgruppe",
     "typeOfPackage": "Verpackungsart",
     "netPerPackage": "Netto je Verpackung",
-    "derivedLater": "Aus den Tabellen"
+    "derivedLater": "Aus den Tabellen",
+    "moreActions": "Weitere Aktionen"
   },
   "import": {
     "downloadTemplate": "Vorlage herunterladen",
@@ -304,7 +314,7 @@
     "organisationHint": "Wird Benutzern, die selbst nichts eingetragen haben, als Absender vorgeschlagen.",
     "organisationAddress": "Adresse der Organisation",
     "adminNetwork": "Verbindungen nach außen",
-    "adminNetworkHint": "CargoPilot läuft auf Ihrem eigenen Server. Dies sind die einzigen Anfragen nach außen.",
+    "adminNetworkHint": "EMCargo läuft auf Ihrem eigenen Server. Dies sind die einzigen Anfragen nach außen.",
     "addressLookup": "Adresssuche",
     "addressLookupHint": "Adressvervollständigung im Assistenten. Aus bedeutet, dass beim Tippen nichts nach außen geht.",
     "addressApiUrl": "Adress-API",
@@ -337,7 +347,7 @@
     "updateExplain": "Aktualisieren heißt immer: das neuere Image holen und den Container neu erstellen — auf dem Server, zum Beispiel:",
     "updateAuto": "Mit Watchtower geschieht das von selbst; unter Unraid genügt ein Klick auf 'update' im Docker-Tab.",
     "unCardsStoreTitle": "UN Cards",
-    "unCardsStoreIntro": "Von CargoPilot erzeugte Karten, installiert auf dem Datenvolume — kein Teil des Docker-Images.",
+    "unCardsStoreIntro": "Von EMCargo erzeugte Karten, installiert auf dem Datenvolume — kein Teil des Docker-Images.",
     "unCardsNone": "Es ist noch kein Kartensatz installiert. Laden Sie den neuesten Satz herunter oder importieren Sie eine heruntergeladene ZIP-Datei.",
     "unCardsInstalled": "Installiert: {{count}} Karten, generiert {{generated}}",
     "unCardsImportedAt": "Importiert {{date}}",
@@ -362,8 +372,8 @@
     "updateFound": "Neuere Version verfügbar: {{latest}} (Sie verwenden {{current}}).",
     "updateApplyNow": "Auf v{{version}} aktualisieren und neu starten",
     "updateApplying": "Aktualisierung läuft…",
-    "updateApplyHint": "Dauert eine bis wenige Minuten; CargoPilot ist kurz nicht erreichbar und lädt danach von selbst neu.",
-    "updateApplyConfirm": "CargoPilot wird auf v{{version}} aktualisiert und startet dabei neu. Laufende Downloads brechen ab. Fortfahren?",
+    "updateApplyHint": "Dauert eine bis wenige Minuten; EMCargo ist kurz nicht erreichbar und lädt danach von selbst neu.",
+    "updateApplyConfirm": "EMCargo wird auf v{{version}} aktualisiert und startet dabei neu. Laufende Downloads brechen ab. Fortfahren?",
     "updatePhasePulling": "Neues Image wird geladen…",
     "updatePhaseRestarting": "Die Anwendung startet neu — diese Seite lädt neu, sobald die neue Version antwortet.",
     "updateDone": "Update erfolgreich: Sie verwenden jetzt Version {{version}}.",
@@ -377,10 +387,10 @@
     "tabMaintenance": "Wartung",
     "updateReasonPermission": "Der Socket ist eingebunden, aber die App darf ihn nicht öffnen. Seit v1.135.0 behoben — den Container einmal manuell aktualisieren und neu starten.",
     "updateReasonContainerNotFound": "Der Socket funktioniert, aber die App findet ihren eigenen Container beim Docker-Daemon nicht.",
-    "updateReasonForeignImage": "Dieser Container läuft nicht mit dem offiziellen CargoPilot-Image; das Aktualisieren aus der App bleibt aus.",
+    "updateReasonForeignImage": "Dieser Container läuft nicht mit dem offiziellen EMCargo-Image; das Aktualisieren aus der App bleibt aus.",
     "updateReasonSocketUnusable": "Der Docker-Socket ist eingebunden, antwortet aber nicht brauchbar; Einbindung prüfen und den Container neu starten.",
     "mailTitle": "Mailserver",
-    "mailHint": "Worüber CargoPilot Mail versendet. Ohne Server versendet die App nichts.",
+    "mailHint": "Worüber EMCargo Mail versendet. Ohne Server versendet die App nichts.",
     "mailEnabled": "Mail versenden",
     "mailEnabledHint": "Aus bedeutet: keine ausgehende Mail, auch kein Test.",
     "mailHost": "Server (Host)",
@@ -406,7 +416,7 @@
     "mailTesting": "Wird gesendet…",
     "mailTestSent": "Testnachricht an {{to}} gesendet.",
     "publicUrl": "Adresse dieser Installation",
-    "publicUrlHint": "Wird für Links in ausgehender Mail verwendet, z. B. https://cargopilot.example.de. Leer lassen, wenn der Browser CargoPilot direkt erreicht.",
+    "publicUrlHint": "Wird für Links in ausgehender Mail verwendet, z. B. https://cargopilot.example.de. Leer lassen, wenn der Browser EMCargo direkt erreicht.",
     "cardLinks": "QR-Code mit UN-Karten auf Dokumenten",
     "cardLinksHint": "Setzt auf jedes Beförderungspapier einen QR-Code, der die UN-Karten dieser Sendung öffnet. Die dahinterliegende Seite verlangt keine Anmeldung — bewusst: der Fahrer am Straßenrand und die Einsatzkraft vor Ort haben hier kein Konto. Sie zeigt nur die UN-Nummern und ob dazu eine Karte vorliegt; nichts über die Sendung, die Beteiligten oder die Mengen. Aus, sofern Sie es nicht einschalten.",
     "cardLinksNeedsUrl": "Tragen Sie zuerst die öffentliche Adresse oben ein. Ohne sie wird kein QR-Code gedruckt: ein Code auf Papier, der nirgendwohin führt, ist schlimmer als gar keiner, denn wer das Papier in der Hand hält, kann das nicht erkennen.",
@@ -420,7 +430,7 @@
     "adminBranding": "Erscheinungsbild",
     "adminBrandingHint": "Eigener Name und eigene Bilder dieser Installation: in der Kopfzeile, auf der Anmeldeseite und auf den Kacheln. Die Bilder gelten sofort nach dem Hochladen; der Name wird mit der Schaltfläche unten gespeichert.",
     "brandName": "Name",
-    "brandNameHint": "Erscheint in der Kopfzeile, auf der Anmeldeseite und im Browser-Tab. Leer bedeutet CargoPilot.",
+    "brandNameHint": "Erscheint in der Kopfzeile, auf der Anmeldeseite und im Browser-Tab. Leer bedeutet EMCargo.",
     "brandLogo": "Logo",
     "brandLogoHint": "PNG, JPEG oder WebP, bis 1 MB. Wird in beiden Designs in eigenen Farben gezeigt und in ausgehenden E-Mails mitgeführt.",
     "brandModalities": "Kachelbilder",
@@ -590,16 +600,16 @@
   },
   "legal": {
     "title": "Haftungsausschluss und Lizenz",
-    "updated": "Zuletzt aktualisiert: 12. Juli 2026 · CargoPilot v1.4.0",
-    "intro": "CargoPilot ist ein Hilfsmittel, das Beförderungs- und Begleitpapiere auf Grundlage Ihrer Eingaben vorbereitet. Die Anwendung erteilt keine rechtliche, zollrechtliche oder sicherheitstechnische Beratung. Lesen Sie die nachstehenden Bedingungen sorgfältig; mit der Nutzung von CargoPilot erkennen Sie sie an. Diese deutsche Fassung ist eine Übersetzung; bei Abweichungen ist die niederländische Fassung maßgebend.",
+    "updated": "Zuletzt aktualisiert: 12. Juli 2026 · EMCargo v1.4.0",
+    "intro": "EMCargo ist ein Hilfsmittel, das Beförderungs- und Begleitpapiere auf Grundlage Ihrer Eingaben vorbereitet. Die Anwendung erteilt keine rechtliche, zollrechtliche oder sicherheitstechnische Beratung. Lesen Sie die nachstehenden Bedingungen sorgfältig; mit der Nutzung von EMCargo erkennen Sie sie an. Diese deutsche Fassung ist eine Übersetzung; bei Abweichungen ist die niederländische Fassung maßgebend.",
     "sections": [
       {
         "heading": "1. Entwurf — kein endgültiges Dokument",
-        "body": "Jedes von CargoPilot erzeugte Dokument ist ein Entwurf. Vor Verwendung, Übergabe, Einreichung oder Unterzeichnung muss es von einer dazu befugten und qualifizierten Person vollständig geprüft, ergänzt und unterschrieben werden. Unterschriftsfelder, Angaben des Frachtführers und operative Felder werden bewusst nicht vorausgefüllt."
+        "body": "Jedes von EMCargo erzeugte Dokument ist ein Entwurf. Vor Verwendung, Übergabe, Einreichung oder Unterzeichnung muss es von einer dazu befugten und qualifizierten Person vollständig geprüft, ergänzt und unterschrieben werden. Unterschriftsfelder, Angaben des Frachtführers und operative Felder werden bewusst nicht vorausgefüllt."
       },
       {
         "heading": "2. Gefahrgut",
-        "body": "Klassifizierung, Verpackung, Kennzeichnung, Bezettelung und Dokumentation gefährlicher Güter (ADR, RID, ADN, IMDG, IATA DGR) liegen in der ausschließlichen Verantwortung des Absenders und der übrigen gesetzlich benannten Beteiligten. CargoPilot macht aus einer freien Bezeichnung niemals selbsttätig eine endgültige Klassifizierung und ersetzt weder zertifizierte Stammdaten noch einen Gefahrgutbeauftragten oder die geltenden, autorisierten Vorschriften."
+        "body": "Klassifizierung, Verpackung, Kennzeichnung, Bezettelung und Dokumentation gefährlicher Güter (ADR, RID, ADN, IMDG, IATA DGR) liegen in der ausschließlichen Verantwortung des Absenders und der übrigen gesetzlich benannten Beteiligten. EMCargo macht aus einer freien Bezeichnung niemals selbsttätig eine endgültige Klassifizierung und ersetzt weder zertifizierte Stammdaten noch einen Gefahrgutbeauftragten oder die geltenden, autorisierten Vorschriften."
       },
       {
         "heading": "3. Keine Gewährleistung (AS IS)",
@@ -607,15 +617,15 @@
       },
       {
         "heading": "4. Haftungsausschluss",
-        "body": "Soweit nach anwendbarem Recht zulässig, schließen die Urheber, Rechteinhaber und Beitragenden von CargoPilot jede Haftung für unmittelbare, mittelbare, beiläufig entstandene, besondere, Straf- oder Folgeschäden aus — einschließlich entgangenen Gewinns, Betriebsunterbrechung, Bußgeldern, Sanktionen, Verzögerungen, beschlagnahmter oder zurückgewiesener Sendungen, Verlust oder Beschädigung von Gütern, Umweltschäden, Personenschäden oder Datenverlust — die aus der Nutzung oder der Unmöglichkeit der Nutzung der Anwendung oder der erzeugten Dokumente entstehen oder damit zusammenhängen, unabhängig vom Rechtsgrund und selbst dann, wenn auf die Möglichkeit solcher Schäden hingewiesen wurde. Sie nutzen CargoPilot vollständig auf eigenes Risiko."
+        "body": "Soweit nach anwendbarem Recht zulässig, schließen die Urheber, Rechteinhaber und Beitragenden von EMCargo jede Haftung für unmittelbare, mittelbare, beiläufig entstandene, besondere, Straf- oder Folgeschäden aus — einschließlich entgangenen Gewinns, Betriebsunterbrechung, Bußgeldern, Sanktionen, Verzögerungen, beschlagnahmter oder zurückgewiesener Sendungen, Verlust oder Beschädigung von Gütern, Umweltschäden, Personenschäden oder Datenverlust — die aus der Nutzung oder der Unmöglichkeit der Nutzung der Anwendung oder der erzeugten Dokumente entstehen oder damit zusammenhängen, unabhängig vom Rechtsgrund und selbst dann, wenn auf die Möglichkeit solcher Schäden hingewiesen wurde. Sie nutzen EMCargo vollständig auf eigenes Risiko."
       },
       {
         "heading": "5. Freistellung",
-        "body": "Sie stellen die Urheber und Rechteinhaber von CargoPilot von allen Ansprüchen Dritter frei, die aus Ihrer Nutzung der Anwendung oder der erzeugten Dokumente entstehen oder damit zusammenhängen."
+        "body": "Sie stellen die Urheber und Rechteinhaber von EMCargo von allen Ansprüchen Dritter frei, die aus Ihrer Nutzung der Anwendung oder der erzeugten Dokumente entstehen oder damit zusammenhängen."
       },
       {
         "heading": "6. Lizenz — Apache License 2.0 mit Commons Clause",
-        "body": "CargoPilot wird unter der Apache License, Version 2.0, ergänzt um die Commons Clause, lizenziert. Nach der Apache License 2.0 wird die Software ohne Gewährleistung und mit Haftungsbeschränkung bereitgestellt (Abschnitte 7 und 8 dieser Lizenz). Die Nutzung innerhalb Ihrer eigenen Organisation ist gestattet; der Verkauf, Weiterverkauf, das Hosting als kostenpflichtiger Dienst oder eine sonstige kommerzielle Weiterverbreitung der Software selbst bedarf der vorherigen schriftlichen Zustimmung des Rechteinhabers (Commons Clause). Der vollständige Text steht in der Datei LICENSE des Repositorys."
+        "body": "EMCargo wird unter der Apache License, Version 2.0, ergänzt um die Commons Clause, lizenziert. Nach der Apache License 2.0 wird die Software ohne Gewährleistung und mit Haftungsbeschränkung bereitgestellt (Abschnitte 7 und 8 dieser Lizenz). Die Nutzung innerhalb Ihrer eigenen Organisation ist gestattet; der Verkauf, Weiterverkauf, das Hosting als kostenpflichtiger Dienst oder eine sonstige kommerzielle Weiterverbreitung der Software selbst bedarf der vorherigen schriftlichen Zustimmung des Rechteinhabers (Commons Clause). Der vollständige Text steht in der Datei LICENSE des Repositorys."
       },
       {
         "heading": "7. Anwendbares Recht",
@@ -741,7 +751,7 @@
   },
   "dgauto": {
     "title": "Automatisch abgeleitet",
-    "intro": "Anhand der UN-Nummer und der erfassten Versandstücke füllt CargoPilot Klassifizierung, Verpackungsangaben und Dokumentzeilen selbst aus. Prüfen Sie die Angaben und passen Sie sie an, wo es nötig ist.",
+    "intro": "Anhand der UN-Nummer und der erfassten Versandstücke füllt EMCargo Klassifizierung, Verpackungsangaben und Dokumentzeilen selbst aus. Prüfen Sie die Angaben und passen Sie sie an, wo es nötig ist.",
     "documentLine": "Angabe für das Beförderungspapier ({{profile}})",
     "documentLinesTitle": "Dokumentzeilen und Summen",
     "adrTotals": "Summe je Beförderungskategorie (ADR 5.4.1.1.1.1)",
@@ -827,7 +837,7 @@
   "checklist": {
     "title": "ADN-Prüfliste (8.6.3)",
     "intro": "Vor dem Laden oder Löschen eines Tankschiffs muss die Prüfliste nach 8.6.3 von Schiffsführer und Landanlage ausgefüllt und unterschrieben werden. Dies ist das vorgeschriebene Muster aus der ADN-Ausgabe.",
-    "notFilledIn": "CargoPilot übergibt das Muster so, wie das Buch es druckt, und füllt nichts für Sie aus: Die Liste wird an Bord gemeinsam mit der Landanlage ausgefüllt."
+    "notFilledIn": "EMCargo übergibt das Muster so, wie das Buch es druckt, und füllt nichts für Sie aus: Die Liste wird an Bord gemeinsam mit der Landanlage ausgefüllt."
   },
   "dgstep": {
     "summaryTitle": "Aus den Vorschriften abgeleitet",
@@ -853,7 +863,7 @@
     "totals_11136": "Für die Gesamtmenge und die Berechnung nach 1.1.3.6",
     "sp3122": "Mehrere Benennungen unter dieser UN-Nummer — 3.1.2.2: nur die zutreffendste kommt ins Dokument",
     "packaging_spec": "Auf der Verpackung steht oft ein UN-Zulassungscode; dieser Code darf die Beschreibung im Beförderungspapier ergänzen (5.4.1.1.1 e).",
-    "dimensions_complete_the_picture": "Mit den Abmessungen und der Dichte aus dem Katalog berechnet CargoPilot Gewicht und Ladevolumen selbst.",
+    "dimensions_complete_the_picture": "Mit den Abmessungen und der Dichte aus dem Katalog berechnet EMCargo Gewicht und Ladevolumen selbst.",
     "dimensions_complete_the_volume": "Das Gewicht ist bereits bekannt; mit den Abmessungen der Verpackung kommt das Ladevolumen hinzu.",
     "weight_unknown_material": "Diese Güter stehen nicht im Katalog, das Gewicht lässt sich daher nicht berechnen."
   },
@@ -907,12 +917,12 @@
   },
   "whatsNew": {
     "title": "Was ist neu",
-    "intro": "CargoPilot wurde auf Version {{version}} aktualisiert. Das hat sich seit Ihrem letzten Besuch geändert:",
+    "intro": "EMCargo wurde auf Version {{version}} aktualisiert. Das hat sich seit Ihrem letzten Besuch geändert:",
     "truncated": "Nicht alle Zwischenversionen werden angezeigt; die vollständige Historie steht in der Changelog-Datei des Projekts.",
     "close": "Schließen"
   },
   "update": {
-    "available": "CargoPilot {{version}} ist verfügbar.",
+    "available": "EMCargo {{version}} ist verfügbar.",
     "hint": "Diese Installation aktualisiert sich nicht selbst; holen Sie das neuere Image wie gewohnt.",
     "releaseNotes": "Versionshinweise ansehen",
     "dismiss": "Meldung schließen"
@@ -1054,7 +1064,7 @@
     "incomplete": "unvollständig",
     "mixedLoading": "Zusammenladung (7.5.2)",
     "notStored": "Diese Fahrt wird nicht gespeichert. Sie besteht nur auf diesem Bildschirm; Neuladen löscht sie.",
-    "notAnExport": "{{file}} ist kein CargoPilot-Sendungsexport und wurde übersprungen.",
+    "notAnExport": "{{file}} ist kein EMCargo-Sendungsexport und wurde übersprungen.",
     "noDangerousGoods": "{{file}} enthält keine gefährlichen Güter und wurde übersprungen.",
     "unreadable": "{{file}} konnte nicht gelesen werden.",
     "failed": "Die Beurteilung ist nicht gelungen.",
@@ -1361,7 +1371,7 @@
     "download": "Entwurf herunterladen",
     "open": "Entwurf öffnen",
     "opened": "Entwurf geöffnet.",
-    "notADraft": "Diese Datei ist kein CargoPilot-Entwurf."
+    "notADraft": "Diese Datei ist kein EMCargo-Entwurf."
   },
   "check": {
     "title": "Prüfen Sie Ihre Angaben",
@@ -1386,11 +1396,12 @@
     "ready": "Fertig",
     "missing": "{{count}} noch nötig",
     "missingUnknown": "Noch nicht vollständig",
-    "blocked": "Stoffangaben fehlen"
+    "blocked": "Stoffangaben fehlen",
+    "title": "Sendungsübersicht"
   },
   "overview": {
     "title": "Übersicht",
-    "intro": "Wo Sie aufgehört haben, was heute entstanden ist, und die Sendungen der letzten Zeit. Eine neue Sendung beginnen Sie hier oder über die Kacheln.",
+    "intro": "Das braucht heute Ihre Aufmerksamkeit",
     "introNoHistory": "Diese Installation speichert keine Sendungen, es gibt also nichts, worauf man zurückkommen könnte. Beginnen geht hier trotzdem.",
     "resumeTitle": "Weiter, wo Sie aufgehört haben",
     "resume": "Weiter",
@@ -1403,6 +1414,23 @@
     "allShipments": "Alle Sendungen",
     "open": "Öffnen",
     "asTemplate": "Als Vorlage",
-    "dg": "Gefahrgut"
+    "dg": "Gefahrgut",
+    "morning": "Guten Morgen",
+    "afternoon": "Guten Tag",
+    "evening": "Guten Abend",
+    "search": "Letzte Sendungen nach Referenz oder Organisation suchen",
+    "loadError": "Einige Daten konnten nicht geladen werden. Bitte erneut versuchen.",
+    "retry": "Erneut versuchen",
+    "loading": "Sendungen werden geladen…",
+    "noResults": "Keine aktuellen Sendungen gefunden.",
+    "unavailable": "Sendungen sind vorübergehend nicht verfügbar.",
+    "localStart": "Beginnen Sie mit Ihren Gütern. Fügen Sie eine Excel-Liste ein oder wählen Sie einen Verkehrsträger.",
+    "paste": "Aus Excel einfügen",
+    "reference": "Referenz",
+    "route": "Route",
+    "status": "Status",
+    "updated": "Aktualisiert",
+    "documentsAvailable": "Dokumente verfügbar",
+    "kept": "Gespeichert"
   }
 }

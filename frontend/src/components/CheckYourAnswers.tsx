@@ -1,5 +1,5 @@
 /**
- * The last look before the documents are made: what CargoPilot is about to
+ * The last look before the documents are made: what EMCargo is about to
  * put on paper, in the words the user gave it.
  *
  * The export step used to open with a form — total weight, a weight per line —

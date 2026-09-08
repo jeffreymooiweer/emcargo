@@ -132,7 +132,7 @@ def test_the_qr_carries_the_secret_and_stays_on_this_server(db):
     user = db.get(User, 1)
     secret = two_factor.new_secret()
     uri = two_factor.provisioning_uri(user, secret)
-    assert uri.startswith("otpauth://totp/CargoPilot%3Aada?")
+    assert uri.startswith("otpauth://totp/EMCargo%3Aada?")
     assert secret in uri
     svg = two_factor.qr_svg(uri)
     assert svg.lstrip().startswith("<svg")
