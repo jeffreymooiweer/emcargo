@@ -2,6 +2,23 @@
 
 All notable changes are documented here, following [Semantic Versioning](https://semver.org/).
 
+## [2.0.0] — 2026-09-08
+
+### EMCargo 2
+
+- Release the EMCargo identity and dark desktop and mobile interface introduced in 1.207.0.
+- Simplify shipment entry with three visible stages, direct Excel paste, draft resume,
+  searchable shipments and explicit save-and-close.
+- Publish container images exclusively to `ghcr.io/jeffreymooiweer/emcargo`,
+  including `latest`, `2.0.0` and `v2.0.0` tags for amd64 and arm64.
+- Preserve existing shipment data, user preferences, import formats and native
+  installation identifiers. Dangerous-goods checks remain mandatory.
+
+### Known limitation
+
+- Exact visual comparison with the approved mockups remains outstanding because
+  the test browser was blocked. Automated tests and build checks cover functionality.
+
 ## [1.207.0] — 2026-09-08
 
 ### EMCargo dark interface
