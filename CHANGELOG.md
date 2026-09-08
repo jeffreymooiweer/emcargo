@@ -2,6 +2,26 @@
 
 All notable changes are documented here, following [Semantic Versioning](https://semver.org/).
 
+## [2.3.0] — 2026-09-08
+
+### One full application, with sign-in
+
+- Retire the open application and its anonymous visitor account. Every
+  installation now serves the full account-based application; an obsolete
+  `EMCARGO_MODE=open` variable cannot bypass authentication.
+- Always load and save preferences with the signed-in account. Remove guest
+  navigation, browser-only preference handling and the mode selector from
+  installation examples. Restore the requested application address after login.
+- Preserve public access to UN-card QR links and their PDFs. These still work
+  without an account when card links are enabled. Login branding, sign-in and
+  recovery, and health/setup probes remain accessible before authentication.
+- Require a session for API documentation and the regulatory metadata endpoint.
+  Preserve administrator permissions, second-factor enforcement and optional
+  shipment retention.
+- Preserve existing accounts, saved settings, shipments and auditing when
+  upgrading. Former open installations create their first administrator through
+  the existing `ADMIN_*` configuration. No automatic database reset is added.
+
 ## [2.2.1] — 2026-09-08
 
 ### Find your workspace and manage your team

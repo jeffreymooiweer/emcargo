@@ -32,9 +32,12 @@ empty database. Keep a backup until account, shipment and document access succee
 
 ## Configuration and native services
 
-Use `EMCARGO_MODE` and `EMCARGO_HISTORY`; the previous product-prefixed variables
-are no longer read. Copy the values from the existing environment file. Preserve
-open mode explicitly so a deployment does not fall back to organisation mode.
+Use `EMCARGO_HISTORY` for the initial retention setting; the previous
+product-prefixed variables are no longer read. `EMCARGO_MODE` is retired as of
+v2.3.0: all installations require sign-in. Former open installations must set the
+`ADMIN_*` variables to create their first administrator. Preserve the existing
+data volume and database URL; no data reset is part of this change. Public UN-card
+QR links continue to work without an account.
 
 New native installations use `/opt/emcargo`, `/etc/emcargo/emcargo.env`,
 `/var/lib/emcargo` and `emcargo.service`. Stop and disable the previous service

@@ -3,7 +3,6 @@ import { NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { api, User } from "../api/client";
 import { useBranding } from "../branding";
-import { usePreferences } from "../settings/preferences";
 import Avatar from "./Avatar";
 import CommandMenu from "./CommandMenu";
 import UpdateToast from "./UpdateToast";
@@ -17,13 +16,9 @@ interface Props { user: User; onLogout: () => void }
 export default function Layout({ user, onLogout }: Props) {
   const { t } = useTranslation();
   const { branding } = useBranding();
-  const { mode } = usePreferences();
   const location = useLocation();
   const navigate = useNavigate();
-  const open = mode === "open";
-  // Destinations stay visible even when shipment storage is disabled.
-  const organisation = !open;
-  const admin = !open && user.role === "admin";
+  const admin = user.role === "admin";
   const [menuOpen, setMenuOpen] = useState(false);
   const [railOpen, setRailOpen] = useState(true);
   const [version, setVersion] = useState<string | null>(null);
@@ -62,7 +57,7 @@ export default function Layout({ user, onLogout }: Props) {
     await api.logout(); clearTwoFactorNudge(); onLogout(); navigate("/login");
   }
   const destinations = [
-    ...(organisation ? [{to: "/overzicht", label: t("nav.overview")}, {to: "/shipments", label: t("nav.shipments")}, {to: "/trips", label: t("nav.trips")}, {to: "/articles", label: t("nav.articles")}] : []),
+    {to: "/overzicht", label: t("nav.overview")}, {to: "/shipments", label: t("nav.shipments")}, {to: "/trips", label: t("nav.trips")}, {to: "/articles", label: t("nav.articles")},
     {to: "/", label: t("nav.new")}, {to: "/groupage", label: t("nav.groupage")},
     ...(admin ? [{to: "/materieel", label: t("nav.materieel")}, {to: "/users", label: t("nav.users")}, {to: "/audit", label: t("nav.audit")}] : []),
     {to: "/settings", label: t("nav.settings")}, {to: "/legal", label: t("nav.legal")},
@@ -86,23 +81,22 @@ export default function Layout({ user, onLogout }: Props) {
   }
   function navigation(compact = false) {
     return <>
-      {organisation && link("/overzicht", t("nav.overview"), HomeIcon, compact)}
+      {link("/overzicht", t("nav.overview"), HomeIcon, compact)}
       {link("/", t("nav.new"), PlusIcon, compact)}
-      {organisation && link("/shipments", t("nav.shipments"), ShipmentsIcon, compact)}
-      {organisation && link("/trips", t("nav.trips"), TripsIcon, compact)}
-      {!organisation && link("/groupage", t("nav.groupage"), GroupageIcon, compact)}
-      {!open && link("/articles", t("nav.articles"), LibraryIcon, compact)}
+      {link("/shipments", t("nav.shipments"), ShipmentsIcon, compact)}
+      {link("/trips", t("nav.trips"), TripsIcon, compact)}
+      {link("/articles", t("nav.articles"), LibraryIcon, compact)}
       {admin && link("/materieel", t("nav.materieel"), RoadIcon, compact)}
       {compact ? <>
         {link("/settings", t("nav.settings"), SettingsIcon, true)}
-        {organisation && link("/groupage", t("nav.groupage"), GroupageIcon, true)}
+        {link("/groupage", t("nav.groupage"), GroupageIcon, true)}
         {admin && link("/users", t("nav.users"), UserIcon, true)}
         {admin && link("/audit", t("nav.audit"), HistoryIcon, true)}
         {link("/legal", t("nav.legal"), DocumentIcon, true)}
       </> : <details className="emcargo-nav-group" open={["/settings", "/users", "/audit", "/legal", "/groupage"].includes(location.pathname) || undefined}>
         <summary className="emcargo-nav-link"><SettingsIcon className="h-[22px] w-[22px]" /><span>{t("nav.manage")}</span><ChevronDownIcon className="ml-auto h-3.5 w-3.5" /></summary>
         <div className="emcargo-subnav">
-          {organisation && link("/groupage", t("nav.groupage"), GroupageIcon, false)}
+          {link("/groupage", t("nav.groupage"), GroupageIcon, false)}
           {link("/settings", t("nav.settings"), SettingsIcon, false)}
           {admin && link("/users", t("nav.users"), UserIcon, false)}
           {admin && link("/audit", t("nav.audit"), HistoryIcon, false)}
@@ -112,11 +106,11 @@ export default function Layout({ user, onLogout }: Props) {
     </>;
   }
   const account = (compact = false) => <div className="emcargo-account">
-    <NavLink to={open ? "/settings" : "/settings?tab=details"} className="account-profile-link" aria-label={t("profile.open")} onClick={() => setMenuOpen(false)}>
-      {open ? <UserIcon className="h-9 w-9" /> : <Avatar user={user} />}
-      {!compact && <div className="min-w-0"><p className="truncate text-sm">{open ? t("nav.openMode") : user.username}</p>{versionLabel && <p className="mt-1 text-xs text-slate-500 dark:text-slate-400" aria-label={`${t("settings.version")} ${versionLabel}`}>{versionLabel}</p>}</div>}
+    <NavLink to="/settings?tab=details" className="account-profile-link" aria-label={t("profile.open")} onClick={() => setMenuOpen(false)}>
+      <Avatar user={user} />
+      {!compact && <div className="min-w-0"><p className="truncate text-sm">{user.username}</p>{versionLabel && <p className="mt-1 text-xs text-slate-500 dark:text-slate-400" aria-label={`${t("settings.version")} ${versionLabel}`}>{versionLabel}</p>}</div>}
     </NavLink>
-    {!open && <button onClick={() => void logout()} className="mt-3 min-h-[44px] w-full border-t border-slate-200 pt-3 text-left text-sm dark:border-slate-700" aria-label={t("nav.logout")}>{compact ? <LogoutIcon className="h-5 w-5" /> : t("nav.logout")}</button>}
+    <button onClick={() => void logout()} className="mt-3 min-h-[44px] w-full border-t border-slate-200 pt-3 text-left text-sm dark:border-slate-700" aria-label={t("nav.logout")}>{compact ? <LogoutIcon className="h-5 w-5" /> : t("nav.logout")}</button>
   </div>;
 
   return <div className={`emcargo-shell ${railOpen ? "" : "emcargo-shell-folded"}`}>
@@ -129,7 +123,7 @@ export default function Layout({ user, onLogout }: Props) {
       <button onClick={() => setRailOpen((value) => !value)} className="emcargo-rail-toggle" aria-controls="main-nav" aria-expanded={railOpen} aria-label={railOpen ? t("nav.collapseMenu") : t("nav.expandMenu")}><CollapseIcon className={`h-4 w-4 ${railOpen ? "" : "rotate-180"}`} /></button>
     </aside>
     <main id="main-content" tabIndex={-1} className="emcargo-main"><div className="workspace-bar"><div className="workspace-location"><span>{t("studio.workspace")}</span><span aria-hidden="true">/</span><strong>{currentLabel}</strong></div><CommandMenu destinations={destinations} /></div><Suspense fallback={<div className="route-loading" role="status">{t("wizard.loading")}</div>}><Outlet /></Suspense></main>
-    {!open && <><WhatsNewModal /><UpdateToast user={user} /><TwoFactorNudge user={user} /></>}
+    <WhatsNewModal /><UpdateToast user={user} /><TwoFactorNudge user={user} />
     {menuOpen && <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true" aria-label={t("nav.menu")}>
       <div className="absolute inset-0 bg-black/60" onClick={() => setMenuOpen(false)} />
       <aside ref={drawer} className="emcargo-mobile-drawer">

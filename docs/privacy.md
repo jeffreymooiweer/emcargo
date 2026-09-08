@@ -136,48 +136,20 @@ a stranger the information that the door exists.
 There is nothing here to expire. The link addresses a UN number, not a consignment, so a
 code scanned in a year answers exactly what it answered on the day it was printed.
 
-## Two applications
+## Account access
 
-Everything above describes the **organisation** application: sign in, and the server
-keeps your account, your settings and your equipment library — never your shipments.
-It is what every installation is unless its operator says otherwise, and nothing on this
-page changes for it.
+EMCargo always requires sign-in to use the full application. Accounts, personal
+preferences, avatars and the organisation's settings live on this installation.
+The former open application is retired; an old `EMCARGO_MODE=open` variable does
+not bypass authentication or disable saved settings and auditing.
 
-The same image also runs as the **open** application, for an installation anyone may
-use without leaving anything behind. Its operator sets `EMCARGO_MODE=open` at deploy
-time, and this is what that means for you as its visitor:
+The public UN-card links described above remain available without an account.
+Login and account recovery, status probes and the branding displayed on the
+sign-in page are also reachable before signing in. Business API endpoints and
+API documentation require a valid session.
 
-**There is no account, because there is nothing to have one for.** No sign-in, no user
-table, no password, no second factor. The addresses that would presume an account — the
-users page, the settings screen, the equipment library, mailing documents, updating
-from inside — do not exist there: they are not switched off, they are not mounted, and
-they answer 404 like any address that was never there.
-
-**What the screen fills in for you lives in your browser, never on the server.** Your
-consignor address, contact, carrier, loading point, emergency number, language, and your
-signature if you draw one, are kept by your own browser and sent along only with the
-shipment you are drawing up at that moment. Clearing your browser data clears them; the
-server never held them.
-
-**Nothing you type is kept.** The same rule as above — no shipment history, no material
-lists, no document archive, no trips, unless an organisation switched its history on —
-holds in both applications. In the open one it is
-the whole of what the server knows about you, because there is no account to know either.
-
-**Nothing is sent on your behalf.** The open application has no mail server and no
-"mail these documents" action. What you can do with your papers is download them.
-
-**You can check this rather than take it on trust.** `/api/health` on any installation
-answers which application it is (`"mode": "open"` or `"organisation"`), the footer of
-the screen repeats it, and this repository is public — the routes that are and are not
-mounted are listed in `backend/app/main.py`, and the test suite asserts their absence
-route by route.
-
-One thing the operator of an open installation can still switch on is the QR code on
-documents described above, with `CARD_LINKS_ENABLED` and `PUBLIC_URL` in the
-environment. It discloses what it always disclosed: UN numbers the paper already prints.
-
-The organisation application has one more choice, below.
+Upgrading preserves existing accounts and data. No scheduled database reset is
+implemented. Shipment retention is still the administrator's explicit choice.
 
 ## The shipment history
 
@@ -220,7 +192,7 @@ department rule as shipments, are listed on their own page, reopen on the groupa
 and are removed there or from their record. Switching the history off counts them along
 with the shipments and deletes them in the same confirmed step.
 
-**What does not change.** The open application ignores the switch. Nothing is written
+**What does not change.** Nothing is written
 while you work: a shipment is kept only when its documents are downloaded or you press
 the button, and a trip only when you press the button. And with the switch off, the
 addresses the shipments and trips pages use answer 404 on the server, exactly as an
@@ -231,8 +203,7 @@ described in a setting.
 
 The organisation application keeps a log of who did what, for its administrators. It
 is written by the routes that do something worth an administrator's attention and read
-on a page of its own; the open application has no accounts, no administrators and no
-log.
+on a page of its own. Retiring guest mode does not disable this log.
 
 **What a line holds.** The moment; the account (its name is kept beside its identifier,
 so a line outlives the account it describes); the action, as a code from a fixed list —

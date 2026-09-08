@@ -1,11 +1,8 @@
-"""The installation's own name and pictures.
+"""The installation's name and pictures.
 
-Two routers, because reading and writing have different audiences. What is on
-the door — the name, the logo, the tile images — is read by the sign-in page
-before anybody has signed in and by the open application, which has nobody to
-sign in; ``public_router`` asks for no session. Changing them is an
-administrator's act and lives on ``admin_router``, which the open application
-does not mount: its operator puts the files in ``DATA_DIR/branding`` instead.
+Reading branding is public so it can paint the sign-in page. Changing it is
+restricted to administrators. Operators may also provide the same image files
+in DATA_DIR/branding.
 """
 from __future__ import annotations
 

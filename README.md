@@ -66,8 +66,8 @@ transport mode you picked. **Road, rail, sea and inland waterway are released to
 air and multimodal are built in but stay locked until their remaining regulatory checks
 are complete — see the [roadmap](ROADMAP.md).
 
-It runs on your own machine or server. The open mode keeps no shipment history.
-In organisation mode, an administrator can enable saved shipments and private
+It runs on your own machine or server and always requires an account.
+An administrator can enable saved shipments and private
 drafts. Optional online lookups and local assistant features are described in
 [Privacy](docs/privacy.md).
 
@@ -119,9 +119,9 @@ docker compose up -d --build
 
 Open <http://localhost:8080> and log in with the admin account from your `.env`.
 
-Want an installation anyone may use without an account, that keeps nothing about
-anyone? Set `EMCARGO_MODE=open` — see [Privacy](docs/privacy.md#two-applications)
-for exactly what that promises and [Configuration](docs/configuration.md) for how.
+The full application always requires sign-in. UN cards opened from document
+QR links remain accessible without an account when an administrator enables
+that feature. The former open application and `EMCARGO_MODE` are retired.
 
 Running Unraid, or want the full set of options? See **[Getting started](docs/getting-started.md)**.
 

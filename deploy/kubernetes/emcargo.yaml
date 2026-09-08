@@ -45,7 +45,6 @@ metadata:
   namespace: emcargo
 data:
   APP_ENV: "production"
-  EMCARGO_MODE: "organisation"
   DATA_DIR: "/data"
   DATABASE_URL: "sqlite:////data/emcargo.db"
   ADMIN_USERNAME: "admin"

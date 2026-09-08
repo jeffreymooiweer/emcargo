@@ -41,39 +41,26 @@ The screen also carries per-user preferences — language, theme, the consignor 
 are retyped on every shipment, a saved signature. Those belong to the account rather than
 to the installation, and are described in the [user guide](user-guide.md#settings).
 
-## Which application: open or organisation
+## Sign-in is required
 
-| Variable | What it does | Default |
-|---|---|---|
-| `EMCARGO_MODE` | `organisation` (accounts; people sign in) or `open` (no accounts; anyone may use it, nothing is kept about anyone) | `organisation` |
+EMCargo has one full application. Every user signs in; administrators manage
+accounts, settings and access. The public QR links to UN cards remain the
+explicit exception, enabled separately under Settings / UN cards.
 
-The image holds two applications, and this variable picks one at start-up. It is read
-once and has no screen counterpart on purpose: a privacy promise an administrator could
-click away is not a promise, and the open application has no administrator to click it.
+`EMCARGO_MODE` has been retired. Remove it from existing deployment files;
+leaving `EMCARGO_MODE=open` in an old environment cannot restore guest access.
+A former open installation needs an administrator: preserve its data volume and
+set `ADMIN_USERNAME`, `ADMIN_EMAIL` and `ADMIN_PASSWORD` before upgrading. Existing
+accounts and saved settings are retained. Without an administrator, the sign-in
+screen explains the required configuration; there is no anonymous fallback.
 
-**`organisation`** is what every installation is unless told otherwise, and what every
-page of this documentation describes: sign in, and the server keeps accounts, settings and
-the equipment library — never shipments.
-
-**`open`** is for an installation anyone may use. The routes that presume an account —
-sign-in, the users page, the settings screen, the equipment library, mailing documents,
-updating from inside the application — are not mounted and answer 404. What the screen
-would fill in for a signed-in user lives in the visitor's browser instead. There is no
-mail in the open application whatever `SMTP_*` says, and no saved settings row is read,
-so the environment is its whole configuration: the switches in the table above that an
-administrator would otherwise flip on the screen (`ADDRESS_LOOKUP_ENABLED`,
-`UN_CARDS_ENABLED`, `CARD_LINKS_ENABLED`, `PUBLIC_URL`, `DEFAULT_LANGUAGE`,
-`DEFAULT_THEME`) are set here. The `ADMIN_*` variables are ignored, and the assistant's
-model, if wanted, is placed in `DATA_DIR/assistant` by the operator rather than
-downloaded from the screen.
-
-A value that is neither word runs the organisation application — the closed one is where
-a typo may safely land — and says so in the log.
+There is no scheduled database reset. A future demonstration installation can
+use its own accounts and data volume without changing the main installation.
 
 ## Shipment history
 
 The history is a setting on the screen: **Settings → Administration → Keep shipments**,
-for administrators of the organisation application. Off by default.
+for administrators. Off by default.
 
 | Variable | What it does | Default |
 |---|---|---|
@@ -107,11 +94,8 @@ the switch. The address book, the articles library and the adviser's reports sta
 switch alone never deletes anything, and nothing is deleted at start-up, ever: a database
 that holds kept shipments while the setting says off — an installation that dropped the
 variable from its environment after upgrading, say — gets the setting switched back on at
-start-up and a line in the log, never a hidden table. The open application has no
-administrator and ignores both the setting and the variable.
-
-The open application ignores both variables: nothing is kept about anyone there. What is
-kept per shipment, and what is not, is in [Privacy](privacy.md#the-shipment-history).
+start-up and a line in the log, never a hidden table. What is kept per shipment,
+and what is not, is in [Privacy](privacy.md#the-shipment-history).
 
 ## Branding
 
@@ -128,15 +112,10 @@ by what it *is* rather than what it was called: `logo.png`, `logo.jpg` or `logo.
 and `modality-road.png` and so on for `road`, `rail`, `sea`, `inland`, `air` and
 `multimodal`. PNG, JPEG and WebP are accepted, recognised by their bytes; SVG is not,
 because an SVG can carry script and an image route that serves one is a page that runs
-it. A logo may be 1 MB, a tile 3 MB. The open application has no screen to upload from:
-its operator places the same files in that folder and sets `BRAND_NAME`, and the door
-reads the same. The uploaded logo also travels in outgoing mail in place of EMCargo's,
+it. A logo may be 1 MB, a tile 3 MB. Operators can also place these files in the
+branding folder and set `BRAND_NAME`. The uploaded logo travels in outgoing mail,
 and since v1.178.0 the name and the logo are printed in the header and the foot of every
 document EMCargo draws itself; the official forms are filled in, not rebranded.
-`/api/health` reports `"mode"` on every
-installation, so what an operator got is a line away, and [Privacy](privacy.md) says in
-one section what the open application means for its visitors.
-
 ## Essentials
 
 | Variable | What it does | Default |

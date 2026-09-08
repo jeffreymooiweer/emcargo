@@ -2,7 +2,7 @@
 
 Mounted in the organisation application behind ``require_history`` — see
 ``main.py`` — so these addresses answer 404 while the administrator's *Keep
-shipments* setting is off, and do not exist at all in the open application.
+shipments* setting is off. Every request requires an authenticated account.
 That is how the promise "nothing is kept" is enforced rather than described.
 
 Every signed-in user of the organisation sees every kept shipment. The

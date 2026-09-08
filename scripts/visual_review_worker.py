@@ -30,7 +30,7 @@ def main() -> None:
     with tempfile.TemporaryDirectory(prefix="emcargo-visual-review-") as data:
         password = secrets.token_urlsafe(32)
         os.environ.update({
-            "APP_ENV": "test", "EMCARGO_MODE": "organisation", "EMCARGO_HISTORY": "true",
+            "APP_ENV": "test", "EMCARGO_HISTORY": "true",
             "DATABASE_URL": f"sqlite:///{data}/review.db", "DATA_DIR": data,
             "CATALOG_AUTO_SYNC": "false", "UPDATE_CHECK_ENABLED": "false",
             "ADMIN_USERNAME": "review", "ADMIN_EMAIL": "review@example.invalid",

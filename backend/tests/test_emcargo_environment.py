@@ -1,17 +1,15 @@
-"""Documented EMCargo variables must select the intended privacy mode."""
+"""Retired deployment flags cannot restore anonymous application access."""
 from app.core.config import Settings
 
 
-def test_emcargo_environment_selects_open_mode(monkeypatch):
+def test_history_configuration_survives_a_retired_mode_variable(monkeypatch):
     monkeypatch.setenv("EMCARGO_MODE", "open")
     monkeypatch.setenv("EMCARGO_HISTORY", "true")
     settings = Settings(_env_file=None)
-    assert settings.is_open
     assert settings.emcargo_history is True
+    assert "emcargo_mode" not in Settings.model_fields
 
 
-def test_constructor_configuration_still_works(monkeypatch):
-    monkeypatch.delenv("EMCARGO_MODE", raising=False)
-    monkeypatch.delenv("EMCARGO_HISTORY", raising=False)
-    assert Settings(_env_file=None, emcargo_mode="open").is_open
-    assert Settings(_env_file=None).mode == "organisation"
+def test_constructor_does_not_accept_a_guest_access_switch():
+    settings = Settings(_env_file=None, emcargo_mode="open")
+    assert not hasattr(settings, "is_open")

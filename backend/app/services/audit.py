@@ -23,7 +23,6 @@ from fastapi import Request
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.core.config import get_settings
 from app.core.ratelimit import client_address
 from app.models.audit import AuditEvent
 from app.models.user import User
@@ -69,14 +68,9 @@ def record(db: Session, action: str, *, actor: User | None = None, actor_usernam
            target: tuple[str, Any] | None = None, summary: str = "",
            request: Request | None = None) -> None:
     """Write one line. Never raises; an audit failure must not fail the action.
-
-    The open application writes nothing: it has no accounts, so there is
-    nobody to attribute an event to and no administrator to read it.
     """
     if action not in ACTIONS:
         raise ValueError(f"unknown audit action: {action}")
-    if get_settings().is_open:
-        return
     try:
         event = AuditEvent(
             actor_id=actor.id if actor is not None and actor.id else None,

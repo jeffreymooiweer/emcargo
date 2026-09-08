@@ -46,16 +46,8 @@ def _load_json(raw: str | None) -> dict[str, Any]:
 
 
 def environment_defaults() -> InstanceSettings:
-    """The instance settings as the environment variables describe them.
-
-    In the open application this is not the starting point but the whole
-    configuration: there is no administrator to save anything on top of it.
-    And that application sends no mail, whatever ``SMTP_*`` says — the send
-    action does not exist there, so a configured server would only be a
-    surprise waiting in the settings for an administrator who cannot exist.
-    """
+    """The initial instance settings, before administrator overrides."""
     settings = get_settings()
-    mail = not settings.is_open
     return InstanceSettings(
         default_language=_known_language(settings.default_language),
         default_theme=_known_theme(settings.default_theme),
@@ -68,20 +60,20 @@ def environment_defaults() -> InstanceSettings:
         card_links_enabled=settings.card_links_enabled,
         session_timeout_minutes=settings.access_token_expire_minutes,
         # The legacy EMCARGO_HISTORY variable is the starting value only;
-        # the screen decides from the first save on. Never in the open app.
-        history_enabled=bool(settings.emcargo_history) and not settings.is_open,
+        # the screen decides from the first save on.
+        history_enabled=bool(settings.emcargo_history),
         public_url=_public_url(settings.public_url),
         brand_name=settings.brand_name.strip()[:80],
         # A host in the environment is a deliberate act, so it switches
         # sending on; without one the mail settings stay off and empty.
-        mail_enabled=bool(mail and settings.smtp_host and settings.smtp_from),
-        mail_host=settings.smtp_host if mail else "",
+        mail_enabled=bool(settings.smtp_host and settings.smtp_from),
+        mail_host=settings.smtp_host,
         mail_port=settings.smtp_port,
         mail_security=_known_security(settings.smtp_security),
-        mail_username=settings.smtp_username if mail else "",
-        mail_password=settings.smtp_password if mail else "",
-        mail_from=settings.smtp_from if mail else "",
-        mail_from_name=settings.smtp_from_name if mail else "",
+        mail_username=settings.smtp_username,
+        mail_password=settings.smtp_password,
+        mail_from=settings.smtp_from,
+        mail_from_name=settings.smtp_from_name,
         mail_timeout_seconds=settings.smtp_timeout_seconds,
     )
 
@@ -130,14 +122,7 @@ def instance_settings(db: Session) -> InstanceSettings:
 
     The mail password comes back in full — this is what the mail service
     reads. The API redacts it on the way out; see :func:`redacted`.
-
-    The open application never reads a saved overlay. It has no screen to
-    save one from, so any row present was written by the organisation
-    application this database used to serve — and honouring it would let a
-    setting nobody can see or change govern a public installation.
     """
-    if get_settings().is_open:
-        return _with_password_flag(environment_defaults())
     row = db.query(InstanceSetting).order_by(InstanceSetting.id).first()
     stored = _load_json(row.data_json if row else None)
     if not stored:
@@ -203,10 +188,7 @@ def public_settings(db: Session) -> PublicSettings:
 
 
 def history_enabled(db: Session) -> bool:
-    """Whether shipments are kept: the administrator's setting, and never in
-    the open application."""
-    if get_settings().is_open:
-        return False
+    """Whether the administrator enabled shipment retention."""
     return bool(instance_settings(db).history_enabled)
 
 

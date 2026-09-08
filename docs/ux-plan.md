@@ -123,7 +123,7 @@ having sent it.
 
 A draft is not a checked shipment. Where the history is on, the running entry is kept as
 a draft with an honest *Saved* / *Saving* / *Could not save*, and a reload returns the
-user to the shipment and the step they were on. In the open application and with the
+user to the shipment and the step they were on. With the
 history off nothing is stored: there the user is warned before leaving, and can download
 the draft as a file. This is the one release with a schema step and backend work.
 
@@ -179,5 +179,5 @@ task that was not run in a browser is reported as not run.
 The confirmed fixes of v1.190.0 — the department's trips, the quantities, the IFTDGN
 content, the second factor, the export download — and the upgrade of v1.191.0 are
 release conditions, not things to be traded against a smoother screen. The privacy
-promise of the open application and of the history switch holds throughout: no silent
+promise of the history switch holds throughout: no silent
 browser or server storage is added anywhere in this plan.

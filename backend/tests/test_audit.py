@@ -11,7 +11,7 @@ What is pinned here:
    and nothing from the form; the mail line counts recipients and never
    names them. The whole table is searched for the consignment's words.
 3. **Only an administrator reads it** — 403 for a user, 401 without a
-   session — and the open application has neither the routes nor any rows.
+   session, including deployments with a retired mode variable.
 4. **The retention** an administrator sets is applied at start-up.
 5. **The schema step** exists, so an old database gets the table.
 """
@@ -238,13 +238,16 @@ def test_the_filters_narrow_the_page(db):
         assert client.get("/api/audit/actions").json()["actors"] == ["ada", "bob"]
 
 
-def test_the_open_application_writes_nothing(db, monkeypatch):
+def test_a_retired_mode_variable_cannot_disable_auditing(db, monkeypatch):
+    """Old deployment variables must not silently stop recording account actions
+    after guest access is retired; the existing audit records must stay visible.
+    """
     monkeypatch.setenv("EMCARGO_MODE", "open")
     get_settings.cache_clear()
-    with application(db) as client:
+    with application(db, as_user=1) as client:
         assert client.post("/api/documents/export", json=doc("cmr")).status_code == 200
-        assert client.get("/api/audit").status_code == 404
-    assert rows(db) == []
+        assert client.get("/api/audit").status_code == 200
+    assert "documents.exported" in actions(db)
 
 
 def test_an_unknown_action_is_a_programming_error(db):

@@ -186,19 +186,6 @@ def sync_catalogs_on_startup(db: Session) -> None:
 
 def bootstrap_admin(db: Session) -> bool:
     settings = get_settings()
-    if settings.is_open:
-        # No accounts: nothing to bootstrap, and no warning about a missing
-        # administrator, because there is none to miss. Accounts left behind
-        # by an installation that used to be the organisation application
-        # are unreachable here — no route reads them — but they are not
-        # deleted either: switching a variable must not destroy anything.
-        left_behind = db.query(User).count()
-        if left_behind:
-            logger.warning(
-                "Open application: %s account(s) exist in the database and "
-                "cannot be used; delete the database or run the organisation "
-                "application to reach them", left_behind)
-        return False
     admin = db.query(User).filter(User.role == "admin").first()
     if admin:
         return True
@@ -220,14 +207,6 @@ def bootstrap_admin(db: Session) -> bool:
 
 
 def init_app() -> bool:
-    settings = get_settings()
-    if settings.is_open:
-        logger.info("Running as the open application: no accounts, nothing kept about anyone")
-    elif settings.emcargo_mode.strip().lower() not in ("", "organisation"):
-        logger.warning(
-            "EMCARGO_MODE=%r is not a mode; running as the organisation "
-            "application (the closed one). Use 'open' or 'organisation'.",
-            settings.emcargo_mode)
     ensure_directories()
     # A database with no tables at all is fresh: create_all makes every table
     # in its current shape and the schema steps are stamped rather than run.

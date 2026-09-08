@@ -1,16 +1,8 @@
-"""The settings endpoints: mine, everyone's, and the administrator's.
+"""Settings for the account, signed-in users and administrators.
 
-Three levels, and the split matters. ``/settings/me`` is scoped to the caller
-and cannot reach another account. ``/settings/public`` is the handful of
-instance facts the interface needs to draw itself correctly for any user.
-``/settings/instance`` is the full picture, and is behind ``require_admin``
-because it decides whether this installation talks to the internet at all.
-
-Two routers, because the open application mounts only one of them. What the
-interface needs to draw itself — the public facts and the option lists — is
-on ``public_router`` and answers a visitor; the account's own settings and the
-administrator's live on ``router`` and do not exist where there are no
-accounts.
+The shared router provides options and installation defaults to authenticated
+users. Personal settings belong to the account; instance settings require an
+administrator and control retention, connections and organisation defaults.
 """
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session

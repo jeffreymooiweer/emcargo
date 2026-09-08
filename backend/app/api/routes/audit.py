@@ -1,8 +1,4 @@
-"""The administrator's audit log: read, filter, export.
-
-Mounted with the account routers, so the open application — which has no
-accounts and writes no audit lines — does not have these addresses at all.
-"""
+"""The administrator's audit log: read, filter and export authenticated activity."""
 from __future__ import annotations
 
 from datetime import datetime
