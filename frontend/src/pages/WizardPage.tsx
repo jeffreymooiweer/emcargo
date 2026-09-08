@@ -230,7 +230,15 @@ export default function WizardPage() {
   const [historyId, setHistoryId] = useState<number | null>(null);
   const [keeping, setKeeping] = useState(false);
   const [keptAt, setKeptAt] = useState<Date | null>(null);
-  const reopened = useRef<string | null>(null);
+  const restoreKey = reopenId
+    ? `${asTemplate ? "template" : "shipment"}:${reopenId}`
+    : historyOn ? `draft:${modality}` : null;
+  const restoredSource = useRef<string | null>(null);
+  const carriedEntry = useRef(false);
+  const [settledRestoreKey, setSettledRestoreKey] = useState<string | null>(null);
+  const [restoreError, setRestoreError] = useState(false);
+  const [restoreAttempt, setRestoreAttempt] = useState(0);
+  const restorePending = !preferencesLoaded || (restoreKey !== null && settledRestoreKey !== restoreKey);
 
   useEffect(() => {
     api
@@ -246,59 +254,6 @@ export default function WizardPage() {
       .then((page) => setRecent(page.items))
       .catch(() => setRecent([]));
   }, [historyOn, reopenId]);
-
-  // Reopening a kept shipment: the snapshot is the wizard's own state, so it
-  // goes straight back into the same pieces of state it came from. Once per
-  // id — the effect must not restore over what the user has since typed.
-  useEffect(() => {
-    if (!reopenId || reopened.current === reopenId) return;
-    // A copy has to know which fields are declarations before it drops them,
-    // and only the registry says so — so this waits for it.
-    if (asTemplate && !registry) return;
-    reopened.current = reopenId;
-    let cancelled = false;
-    api
-      .shipment(Number(reopenId))
-      .then((detail) => {
-        if (cancelled) return;
-        const snap = readSnapshot(detail.snapshot);
-        if (!snap) {
-          toast.error(t("history.loadFailed"));
-          return;
-        }
-        setDraftLines(snap.draftLines);
-        setNextId(snap.nextId);
-        setResult(snap.result);
-        setDgEntries(snap.dgEntries);
-        setDocValues(asTemplate ? templateValues(snap.docValues, declarationKeys) : snap.docValues);
-        setSelectedDocs(snap.selectedDocs);
-        setSkippedQuestions(snap.skippedQuestions);
-        // A signature belongs to the shipment it was drawn for, not to the
-        // next one made from it.
-        setSignature(asTemplate ? null : snap.signature);
-        setChosenDocLang(snap.docLang as Language | null);
-        if (asTemplate) {
-          // A new shipment: the goods and parties are its own, the record
-          // and the export are not. Start at the goods, keep nothing yet.
-          setStepKey("lines");
-          setHistoryId(null);
-          setKeptAt(null);
-          toast.info(t("history.templateOpened", { reference: detail.reference || detail.consignee_name || "" }));
-        } else {
-          setStepKey(snap.stepKey);
-          setHistoryId(detail.id);
-          setKeptAt(new Date(detail.updated_at));
-        }
-      })
-      .catch(() => {
-        if (!cancelled) toast.error(t("history.loadFailed"));
-      });
-    return () => {
-      cancelled = true;
-    };
-    // toast and t are stable for the page's lifetime.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reopenId, registry]);
 
   // The saved details land in the form as soon as they arrive, and only in
   // fields that are still empty — the preferences come back over the network,
@@ -645,7 +600,7 @@ export default function WizardPage() {
   // stops. The delay is there so as not to send a request on every keystroke.
   const calculatedSignature = useRef<string | null>(null);
   useEffect(() => {
-    if (stepKey !== "lines") return;
+    if (restorePending || stepKey !== "lines") return;
     if (!draftLines.some((line) => line.description.trim())) return;
     if (calculatedSignature.current === draftSignature) return;
 
@@ -655,7 +610,7 @@ export default function WizardPage() {
     }, 600);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draftSignature, stepKey]);
+  }, [draftSignature, stepKey, restorePending, modality]);
 
   const addLine = () => {
     const unit = preferences.default_unit || "pcs";
@@ -978,7 +933,6 @@ export default function WizardPage() {
   //: The body last written, so nothing is saved twice and a render is not a change.
   const draftBody = useRef<string>("");
   const draftTimer = useRef<number | undefined>(undefined);
-  const draftRestored = useRef(false);
   const pendingDraft = useRef<Promise<unknown>>(Promise.resolve());
   const [closing, setClosing] = useState(false);
 
@@ -1003,7 +957,7 @@ export default function WizardPage() {
   };
 
   useEffect(() => {
-    if (!historyOn || !hasEntry || reopenId || closing) return;
+    if (restorePending || !historyOn || !hasEntry || reopenId || closing) return;
     const payload = shipmentPayload(true);
     const body = JSON.stringify(payload);
     if (body === draftBody.current) return;
@@ -1025,63 +979,83 @@ export default function WizardPage() {
     // The payload is rebuilt from these; the body comparison does the rest.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [historyOn, hasEntry, reopenId, stepKey, draftLines, docValues, result, dgEntries,
-      selectedDocs, signature, chosenDocLang, skippedQuestions, closing]);
+      selectedDocs, signature, chosenDocLang, skippedQuestions, closing, restorePending]);
 
-  // Coming back to it. Only this modality's draft, and only when the wizard was
-  // not opened on a shipment of its own.
+  // Finish a read before allowing entry or autosave. Marking it restored when
+  // the request started stranded StrictMode and registry-cancelled responses;
+  // treating a failed draft read as empty could autosave over unseen work.
   useEffect(() => {
-    if (!historyOn || reopenId || draftRestored.current || !modality) return;
-    draftRestored.current = true;
+    if (!preferencesLoaded || !registry || !restoreKey) return;
+    if (readSnapshot((location.state as { carry?: unknown } | null)?.carry)) return;
+    if (restoredSource.current === restoreKey || (!reopenId && carriedEntry.current)) {
+      setSettledRestoreKey(restoreKey);
+      return;
+    }
     let cancelled = false;
-    api
-      .runningDraft()
+    setRestoreError(false);
+    const request = reopenId ? api.shipment(Number(reopenId)) : api.runningDraft();
+    request
       .then((detail) => {
-        if (cancelled || !detail) return;
-        const snap = readSnapshot(detail.snapshot);
-        if (!snap || (snap.modality && snap.modality !== modality)) return;
-        setDraftLines(snap.draftLines);
-        setNextId(snap.nextId);
-        setResult(snap.result);
-        setDgEntries(snap.dgEntries);
-        setDocValues(snap.docValues);
-        setSelectedDocs(snap.selectedDocs);
-        setSkippedQuestions(snap.skippedQuestions);
-        setSignature(snap.signature);
-        setChosenDocLang(snap.docLang as Language | null);
-        setStepKey(snap.stepKey);
-        setHistoryId(detail.id);
-        setDraftSavedAt(new Date(detail.updated_at));
-        setDraftStatus("saved");
-        draftBody.current = "";
-        toast.info(t("draft.resumed"));
+        if (cancelled || restoredSource.current === restoreKey || (!reopenId && carriedEntry.current)) return;
+        if (reopenId && !detail) throw new Error("Missing shipment");
+        if (detail) {
+          const snap = readSnapshot(detail.snapshot);
+          if (!snap) throw new Error("Invalid shipment snapshot");
+          if (reopenId || !snap.modality || snap.modality === modality) {
+            setDraftLines(snap.draftLines);
+            setNextId(snap.nextId);
+            setResult(snap.result);
+            setDgEntries(snap.dgEntries);
+            setDocValues(asTemplate ? templateValues(snap.docValues, declarationKeys) : snap.docValues);
+            setSelectedDocs(snap.selectedDocs);
+            setSkippedQuestions(snap.skippedQuestions);
+            setSignature(asTemplate ? null : snap.signature);
+            setChosenDocLang(snap.docLang as Language | null);
+            setStepKey(asTemplate ? "lines" : snap.stepKey);
+            setHistoryId(asTemplate ? null : detail.id);
+            setKeptAt(reopenId && !asTemplate ? new Date(detail.updated_at) : null);
+            if (!reopenId) {
+              setDraftSavedAt(new Date(detail.updated_at));
+              setDraftStatus("saved");
+              draftBody.current = "";
+              toast.info(t("draft.resumed"));
+            } else if (asTemplate) {
+              toast.info(t("history.templateOpened", { reference: detail.reference || detail.consignee_name || "" }));
+            }
+          }
+        }
+        restoredSource.current = restoreKey;
+        setSettledRestoreKey(restoreKey);
       })
-      .catch(() => undefined);
+      .catch(() => { if (!cancelled) setRestoreError(true); });
     return () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [historyOn, reopenId, modality]);
+  }, [restoreKey, reopenId, asTemplate, modality, registry, preferencesLoaded, restoreAttempt, location.state]);
 
   // --- switching transport mode without losing the shipment -----------------
   //
   // The mode is part of the address, so changing it is a navigation and this
-  // page mounts again with nothing in it. What was typed travels in the
+  // page may remain mounted. What was typed travels in the
   // navigation's own state: the goods, the answers, the substances, the
   // signature. The calculation does not travel. It was made against the rules
   // of the mode you have just left, and carrying it over would put totals on
   // the screen that claim to come from a book they were never read out of. So
   // the entry survives, the judgement is made again, and the wizard lands back
   // on the goods step where the recalculation starts.
-  const carryRestored = useRef(false);
+  const carryRestored = useRef<unknown>(null);
   useEffect(() => {
-    if (carryRestored.current) return;
-    carryRestored.current = true;
     const carried = (location.state as { carry?: unknown } | null)?.carry;
+    if (!carried || carryRestored.current === carried) return;
     const snap = carried ? readSnapshot(carried) : null;
     if (!snap) return;
+    carryRestored.current = carried;
     // The draft on the server is the old mode's; this entry replaces it rather
     // than being overwritten by it when the fetch comes back.
-    draftRestored.current = true;
+    carriedEntry.current = true;
+    restoredSource.current = restoreKey;
+    setSettledRestoreKey(restoreKey);
     setDraftLines(snap.draftLines);
     setNextId(snap.nextId);
     setDgEntries(snap.dgEntries);
@@ -1089,12 +1063,18 @@ export default function WizardPage() {
     setSkippedQuestions(snap.skippedQuestions);
     setSignature(snap.signature);
     setChosenDocLang(snap.docLang as Language | null);
+    setResult(null);
+    setSelectedDocs(null);
+    setStepKey("lines");
+    setHistoryId(null);
+    setKeptAt(null);
+    calculatedSignature.current = null;
     // Without this the entry would come back a second time on a reload, on top
     // of whatever had been typed since.
     navigate(location.pathname, { replace: true });
-    // Mount only: this is the handover, not something that repeats.
+    // A new carry can arrive while React Router reuses this component.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [location.state, location.pathname, restoreKey]);
 
   const switchModality = (next: string) => {
     if (!next || next === modality) return;
@@ -1469,6 +1449,15 @@ export default function WizardPage() {
 
   if (!registry) {
     return <div className="py-12 text-center text-slate-500 dark:text-slate-400">{t("wizard.loading")}</div>;
+  }
+
+  if (restorePending) {
+    return restoreError ? (
+      <div role="alert" className="surface space-y-4 p-6 text-center">
+        <p>{t("history.loadFailed")}</p>
+        <button className={buttonSecondary} onClick={() => setRestoreAttempt((attempt) => attempt + 1)}>{t("overview.retry")}</button>
+      </div>
+    ) : <div role="status" className="py-12 text-center text-slate-500 dark:text-slate-400">{t("wizard.loading")}</div>;
   }
 
   return (

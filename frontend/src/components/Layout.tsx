@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { api, User } from "../api/client";
 import { useBranding } from "../branding";
 import { usePreferences } from "../settings/preferences";
+import CommandMenu from "./CommandMenu";
 import UpdateToast from "./UpdateToast";
 import TwoFactorNudge, { clearTwoFactorNudge } from "./TwoFactorNudge";
 import WhatsNewModal from "./WhatsNewModal";
@@ -26,9 +27,18 @@ export default function Layout({ user, onLogout }: Props) {
   const [version, setVersion] = useState<string | null>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const drawer = useRef<HTMLElement>(null);
+  const previousPath = useRef(location.pathname);
 
   useEffect(() => { api.health().then((health) => setVersion(health.version)).catch(() => {}); }, []);
-  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    setMenuOpen(false);
+    // A new page starts at its heading, even when the previous form was long.
+    // Wizard field edits and in-page steps do not change the pathname.
+    if (previousPath.current !== location.pathname) {
+      previousPath.current = location.pathname;
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
+  }, [location.pathname]);
   useEffect(() => {
     if (!menuOpen) return;
     const previousOverflow = document.body.style.overflow;
@@ -49,6 +59,13 @@ export default function Layout({ user, onLogout }: Props) {
   async function logout() {
     await api.logout(); clearTwoFactorNudge(); onLogout(); navigate("/login");
   }
+  const destinations = [
+    ...(history ? [{to: "/overzicht", label: t("nav.overview")}, {to: "/shipments", label: t("nav.shipments")}, {to: "/trips", label: t("nav.trips")}, {to: "/articles", label: t("nav.articles")}] : []),
+    {to: "/", label: t("nav.new")}, {to: "/groupage", label: t("nav.groupage")},
+    ...(admin ? [{to: "/materieel", label: t("nav.materieel")}, {to: "/users", label: t("nav.users")}, {to: "/audit", label: t("nav.audit")}] : []),
+    {to: "/settings", label: t("nav.settings")}, {to: "/legal", label: t("nav.legal")},
+  ];
+  const currentLabel = location.pathname.startsWith("/wizard") ? t("nav.new") : destinations.find(item => item.to === location.pathname)?.label || t("studio.workspace");
   const name = branding.name || t("app.name");
   const versionLabel = version ? (version.startsWith("v") ? version : `v${version}`) : "";
   const brand = (compact = false) => <div className="emcargo-brand">
@@ -111,7 +128,7 @@ export default function Layout({ user, onLogout }: Props) {
       {account(!railOpen)}
       <button onClick={() => setRailOpen((value) => !value)} className="emcargo-rail-toggle" aria-controls="main-nav" aria-expanded={railOpen} aria-label={railOpen ? t("nav.collapseMenu") : t("nav.expandMenu")}><CollapseIcon className={`h-4 w-4 ${railOpen ? "" : "rotate-180"}`} /></button>
     </aside>
-    <main id="main-content" tabIndex={-1} className="emcargo-main"><Outlet /></main>
+    <main id="main-content" tabIndex={-1} className="emcargo-main"><div className="workspace-bar"><div className="workspace-location"><span>{t("studio.workspace")}</span><span aria-hidden="true">/</span><strong>{currentLabel}</strong></div><CommandMenu destinations={destinations} /></div><Suspense fallback={<div className="route-loading" role="status">{t("wizard.loading")}</div>}><Outlet /></Suspense></main>
     {!open && <><WhatsNewModal /><UpdateToast user={user} /><TwoFactorNudge user={user} /></>}
     {menuOpen && <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true" aria-label={t("nav.menu")}>
       <div className="absolute inset-0 bg-black/60" onClick={() => setMenuOpen(false)} />

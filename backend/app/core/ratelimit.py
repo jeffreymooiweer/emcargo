@@ -22,7 +22,9 @@ So the entry is counted from the right, one position per proxy in front:
     client -> nginx -> app          "C"        take the 1st from the right
     client -> cdn -> nginx -> app   "C, cdn"   take the 2nd from the right
 
-``TRUSTED_PROXY_COUNT`` is that number and defaults to 1. When the header holds
+Forwarded headers are ignored by default. An operator whose backend is reachable
+only through controlled proxies enables ``TRUSTED_PROXY_HEADERS=true`` explicitly.
+``TRUSTED_PROXY_COUNT`` is their number and defaults to 1. When the header holds
 fewer entries than there are proxies the installation is misconfigured, and this
 falls back to the peer address: a limiter that counts everyone as one caller is
 useless, but a limiter keyed on a value the caller chooses is worse.

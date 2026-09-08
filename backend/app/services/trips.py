@@ -14,10 +14,11 @@ from datetime import datetime
 from typing import Any
 
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, defer, joinedload
 
+from app.core.dates import utc_filter_bound
 from app.models.trip import Trip
-from app.models.user import User
+from app.models.user import Department, User
 from app.schemas.trips import TripDetail, TripIn, TripSummary
 from app.services import departments
 from app.services.dg.trip import check_trip
@@ -141,12 +142,17 @@ def search(db: Session, viewer: User, q: str = "",
     if needle:
         query = query.filter(Trip.name.ilike(f"%{needle}%"))
     if date_from:
-        query = query.filter(Trip.created_at >= date_from)
+        query = query.filter(Trip.created_at >= utc_filter_bound(date_from))
     if date_to:
-        query = query.filter(Trip.created_at <= date_to)
-    total = query.count()
+        query = query.filter(Trip.created_at <= utc_filter_bound(date_to))
+    total = int(query.with_entities(func.count(Trip.id)).scalar() or 0)
     per_page = max(1, min(int(per_page), PER_PAGE_MAX))
     page = max(1, int(page))
-    rows = (query.order_by(Trip.created_at.desc(), Trip.id.desc())
+    # The planner's list reads metadata, not every consignment and assessment.
+    rows = (query.options(
+                defer(Trip.consignments_json), defer(Trip.result_json),
+                joinedload(Trip.creator).load_only(User.username),
+                joinedload(Trip.department).load_only(Department.name))
+            .order_by(Trip.created_at.desc(), Trip.id.desc())
             .offset((page - 1) * per_page).limit(per_page).all())
     return rows, total

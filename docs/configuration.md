@@ -438,8 +438,8 @@ scanned in a year answers what it answered on the day it was printed.
 | `APP_ENV` | `production` or `development` | `production` |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | How long a login stays valid | `480` (8 hours) |
 | `COOKIE_SECURE` | Override the login-cookie `Secure` flag. Empty means automatic: enabled for HTTPS or trusted `X-Forwarded-Proto=https`. | automatic |
-| `CORS_ALLOWED_ORIGINS` | Comma-separated list, or `*`. Named origins are answered with credentials; the wildcard without them, so a browser on another site cannot use the login cookie against the API | `*` |
-| `TRUSTED_PROXY_HEADERS` | Honour `X-Forwarded-*` headers behind a reverse proxy | `true` |
+| `CORS_ALLOWED_ORIGINS` | Allowed origins for a separate website using the API. Empty keeps the bundled same-origin interface working. Named origins permit credentials; any list containing `*` permits only anonymous cross-origin reads | empty |
+| `TRUSTED_PROXY_HEADERS` | Honour `X-Forwarded-*` headers; enable only when controlled reverse proxies are the only route to the backend | `false` |
 | `TRUSTED_PROXY_COUNT` | How many reverse proxies stand in front. Decides which `X-Forwarded-For` entry a rate limit counts against | `1` |
 | `LOG_LEVEL` | `DEBUG`, `INFO`, `WARNING`, `ERROR` | `INFO` |
 
@@ -453,8 +453,10 @@ malformed or hostile file, not a preference, and they live in
 > nothing is worse than an undocumented one: it invites somebody to tune it and conclude
 > the app ignores them.
 
-If you put EMCargo behind a reverse proxy, keep `TRUSTED_PROXY_HEADERS=true` and set
-`CORS_ALLOWED_ORIGINS` to your actual hostname instead of `*`. The login cookie is then
+If you put EMCargo behind a reverse proxy, explicitly set `TRUSTED_PROXY_HEADERS=true`
+and prevent direct access to the backend port. The bundled interface still needs no
+CORS setting; list an origin only for a separate interface that calls this API.
+The login cookie is then
 marked `Secure` when the proxy sends `X-Forwarded-Proto=https`. Set `COOKIE_SECURE=true`
 when you want to force that behaviour, or `false` only for a deliberate HTTP-only setup.
 
@@ -473,13 +475,26 @@ which entry of `X-Forwarded-For` the sign-in rate limit is counted against, and 
 default of `1` is right for one nginx, Caddy or Traefik in front. Put a CDN in front of
 that and it is `2`.
 
-The number matters in both directions. Too high and EMCargo cannot find the entry it
-was told to trust, falls back to the proxy's own address, and everyone shares one budget
-again — which is the bug fixed in v1.163.4, where fifteen colleagues behind one proxy
-shared ten sign-in attempts a minute and could lock each other out. Too low and it reads
-an entry the caller wrote themselves, which hands every caller a fresh budget per request
-and is a rate limit that does not limit. A proxy *appends* what it saw, so the rightmost
-entries are the trustworthy ones and each proxy in the chain accounts for one of them.
+The number matters in both directions. Too low counts against a proxy instead of the
+client, so people share a budget. Too high can read a caller-supplied entry to the left
+of the controlled proxy chain; if the header is shorter than the configured count,
+EMCargo falls back to the peer address. A proxy *appends* what it saw, so the rightmost
+entries are the trustworthy ones and each controlled proxy accounts for one of them.
+
+**Upgrading to 2.1.0.** An existing explicit environment value is respected. When no
+value was set, forwarded-header trust now becomes `false` and CORS becomes empty.
+Operators using a reverse proxy must explicitly enable trust and set the correct proxy
+count; otherwise callers share the proxy's rate-limit budget. Set `PUBLIC_URL` to the
+external HTTPS address for mail and document links, and `COOKIE_SECURE=true` for an
+HTTPS-only deployment. Native and Kubernetes examples already opt into proxy trust
+because their documented deployment puts a controlled proxy in front.
+
+Recovery-code renewal now requires a current authenticator, email or recovery code.
+The bundled settings screen asks for it. Custom clients calling
+`POST /api/auth/two-factor/recovery-codes` must send `{"code":"…"}`; requests without
+proof no longer create replacement codes. Confirmation, renewal and disabling each
+allow ten code-verification attempts per minute. This stops a stolen session from
+minting a new second factor or guessing codes without the login limit.
 
 User roles are restricted to `admin` and `user`. EMCargo prevents an administrator from
 disabling or demoting their own account and refuses to remove the last active administrator.

@@ -7,7 +7,7 @@ Developed and maintained by **Jeffrey Mooiweer**.
 **Turn a list of packages into finished transport documents.**
 
 Paste your load, and EMCargo works out the weights and volumes, fills in the official
-CMR, CIM, AVC and IATA forms, and checks your dangerous goods before you print.
+CMR, CIM and AVC forms and sea/inland documents, and checks your dangerous goods before you print.
 
 [![Latest release](https://img.shields.io/github/v/release/jeffreymooiweer/emcargo?logo=github&label=release&color=2ea44f)](https://github.com/jeffreymooiweer/emcargo/releases/latest)
 [![Build](https://img.shields.io/github/actions/workflow/status/jeffreymooiweer/emcargo/ci.yml?branch=main&logo=githubactions&logoColor=white&label=build)](https://github.com/jeffreymooiweer/emcargo/actions/workflows/ci.yml)
@@ -15,7 +15,7 @@ CMR, CIM, AVC and IATA forms, and checks your dangerous goods before you print.
 [![Licence](https://img.shields.io/badge/licence-Apache--2.0%20%2B%20Commons%20Clause-blue)](LICENSE)
 
 [![Backend](https://img.shields.io/badge/backend-FastAPI%20%C2%B7%20Python%203.12-009688?logo=fastapi&logoColor=white)](docs/development.md)
-[![Frontend](https://img.shields.io/badge/frontend-React%2018%20%C2%B7%20TypeScript-61DAFB?logo=react&logoColor=black)](docs/development.md)
+[![Frontend](https://img.shields.io/badge/frontend-React%2019%20%C2%B7%20TypeScript-61DAFB?logo=react&logoColor=black)](docs/development.md)
 [![Unraid](https://img.shields.io/badge/Unraid-ready-F15A2C?logo=unraid&logoColor=white)](docs/getting-started.md#unraid)
 [![Interface](https://img.shields.io/badge/interface-NL%20%C2%B7%20EN%20%C2%B7%20DE%20%C2%B7%20FR-lightgrey)](#)
 [![Self-hosted](https://img.shields.io/badge/self--hosted-your%20data%20stays%20yours-6f42c1)](docs/privacy.md)
@@ -31,8 +31,12 @@ CMR, CIM, AVC and IATA forms, and checks your dangerous goods before you print.
 
 ## EMCargo interface
 
-EMCargo uses a dark navy workspace with a persistent desktop sidebar, a mobile
-navigation drawer, three visible shipment stages and a bottom action bar.
+EMCargo 2.1 uses a quiet charcoal workspace with a persistent desktop sidebar,
+a mobile navigation drawer, three clear shipment stages and a bottom action bar.
+Use Ctrl/Cmd K to jump between pages. Additional documents are tucked into
+disclosures, and shipment summaries remain available on smaller screens.
+Transitions respect reduced-motion preferences. See the
+[design and functional review](docs/design/review-2.1.0.md).
 Dangerous-goods assessment remains mandatory within the goods stage. The complete source now uses EMCargo identifiers, including storage and native
 installation names. Existing installations require the steps in
 [Identity migration](docs/identity-migration.md) before upgrading. The original
@@ -54,8 +58,10 @@ transport mode you picked. **Road, rail, sea and inland waterway are released to
 air and multimodal are built in but stay locked until their remaining regulatory checks
 are complete — see the [roadmap](ROADMAP.md).
 
-It runs on your own machine or server. Nothing is sent to a cloud service, and no
-shipment history is kept.
+It runs on your own machine or server. The open mode keeps no shipment history.
+In organisation mode, an administrator can enable saved shipments and private
+drafts. Optional online lookups and local assistant features are described in
+[Privacy](docs/privacy.md).
 
 ## What it does
 

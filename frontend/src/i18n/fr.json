@@ -453,8 +453,8 @@
     "historyDiscardConfirm": "Supprimer et désactiver"
   },
   "modality": {
-    "title": "Choisissez votre mode de transport",
-    "intro": "Commencez un nouvel envoi en choisissant un mode de transport. En tant qu'expéditeur, vous saisissez les marchandises ; l'application déduit ce qui s'y rattache et compose le dossier de documents.",
+    "title": "Choisissez le transport",
+    "intro": "Choisissez un mode de transport. EMCargo propose les documents adaptés.",
     "road": "Transport routier",
     "roadDesc": "Lettre de voiture CMR et AVC, liste de colisage et bon de livraison",
     "rail": "Transport ferroviaire",
@@ -822,7 +822,9 @@
       "row_refused": "Ligne {{row}} : {{reason}}"
     },
     "auth": {
-      "two_factor_required": "Cette installation exige la vérification en deux étapes pour votre compte. Configurez-la d'abord sous Paramètres, Mes informations."
+      "two_factor_required": "Cette installation exige la vérification en deux étapes pour votre compte. Configurez-la d'abord sous Paramètres, Mes informations.",
+      "two_factor_invalid_code": "Ce code de vérification est invalide.",
+      "two_factor_inactive": "La vérification en deux étapes n’est pas active."
     }
   },
   "instructions": {
@@ -1020,10 +1022,12 @@
     "sendCode": "Envoyer un code",
     "codeSent": "Un code a été envoyé à votre adresse e-mail.",
     "turnOffHintMail": "Demandez d'abord un code et saisissez-le ci-dessous. Un code de secours fonctionne aussi.",
-    "nudge": "Votre compte n'a pas encore de vérification en deux étapes. Un mot de passe seul n'est qu'à une réutilisation divulguée d'une usurpation de votre identité.",
+    "nudge": "Protégez votre compte avec la vérification en deux étapes.",
     "nudgeAction": "Configurer",
-    "nudgeRequired": "Cette installation exige une vérification en deux étapes et votre compte n'en a pas encore. Configurez-la tant que vous pouvez encore vous connecter.",
-    "enforced": "Tant que votre compte n'a pas de vérification en deux étapes, cet écran est le seul qui fonctionne. Configurez-la ci-dessous."
+    "nudgeRequired": "Votre organisation exige la vérification en deux étapes. Configurez-la pour continuer.",
+    "enforced": "Tant que votre compte n'a pas de vérification en deux étapes, cet écran est le seul qui fonctionne. Configurez-la ci-dessous.",
+    "renewCode": "Confirmez avec votre code de vérification",
+    "renewHint": "Saisissez un code actuel de votre application, reçu par e-mail ou de récupération. Les nouveaux codes remplacent tous les précédents."
   },
   "toast": {
     "undo": "Annuler l'action",
@@ -1320,7 +1324,8 @@
       "trip.kept": "Trajet conservé",
       "trip.updated": "Trajet conservé mis à jour",
       "trip.forgotten": "Trajet conservé supprimé",
-      "settings.history_discarded": "Historique vidé avant la désactivation"
+      "settings.history_discarded": "Historique vidé avant la désactivation",
+      "auth.recovery_codes_replaced": "Codes de récupération remplacés"
     }
   },
   "trips": {
@@ -1432,5 +1437,20 @@
     "updated": "Mise à jour",
     "documentsAvailable": "Documents disponibles",
     "kept": "Enregistré"
+  },
+  "studio": {
+    "importTitle": "Importer une liste de marchandises",
+    "importHint": "Collez votre liste de marchandises depuis Excel. EMCargo lit les lignes et calcule le poids et le volume.",
+    "otherModes": "Autres modes de transport",
+    "quickFind": "Accès rapide",
+    "findPlaceholder": "Rechercher une page ou une action",
+    "workspace": "Espace de travail",
+    "summary": "Récapitulatif",
+    "loginTitle": "Bon retour.",
+    "loginHint": "Connectez-vous pour poursuivre vos expéditions.",
+    "loginBusy": "Connexion…",
+    "historyPrivacy": "Lorsque l’historique est activé, vos brouillons et expéditions enregistrées sont conservés sur cette installation.",
+    "documentsSelected": "Sélection : {{count}}",
+    "showOptions": "Voir les options"
   }
 }

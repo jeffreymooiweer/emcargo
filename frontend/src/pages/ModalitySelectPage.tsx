@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useBranding } from "../branding";
+import { ModalityIcon } from "../components/WizardShell";
+import { ImportIcon } from "../components/icons";
 import { usePreferences } from "../settings/preferences";
 
 export const MODALITIES = ["road", "rail", "sea", "inland", "air", "multimodal"] as const;
@@ -80,7 +82,7 @@ export default function ModalitySelectPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const { preferences, loaded } = usePreferences();
+  const { preferences, publicSettings, loaded } = usePreferences();
   const custom = useBranding().branding.modalities;
 
   // Someone who only ever ships by road should not tap the same tile every
@@ -96,95 +98,32 @@ export default function ModalitySelectPage() {
   }, [loaded, skipDefault, preferred, navigate]);
 
   return (
-    <div className="space-y-5 sm:space-y-6">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-8">
-        <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-100">
-          {t("modality.title")}
-        </h2>
-        <p className="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl">
-          {t("modality.intro")}
-        </p>
-        <p className="mt-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-2xl">
-          {t("dashboard.privacy")}
-        </p>
+    <div className="start-workspace page-enter">
+      <header className="page-heading">
+        <div><p className="eyebrow">{t("nav.new")}</p><h2>{t("modality.title")}</h2>
+        <p>{t("modality.intro")}</p></div>
+      </header>
+      <div className="start-layout">
+        <section className="mode-list surface" aria-label={t("wizard.mode")}>
+          {AVAILABLE_MODALITIES.map((key, index) => <button key={key} className="mode-option" onClick={() => navigate(`/wizard/${key}`)}>
+            <span className="mode-index" aria-hidden="true">0{index + 1}</span>
+            {custom[key] ? <img src={custom[key] ?? undefined} alt="" className="mode-custom-image" /> : <ModalityIcon modality={key} className="mode-glyph" />}
+            <span className="mode-copy"><strong>{t(`modality.${key}`)}</strong><span>{t(`modality.${key}Desc`)}</span></span>
+            <span className="mode-rule">{({ road: "ADR", rail: "RID", sea: "IMDG", inland: "ADN" } as Record<string,string>)[key]}</span>
+            <span className="mode-arrow" aria-hidden="true">↗</span>
+          </button>)}
+        </section>
+        <aside className="start-import surface">
+          <span className="import-glyph"><ImportIcon className="h-6 w-6" /></span>
+          <h3>{t("studio.importTitle")}</h3>
+          <p>{t("studio.importHint")}</p>
+          <button className="action-primary" onClick={() => navigate(`/wizard/${isModalityAvailable(preferred) ? preferred : "road"}?input=paste`)}>{t("overview.paste")}<span aria-hidden="true">↗</span></button>
+          <span className="import-formats">XLSX <span>·</span> CSV <span>·</span> TXT</span>
+        </aside>
       </div>
-
-      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {/* What can be used comes first. The unavailable ones stay on the
-            page — they say why, and that is worth reading — but they no longer
-            sit between two modes somebody could have picked. */}
-        {[...MODALITIES].sort((a, b) => Number(isModalityAvailable(b)) - Number(isModalityAvailable(a))).map((key) => {
-          const available = isModalityAvailable(key);
-          return (
-          <button
-            key={key}
-            type="button"
-            disabled={!available}
-            aria-disabled={!available}
-            onClick={() => available && navigate(`/wizard/${key}`)}
-            title={available ? undefined : t("modality.lockedReason")}
-            className={`group relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-left shadow-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 ${
-              available
-                ? "hover:border-brand-400 hover:shadow-lg dark:hover:border-brand-500"
-                : "cursor-not-allowed opacity-60 grayscale"
-            }`}
-          >
-            <div className="aspect-[3/1] w-full overflow-hidden">
-              {custom[key] ? (
-                // An uploaded picture is one picture: it is shown in both
-                // themes, because nobody uploads a company photo twice.
-                <img
-                  src={custom[key] ?? undefined}
-                  alt=""
-                  aria-hidden="true"
-                  loading="lazy"
-                  className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                />
-              ) : (
-                <>
-                  <img
-                    src={`/modalities/${key}-light.webp`}
-                    alt=""
-                    aria-hidden="true"
-                    loading="lazy"
-                    className="h-full w-full object-cover transition duration-300 group-hover:scale-105 dark:hidden"
-                  />
-                  <img
-                    src={`/modalities/${key}-dark.webp`}
-                    alt=""
-                    aria-hidden="true"
-                    loading="lazy"
-                    className="hidden h-full w-full object-cover transition duration-300 group-hover:scale-105 dark:block"
-                  />
-                </>
-              )}
-            </div>
-            <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4">
-              <div className="min-w-0">
-                <h3 className="flex flex-wrap items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
-                  {t(`modality.${key}`)}
-                  {!available && (
-                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-200">
-                      {t("modality.locked")}
-                    </span>
-                  )}
-                </h3>
-                <p className="mt-0.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                  {available ? t(`modality.${key}Desc`) : t("modality.lockedReason")}
-                </p>
-              </div>
-              <span
-                aria-hidden="true"
-                className="shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-brand-500 dark:text-slate-600"
-              >
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            </div>
-          </button>
-          );
-        })}
+      <div className="start-footnote">
+        <p>{t(publicSettings?.history_enabled ? "studio.historyPrivacy" : "dashboard.privacy")}</p>
+        <details className="future-modes"><summary>{t("studio.otherModes")}</summary><div>{MODALITIES.filter((key): boolean => !isModalityAvailable(key)).map(key => <div key={key}><strong>{t(`modality.${key}`)}</strong><span>{t("modality.lockedReason")}</span></div>)}</div></details>
       </div>
     </div>
   );

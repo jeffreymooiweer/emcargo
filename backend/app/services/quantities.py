@@ -10,8 +10,9 @@ the trip check and the IFTDGN cannot disagree about what a quantity says.
 
 The rules, in order:
 
-1. The first run of digits and separators is the number; what follows is
-   the unit, read elsewhere. A leading minus counts: "-5 L" is -5, and it is
+1. The entire field must be one number with an optional textual unit; a
+   formula, range or prose containing a number is not a quantity. A leading
+   minus counts: "-5 L" is -5, and it is
    the caller's job to refuse it, not this module's to make it positive.
 2. With both "." and "," present the last one is the decimal separator and
    the other marks thousands: "1.250,5" and "1,250.5" are both 1250.5.
@@ -31,21 +32,45 @@ import math
 import re
 from typing import Any
 
-_NUMBER = re.compile(r"-?\d[\d.,]*")
+# A scalar and its unit have no legitimate need for an unbounded text field.
+# Check the raw size before normalising or scanning hostile input.
+MAX_QUANTITY_TEXT_LENGTH = 256
+
+# Read the number and unit separately. Combining optional whitespace before,
+# inside and after a unit lets a regex backtrack over the same run repeatedly.
+_NUMBER = re.compile(r"[+-]?(?:\d[\d.,]*|[.,]\d+)")
+_UNIT = re.compile(r"[A-Za-zµμ°%/()²³][A-Za-zµμ°%/()²³\s]*")
 
 
 def parse_number(value: Any) -> float | None:
-    """The first number in ``value``, sign kept, or None when there is none."""
+    """One finite scalar quantity, sign kept, or None for ambiguous input."""
     if value is None or isinstance(value, bool):
         return None
     if isinstance(value, (int, float)):
-        return float(value) if math.isfinite(float(value)) else None
-    match = _NUMBER.search(str(value))
+        try:
+            number = float(value)
+        except OverflowError:
+            return None
+        return number if math.isfinite(number) else None
+    text = str(value)
+    if len(text) > MAX_QUANTITY_TEXT_LENGTH:
+        return None
+    text = text.strip().replace("−", "-")
+    match = _NUMBER.match(text)
     if not match:
         return None
-    token = match.group(0).rstrip(".,")
+    unit = text[match.end():].strip()
+    if unit and not _UNIT.fullmatch(unit):
+        return None
+    token = match.group(0)
+    if token.endswith((".", ",")):
+        token = token[:-1]
+        if token.endswith((".", ",")):
+            return None
     negative = token.startswith("-")
-    digits = token.lstrip("-")
+    digits = token.lstrip("-+")
+    if digits.startswith((".", ",")):
+        digits = "0" + digits
     dots, commas = digits.count("."), digits.count(",")
 
     if dots and commas:
@@ -75,6 +100,8 @@ def parse_number(value: Any) -> float | None:
     if not integer.isdigit() or (fraction and not fraction.isdigit()):
         return None
     number = float(f"{integer}.{fraction}" if fraction else integer)
+    if not math.isfinite(number):
+        return None
     return -number if negative else number
 
 

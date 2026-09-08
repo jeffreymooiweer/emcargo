@@ -91,12 +91,12 @@ export default function DocumentAdvicePanel({ registry, modality, needsDg, selec
     onChange(selected.includes(key) ? selected.filter((k) => k !== key) : [...selected, key]);
   };
 
-  const groups: { keys: string[]; label: string; note?: string }[] = [
+  const groups: { keys: string[]; label: string; note?: string; optional?: boolean }[] = [
     { keys: advice.required, label: t("advice.required"), note: t("advice.requiredNote") },
     { keys: advice.recommended, label: t("advice.recommended") },
-    { keys: advice.possible, label: t("advice.possible") },
+    { keys: advice.possible, label: t("advice.possible"), optional: true },
     // Not documents: read by another system, not carried on the vehicle.
-    { keys: advice.integration, label: t("advice.integration"), note: t("advice.integrationNote") },
+    { keys: advice.integration, label: t("advice.integration"), note: t("advice.integrationNote"), optional: true },
   ];
 
   /** The reason a whole group shares, if its documents are all on the list for
@@ -120,7 +120,7 @@ export default function DocumentAdvicePanel({ registry, modality, needsDg, selec
       {groups.map((group) => {
         if (group.keys.length === 0) return null;
         const shared = sharedReason(group.keys);
-        return (
+        const choices = (
             <div key={group.label}>
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                 {group.label}
@@ -128,7 +128,7 @@ export default function DocumentAdvicePanel({ registry, modality, needsDg, selec
               {(group.note ?? shared) && (
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{group.note ?? shared}</p>
               )}
-              <div className="mt-1.5 grid gap-1.5 md:grid-cols-2">
+              <div className="mt-1.5 grid gap-1.5">
                 {group.keys.map((key) => {
                   const doc = docFor(key);
                   if (!doc) return null;
@@ -169,6 +169,13 @@ export default function DocumentAdvicePanel({ registry, modality, needsDg, selec
               </div>
             </div>
         );
+        if (!group.optional) return choices;
+        const chosen = group.keys.filter(key => selected.includes(key));
+        return <details key={group.label} className="document-options">
+          <summary><span>{group.label}</span><span>{chosen.length ? t("studio.documentsSelected", { count: chosen.length }) : t("studio.showOptions")}</span></summary>
+          {chosen.length > 0 && <p className="document-selected">{chosen.map(key => L(docFor(key)?.label)).join(" · ")}</p>}
+          {choices}
+        </details>;
       })}
     </div>
   );

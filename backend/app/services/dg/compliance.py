@@ -42,7 +42,7 @@ def _lang(language: str) -> str:
 
 
 def _num(value: Any) -> float | None:
-    """Parse the first number out of a value ('333', '5 kg', '12,5 L', '1.250,5 L').
+    """Parse one scalar quantity ('333', '5 kg', '12,5 L', '1.250,5 L').
 
     The sign counts: '-5 L' is -5, not 5. A negative quantity has to surface as
     an error rather than being silently made positive. Thousands separators

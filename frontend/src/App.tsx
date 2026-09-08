@@ -1,28 +1,30 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Navigate, Route, Routes, useNavigate } from "react-router";
 import { api, InstallationMode, User, VISITOR } from "./api/client";
+import { useTranslation } from "react-i18next";
 import Layout from "./components/Layout";
-import CardsPage from "./pages/CardsPage";
-import GroupagePage from "./pages/GroupagePage";
+const CardsPage = lazy(() => import("./pages/CardsPage"));
+const GroupagePage = lazy(() => import("./pages/GroupagePage"));
 import LoginPage from "./pages/LoginPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
 import ModalitySelectPage from "./pages/ModalitySelectPage";
 import OverviewPage from "./pages/OverviewPage";
-import WizardPage from "./pages/WizardPage";
-import UsersPage from "./pages/UsersPage";
-import MaterieelPage from "./pages/MaterieelPage";
-import SettingsPage from "./pages/SettingsPage";
-import ShipmentsPage from "./pages/ShipmentsPage";
-import DgsaReportPage from "./pages/DgsaReportPage";
-import ArticlesPage from "./pages/ArticlesPage";
-import AuditPage from "./pages/AuditPage";
-import TripsPage from "./pages/TripsPage";
-import LegalPage from "./pages/LegalPage";
+const WizardPage = lazy(() => import("./pages/WizardPage"));
+const UsersPage = lazy(() => import("./pages/UsersPage"));
+const MaterieelPage = lazy(() => import("./pages/MaterieelPage"));
+const SettingsPage = lazy(() => import("./pages/SettingsPage"));
+const ShipmentsPage = lazy(() => import("./pages/ShipmentsPage"));
+const DgsaReportPage = lazy(() => import("./pages/DgsaReportPage"));
+const ArticlesPage = lazy(() => import("./pages/ArticlesPage"));
+const AuditPage = lazy(() => import("./pages/AuditPage"));
+const TripsPage = lazy(() => import("./pages/TripsPage"));
+const LegalPage = lazy(() => import("./pages/LegalPage"));
 import { BrandingProvider } from "./branding";
 import { PreferencesProvider } from "./settings/preferences";
 import { ToastProvider } from "./toast/ToastProvider";
 
 export default function App() {
+  const { t } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [mode, setMode] = useState<InstallationMode>("organisation");
   const [loading, setLoading] = useState(true);
@@ -59,13 +61,14 @@ export default function App() {
   }, []);
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center text-slate-500 dark:text-slate-400">Loading...</div>;
+    return <div className="min-h-screen flex items-center justify-center text-slate-500 dark:text-slate-400" role="status">{t("wizard.loading")}</div>;
   }
 
   if (!user) {
     return (
       <BrandingProvider>
       <ToastProvider>
+      <Suspense fallback={<div className="route-loading" role="status">{t("wizard.loading")}</div>}>
       <Routes>
         <Route path="/login" element={<LoginPage onLogin={() => api.me().then((r) => { setUser(r.user); navigate("/"); })} />} />
         {/* A reset link is opened by somebody who cannot sign in; sending
@@ -77,6 +80,7 @@ export default function App() {
         <Route path="/cards" element={<CardsPage />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
+      </Suspense>
       </ToastProvider>
       </BrandingProvider>
     );
@@ -88,6 +92,7 @@ export default function App() {
     <BrandingProvider>
     <PreferencesProvider mode={mode}>
       <ToastProvider>
+      <Suspense fallback={<div className="route-loading" role="status">{t("wizard.loading")}</div>}>
       <Routes>
         <Route element={<Layout user={user} onLogout={() => setUser(null)} />}>
           {/* `/` is the transport-mode chooser and stays the front door. The
@@ -120,6 +125,7 @@ export default function App() {
         <Route path="/cards" element={<CardsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
       </ToastProvider>
     </PreferencesProvider>
     </BrandingProvider>

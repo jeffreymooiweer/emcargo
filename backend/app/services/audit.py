@@ -40,6 +40,7 @@ ACTIONS: dict[str, str] = {
     "auth.password_reset": "set a new password through a reset link",
     "auth.two_factor_enabled": "enabled their second factor (the method)",
     "auth.two_factor_disabled": "disabled their second factor",
+    "auth.recovery_codes_replaced": "replaced their recovery codes after second-factor verification",
     "user.created": "an account created (the name and role)",
     "user.updated": "an account changed (which fields)",
     "user.deleted": "an account deleted (the name)",

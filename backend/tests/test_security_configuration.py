@@ -167,7 +167,8 @@ def test_what_counts_as_a_usable_key(value, usable):
 # --- What is still reported -----------------------------------------------
 
 
-def test_a_wildcard_origin_is_answered_without_credentials(tmp_path, monkeypatch):
+@pytest.mark.parametrize("origins", ["*", "*,https://emcargo.example.com", "https://emcargo.example.com, *"])
+def test_a_wildcard_origin_is_answered_without_credentials(tmp_path, monkeypatch, origins):
     """"*" with credentials made Starlette reflect whatever origin asked,
     cookie and all — the one combination CORS exists to forbid. Since
     v1.190.0 the wildcard is anonymous and a named origin keeps the cookie."""
@@ -184,8 +185,9 @@ def test_a_wildcard_origin_is_answered_without_credentials(tmp_path, monkeypatch
     monkeypatch.setenv("CATALOG_AUTO_SYNC", "false")
     preflight = {"Origin": "https://evil.example", "Access-Control-Request-Method": "GET"}
     try:
-        monkeypatch.setenv("CORS_ALLOWED_ORIGINS", "*")
+        monkeypatch.setenv("CORS_ALLOWED_ORIGINS", origins)
         get_settings.cache_clear()
+
         with TestClient(create_app()) as client:
             answer = client.options("/api/auth/me", headers=preflight)
         assert answer.headers.get("access-control-allow-origin") == "*"
@@ -200,6 +202,30 @@ def test_a_wildcard_origin_is_answered_without_credentials(tmp_path, monkeypatch
         assert "access-control-allow-origin" not in stranger.headers
         assert friend.headers.get("access-control-allow-origin") == "https://emcargo.example.com"
         assert friend.headers.get("access-control-allow-credentials") == "true"
+    finally:
+        get_settings.cache_clear()
+
+
+def test_the_default_allows_same_origin_but_not_a_cross_origin_reader(tmp_path, monkeypatch):
+    """The bundled UI needs no CORS permission. The default must not expose
+    anonymous API responses to a third-party website or break same-origin use."""
+    from fastapi.testclient import TestClient
+    from app.core.config import get_settings
+    from app.main import create_app
+
+    monkeypatch.setenv("DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path / 'test.db'}")
+    monkeypatch.setenv("CATALOG_AUTO_SYNC", "false")
+    monkeypatch.delenv("CORS_ALLOWED_ORIGINS", raising=False)
+    get_settings.cache_clear()
+    try:
+        with TestClient(create_app()) as client:
+            same_origin = client.get("/api/health")
+            other_origin = client.options("/api/health", headers={
+                "Origin": "https://another.example", "Access-Control-Request-Method": "GET"})
+        assert same_origin.status_code == 200
+        assert other_origin.status_code == 400
+        assert "access-control-allow-origin" not in other_origin.headers
     finally:
         get_settings.cache_clear()
 

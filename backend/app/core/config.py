@@ -40,8 +40,12 @@ class Settings(BaseSettings):
     admin_email: str | None = None
     admin_password: str | None = None
     log_level: str = "INFO"
-    cors_allowed_origins: str = "*"
-    trusted_proxy_headers: bool = True
+    # The bundled interface uses the same origin as its API and needs no
+    # cross-origin permission. External interfaces must be named explicitly.
+    cors_allowed_origins: str = ""
+    # Directly exposed instances must not let a caller choose its rate-limit
+    # bucket or the URLs sent in password-reset mail through forwarded headers.
+    trusted_proxy_headers: bool = False
     #: How many reverse proxies stand in front of the application. It decides
     #: which entry of ``X-Forwarded-For`` a rate limit is counted against: one
     #: position from the right per proxy, because a proxy appends what it saw

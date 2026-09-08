@@ -33,3 +33,7 @@ backend/static/
 # Playwright
 frontend/test-results/
 frontend/playwright-report/
+
+# Local visual-review worker state (synthetic data only).
+frontend/.review-bridge/
+frontend/.env.development.local

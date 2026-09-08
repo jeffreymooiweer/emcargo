@@ -17,6 +17,7 @@ import { api, Department, ShipmentDetail, ShipmentSummary, User } from "../api/c
 import { usePreferences } from "../settings/preferences";
 import ConfirmDialog from "../toast/ConfirmDialog";
 import { useToast } from "../toast/ToastProvider";
+import { localDateFilters } from "../utils/dateRanges";
 import { MODALITIES } from "./ModalitySelectPage";
 
 const panelClass = "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800";
@@ -111,8 +112,7 @@ function ShipmentList({ language, admin }: { language: string; admin: boolean })
       const answer = await api.shipments({
         q,
         modality,
-        date_from: from ? `${from}T00:00:00` : undefined,
-        date_to: to ? `${to}T23:59:59` : undefined,
+        ...localDateFilters(from, to),
         page,
         per_page: PER_PAGE,
         department: admin ? department : undefined,
