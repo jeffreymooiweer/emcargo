@@ -2,7 +2,7 @@
  * The trips page: what it lists, what it says where the history is off, the
  * record with the kept judgement, and the one action that must ask first.
  */
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -83,6 +83,22 @@ beforeEach(() => {
   }));
   api.forgetTrip.mockResolvedValue({ ok: true });
   api.departments.mockResolvedValue([]);
+});
+
+it("sends selected local trip dates as complete UTC day bounds", async () => {
+  renderAt("/trips");
+  await screen.findAllByText("Maandag");
+  fireEvent.change(screen.getByLabelText("history.from"), { target: { value: "2026-10-25" } });
+  fireEvent.change(screen.getByLabelText("history.to"), { target: { value: "2026-10-25" } });
+  await waitFor(() => expect(api.trips).toHaveBeenLastCalledWith(expect.objectContaining({
+    date_from: new Date(2026, 9, 25, 0).toISOString(),
+    date_to: new Date(2026, 9, 25, 23, 59, 59, 999).toISOString().replace(".999Z", ".999999Z"),
+  })));
+  fireEvent.change(screen.getByLabelText("history.from"), { target: { value: "" } });
+  fireEvent.change(screen.getByLabelText("history.to"), { target: { value: "" } });
+  await waitFor(() => expect(api.trips).toHaveBeenLastCalledWith(expect.objectContaining({
+    date_from: undefined, date_to: undefined,
+  })));
 });
 
 describe("de rittenpagina", () => {

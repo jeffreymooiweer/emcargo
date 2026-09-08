@@ -22,6 +22,8 @@ export default function TwoFactorPanel() {
   const [status, setStatus] = useState<TwoFactorStatus | null>(null);
   const [setup, setSetup] = useState<TwoFactorSetup | null>(null);
   const [code, setCode] = useState("");
+  const [renewing, setRenewing] = useState(false);
+  const [renewCode, setRenewCode] = useState("");
   const [codes, setCodes] = useState<string[] | null>(null);
   const [busy, setBusy] = useState(false);
   const toast = useToast();
@@ -78,7 +80,9 @@ export default function TwoFactorPanel() {
 
   const newCodes = () =>
     run(async () => {
-      const result = await api.twoFactorNewRecoveryCodes();
+      const result = await api.twoFactorNewRecoveryCodes(renewCode);
+      setRenewCode("");
+      setRenewing(false);
       setCodes(result.recovery_codes);
       await load();
     });
@@ -109,10 +113,20 @@ export default function TwoFactorPanel() {
             {t("twoFactor.codesLeft", { count: status.recovery_codes_left })}
           </p>
           <div className="flex flex-wrap gap-2">
-            <button type="button" className={buttonSecondary} disabled={busy} onClick={newCodes}>
+            <button type="button" className={buttonSecondary} disabled={busy} onClick={() => { setRenewing(true); setCodes(null); }}>
               {t("twoFactor.newCodes")}
             </button>
           </div>
+          {renewing && <form className="space-y-2" onSubmit={event => { event.preventDefault(); if (renewCode.trim() && !busy) void newCodes(); }}>
+            <label htmlFor="renew-code" className="block text-sm font-medium">{t("twoFactor.renewCode")}</label>
+            <p className="text-xs text-slate-500 dark:text-slate-400" id="renew-hint">{t("twoFactor.renewHint")}</p>
+            <div className="flex flex-wrap gap-2">
+              {status.method === "email" && <button type="button" className={buttonSecondary} disabled={busy} onClick={sendCode}>{t("twoFactor.sendCode")}</button>}
+              <input id="renew-code" autoFocus autoComplete="one-time-code" aria-describedby="renew-hint" className={`${inputClass} max-w-[12rem]`} value={renewCode} onChange={event => setRenewCode(event.target.value)} />
+              <button className={buttonPrimary} disabled={busy || !renewCode.trim()}>{t("twoFactor.confirm")}</button>
+              <button type="button" className={buttonSecondary} disabled={busy} onClick={() => { setRenewing(false); setRenewCode(""); }}>{t("twoFactor.cancel")}</button>
+            </div>
+          </form>}
           {!status.required && (
             <div className="border-t border-slate-100 pt-3 dark:border-slate-800">
               <label className="text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor="off-code">

@@ -134,7 +134,7 @@ export default function WizardShell({
 
   return (
     <SlotContext.Provider value={slot}>
-      <div className="wizard-shell space-y-4 sm:space-y-6">
+      <div className="wizard-shell page-enter space-y-4 sm:space-y-6">
         <header className="wizard-header">
           <div className="wizard-title-block">
             <div className="flex items-center gap-2">
@@ -157,6 +157,8 @@ export default function WizardShell({
             <Link to="/?choose=1" className="mt-1 block text-right text-xs text-slate-500 hover:underline dark:text-slate-400">{t("wizard.changeModality")}</Link>
           </div>
         </header>
+
+        {panel && <details className="wizard-mobile-summary"><summary>{t("studio.summary")}</summary><div>{panel}</div></details>}
 
         {/* `flex-row-reverse` puts the panel on the right on a wide screen
             while it stays first in the document, which is where it belongs on

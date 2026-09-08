@@ -453,8 +453,8 @@
     "historyDiscardConfirm": "Verwijderen en uitzetten"
   },
   "modality": {
-    "title": "Kies uw transportmodaliteit",
-    "intro": "Start een nieuwe zending door een modaliteit te kiezen. U voert als afzender de goederen in; de app leidt af wat erbij hoort en stelt het documentenpakket samen.",
+    "title": "Kies het vervoer",
+    "intro": "Kies een vervoerswijze. EMCargo stelt de passende documenten voor.",
     "road": "Wegtransport",
     "roadDesc": "CMR- en AVC-vrachtbrief, paklijst en afleverbon",
     "rail": "Spoortransport",
@@ -822,7 +822,9 @@
       "row_refused": "Regel {{row}}: {{reason}}"
     },
     "auth": {
-      "two_factor_required": "Deze installatie vereist tweestapsverificatie voor uw account. Stel die eerst in onder Instellingen, Mijn gegevens."
+      "two_factor_required": "Deze installatie vereist tweestapsverificatie voor uw account. Stel die eerst in onder Instellingen, Mijn gegevens.",
+      "two_factor_invalid_code": "Deze verificatiecode is niet geldig.",
+      "two_factor_inactive": "Tweestapsverificatie is niet actief."
     }
   },
   "instructions": {
@@ -1020,10 +1022,12 @@
     "sendCode": "Code mailen",
     "codeSent": "Er is een code naar uw e-mailadres gestuurd.",
     "turnOffHintMail": "Vraag eerst een code aan en vul die hieronder in. Een herstelcode werkt ook.",
-    "nudge": "Uw account heeft nog geen tweestapsverificatie. Alleen een wachtwoord is één gelekt hergebruik verwijderd van iemand anders in uw naam.",
+    "nudge": "Beveilig uw account met tweestapsverificatie.",
     "nudgeAction": "Nu instellen",
-    "nudgeRequired": "Deze installatie vereist tweestapsverificatie en uw account heeft die nog niet. Stel hem in zolang u nog kunt inloggen.",
-    "enforced": "Zolang uw account geen tweestapsverificatie heeft, is dit het enige scherm dat werkt. Stel die hieronder in."
+    "nudgeRequired": "Uw organisatie vereist tweestapsverificatie. Stel deze in om verder te werken.",
+    "enforced": "Zolang uw account geen tweestapsverificatie heeft, is dit het enige scherm dat werkt. Stel die hieronder in.",
+    "renewCode": "Bevestig met uw verificatiecode",
+    "renewHint": "Vul een actuele authenticatorcode, e-mailcode of herstelcode in. De nieuwe herstelcodes vervangen alle vorige."
   },
   "toast": {
     "undo": "Ongedaan maken",
@@ -1320,7 +1324,8 @@
       "trip.kept": "Rit bewaard",
       "trip.updated": "Bewaarde rit bijgewerkt",
       "trip.forgotten": "Bewaarde rit verwijderd",
-      "settings.history_discarded": "Historie geleegd voor het uitzetten"
+      "settings.history_discarded": "Historie geleegd voor het uitzetten",
+      "auth.recovery_codes_replaced": "Herstelcodes vervangen"
     }
   },
   "trips": {
@@ -1432,5 +1437,20 @@
     "updated": "Bijgewerkt",
     "documentsAvailable": "Documenten beschikbaar",
     "kept": "Bewaard"
+  },
+  "studio": {
+    "importTitle": "Goederenlijst importeren",
+    "importHint": "Plak uw goederenlijst uit Excel. EMCargo leest de regels en berekent het gewicht en volume.",
+    "otherModes": "Overige vervoerswijzen",
+    "quickFind": "Snel naar…",
+    "findPlaceholder": "Zoek een pagina of actie",
+    "workspace": "Werkruimte",
+    "summary": "Zendingoverzicht",
+    "loginTitle": "Welkom terug.",
+    "loginHint": "Log in om verder te gaan met uw zendingen.",
+    "loginBusy": "Inloggen…",
+    "historyPrivacy": "Met zendinghistorie ingeschakeld worden uw concepten en opgeslagen zendingen op deze installatie bewaard.",
+    "documentsSelected": "Gekozen: {{count}}",
+    "showOptions": "Opties bekijken"
   }
 }

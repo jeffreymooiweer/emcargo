@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.config import Settings, get_settings
 from app.core.database import get_db
 from app.core.deps import get_current_user
+from app.core.messages import error
 from app.core.ratelimit import limiter
 from app.core.security import (
     create_access_token,
@@ -405,6 +406,7 @@ def two_factor_start(
 
 
 @router.post("/two-factor/confirm")
+@limiter.limit("10/minute")
 def two_factor_confirm(
     request: Request,
     payload: TwoFactorConfirm,
@@ -431,14 +433,25 @@ def two_factor_confirm(
 
 
 @router.post("/two-factor/recovery-codes")
+@limiter.limit("10/minute")
 def two_factor_new_recovery_codes(
+    request: Request,
+    payload: TwoFactorConfirm,
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Fresh codes, replacing whatever is left of the old ones."""
+    """Fresh codes, after proving possession of the existing second factor.
+
+    A session alone must not be enough to mint a replacement second factor:
+    that would let a stolen session bypass the proof required to disable it.
+    """
     if not two_factor.is_active(db, user.id):
-        raise HTTPException(status_code=400, detail="Two-factor is not switched on.")
-    return {"recovery_codes": two_factor.replace_recovery_codes(db, user)}
+        raise error(400, "auth.two_factor_inactive")
+    if not two_factor.verify(db, user, payload.code):
+        raise error(400, "auth.two_factor_invalid_code")
+    codes = two_factor.replace_recovery_codes(db, user)
+    audit.record(db, "auth.recovery_codes_replaced", actor=user, request=request)
+    return {"recovery_codes": codes}
 
 
 @router.post("/two-factor/send-code")
@@ -475,6 +488,7 @@ def two_factor_send_code(
 
 
 @router.delete("/two-factor")
+@limiter.limit("10/minute")
 def two_factor_disable(
     request: Request,
     payload: TwoFactorConfirm,

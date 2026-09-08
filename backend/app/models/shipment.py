@@ -27,7 +27,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, func
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, column_property, mapped_column, relationship
 
 from app.core.database import Base
 from app.models.user import Department, User
@@ -66,6 +66,11 @@ class Shipment(Base):
     snapshot_json: Mapped[str] = mapped_column(Text, default="{}")
     bundle_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     export_json: Mapped[str] = mapped_column(Text, default="{}")
+
+    # A list needs document availability, never the document payload. This
+    # SQL expression adds no physical column and also handles empty bundles.
+    has_documents: Mapped[bool] = column_property(
+        bundle_json.is_not(None) & (bundle_json != ""))
 
     creator: Mapped[User | None] = relationship()
     department: Mapped[Department | None] = relationship()

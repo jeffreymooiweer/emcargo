@@ -2,6 +2,53 @@
 
 All notable changes are documented here, following [Semantic Versioning](https://semver.org/).
 
+## [2.1.0] — 2026-09-08
+
+### A quieter workspace
+
+- Introduce a consistent charcoal interface, restrained blue accents, clearer
+  typography, larger step targets, responsive goods rows and subtle motion that
+  respects reduced-motion preferences. Light mode remains supported.
+- Replace transport photo tiles with four clear transport choices. Preserve
+  custom organisation images and explain unavailable modes in a disclosure.
+- Add keyboard navigation with Ctrl/Cmd K, search and immediate page access.
+  Suggestions respect the current installation mode and account permissions.
+- Keep recommended documents visible; move additional documents and integrations
+  into disclosures without changing their selection or validation.
+- Make the shipment summary available on phones. Improve login labels, busy
+  feedback and compact account-security reminders in all four languages.
+- Load secondary pages on demand instead of shipping every screen at startup.
+
+### Reliability and security
+
+- Restore drafts and saved shipments reliably after delayed requests and page
+  remounts. Entry and autosave wait for restoration; failed reads can be retried
+  without overwriting existing work. Preserve goods when switching transport mode.
+- Keep private drafts accessible only to their author, including after an author
+  changes department. First publication shares a draft with the author's current
+  department; previously saved shipments keep their existing sharing scope.
+- Fetch shipment/trip list metadata without loading document JSON, using joined
+  relationships instead of per-row queries. No database migration is required.
+- Use local calendar-day boundaries for dashboard counts and shipment/trip
+  filters, including daylight-saving changes and database microseconds.
+- Require current second-factor proof before replacing recovery codes. Rate-limit
+  second-factor verification and record replacement in the audit log.
+- Default to same-origin access and explicit proxy trust. An origin wildcard,
+  including one in a list, never enables credentialed cross-origin requests.
+- Share strict quantity parsing between API validation, DG checks and IFTDGN:
+  `.5 L` stays 0.5 L; ranges, formulas and non-finite values are refused. Bound
+  quantity text before parsing to avoid excessive work on malformed input.
+
+### Upgrade notes
+
+- Reverse-proxy installations must explicitly set `TRUSTED_PROXY_HEADERS=true`
+  and the correct proxy count when forwarded headers are required. Set
+  `CORS_ALLOWED_ORIGINS` only for deliberately separate frontend origins.
+- Custom clients calling `POST /api/auth/two-factor/recovery-codes` must send
+  `{ "code": "<current verification code>" }`.
+- Containers remain exclusive to GHCR. See [configuration](docs/configuration.md)
+  and [the design review](docs/design/review-2.1.0.md) for validation and limitations.
+
 ## [2.0.0] — 2026-09-08
 
 ### EMCargo 2

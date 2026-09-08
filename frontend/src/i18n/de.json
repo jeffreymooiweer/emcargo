@@ -453,8 +453,8 @@
     "historyDiscardConfirm": "Löschen und ausschalten"
   },
   "modality": {
-    "title": "Wählen Sie Ihren Verkehrsträger",
-    "intro": "Starten Sie eine neue Sendung, indem Sie einen Verkehrsträger wählen. Als Absender erfassen Sie die Güter; die App leitet ab, was dazugehört, und stellt das Dokumentenpaket zusammen.",
+    "title": "Transportart wählen",
+    "intro": "Wählen Sie eine Transportart. EMCargo schlägt die passenden Dokumente vor.",
     "road": "Straßentransport",
     "roadDesc": "CMR- und AVC-Frachtbrief, Packliste und Lieferschein",
     "rail": "Schienentransport",
@@ -822,7 +822,9 @@
       "row_refused": "Zeile {{row}}: {{reason}}"
     },
     "auth": {
-      "two_factor_required": "Diese Installation verlangt eine Zwei-Faktor-Bestätigung für Ihr Konto. Richten Sie sie zuerst unter Einstellungen, Meine Daten ein."
+      "two_factor_required": "Diese Installation verlangt eine Zwei-Faktor-Bestätigung für Ihr Konto. Richten Sie sie zuerst unter Einstellungen, Meine Daten ein.",
+      "two_factor_invalid_code": "Dieser Bestätigungscode ist ungültig.",
+      "two_factor_inactive": "Die Zwei-Faktor-Verifizierung ist nicht aktiv."
     }
   },
   "instructions": {
@@ -1020,10 +1022,12 @@
     "sendCode": "Code senden",
     "codeSent": "Ein Code wurde an Ihre E-Mail-Adresse gesendet.",
     "turnOffHintMail": "Fordern Sie zuerst einen Code an und geben Sie ihn unten ein. Ein Wiederherstellungscode geht auch.",
-    "nudge": "Ihr Konto hat noch keine Zwei-Faktor-Authentifizierung. Ein Passwort allein ist nur eine geleakte Wiederverwendung davon entfernt, dass jemand anderes in Ihrem Namen handelt.",
+    "nudge": "Schützen Sie Ihr Konto mit Zwei-Faktor-Verifizierung.",
     "nudgeAction": "Jetzt einrichten",
-    "nudgeRequired": "Diese Installation verlangt eine Zwei-Faktor-Authentifizierung, und Ihr Konto hat noch keine. Richten Sie sie ein, solange Sie sich noch anmelden können.",
-    "enforced": "Solange Ihr Konto keine Zwei-Faktor-Bestätigung hat, ist dies der einzige Bildschirm, der funktioniert. Richten Sie sie unten ein."
+    "nudgeRequired": "Ihre Organisation verlangt eine Zwei-Faktor-Verifizierung. Richten Sie diese ein, um fortzufahren.",
+    "enforced": "Solange Ihr Konto keine Zwei-Faktor-Bestätigung hat, ist dies der einzige Bildschirm, der funktioniert. Richten Sie sie unten ein.",
+    "renewCode": "Mit Ihrem Bestätigungscode bestätigen",
+    "renewHint": "Geben Sie einen aktuellen App-, E-Mail- oder Wiederherstellungscode ein. Die neuen Wiederherstellungscodes ersetzen alle bisherigen."
   },
   "toast": {
     "undo": "Rückgängig",
@@ -1320,7 +1324,8 @@
       "trip.kept": "Fahrt gespeichert",
       "trip.updated": "Gespeicherte Fahrt aktualisiert",
       "trip.forgotten": "Gespeicherte Fahrt entfernt",
-      "settings.history_discarded": "Verlauf vor dem Ausschalten geleert"
+      "settings.history_discarded": "Verlauf vor dem Ausschalten geleert",
+      "auth.recovery_codes_replaced": "Wiederherstellungscodes ersetzt"
     }
   },
   "trips": {
@@ -1432,5 +1437,20 @@
     "updated": "Aktualisiert",
     "documentsAvailable": "Dokumente verfügbar",
     "kept": "Gespeichert"
+  },
+  "studio": {
+    "importTitle": "Warenliste importieren",
+    "importHint": "Fügen Sie Ihre Warenliste aus Excel ein. EMCargo liest die Zeilen und berechnet Gewicht und Volumen.",
+    "otherModes": "Weitere Verkehrsarten",
+    "quickFind": "Schnellzugriff",
+    "findPlaceholder": "Seite oder Aktion suchen",
+    "workspace": "Arbeitsbereich",
+    "summary": "Sendungsübersicht",
+    "loginTitle": "Willkommen zurück.",
+    "loginHint": "Melden Sie sich an, um Ihre Sendungen weiterzubearbeiten.",
+    "loginBusy": "Anmelden…",
+    "historyPrivacy": "Bei aktiviertem Sendungsverlauf werden Ihre Entwürfe und gespeicherten Sendungen in dieser Installation gespeichert.",
+    "documentsSelected": "Ausgewählt: {{count}}",
+    "showOptions": "Optionen anzeigen"
   }
 }

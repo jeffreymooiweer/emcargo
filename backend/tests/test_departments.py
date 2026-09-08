@@ -145,6 +145,90 @@ def test_keeping_again_keeps_the_original_department(db, three_shipments):
     assert record.reference == "SALES-1b"
 
 
+@pytest.mark.parametrize("viewer_id", [1, 3, 5])
+def test_direct_draft_addresses_remain_private_to_the_author(db, viewer_id):
+    """Hiding a draft from lists did not protect its predictable id: the
+    shared record helper let a colleague read, rewrite, export or delete it.
+    Administrators must not gain access to another person's unfinished entry
+    either; their broader department access applies only to kept shipments.
+    """
+    db.add(User(id=5, username="eve", email="eve@example.com", password_hash="x",
+                role="user", department_id=1))
+    db.commit()
+    payload = history.ShipmentIn(**shipment(draft=True))
+    record = history.keep(db, db.get(User, 2), payload)
+    record_id = record.id
+    original_snapshot = record.snapshot_json
+
+    with client_as(db, viewer_id) as client:
+        path = f"/api/shipments/{record_id}"
+        assert client.get(path).status_code == 404
+        assert client.get(f"{path}/export.json").status_code == 404
+        assert client.post(f"{path}/documents").status_code == 404
+        assert client.put(path, json=shipment()).status_code == 404
+        assert client.delete(path).status_code == 404
+        assert client.get("/api/shipments/draft").json() is None
+
+    db.expire_all()
+    unchanged = db.get(Shipment, record_id)
+    assert unchanged.is_draft is True
+    assert unchanged.created_by_id == 2
+    assert unchanged.snapshot_json == original_snapshot
+
+
+@pytest.mark.parametrize("new_department,new_colleague", [(2, 3), (None, 4)])
+def test_author_can_finish_a_draft_after_moving_departments(db, new_department, new_colleague):
+    """A running draft follows its author until it is completed. Applying
+    only the ordinary department guard to its id stranded an entry after a
+    transfer, even though the dedicated draft endpoint still restored it.
+    Its first publication belongs to the author's current department: sharing
+    an unfinished entry with the old department both exposed it to former
+    colleagues and immediately locked the author out of their own result.
+    """
+    record = history.keep(db, db.get(User, 2), history.ShipmentIn(**shipment(draft=True)))
+    record_id = record.id
+    db.add(User(id=5, username="eve", email="eve@example.com", password_hash="x",
+                role="user", department_id=1))
+    db.get(User, 2).department_id = new_department
+    db.commit()
+
+    with client_as(db, 2) as author:
+        path = f"/api/shipments/{record_id}"
+        assert author.get(path).json()["snapshot"] == shipment()["snapshot"]
+        assert author.get(f"{path}/export.json").status_code == 200
+        completed = author.put(path, json=shipment())
+        assert completed.status_code == 200, completed.text
+        assert completed.json()["is_draft"] is False
+        assert completed.json()["department_id"] == new_department
+        assert author.get("/api/shipments/draft").json() is None
+        assert author.get(path).status_code == 200
+
+    with client_as(db, 5) as old_colleague:
+        assert old_colleague.get(path).status_code == 404
+        assert old_colleague.get("/api/shipments").json()["total"] == 0
+    with client_as(db, new_colleague) as current_colleague:
+        assert current_colleague.get(path).status_code == 200
+        assert current_colleague.get("/api/shipments").json()["total"] == 1
+
+    with client_as(db, 1) as administrator:
+        assert administrator.get(path).status_code == 200
+
+
+def test_an_unassigned_colleague_cannot_delete_another_users_draft(db):
+    """An installation without departments is the default case. Matching
+    two NULL department ids must never grant ownership of a private draft.
+    """
+    db.get(User, 2).department_id = None
+    db.commit()
+    record = history.keep(db, db.get(User, 2), history.ShipmentIn(**shipment(draft=True)))
+    record_id = record.id
+    with client_as(db, 4) as colleague:
+        assert colleague.get(f"/api/shipments/{record_id}").status_code == 404
+        assert colleague.delete(f"/api/shipments/{record_id}").status_code == 404
+    with client_as(db, 2) as author:
+        assert author.delete(f"/api/shipments/{record_id}").status_code == 200
+
+
 # --- managing them ----------------------------------------------------------------
 
 

@@ -1,14 +1,14 @@
 """Making sure the app starts safely — not making sure it does not start.
 
 `APP_SECRET_KEY` signs the JWT that says a user is logged in. Its default value
-is in this repository, so an installation that never set it runs on a key
+was in this repository, so an installation that never set it ran on a key
 anybody can look up, and whoever holds that key writes themselves a valid admin
 token. That is an open front door, not a blemish.
 
 **What used to be here, and why that was wrong.** From v1.25.0 EMCargo
 refused to start in that case. The reasoning — nobody reads a warning in a log
-— was sound; the execution was not. This application's own defaults *are*
-`APP_SECRET_KEY=change-me` and `CORS_ALLOWED_ORIGINS=*`, and the Unraid
+— was sound; the execution was not. `APP_SECRET_KEY=change-me` and
+`CORS_ALLOWED_ORIGINS=*` were the application's own defaults, and the Unraid
 template leaves the key blank. So every installation that had not filled in
 those two by itself crashed on startup, in a container that exited too fast for
 the message to be read. Security gained nothing: the app was simply gone.
@@ -155,7 +155,7 @@ def configuration_warnings(settings) -> list[str]:
 
     warnings: list[str] = []
 
-    if settings.cors_allowed_origins.strip() == "*":
+    if "*" in {origin.strip() for origin in settings.cors_allowed_origins.split(",")}:
         warnings.append(
             "CORS_ALLOWED_ORIGINS is set to '*'. A wildcard is answered without "
             "credentials, so a call from another website cannot carry the login "

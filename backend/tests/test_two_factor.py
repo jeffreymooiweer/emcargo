@@ -408,6 +408,64 @@ def test_a_working_factor_is_not_restarted_without_a_code(signed_in, db):
     assert two_factor.enrolment_for(db, 1).secret == secret
 
 
+def test_a_session_alone_cannot_replace_recovery_codes(signed_in, db):
+    """Recovery codes are a second factor. Minting them with only a session
+    bypassed the code required to switch that factor off, allowing a stolen
+    session to replace the owner's backup proof without their phone."""
+    from app.models.two_factor import TwoFactorRecoveryCode
+
+    enable_totp(db)
+    previous = {row.code_hash for row in db.query(TwoFactorRecoveryCode).all()}
+    missing = signed_in.post("/api/auth/two-factor/recovery-codes")
+    refused = signed_in.post("/api/auth/two-factor/recovery-codes", json={"code": "WRONG-CODE"})
+    assert missing.status_code == 422
+    assert refused.status_code == 400
+    assert refused.json()["detail"]["code"] == "auth.two_factor_invalid_code"
+    assert {row.code_hash for row in db.query(TwoFactorRecoveryCode).all()} == previous
+
+
+@pytest.mark.parametrize("method", ["totp", "email", "recovery"])
+def test_replacing_recovery_codes_accepts_each_existing_proof_and_revokes_old_ones(signed_in, db, method):
+    """Someone who lost a phone can renew backups with an existing recovery
+    code; mailbox and authenticator users can do the same with their factor.
+    All old backups must cease to work, and no secret belongs in the audit."""
+    from app.models.audit import AuditEvent
+
+    user = db.get(User, 1)
+    row = two_factor.start_enrolment(db, user, "email" if method == "email" else "totp")
+    old_codes = two_factor.confirm_enrolment(db, user)
+    proof = (two_factor.issue_email_code(db, user.id) if method == "email" else
+             old_codes[0] if method == "recovery" else
+             two_factor.totp_at(row.secret, int(time.time() // 30)))
+    answer = signed_in.post("/api/auth/two-factor/recovery-codes", json={"code": proof})
+    assert answer.status_code == 200
+    fresh = answer.json()["recovery_codes"]
+    assert len(fresh) == two_factor.RECOVERY_CODE_COUNT
+    assert not set(fresh) & set(old_codes)
+    assert all(not two_factor.spend_recovery_code(db, user.id, code) for code in old_codes)
+    assert two_factor.spend_recovery_code(db, user.id, fresh[0])
+    events = db.query(AuditEvent).filter_by(action="auth.recovery_codes_replaced").all()
+    assert len(events) == 1
+    assert events[0].actor_id == user.id
+    assert all(code not in events[0].summary for code in [*old_codes, *fresh, proof])
+
+
+@pytest.mark.parametrize("method,path", [
+    ("POST", "/api/auth/two-factor/confirm"),
+    ("POST", "/api/auth/two-factor/recovery-codes"),
+    ("DELETE", "/api/auth/two-factor"),
+])
+def test_second_factor_management_limits_code_guesses(signed_in, db, monkeypatch, method, path):
+    """Protect every code-verifying management route, not only login. A
+    stolen session otherwise offers unlimited guesses of a six-digit TOTP."""
+    enable_totp(db)
+    monkeypatch.setattr(auth_route.limiter, "enabled", True)
+    statuses = [signed_in.request(method, path, json={"code": "WRONG-CODE"}).status_code
+                for _ in range(11)]
+    assert statuses[:10] == [400] * 10
+    assert statuses[10] == 429
+
+
 def test_an_administrator_can_clear_a_lost_factor(client, db):
     enable_totp(db, 2)
     app.dependency_overrides[require_admin] = lambda: db.get(User, 1)

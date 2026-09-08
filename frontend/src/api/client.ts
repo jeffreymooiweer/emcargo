@@ -166,9 +166,10 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ code }),
     }),
-  twoFactorNewRecoveryCodes: () =>
+  twoFactorNewRecoveryCodes: (code: string) =>
     request<{ recovery_codes: string[] }>("/auth/two-factor/recovery-codes", {
       method: "POST",
+      body: JSON.stringify({ code }),
     }),
   twoFactorDisable: (code: string) =>
     request<{ ok: boolean }>("/auth/two-factor", {

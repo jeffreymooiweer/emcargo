@@ -71,6 +71,8 @@ MESSAGES: dict[str, str] = {
         "This installation requires two-factor verification for your account. "
         "Set it up under Settings, My details, before doing anything else"
     ),
+    "auth.two_factor_invalid_code": "That verification code is not valid",
+    "auth.two_factor_inactive": "Two-factor verification is not switched on",
     # Equipment import, reported per row rather than as an HTTP error
     "equipment.row_weight_missing": "Row {row}: the weight is missing or unusable",
     # Articles import, reported per row

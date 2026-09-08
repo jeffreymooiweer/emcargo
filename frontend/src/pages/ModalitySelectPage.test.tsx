@@ -71,25 +71,15 @@ describe("de modaliteitkeuze", () => {
     }
   });
 
-  it("zet de overige tegels op slot in plaats van ze te verbergen", () => {
-    // Hiding them would raise the wrong question — "where did rail go?" — where
-    // the true answer is "not yet, and here is why".
+  it("explains unavailable modes in a disclosure without offering navigation", async () => {
     preferences.default_modality = undefined;
     renderAt("/?choose=1");
-    const tiles = screen.getAllByRole("button");
-    const locked = tiles.filter((tile) => tile.hasAttribute("disabled"));
-    expect(locked).toHaveLength(MODALITIES.length - AVAILABLE_MODALITIES.length);
-    expect(screen.getAllByText("modality.locked").length).toBe(
-      MODALITIES.length - AVAILABLE_MODALITIES.length,
-    );
-  });
-
-  it("doet niets als er op een vergrendelde tegel wordt geklikt", async () => {
-    preferences.default_modality = undefined;
-    renderAt("/?choose=1");
-    const tiles = screen.getAllByRole("button");
-    const locked = tiles.find((tile) => tile.hasAttribute("disabled"))!;
-    await userEvent.click(locked);
+    await userEvent.click(screen.getByText("studio.otherModes"));
+    for (const key of ["air", "multimodal"]) {
+      expect(screen.getByText(`modality.${key}`)).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: new RegExp(`modality.${key}`) })).not.toBeInTheDocument();
+    }
+    expect(screen.getAllByText("modality.lockedReason")).toHaveLength(2);
     expect(screen.queryByText("wizard")).not.toBeInTheDocument();
   });
 
@@ -132,8 +122,7 @@ describe("de modaliteitkeuze", () => {
 
 describe("de eigen tegelafbeeldingen", () => {
   it("toont een geüploade afbeelding in beide thema's en de standaard waar er geen is", () => {
-    // One uploaded picture replaces both the light and the dark default:
-    // nobody uploads a company photo twice. The other tiles keep their pair.
+    // Custom organisation images remain supported; other modes use vector icons.
     preferences.default_modality = undefined;
     branding.modalities = { road: "/api/branding/modality/road?v=42" };
     renderAt("/?choose=1");
@@ -142,8 +131,8 @@ describe("de eigen tegelafbeeldingen", () => {
     expect(sources).toContain("/api/branding/modality/road?v=42");
     expect(sources).not.toContain("/modalities/road-light.webp");
     expect(sources).not.toContain("/modalities/road-dark.webp");
-    expect(sources).toContain("/modalities/rail-light.webp");
-    expect(sources).toContain("/modalities/rail-dark.webp");
+    expect(sources).toHaveLength(1);
+    expect(screen.getByRole("button", { name: /modality.rail/ }).querySelector("svg")).not.toBeNull();
     branding.modalities = {};
   });
 });

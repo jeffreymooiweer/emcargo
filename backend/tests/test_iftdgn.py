@@ -170,6 +170,18 @@ def test_what_is_empty_is_absent():
     assert validate(segments, iftdgn.config()["structure"]) == []
 
 
+def test_a_leading_decimal_keeps_its_amount_and_ambiguous_quantities_block_export():
+    """The shared reader used to find the 5 in '.5 L', multiplying the
+    declared amount by ten; it also accepted the first number in formulas."""
+    product = {"un_number": "1203", "class": "3", "adr_total_quantity": ".5 L"}
+    segments = message(entries=[{"line_id": "1", "products": [product]}])
+    assert by_tag(segments, "MEA")[0].elements == ["AAE", ["AAF"], ["LTR", "0.5"]]
+    for invalid in ("10 x 20 L", "10-20 L", "999" * 150):
+        problems = iftdgn.problems(VALUES, [{"line_id": "1", "products": [
+            {**product, "adr_total_quantity": invalid}]}], "en")
+        assert any("not a number greater than zero" in item for item in problems)
+
+
 def test_the_regime_follows_the_modality_and_adn_says_so():
     sea = by_tag(message(profiles=("ADR", "IMDG"), modality="sea"), "DGS")[0]
     assert sea.elements[0] == "IMD"

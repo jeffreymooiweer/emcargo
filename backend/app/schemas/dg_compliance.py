@@ -22,6 +22,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic_core import PydanticCustomError
 
 from app.core.messages import text as message_text
+from app.services.quantities import parse_number
 
 
 class RegulatoryProfile(str, Enum):
@@ -208,20 +209,18 @@ class DangerousGoodsProduct(BaseModel):
         """
         if value is None or not str(value).strip():
             return value
-        import re
-
-        match = re.search(r"-?\d+(?:[.,]\d+)?", str(value))
+        number = parse_number(value)
         # PydanticCustomError puts the code in the `type` field of the 422
         # body and the parameters in `ctx`, which is exactly what the interface
         # needs to translate it. A plain ValueError would leave the message as
         # the only thing to go on — and that message can only be in one language.
-        if not match:
+        if number is None:
             raise PydanticCustomError(
                 "dg.quantity_not_a_number",
                 message_text("dg.quantity_not_a_number", value=repr(value)),
                 {"value": str(value)},
             )
-        if float(match.group(0).replace(",", ".")) <= 0:
+        if number <= 0:
             raise PydanticCustomError(
                 "dg.quantity_not_positive",
                 message_text("dg.quantity_not_positive", value=repr(value)),

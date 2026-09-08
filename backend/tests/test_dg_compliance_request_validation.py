@@ -63,9 +63,10 @@ def test_a_quantity_that_is_not_positive_is_refused(quantity):
     assert error.value.errors()[0]["type"] == "dg.quantity_not_positive"
 
 
-def test_a_quantity_without_a_number_is_refused():
+@pytest.mark.parametrize("quantity", ["a few drums", "10 x 20 L", "10-20 L", "1e3 kg", "999" * 150])
+def test_a_quantity_without_a_number_is_refused(quantity):
     with pytest.raises(ValidationError) as error:
-        request(un_number="1203", adr_total_quantity="a few drums")
+        request(un_number="1203", adr_total_quantity=quantity)
     assert error.value.errors()[0]["type"] == "dg.quantity_not_a_number"
 
 

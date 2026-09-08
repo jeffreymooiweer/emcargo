@@ -230,12 +230,22 @@ def test_a_short_password_is_refused_before_the_token_is_spent(client, sent):
 # --- the link ---------------------------------------------------------------
 
 
-def test_the_link_follows_the_proxy_that_the_browser_actually_used(client, sent):
+def test_the_link_follows_the_proxy_that_the_browser_actually_used(client, sent, monkeypatch):
+    monkeypatch.setattr(get_settings(), "trusted_proxy_headers", True)
     client.post("/api/auth/forgot-password", json={"identifier": "ada"},
                 headers={"x-forwarded-proto": "https",
                          "x-forwarded-host": "emcargo.example.com"})
     assert link_from(sent[0]).startswith(
         "https://emcargo.example.com/reset-password?token=")
+
+
+def test_an_untrusted_forwarded_host_cannot_redirect_password_reset_mail(client, sent, monkeypatch):
+    """An Internet caller can set forwarded headers when the backend port is
+    exposed directly. Its chosen hostname must not receive the reset token."""
+    monkeypatch.setattr(get_settings(), "trusted_proxy_headers", False)
+    client.post("/api/auth/forgot-password", json={"identifier": "ada"}, headers={
+        "x-forwarded-proto": "https", "x-forwarded-host": "attacker.example"})
+    assert link_from(sent[0]).startswith("http://testserver/reset-password?token=")
 
 
 def test_a_configured_address_wins_over_the_request(client, monkeypatch, db):

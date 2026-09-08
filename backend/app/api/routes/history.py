@@ -43,9 +43,18 @@ def _record(shipment_id: int, db: Session, viewer: User) -> Shipment:
     it exists.
     """
     record = db.get(Shipment, shipment_id)
-    if record is None or not departments.may_see(record, viewer):
-        raise HTTPException(status_code=404, detail="No such shipment")
-    return record
+    if record is not None:
+        # An unfinished entry belongs only to its author, even when an
+        # administrator or a colleague knows its id. Moving departments must
+        # not prevent that author from resuming and completing the draft.
+        visible = (
+            bool(viewer.id) and record.created_by_id == viewer.id
+            if record.is_draft
+            else departments.may_see(record, viewer)
+        )
+        if visible:
+            return record
+    raise HTTPException(status_code=404, detail="No such shipment")
 
 
 @router.get("", response_model=ShipmentPage)

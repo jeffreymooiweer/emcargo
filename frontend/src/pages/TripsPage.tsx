@@ -16,6 +16,7 @@ import { api, Department, TripDetail, TripSummary, User } from "../api/client";
 import { usePreferences } from "../settings/preferences";
 import ConfirmDialog from "../toast/ConfirmDialog";
 import { useToast } from "../toast/ToastProvider";
+import { localDateFilters } from "../utils/dateRanges";
 
 const panelClass = "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800";
 const inputClass =
@@ -102,8 +103,7 @@ function TripList({ language, admin }: { language: string; admin: boolean }) {
     try {
       const answer = await api.trips({
         q,
-        date_from: from ? `${from}T00:00:00` : undefined,
-        date_to: to ? `${to}T23:59:59` : undefined,
+        ...localDateFilters(from, to),
         page,
         per_page: PER_PAGE,
         department: admin ? department : undefined,

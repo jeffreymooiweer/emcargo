@@ -429,7 +429,7 @@ export default function ReviewLinesPanel({
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{t("review.intro")}</p>
           </div>
           {onImport && (
-            <div className="shrink-0">
+            <div className="goods-import w-full min-w-0">
               <GoodsImport
                 initialPaste={initialPaste}
                 hasLines={hasLines}
@@ -451,14 +451,12 @@ export default function ReviewLinesPanel({
         {/* Column names for the row below, on the widths where the row is one
             line. Every control carries its own name for a screen reader, so
             this is the sighted reader's half of the same labelling. */}
-        <div className="hidden gap-2 px-2 pb-1 lg:flex">
+        <div className="goods-column-head">
           <span className="w-6" />
           <span className={`${labelClass} min-w-[14rem] flex-1`}>{t("review.description")}</span>
           <span className={`${labelClass} w-20`}>{t("review.quantity")}</span>
           <span className={`${labelClass} w-32`}>{t("review.unit")}</span>
           <span className={`${labelClass} w-28 text-right`}>{t("review.weightTotal")}</span>
-          <span className={`${labelClass} w-28`}>{t("review.status")}</span>
-          <span className="w-[7.5rem]" />
         </div>
 
         {attention + unanswered > 0 && (
@@ -492,7 +490,7 @@ export default function ReviewLinesPanel({
                     : "border-slate-200 dark:border-slate-700"
                 }`}
               >
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="goods-fields">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                     {index + 1}
                   </span>
@@ -509,7 +507,7 @@ export default function ReviewLinesPanel({
                     />
                   </div>
                   <NumberInput
-                    className={`${fieldClass} w-20`}
+                    className={`${fieldClass} goods-quantity w-20`}
                     inputMode="decimal"
                     value={line.quantity}
                     aria-label={t("review.quantityOfLine", { number: index + 1 })}
@@ -520,7 +518,7 @@ export default function ReviewLinesPanel({
                       })
                     }
                   />
-                  <div className="w-32">
+                  <div className="goods-unit w-32">
                     <UnitSelect
                       value={line.unit}
                       onChange={(unit) => updateDraft(line.id, { unit })}
@@ -531,7 +529,7 @@ export default function ReviewLinesPanel({
                     />
                   </div>
                   <div
-                    className={`w-28 text-right text-sm tabular-nums ${
+                    className={`goods-weight w-28 text-right text-sm tabular-nums ${
                       stale ? "text-slate-400 dark:text-slate-500" : "text-slate-800 dark:text-slate-100"
                     }`}
                   >
@@ -544,7 +542,7 @@ export default function ReviewLinesPanel({
                       <span className="text-slate-400">—</span>
                     )}
                   </div>
-                  <div className="w-28">
+                  <div className="goods-outcome w-28">
                     {stale ? (
                       <span className="inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                         {t("review.toBeRechecked")}
@@ -557,7 +555,7 @@ export default function ReviewLinesPanel({
                       <span className="text-slate-400">—</span>
                     )}
                   </div>
-                  <div className="flex shrink-0 items-center gap-1">
+                  <div className="goods-actions flex shrink-0 items-center gap-1">
                     <RowAction
                       // A dangerous line has more behind the arrow than a
                       // plain one — its substance — and the button says so

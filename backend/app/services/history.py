@@ -22,11 +22,12 @@ from datetime import datetime
 from typing import Any
 
 from sqlalchemy import func, or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, defer, joinedload
 
 from app.core.config import get_settings
+from app.core.dates import utc_filter_bound
 from app.models.shipment import Shipment
-from app.models.user import User
+from app.models.user import Department, User
 from app.schemas.history import ShipmentDetail, ShipmentIn, ShipmentSummary
 from app.services import departments
 from app.services.documents.shipment_export import build_shipment_export
@@ -144,10 +145,13 @@ def keep(db: Session, user: User, payload: ShipmentIn,
             f"The shipment is {size / 1024 / 1024:.1f} MB, more than the "
             f"{MAX_RECORD_BYTES // 1024 // 1024} MB one kept shipment may be.")
 
-    # The keeper's department is copied at the moment of keeping and never
-    # moved afterwards: whose work it was, not whose it would be today.
+    # A private draft is not yet shared with any department. Its first
+    # publication uses the author's current department, even after a move;
+    # once kept, a shipment retains that department through later edits.
     record = existing or Shipment(created_by_id=user.id if user.id else None,
                                   department_id=getattr(user, "department_id", None))
+    if existing is not None and existing.is_draft and not payload.draft:
+        record.department_id = getattr(user, "department_id", None)
     _index(record, export, payload)
     # Saving the same row without the draft flag is what turns entry in
     # progress into a kept shipment; there is no separate act.
@@ -218,7 +222,7 @@ def summary(record: Shipment) -> ShipmentSummary:
         consignee_name=record.consignee_name,
         goods_count=record.goods_count,
         has_dangerous_goods=record.has_dangerous_goods,
-        has_documents=bool(record.bundle_json),
+        has_documents=bool(record.has_documents),
         is_draft=bool(record.is_draft),
         created_by=record.creator.username if record.creator else "",
         department_id=record.department_id,
@@ -259,12 +263,19 @@ def search(db: Session, viewer: User, q: str = "", modality: str = "",
     if modality:
         query = query.filter(Shipment.modality == modality)
     if date_from:
-        query = query.filter(Shipment.created_at >= date_from)
+        query = query.filter(Shipment.created_at >= utc_filter_bound(date_from))
     if date_to:
-        query = query.filter(Shipment.created_at <= date_to)
-    total = query.count()
+        query = query.filter(Shipment.created_at <= utc_filter_bound(date_to))
+    total = int(query.with_entities(func.count(Shipment.id)).scalar() or 0)
     per_page = max(1, min(int(per_page), PER_PAGE_MAX))
     page = max(1, int(page))
-    rows = (query.order_by(Shipment.created_at.desc(), Shipment.id.desc())
+    # Large saved documents stay on detail routes. Names are joined once
+    # rather than fetched again for every author and department in the page.
+    rows = (query.options(
+                defer(Shipment.snapshot_json), defer(Shipment.export_json),
+                defer(Shipment.bundle_json),
+                joinedload(Shipment.creator).load_only(User.username),
+                joinedload(Shipment.department).load_only(Department.name))
+            .order_by(Shipment.created_at.desc(), Shipment.id.desc())
             .offset((page - 1) * per_page).limit(per_page).all())
     return rows, total

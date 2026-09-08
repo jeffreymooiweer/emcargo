@@ -453,8 +453,8 @@
     "historyDiscardConfirm": "Delete and switch off"
   },
   "modality": {
-    "title": "Choose your transport modality",
-    "intro": "Start a new shipment by choosing a modality. As the consignor you enter the goods; the app derives what belongs to them and assembles the document pack.",
+    "title": "Choose your transport",
+    "intro": "Choose a transport mode. EMCargo suggests the documents you need.",
     "road": "Road transport",
     "roadDesc": "CMR and AVC waybill, packing list and delivery note",
     "rail": "Rail transport",
@@ -822,7 +822,9 @@
       "row_refused": "Row {{row}}: {{reason}}"
     },
     "auth": {
-      "two_factor_required": "This installation requires two-factor verification for your account. Set it up first under Settings, My details."
+      "two_factor_required": "This installation requires two-factor verification for your account. Set it up first under Settings, My details.",
+      "two_factor_invalid_code": "That verification code is not valid.",
+      "two_factor_inactive": "Two-factor verification is not active."
     }
   },
   "instructions": {
@@ -1020,10 +1022,12 @@
     "sendCode": "Send a code",
     "codeSent": "A code has been sent to your e-mail address.",
     "turnOffHintMail": "Ask for a code first and type it below. A recovery code works too.",
-    "nudge": "Your account has no two-factor authentication yet. A password alone is one leaked reuse away from somebody else acting in your name.",
+    "nudge": "Protect your account with two-factor verification.",
     "nudgeAction": "Set it up",
-    "nudgeRequired": "This installation requires two-factor authentication and your account does not have it yet. Set it up while you can still sign in.",
-    "enforced": "Until your account has two-factor verification, this is the only screen that works. Set it up below."
+    "nudgeRequired": "Your organisation requires two-factor verification. Set it up to continue.",
+    "enforced": "Until your account has two-factor verification, this is the only screen that works. Set it up below.",
+    "renewCode": "Confirm with your verification code",
+    "renewHint": "Enter a current authenticator, email or recovery code. The new recovery codes replace all previous codes."
   },
   "toast": {
     "undo": "Undo",
@@ -1320,7 +1324,8 @@
       "trip.kept": "Trip kept",
       "trip.updated": "Kept trip updated",
       "trip.forgotten": "Kept trip removed",
-      "settings.history_discarded": "History emptied before switching off"
+      "settings.history_discarded": "History emptied before switching off",
+      "auth.recovery_codes_replaced": "Recovery codes replaced"
     }
   },
   "trips": {
@@ -1432,5 +1437,20 @@
     "updated": "Updated",
     "documentsAvailable": "Documents available",
     "kept": "Saved"
+  },
+  "studio": {
+    "importTitle": "Import a goods list",
+    "importHint": "Paste your goods list from Excel. EMCargo reads the rows and calculates weight and volume.",
+    "otherModes": "Other transport modes",
+    "quickFind": "Quick access",
+    "findPlaceholder": "Find a page or action",
+    "workspace": "Workspace",
+    "summary": "Shipment summary",
+    "loginTitle": "Welcome back.",
+    "loginHint": "Sign in to continue with your shipments.",
+    "loginBusy": "Signing in…",
+    "historyPrivacy": "With shipment history enabled, your drafts and saved shipments are stored on this installation.",
+    "documentsSelected": "Selected: {{count}}",
+    "showOptions": "View options"
   }
 }

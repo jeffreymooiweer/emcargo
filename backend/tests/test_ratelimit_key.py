@@ -121,6 +121,19 @@ def test_the_header_is_ignored_when_it_is_not_trusted(settings, monkeypatch):
         peer="203.0.113.1", forwarded="1.2.3.4")) == "203.0.113.1"
 
 
+def test_direct_deployments_ignore_forwarded_headers_by_default(monkeypatch):
+    """A fresh deployment may expose its port directly. Changing a forged
+    header must not provide a fresh password-guessing budget by default."""
+    monkeypatch.delenv("TRUSTED_PROXY_HEADERS", raising=False)
+    get_settings.cache_clear()
+    try:
+        assert get_settings().trusted_proxy_headers is False
+        assert client_address(_Request(peer="203.0.113.1", forwarded="1.2.3.4")) == "203.0.113.1"
+        assert client_address(_Request(peer="203.0.113.1", forwarded="5.6.7.8")) == "203.0.113.1"
+    finally:
+        get_settings.cache_clear()
+
+
 def test_no_header_means_the_peer(settings, monkeypatch):
     configure(settings, monkeypatch)
     assert client_address(_Request(peer="203.0.113.1")) == "203.0.113.1"
@@ -194,6 +207,9 @@ def test_every_rate_limit_in_the_application_in_one_table():
         "login": "10 per 1 minute",
         "login_two_factor": "10 per 1 minute",
         "two_factor_send_code": "5 per 1 minute",
+        "two_factor_confirm": "10 per 1 minute",
+        "two_factor_new_recovery_codes": "10 per 1 minute",
+        "two_factor_disable": "10 per 1 minute",
         "forgot_password": "5 per 1 minute",
         "reset_password_check": "30 per 1 minute",
         "reset_password": "10 per 1 minute",
@@ -240,7 +256,7 @@ def test_mailing_is_held_tighter_than_the_bundle_it_sends():
         < per_minute(ratelimit.DOCUMENT_BUNDLE)
 
 
-def test_two_callers_behind_one_proxy_get_their_own_budget_end_to_end():
+def test_two_callers_behind_one_proxy_get_their_own_budget_end_to_end(settings, monkeypatch):
     """The whole fix, measured where it matters: through a real request.
 
     Sign-in allows ten a minute. Eleven from one address is a 429; the eleventh
@@ -253,6 +269,8 @@ def test_two_callers_behind_one_proxy_get_their_own_budget_end_to_end():
     from fastapi.testclient import TestClient
 
     from app.main import app
+
+    configure(settings, monkeypatch, trust=True)
 
     def sign_in(client, address):
         return client.post(

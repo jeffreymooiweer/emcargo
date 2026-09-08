@@ -89,6 +89,16 @@ them through the same rules: `1.250,5 L` and `1,250.5` are both 1250.5, `1.250` 
 positive; it is named as the problem it is. The rules are written out in
 `backend/app/services/quantities.py`.
 
+Since 2.1.0 the complete quantity must be one finite number, optionally followed by
+a textual unit. Leading decimals such as `.5 L` and `,5 L` mean `0.5 L`; previously
+they could be read as `5 L`. Formulas (`10 x 20 L`), ranges (`10-20 L`), scientific
+notation (`1e3 L`), prose before a number, space-grouped thousands (`1 250 L`) and
+overflowing values are refused. Write the actual total using the separators above,
+for example `200 L` or `1250 L`. Imported older values using these unsupported forms
+must be corrected before export; the application no longer guesses their meaning.
+Quantity text is limited to 256 characters before parsing, keeping malformed
+input bounded even when it contains long runs of whitespace.
+
 **The character set.** UNOC is ISO 8859-1. A character outside it — an emoji, a letter
 from another script — is replaced by `?` *before* the service characters are released,
 so it travels as `??` and reads back as a plain question mark. The v1.189.0 release

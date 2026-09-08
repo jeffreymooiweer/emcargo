@@ -6,14 +6,8 @@ import { ModalityIcon } from "../components/WizardShell";
 import { HomeIcon, PlusIcon, ShipmentsIcon, TripsIcon, ImportIcon } from "../components/icons";
 import { usePreferences } from "../settings/preferences";
 import { readSnapshot } from "../wizard/snapshot";
+import { localDayRange } from "../utils/dateRanges";
 import { AVAILABLE_MODALITIES, isModalityAvailable } from "./ModalitySelectPage";
-
-/** Counts use the user's calendar day, not a UTC day or a partial result page. */
-function today() {
-  const now = new Date();
-  const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  return { from: date, to: date };
-}
 
 export default function OverviewPage() {
   const { t, i18n } = useTranslation();
@@ -33,7 +27,7 @@ export default function OverviewPage() {
     if (!history) return;
     let alive = true;
     setLoading(true); setError(false);
-    const day = today();
+    const day = localDayRange();
     const fail = () => { if (alive) setError(true); };
     api.runningDraft().then((value) => { if (alive) setDraft(value); }).catch(fail);
     api.shipments({ per_page: 5, page: 1 })
@@ -61,7 +55,7 @@ export default function OverviewPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="page-enter space-y-6">
       <div className="page-heading">
         <div>
           <h2>{t(`overview.${greeting}`)}</h2>
@@ -75,9 +69,9 @@ export default function OverviewPage() {
       </div>}
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
         <div className="min-w-0 space-y-6">
-          {draft && <section data-testid="resume-entry" className="surface p-5 sm:p-6">
+          {draft && <section data-testid="resume-entry" className="surface overview-resume p-5 sm:p-6">
             <h3 className="surface-title">{t("overview.resumeTitle")}</h3>
-            <div className="mt-4 flex flex-wrap items-center gap-4 rounded-xl border border-brand-200 bg-brand-50/40 p-4 dark:border-slate-700 dark:bg-slate-950/40">
+            <div className="overview-resume-content">
               <span className="icon-tile"><ModalityIcon modality={draftModality} className="h-6 w-6" /></span>
               <div className="min-w-0 flex-1 basis-44">
                 <p className="break-words font-semibold">{draft.reference || draft.consignee_name || t("wizard.newShipment")}</p>
@@ -127,13 +121,13 @@ export default function OverviewPage() {
           {history && <section className="surface p-5">
             <h3 className="surface-title">{t("overview.todayTitle")}</h3>
             <div className="mt-4 space-y-3">
-              {[{ label: "overview.todayShipments", value: counts?.shipments, icon: ShipmentsIcon, to: "/shipments" }, { label: "overview.todayTrips", value: counts?.trips, icon: TripsIcon, to: "/trips" }].map(({ label, value, icon: Icon, to }) => <Link key={label} to={to} className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 hover:border-brand-400 dark:border-slate-700">
+              {[{ label: "overview.todayShipments", value: counts?.shipments, icon: ShipmentsIcon, to: "/shipments" }, { label: "overview.todayTrips", value: counts?.trips, icon: TripsIcon, to: "/trips" }].map(({ label, value, icon: Icon, to }) => <Link key={label} to={to} className="overview-metric">
                 <span className="icon-tile"><Icon className="h-5 w-5" /></span>
                 <div><p className="text-2xl font-semibold tabular-nums">{value ?? "—"}</p><p className="text-xs text-slate-500 dark:text-slate-400">{t(label)}</p></div>
               </Link>)}
             </div>
           </section>}
-          <section className="surface p-5">
+          <section className="surface overview-quick p-5">
             <h3 className="surface-title">{t("overview.startTitle")}</h3>
             <div className="mt-4 space-y-2">
               <Link to={`/wizard/${preferred}?input=paste`} className="action-secondary w-full justify-between"><span className="flex items-center gap-2"><ImportIcon className="h-5 w-5" />{t("overview.paste")}</span><span aria-hidden="true">→</span></Link>

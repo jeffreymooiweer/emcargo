@@ -24,9 +24,17 @@ function renderAt(path = "/wizard/road", custom = false) {
   </BrandingContext.Provider>);
 }
 
-beforeEach(() => { vi.clearAllMocks(); config.mode = "organisation"; config.publicSettings.history_enabled = true; api.health.mockResolvedValue({ version: "1.206.2" }); api.logout.mockResolvedValue({ ok: true }); });
+beforeEach(() => { vi.spyOn(window, "scrollTo").mockImplementation(() => {}); vi.clearAllMocks(); config.mode = "organisation"; config.publicSettings.history_enabled = true; api.health.mockResolvedValue({ version: "1.206.2" }); api.logout.mockResolvedValue({ ok: true }); });
 
 describe("the approved EMCargo navigation", () => {
+  it("starts a newly selected page at the top without moving an unchanged page", async () => {
+    renderAt();
+    expect(window.scrollTo).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole("link", { name: "nav.new" }));
+    expect(screen.getByText("chooser")).toBeInTheDocument();
+    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "instant" });
+  });
+
   it("keeps the labelled rail open in the wizard as shown in the mockup", () => {
     renderAt();
     expect(screen.getByRole("button", { name: "nav.collapseMenu" })).toHaveAttribute("aria-expanded", "true");
