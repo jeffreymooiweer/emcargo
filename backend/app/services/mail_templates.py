@@ -36,7 +36,7 @@ LOGO_PATH = Path(__file__).resolve().parent.parent / "assets" / "logo.png"
 #: means the reader's mail client calls this server — which is a tracking
 #: pixel by accident, and a broken image on an installation that is not
 #: reachable from the internet.
-LOGO_CID = "cargopilot-logo"
+LOGO_CID = "emcargo-logo"
 
 
 #: The copy glyph beside a sign-in code. A PNG rather than the inline SVG the
@@ -44,7 +44,7 @@ LOGO_CID = "cargopilot-logo"
 #: application's own drawing, rendered by scripts/render_mail_icons.py from the
 #: same paths as ReviewLinesPanel.tsx, so no third-party licence travels here.
 COPY_ICON_PATH = Path(__file__).resolve().parent.parent / "assets" / "copy.png"
-COPY_ICON_CID = "cargopilot-copy"
+COPY_ICON_CID = "emcargo-copy"
 
 
 @lru_cache(maxsize=1)

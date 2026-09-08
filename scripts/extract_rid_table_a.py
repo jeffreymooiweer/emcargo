@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Read table A of RID 3.2.1 out of the editions in the regulations store.
 
-The UN cards fail honestly for rail because CargoPilot's table A is the
+The UN cards fail honestly for rail because EMCargo's table A is the
 ADR's: generating a RID card from a road row would relabel road data as
 rail data (columns (12) to (20) are the rail's own — tank codes, transport
 category, the W/VC/CW/CE provisions, the hazard number can all differ).
@@ -51,9 +51,9 @@ except ImportError:  # pragma: no cover - runner installs it
     fitz = None
 
 STORE = Path(
-    os.environ.get("CARGOPILOT_REGULATIONS_DIR")
+    os.environ.get("EMCARGO_REGULATIONS_DIR")
     or ("/data/regulations" if Path("/data").is_dir()
-        else "/tmp/cargopilot-regulations"))
+        else "/tmp/emcargo-regulations"))
 
 SEED = Path(__file__).resolve().parents[1] / "backend" / "seed" / "dg"
 

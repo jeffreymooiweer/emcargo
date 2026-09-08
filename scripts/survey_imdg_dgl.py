@@ -38,7 +38,7 @@ from collections import Counter
 from pathlib import Path
 
 SOURCE_URL = "https://www.cepa.be/wp-content/uploads/IMDG_Code-amdt_42_24.pdf"
-UA = {"User-Agent": "CargoPilot data survey (github.com/jeffreymooiweer/CargoPilot)"}
+UA = {"User-Agent": "EMCargo data survey (github.com/jeffreymooiweer/emcargo)"}
 CARD_DATA = Path(__file__).resolve().parents[1] / "backend" / "seed" / "dg" / "card_data.json"
 
 # A page of the list carries these headings. They are not all on every page — the

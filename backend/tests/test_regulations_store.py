@@ -87,7 +87,7 @@ def test_de_werkstroom_haalt_op_wat_het_register_kent():
     workflow = (ROOT / ".github" / "workflows" / "fetch-regulations.yml").read_text(
         encoding="utf-8")
     assert "regulations_store.py fetch" in workflow
-    assert "/tmp/cargopilot-regulations" in workflow
+    assert "/tmp/emcargo-regulations" in workflow
 
 
 def test_het_gereedschap_meldt_de_stand(tmp_path):
@@ -96,7 +96,7 @@ def test_het_gereedschap_meldt_de_stand(tmp_path):
     result = subprocess.run(
         [sys.executable, str(ROOT / "scripts" / "regulations_store.py"), "status"],
         capture_output=True, text=True,
-        env={"PATH": "/usr/bin:/bin", "CARGOPILOT_REGULATIONS_DIR": str(tmp_path)},
+        env={"PATH": "/usr/bin:/bin", "EMCARGO_REGULATIONS_DIR": str(tmp_path)},
     )
     assert "store:" in result.stdout
     for doc in register()["documents"]:

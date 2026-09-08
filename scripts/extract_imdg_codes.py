@@ -37,7 +37,7 @@ SOURCE_URL = "https://www.cepa.be/wp-content/uploads/IMDG_Code-amdt_42_24.pdf"
 SOURCE_NAME = ("IMO-resolutie MSC.556(108), aangenomen 23 mei 2024 — Amendments to the "
                "International Maritime Dangerous Goods (IMDG) Code, Amendment 42-24, "
                "in werking sinds 1 januari 2026")
-UA = {"User-Agent": "CargoPilot data extraction (github.com/jeffreymooiweer/CargoPilot)"}
+UA = {"User-Agent": "EMCargo data extraction (github.com/jeffreymooiweer/emcargo)"}
 
 # Each series with the heading the section starts on and the pattern of its codes.
 SECTIONS = [

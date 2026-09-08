@@ -43,7 +43,7 @@ import { useToast } from "../toast/ToastProvider";
 /** Where the second factor is set up. */
 export const TWO_FACTOR_PANEL = "/settings?tab=details";
 
-export const NUDGED_KEY = "cargopilot-2fa-nudged";
+export const NUDGED_KEY = "emcargo-2fa-nudged";
 
 /** Called on logout, so the next sign-in is nudged again. */
 export function clearTwoFactorNudge() {

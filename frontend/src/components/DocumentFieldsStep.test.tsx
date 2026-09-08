@@ -7,7 +7,7 @@
  *
  * **Next tells first.** A step with required fields still empty says which, on
  * the fields themselves and in a summary above them — and then lets the user go
- * on anyway, because CargoPilot does not block a document it cannot finish; the
+ * on anyway, because EMCargo does not block a document it cannot finish; the
  * export step keeps saying what is missing and the server has the last word.
  * Nothing is marked while somebody is still typing: that is the difference
  * between telling and nagging.

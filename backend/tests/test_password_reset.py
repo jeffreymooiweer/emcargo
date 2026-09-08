@@ -64,7 +64,7 @@ def sent(db, monkeypatch):
     messages: list[dict] = []
     settings = InstanceSettings(
         mail_enabled=True, mail_host="smtp.example.com",
-        mail_from="cargopilot@example.com")
+        mail_from="emcargo@example.com")
     monkeypatch.setattr(auth_route, "instance_settings", lambda db: settings)
     monkeypatch.setattr(
         auth_route.mail, "send",
@@ -233,9 +233,9 @@ def test_a_short_password_is_refused_before_the_token_is_spent(client, sent):
 def test_the_link_follows_the_proxy_that_the_browser_actually_used(client, sent):
     client.post("/api/auth/forgot-password", json={"identifier": "ada"},
                 headers={"x-forwarded-proto": "https",
-                         "x-forwarded-host": "cargopilot.example.com"})
+                         "x-forwarded-host": "emcargo.example.com"})
     assert link_from(sent[0]).startswith(
-        "https://cargopilot.example.com/reset-password?token=")
+        "https://emcargo.example.com/reset-password?token=")
 
 
 def test_a_configured_address_wins_over_the_request(client, monkeypatch, db):
@@ -245,8 +245,8 @@ def test_a_configured_address_wins_over_the_request(client, monkeypatch, db):
     messages: list[dict] = []
     settings = InstanceSettings(
         mail_enabled=True, mail_host="smtp.example.com",
-        mail_from="cargopilot@example.com",
-        public_url="https://cargopilot.nucraid.nl/")
+        mail_from="emcargo@example.com",
+        public_url="https://emcargo.nucraid.nl/")
     monkeypatch.setattr(auth_route, "instance_settings", lambda db: settings)
     monkeypatch.setattr(
         auth_route.mail, "send",
@@ -256,7 +256,7 @@ def test_a_configured_address_wins_over_the_request(client, monkeypatch, db):
     client.post("/api/auth/forgot-password", json={"identifier": "ada"},
                 headers={"x-forwarded-host": "internal-container:8000"})
     assert link_from(messages[0]).startswith(
-        "https://cargopilot.nucraid.nl/reset-password?token=")
+        "https://emcargo.nucraid.nl/reset-password?token=")
 
 
 def test_the_message_says_what_to_do_and_what_not_doing_it_means(client, sent):
@@ -283,7 +283,7 @@ def test_a_refusing_mail_server_does_not_change_the_answer(client, db, monkeypat
     the administrator reads it in the log."""
     settings = InstanceSettings(
         mail_enabled=True, mail_host="smtp.example.com",
-        mail_from="cargopilot@example.com")
+        mail_from="emcargo@example.com")
     monkeypatch.setattr(auth_route, "instance_settings", lambda db: settings)
 
     def refusing(*args, **kwargs):
@@ -399,7 +399,7 @@ def test_a_refused_invitation_reports_the_reason_and_keeps_the_account(db, monke
     monkeypatch.setattr(
         users_route, "instance_settings",
         lambda db: InstanceSettings(mail_enabled=True, mail_host="smtp.example.com",
-                                    mail_from="cargopilot@example.com"))
+                                    mail_from="emcargo@example.com"))
 
     def refusing(*args, **kwargs):
         raise users_route.mail.MailError("Could not reach smtp.example.com:587")

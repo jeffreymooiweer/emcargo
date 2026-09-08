@@ -48,7 +48,7 @@ jobs:
       # a runner can reach.
       - uses: actions/cache/restore@v4
         with:
-          path: /tmp/cargopilot-regulations
+          path: /tmp/emcargo-regulations
           key: regulations-${{ github.run_id }}
           restore-keys: |
             regulations-
@@ -62,7 +62,7 @@ jobs:
       - uses: actions/cache/save@v4
         if: always()
         with:
-          path: /tmp/cargopilot-regulations
+          path: /tmp/emcargo-regulations
           key: regulations-${{ github.run_id }}
 
       - name: Cut the models along the pinned page ranges

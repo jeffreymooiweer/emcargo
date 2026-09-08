@@ -1,7 +1,7 @@
 """A check that did not run must not look like a check that passed.
 
 Two gaps, the same shape. The Q check of IATA 5.0.2.11 only computes when the
-user fills in M, and that is unavoidable: CargoPilot does not have the quantity
+user fills in M, and that is unavoidable: EMCargo does not have the quantity
 tables of the DGR. What *was* avoidable is that it happened silently.
 
 v1.30.0 already said so on the screen, but in two places not far enough:

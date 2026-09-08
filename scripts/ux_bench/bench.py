@@ -23,10 +23,10 @@ import requests
 
 #: Where the application under measurement is answering, and where the run
 #: writes its numbers and screenshots. Both can be pointed elsewhere.
-BASE = os.environ.get("CARGOPILOT_BENCH_URL", "http://127.0.0.1:8765")
-OUT = Path(os.environ.get("CARGOPILOT_BENCH_OUT", "bench-out"))
+BASE = os.environ.get("EMCARGO_BENCH_URL", "http://127.0.0.1:8765")
+OUT = Path(os.environ.get("EMCARGO_BENCH_OUT", "bench-out"))
 #: Playwright finds its own browser unless one is named here.
-CHROME = os.environ.get("CARGOPILOT_BENCH_CHROME") or None
+CHROME = os.environ.get("EMCARGO_BENCH_CHROME") or None
 
 
 @dataclass
@@ -166,8 +166,8 @@ STEP_ORDER = {"Goederen": 0, "Gevaarlijke stoffen": 1, "Zendinggegevens": 2, "Ex
 def sign_in() -> requests.Session:
     session = requests.Session()
     answer = session.post(f"{BASE}/api/auth/login", json={
-        "username": os.environ.get("CARGOPILOT_BENCH_USER", "root"),
-        "password": os.environ.get("CARGOPILOT_BENCH_PASSWORD", "Root-pass-123")})
+        "username": os.environ.get("EMCARGO_BENCH_USER", "root"),
+        "password": os.environ.get("EMCARGO_BENCH_PASSWORD", "Root-pass-123")})
     assert answer.status_code == 200, answer.text
     return session
 

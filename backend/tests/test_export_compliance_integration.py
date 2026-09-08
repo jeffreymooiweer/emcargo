@@ -154,7 +154,7 @@ def test_the_air_declaration_carries_the_iata_packing_instruction():
 def test_the_authorization_reaches_the_document():
     """Under which approval or exemption the consignment may fly.
 
-    The template CargoPilot fills in has no separate field for that — the
+    The template EMCargo fills in has no separate field for that — the
     Authorization box of the DGD sits inside the goods table — so it goes as a
     named line of its own below that table. Omitting is not an option: without
     that reference, a consignment that needs one cannot be offered.

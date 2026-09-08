@@ -44,7 +44,7 @@ jobs:
       # live in this cache; restoring it usually spares unece.org a request.
       - uses: actions/cache/restore@v4
         with:
-          path: /tmp/cargopilot-regulations
+          path: /tmp/emcargo-regulations
           key: regulations-${{ github.run_id }}
           restore-keys: |
             regulations-
@@ -61,7 +61,7 @@ jobs:
       - uses: actions/cache/save@v4
         if: always()
         with:
-          path: /tmp/cargopilot-regulations
+          path: /tmp/emcargo-regulations
           key: regulations-${{ github.run_id }}
 
       # Provision texts first: the two extractions are independent and one
@@ -69,7 +69,7 @@ jobs:
       - name: Extract V/CV/S provision texts (Volume II)
         run: |
           python scripts/extract_adr_provision_texts.py \
-            --pdf /tmp/cargopilot-regulations/adr2.pdf \
+            --pdf /tmp/emcargo-regulations/adr2.pdf \
             --out backend/seed/dg/adr_provision_texts.json \
             --source "ADR 2025, UNECE English edition (ECE/TRANS/352 Vol. II), sections 7.2.4, 7.5.11 and 8.5" \
             --lenient
@@ -78,7 +78,7 @@ jobs:
         if: always()
         run: |
           python scripts/extract_adn_provision_texts.py \
-            --pdf /tmp/cargopilot-regulations/adn.pdf \
+            --pdf /tmp/emcargo-regulations/adn.pdf \
             --out backend/seed/dg/adn_provision_texts.json \
             --source "ADN 2025, UNECE English edition, section 7.1.6" \
             --lenient
@@ -89,8 +89,8 @@ jobs:
         if: always()
         run: |
           python scripts/extract_adr_label_models.py \
-            --vol1 /tmp/cargopilot-regulations/adr2.pdf \
-            --vol-adr1 /tmp/cargopilot-regulations/adr1.pdf \
+            --vol1 /tmp/emcargo-regulations/adr2.pdf \
+            --vol-adr1 /tmp/emcargo-regulations/adr1.pdf \
             --out scripts/un_cards/assets/labels \
             --allow-missing
 

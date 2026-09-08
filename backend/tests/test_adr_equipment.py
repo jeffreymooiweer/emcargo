@@ -2,7 +2,7 @@
 
 Equipment was the one heading in `docs/dg-coverage.md` that named itself "the
 most common real-world failure" and was absent from every mode. It was absent
-for a reason worth stating: CargoPilot cannot see a vehicle, so it can never
+for a reason worth stating: EMCargo cannot see a vehicle, so it can never
 establish that a wheel chock is in the cab.
 
 What it *can* do is derive the list, and that turns out to be most of the value.
@@ -81,7 +81,7 @@ def test_the_extinguisher_table_is_the_one_in_the_book():
 
 
 def test_a_load_over_the_threshold_gets_the_whole_table():
-    """The maximum permissible mass is a property of the vehicle and CargoPilot
+    """The maximum permissible mass is a property of the vehicle and EMCargo
     does not know it, so all three rows are given rather than one answer."""
     result = check_compliance(loaded("1203", "400"), ["ADR"], "nl")
     extinguisher = result["adr_equipment"]["items"][0]

@@ -71,7 +71,7 @@ beforeEach(() => {
   api.shipment.mockImplementation(async (id: number) => ({
     ...kept.find((s) => s.id === id)!,
     snapshot: { version: 1 },
-    export: { format: "cargopilot.shipment", documents: ["cmr"] },
+    export: { format: "emcargo.shipment", documents: ["cmr"] },
   }));
   api.forgetShipment.mockResolvedValue({ ok: true });
   api.departments.mockResolvedValue([{ id: 1, name: "Sales", users: 2, shipments: 5 }]);

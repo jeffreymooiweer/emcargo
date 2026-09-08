@@ -2,7 +2,7 @@ name: Extract RID shunting models
 
 # Reads which substances carry the bracketed shunting models 13 and 15 in
 # column (5) of RID table A — the per-substance half of RID 5.3.4 that
-# CargoPilot has named as a condition since v1.121.0 because its table is the
+# EMCargo has named as a condition since v1.121.0 because its table is the
 # ADR's, which carries neither model. The RID PDFs live in the Actions cache
 # where the fetch workflow put them; the development container cannot reach
 # the publisher, so the reading happens here and is printed to the log.
@@ -53,7 +53,7 @@ jobs:
       - name: Volumes already fetched
         uses: actions/cache/restore@v4
         with:
-          path: /tmp/cargopilot-regulations
+          path: /tmp/emcargo-regulations
           key: regulations-${{ github.run_id }}
           restore-keys: |
             regulations-

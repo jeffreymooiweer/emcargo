@@ -64,7 +64,7 @@ const TODAY_DATE_FIELDS = new Set([
   "determination_date",
 ]);
 
-const LAST_SHIPMENT_KEY = "cargopilot:last-shipment";
+const LAST_SHIPMENT_KEY = "emcargo:last-shipment";
 
 type DocStatus = "ready" | "draft" | "blocked" | "not_applicable";
 
@@ -1139,7 +1139,7 @@ export default function WizardPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `cargopilot-concept-${new Date().toISOString().slice(0, 10)}.json`;
+    link.download = `emcargo-concept-${new Date().toISOString().slice(0, 10)}.json`;
     link.click();
     URL.revokeObjectURL(url);
   };

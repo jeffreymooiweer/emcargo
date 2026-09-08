@@ -10,7 +10,7 @@ on an official piece of paper.
 The defect this file was written for is older and larger than any of those.
 Paragraph (c) asks for the **label model numbers**, with the ones after the
 first in brackets — the RID's own example is "663, UN 1098 ALLYL ALCOHOL,
-6.1(3), I". CargoPilot printed "6.1" and dropped the "(3)". The cause was a
+6.1(3), I". EMCargo printed "6.1" and dropped the "(3)". The cause was a
 separator: the 2023 export writes "6.1+3" and the Dutch 2025 edition writes
 "6.1, 3", and the reader split on the plus alone. 718 of the 3,158 rows of that
 table carry more than one label model, and every one of them reached the

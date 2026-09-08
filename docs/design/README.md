@@ -20,10 +20,11 @@ cards and accessible primary actions.
 - Dangerous-goods assessment remains a required part of the goods stage. Grouping
   progress into three stages does not skip underlying checks.
 - Open installations remain anonymous and do not gain server-side history.
-- Existing custom branding and explicit light/system preferences survive.
-- EMCargo database paths, browser keys, JSON format identifiers, native service
-  names and native bundle filenames are compatibility identifiers. LICENSE remains
-  unchanged. Updates and container images use this repository, never the upstream.
+- Preserve custom branding by migrating the complete data directory. Browser
+  preferences use new keys; export local drafts before upgrading.
+- Database paths, browser keys, JSON format identifiers, native services and bundle
+  names now use EMCargo. Follow [identity migration](../identity-migration.md) for
+  existing installations. The licence terms remain unchanged.
 
 ## Verification
 

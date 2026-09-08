@@ -79,7 +79,7 @@ NEW_UN_NUMBERS = ["0514", "3551", "3552", "3553", "3554",
 NEW_SPECIAL_PROVISIONS = ["375", "400", "401", "402", "403",
                           "404", "405", "406", "407", "408", "409"]
 
-UA = {"User-Agent": "CargoPilot source probe (github.com/jeffreymooiweer/CargoPilot)"}
+UA = {"User-Agent": "EMCargo source probe (github.com/jeffreymooiweer/emcargo)"}
 
 
 def head(url: str, timeout: int = 25) -> tuple[int, int]:
@@ -156,7 +156,7 @@ def probe_cantell() -> int:
     else:
         parts = count_parts("imdg", newest_imdg)
         print(f"Size: roughly {parts} parts.")
-        print("This is a newer edition. CargoPilot no longer bundles these cards")
+        print("This is a newer edition. EMCargo no longer bundles these cards")
         print("(it generates its own, see docs/un-cards.md), but a newer set could")
         print("refresh backend/seed/dg/card_data.json via extract_un_card_data.py.")
 

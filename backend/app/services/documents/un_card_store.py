@@ -3,7 +3,7 @@
 The cards themselves — thousands of PDFs — are deliberately not part of the
 Docker image or the repository. The **Generate UN cards** workflow publishes
 the complete current set as a GitHub Release asset
-(``cargopilot-un-cards.zip``), and an administrator imports it here: into
+(``emcargo-un-cards.zip``), and an administrator imports it here: into
 ``<data-dir>/un-cards/``, the same persistent volume the rest of the
 application's data lives on, so the set survives restarts and updates.
 
@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 #: download that took a caller-supplied URL would be an SSRF hole.
 RELEASES_URL = "https://api.github.com/repos/jeffreymooiweer/EMCargo/releases?per_page=30"
 RELEASE_TAG_PREFIX = "un-cards-"
-PACKAGE_NAME = "cargopilot-un-cards.zip"
+PACKAGE_NAME = "emcargo-un-cards.zip"
 
 MODALITIES = ("ADR", "RID", "ADN", "IMDG", "ICAO")
 

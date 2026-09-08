@@ -231,7 +231,7 @@ describe("ToastProvider", () => {
     // rest was about 135px, and the notice broke mid-word four characters to
     // a line. Both have to be short for the action to sit alongside.
     const api = setup();
-    const short = "CargoPilot 1.206.0 is beschikbaar.";
+    const short = "EMCargo 1.206.0 is beschikbaar.";
     const wordy = "Bekijk de release-opmerkingen";
     expect(short.length).toBeLessThanOrEqual(INLINE_ACTION_MAX_CHARS);
     expect(wordy.length).toBeGreaterThan(INLINE_ACTION_MAX_LABEL);

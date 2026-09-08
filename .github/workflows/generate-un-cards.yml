@@ -1,4 +1,4 @@
-# Generates the CargoPilot UN card set from the measured seed tables in this
+# Generates the EMCargo UN card set from the measured seed tables in this
 # repository — no network sources at generation time; the seeds carry their
 # own provenance. Test mode (publish=false) uploads the result as a workflow
 # artifact for inspection; publish=true creates a GitHub Release tagged
@@ -51,7 +51,7 @@ jobs:
           if [ "${{ inputs.scope }}" = "all" ]; then
             python scripts/un_cards/generate.py --scope all \
               --modalities "${{ inputs.modalities }}" \
-              --out /tmp/cards --zip /tmp/cargopilot-un-cards.zip
+              --out /tmp/cards --zip /tmp/emcargo-un-cards.zip
           else
             python scripts/un_cards/generate.py --scope single \
               --un "${{ inputs.un_number }}" \
@@ -95,7 +95,7 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --title "UN cards $DATE ($N)" \
             --notes-file /tmp/release-notes.txt \
-            /tmp/cargopilot-un-cards.zip \
+            /tmp/emcargo-un-cards.zip \
             /tmp/cards/manifest.json \
             /tmp/cards/generation-report.json
           echo "published $TAG"

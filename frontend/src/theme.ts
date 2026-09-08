@@ -1,4 +1,4 @@
-const STORAGE_KEY = "cargopilot-theme";
+const STORAGE_KEY = "emcargo-theme";
 
 export type Theme = "light" | "dark";
 

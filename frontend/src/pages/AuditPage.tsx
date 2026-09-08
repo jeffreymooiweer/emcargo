@@ -108,7 +108,7 @@ export default function AuditPage() {
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 max-w-2xl">{t("audit.intro")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <a className={buttonSecondary} href={api.auditExportUrl(query())} download="cargopilot-audit.csv">
+          <a className={buttonSecondary} href={api.auditExportUrl(query())} download="emcargo-audit.csv">
             {t("audit.export")}
           </a>
           <Link to="/settings" className={buttonSecondary} title={t("audit.retentionHint")}>

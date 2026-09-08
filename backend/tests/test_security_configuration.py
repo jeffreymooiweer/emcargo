@@ -5,7 +5,7 @@ value `change-me` is in this repository. An installation that never set it
 therefore runs on a key anybody can look up, and whoever holds the key writes
 themselves a valid admin token.
 
-From v1.25.0 to v1.29.2 CargoPilot solved that by refusing to start. That was
+From v1.25.0 to v1.29.2 EMCargo solved that by refusing to start. That was
 wrong, and the proof is in the application's own defaults: `APP_SECRET_KEY=
 change-me` and `CORS_ALLOWED_ORIGINS=*`, plus an Unraid template that leaves the
 key blank. Every installation that had not filled in those two by itself crashed
@@ -43,7 +43,7 @@ class FakeSettings:
     data_dir: Path = Path("/nonexistent")
     app_env: str = "production"
     app_secret_key: str = field(default_factory=suggested_secret)
-    cors_allowed_origins: str = "https://cargopilot.example.com"
+    cors_allowed_origins: str = "https://emcargo.example.com"
     admin_password: str | None = None
 
 
@@ -56,7 +56,7 @@ def settings(tmp_path):
 
 
 def test_the_shipped_defaults_start_instead_of_crashing(tmp_path):
-    """Exactly the configuration CargoPilot comes out of the box with, and the
+    """Exactly the configuration EMCargo comes out of the box with, and the
     one every Unraid installation fell over on since v1.25.0."""
     out_of_the_box = FakeSettings(
         data_dir=tmp_path, app_secret_key="change-me", cors_allowed_origins="*"
@@ -191,14 +191,14 @@ def test_a_wildcard_origin_is_answered_without_credentials(tmp_path, monkeypatch
         assert answer.headers.get("access-control-allow-origin") == "*"
         assert "access-control-allow-credentials" not in answer.headers
 
-        monkeypatch.setenv("CORS_ALLOWED_ORIGINS", "https://cargopilot.example.com")
+        monkeypatch.setenv("CORS_ALLOWED_ORIGINS", "https://emcargo.example.com")
         get_settings.cache_clear()
         with TestClient(create_app()) as client:
             stranger = client.options("/api/auth/me", headers=preflight)
             friend = client.options("/api/auth/me", headers={
-                **preflight, "Origin": "https://cargopilot.example.com"})
+                **preflight, "Origin": "https://emcargo.example.com"})
         assert "access-control-allow-origin" not in stranger.headers
-        assert friend.headers.get("access-control-allow-origin") == "https://cargopilot.example.com"
+        assert friend.headers.get("access-control-allow-origin") == "https://emcargo.example.com"
         assert friend.headers.get("access-control-allow-credentials") == "true"
     finally:
         get_settings.cache_clear()
@@ -211,7 +211,7 @@ def test_wide_open_cors_is_reported_but_does_not_stop_anything(settings):
 
 
 def test_a_documented_admin_password_is_reported(settings):
-    settings.admin_password = "cargopilot123"
+    settings.admin_password = "emcargo123"
     assert any("ADMIN_PASSWORD" in w for w in configuration_warnings(settings))
 
 
@@ -239,7 +239,7 @@ def test_a_warning_says_what_to_do_about_it(settings):
 def test_development_is_not_nagged(env, settings):
     settings.app_env = env
     settings.cors_allowed_origins = "*"
-    settings.admin_password = "cargopilot123"
+    settings.admin_password = "emcargo123"
     assert configuration_warnings(settings) == []
     assert not is_production(env)
 

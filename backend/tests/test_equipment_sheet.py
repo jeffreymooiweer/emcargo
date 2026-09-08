@@ -2,7 +2,7 @@
 
 Derived since v1.53.0 and shown on screen since — and the person who needs it
 is standing at the open door of a cab, not at a browser. Nothing on the sheet
-is a finding: CargoPilot cannot see a vehicle, and the sheet says so in the
+is a finding: EMCargo cannot see a vehicle, and the sheet says so in the
 same words the panel does.
 """
 import fitz

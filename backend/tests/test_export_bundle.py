@@ -196,7 +196,7 @@ def mail_server(monkeypatch):
     sent = {}
     settings = InstanceSettings(
         mail_enabled=True, mail_host="smtp.example.com",
-        mail_from="cargopilot@example.com")
+        mail_from="emcargo@example.com")
     monkeypatch.setattr(documents_route, "instance_settings", lambda db: settings)
 
     def fake_send(config, to, subject, body, attachments=None, html=None):
@@ -262,7 +262,7 @@ def test_the_archive_is_not_left_behind_on_the_server(data_dir, mail_server,
                                                       tmp_path, monkeypatch):
     """A download hands the file to the browser and deletes it afterwards; a
     mailed bundle has no such moment, so it has to be deleted on the way out.
-    Consignment papers are not CargoPilot's to keep."""
+    Consignment papers are not EMCargo's to keep."""
     import tempfile
 
     scratch = tmp_path / "scratch"
@@ -309,7 +309,7 @@ def test_a_refusal_from_the_mail_server_is_passed_on(data_dir, monkeypatch):
     monkeypatch.setattr(
         documents_route, "instance_settings",
         lambda db: InstanceSettings(mail_enabled=True, mail_host="smtp.example.com",
-                                    mail_from="cargopilot@example.com"))
+                                    mail_from="emcargo@example.com"))
 
     def refusing(*args, **kwargs):
         raise documents_route.mail.MailError("Could not reach smtp.example.com:587")

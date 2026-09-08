@@ -7,7 +7,7 @@ description.
 
 Recognition of the materials themselves runs via the catalogue's synonym list,
 and that does not yet know German terms. What this detection solves is only the
-language of what CargoPilot writes back.
+language of what EMCargo writes back.
 """
 
 KEYWORDS = {

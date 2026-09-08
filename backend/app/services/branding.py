@@ -1,6 +1,6 @@
 """What the installation looks like: a logo and the six tile images.
 
-An organisation that hosts CargoPilot for its own people would rather see its
+An organisation that hosts EMCargo for its own people would rather see its
 own name on the door and its own pictures on the tiles. The name is an
 instance setting (``brand_name``, with ``BRAND_NAME`` in the environment as
 its starting value, like every other one). The images are files, and this

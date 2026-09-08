@@ -12,7 +12,7 @@ shipped with.
    missing-in-new key is survivable in both directions.
 
 2. **Environment variables silently overruled.** ``GEO_ADDRESS_API_URL`` and
-   friends were the only way to configure CargoPilot until v1.45.0 and are
+   friends were the only way to configure EMCargo until v1.45.0 and are
    documented as such. If the stored settings had simply carried their own
    hard-coded defaults, upgrading would have changed the behaviour of every
    installation that had configured them. A stored setting is an overlay.

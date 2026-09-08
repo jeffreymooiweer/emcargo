@@ -1,6 +1,6 @@
 """The open application: anyone may use it, nothing is kept about anyone.
 
-``CARGOPILOT_MODE=open`` is not a switch inside the organisation application;
+``EMCARGO_MODE=open`` is not a switch inside the organisation application;
 it is a second application in the same image. The difference is enforced by
 what is *mounted*, not by what is refused: the sign-in, the users page, the
 settings screen, the equipment library, mail and the administrator's
@@ -14,7 +14,7 @@ Two things the tests check that are easy to get wrong:
   the organisation application may hold a settings row with a mail server in
   it. The open application has no screen that could ever change that row, so
   honouring it would let a setting nobody can see govern a public site.
-- **A typo is the closed application.** ``CARGOPILOT_MODE=opne`` must not open
+- **A typo is the closed application.** ``EMCARGO_MODE=opne`` must not open
   anything. It runs as the organisation application and says so.
 """
 from __future__ import annotations
@@ -62,9 +62,9 @@ def fresh(tmp_path, monkeypatch):
 
 def application(mode: str | None, monkeypatch, db) -> TestClient:
     if mode is None:
-        monkeypatch.delenv("CARGOPILOT_MODE", raising=False)
+        monkeypatch.delenv("EMCARGO_MODE", raising=False)
     else:
-        monkeypatch.setenv("CARGOPILOT_MODE", mode)
+        monkeypatch.setenv("EMCARGO_MODE", mode)
     get_settings.cache_clear()
     app = create_app()
     app.dependency_overrides[get_db] = lambda: db
@@ -127,7 +127,7 @@ def test_the_organisation_application_still_has_them(organisation_client, method
 def test_the_route_table_itself_carries_nothing_account_bound(fresh, monkeypatch):
     """Structural, so it does not depend on which addresses the list above
     happens to name: no mounted path may start with an account prefix."""
-    monkeypatch.setenv("CARGOPILOT_MODE", "open")
+    monkeypatch.setenv("EMCARGO_MODE", "open")
     get_settings.cache_clear()
     app = create_app()
     paths = route_table.paths(app)
@@ -187,7 +187,7 @@ def test_no_mail_whatever_the_environment_says(fresh, monkeypatch):
     nothing. The send action does not exist, so the public facts say mail is
     off and the effective settings carry no server at all."""
     monkeypatch.setenv("SMTP_HOST", "smtp.example.com")
-    monkeypatch.setenv("SMTP_FROM", "cargopilot@example.com")
+    monkeypatch.setenv("SMTP_FROM", "emcargo@example.com")
     with application("open", monkeypatch, fresh) as client:
         assert client.get("/api/settings/public").json()["mail_enabled"] is False
         effective = settings_store.instance_settings(fresh)
@@ -198,7 +198,7 @@ def test_no_mail_whatever_the_environment_says(fresh, monkeypatch):
 def test_the_same_environment_does_configure_the_organisation_application(
         fresh, monkeypatch):
     monkeypatch.setenv("SMTP_HOST", "smtp.example.com")
-    monkeypatch.setenv("SMTP_FROM", "cargopilot@example.com")
+    monkeypatch.setenv("SMTP_FROM", "emcargo@example.com")
     with application(None, monkeypatch, fresh):
         effective = settings_store.instance_settings(fresh)
         assert effective.mail_enabled is True
@@ -225,13 +225,13 @@ def test_a_saved_administrator_overlay_is_ignored(fresh, monkeypatch):
 
 def test_the_environment_opens_the_qr_door(fresh, monkeypatch):
     monkeypatch.setenv("CARD_LINKS_ENABLED", "true")
-    monkeypatch.setenv("PUBLIC_URL", "https://cargopilot.example.org/")
+    monkeypatch.setenv("PUBLIC_URL", "https://emcargo.example.org/")
     with application("open", monkeypatch, fresh) as client:
         response = client.get("/api/cards/lookup?un=1203")
         assert response.status_code == 200
         assert response.json()["cards"][0]["un_number"] == "1203"
         assert settings_store.instance_settings(fresh).public_url == \
-            "https://cargopilot.example.org"
+            "https://emcargo.example.org"
 
 
 @pytest.mark.parametrize("variable,value,field,expected", [
@@ -267,7 +267,7 @@ def test_the_environment_is_also_the_starting_point_for_the_organisation(
 
 
 def test_no_administrator_is_made_and_none_is_missed(fresh, monkeypatch, caplog):
-    monkeypatch.setenv("CARGOPILOT_MODE", "open")
+    monkeypatch.setenv("EMCARGO_MODE", "open")
     monkeypatch.setenv("ADMIN_USERNAME", "admin")
     monkeypatch.setenv("ADMIN_EMAIL", "admin@example.com")
     monkeypatch.setenv("ADMIN_PASSWORD", "a-perfectly-good-password")
@@ -282,7 +282,7 @@ def test_accounts_left_behind_are_reported_but_not_deleted(fresh, monkeypatch, c
     fresh.add(User(username="ada", email="ada@example.com", password_hash="x",
                    role="admin", active=True))
     fresh.commit()
-    monkeypatch.setenv("CARGOPILOT_MODE", "open")
+    monkeypatch.setenv("EMCARGO_MODE", "open")
     get_settings.cache_clear()
     with caplog.at_level(logging.WARNING):
         bootstrap_admin(fresh)

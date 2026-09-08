@@ -31,7 +31,7 @@ from typing import Any
 SOURCE_URL = "https://www.cepa.be/wp-content/uploads/IMDG_Code-amdt_42_24.pdf"
 SOURCE_NAME = ("IMO-resolutie MSC.556(108), aangenomen 23 mei 2024 — IMDG-code "
                "Amendment 42-24, hoofdstuk 3.2 Dangerous Goods List")
-UA = {"User-Agent": "CargoPilot data extraction (github.com/jeffreymooiweer/CargoPilot)"}
+UA = {"User-Agent": "EMCargo data extraction (github.com/jeffreymooiweer/emcargo)"}
 
 SEED = Path(__file__).resolve().parents[1] / "backend" / "seed" / "dg"
 

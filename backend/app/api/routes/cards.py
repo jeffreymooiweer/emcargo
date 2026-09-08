@@ -13,7 +13,7 @@ because it is public it is the narrowest thing in the application:
   shipment to look up, which is also why the roadmap's question about link
   lifetime does not arise: the link addresses the regulation, and the
   regulation does not expire the way a stored job would;
-* what it serves is the card set an administrator imported — CargoPilot's own
+* what it serves is the card set an administrator imported — EMCargo's own
   datasheets built from the measured tables. The document that carries the QR
   already prints those UN numbers in plain text and larger, so the code
   discloses nothing the paper does not;

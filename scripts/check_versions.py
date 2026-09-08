@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail CI when CargoPilot's published version files disagree.
+"""Fail CI when EMCargo's published version files disagree.
 
 Four files carry the version and they have to say the same thing: ``VERSION``,
 ``backend/VERSION``, ``frontend/package.json`` and — twice — the lock file that
@@ -46,7 +46,7 @@ def main() -> None:
     versions = collect()
     unique = set(versions.values())
     if len(unique) != 1:
-        print("CargoPilot version mismatch:", file=sys.stderr)
+        print("EMCargo version mismatch:", file=sys.stderr)
         for name, version in versions.items():
             print(f"  {name}: {version or '(missing)'}", file=sys.stderr)
         print(
@@ -54,7 +54,7 @@ def main() -> None:
             file=sys.stderr,
         )
         raise SystemExit(1)
-    print(f"CargoPilot version is consistent: {unique.pop()}")
+    print(f"EMCargo version is consistent: {unique.pop()}")
 
 
 if __name__ == "__main__":

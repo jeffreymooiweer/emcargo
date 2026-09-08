@@ -13,7 +13,7 @@ Each archetype asserts three things:
   cargo vessel's chapter 7.1, and a packages consignment must not be asked
   about a tank;
 * **the documents** the wizard would offer are the documents that consignment
-  needs, and each one that CargoPilot generates actually renders;
+  needs, and each one that EMCargo generates actually renders;
 * **what the application cannot say** is said. Every archetype ends on the
   finding that names its own limit, because an answer with a silent hole in it
   is the failure this whole application is built against.

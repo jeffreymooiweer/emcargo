@@ -4,15 +4,16 @@
 
 Use the installer from this repository. It downloads the native bundle attached to
 an EMCargo release and installs the backend, built frontend and document templates.
-The archive name, service identifier and native filesystem paths retain their
-historical compatibility names; use the paths reported by the installer instead of
-renaming an existing installation manually.
+New bundles use `emcargo-<version>-native.tar.gz`. The service is `emcargo`,
+installed under `/opt/emcargo`, with settings in `/etc/emcargo/emcargo.env` and
+data in `/var/lib/emcargo`. Existing installations must follow
+[identity migration](identity-migration.md) first.
 
 Requirements: Linux with systemd, Python 3.12 with venv, curl, tar and root access.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/jeffreymooiweer/emcargo/main/deploy/native/install.sh -o install.sh
-sudo bash install.sh 2.0.0
+sudo bash install.sh --bundle /path/to/emcargo-VERSION-native.tar.gz
 ```
 
 Set `ADMIN_PASSWORD`, `PUBLIC_URL` and `CORS_ALLOWED_ORIGINS` in the generated
@@ -20,8 +21,7 @@ environment file before exposing the service. The backend listens on
 `127.0.0.1:8080`; terminate HTTPS at your reverse proxy.
 
 For updates, run `deploy/native/update.sh` from the current installed release as
-root, optionally passing the release version. Keep the existing data directory,
-service identity and environment file. Back up the data directory before updating.
+root, optionally passing the release version. Keep the migrated data directory and environment file. Back up the data directory before updating.
 The in-app Docker updater does not apply to native installations.
 
 See [the installer](../deploy/native/install.sh),

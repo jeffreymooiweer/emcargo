@@ -5,7 +5,7 @@ The column (5) explanation of RID 3.2.1 (English edition, page 258; German,
 page 280 — they agree) says the shunting labels of 5.3.4 are "indicated in
 brackets for some substances" and are only ever affixed in two cases: Class 1
 on both sides of full-load wagons, Class 2 on both sides of tank-type wagons.
-CargoPilot has applied those two cases since v1.121.0 as a *class-level*
+EMCargo has applied those two cases since v1.121.0 as a *class-level*
 condition, because its table A is the ADR's, whose column (5) carries neither
 model. This script reads the per-substance half out of the RID's own table.
 
@@ -45,9 +45,9 @@ except ImportError:  # pragma: no cover - runner installs it
     fitz = None
 
 STORE = Path(
-    os.environ.get("CARGOPILOT_REGULATIONS_DIR")
+    os.environ.get("EMCARGO_REGULATIONS_DIR")
     or ("/data/regulations" if Path("/data").is_dir()
-        else "/tmp/cargopilot-regulations"))
+        else "/tmp/emcargo-regulations"))
 
 #: The bracketed shunting models as table A prints them in the cells: with a
 #: plus sign — ``(+13)`` after label model 1 on UN 0027's row. The plus is the

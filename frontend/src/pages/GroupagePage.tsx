@@ -7,7 +7,7 @@
  *  limited-quantities marking of 3.4.13.
  *
  *  The consignments come in two ways. As the shipment exports the export step
- *  writes (`cargopilot.shipment`) — on an installation that keeps nothing,
+ *  writes (`emcargo.shipment`) — on an installation that keeps nothing,
  *  the file the planner already has is the honest input. And, on an
  *  installation that keeps its shipments, straight from the history: the
  *  kept shipments the viewer may see, picked by reference, with the same
@@ -183,7 +183,7 @@ export default function GroupagePage() {
         // A file that is not a shipment export is refused by name rather than
         // half-read: a trip built from the wrong half of somebody's disk would
         // produce a confident answer about goods that are not on the vehicle.
-        if (payload?.format !== "cargopilot.shipment") {
+        if (payload?.format !== "emcargo.shipment") {
           toast.error(t("groupage.notAnExport", { file: file.name }));
           continue;
         }

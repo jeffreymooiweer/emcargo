@@ -2,7 +2,7 @@
 
 The rule this module exists to enforce: **an installation that never opens the
 settings screen keeps behaving exactly as its ``.env`` says.** The environment
-variables were the only way to configure CargoPilot until v1.45.0, they are
+variables were the only way to configure EMCargo until v1.45.0, they are
 documented in ``docs/configuration.md``, and quietly overriding them with a
 hard-coded default would change working installations on upgrade.
 
@@ -67,9 +67,9 @@ def environment_defaults() -> InstanceSettings:
         un_cards_enabled=settings.un_cards_enabled,
         card_links_enabled=settings.card_links_enabled,
         session_timeout_minutes=settings.access_token_expire_minutes,
-        # The legacy CARGOPILOT_HISTORY variable is the starting value only;
+        # The legacy EMCARGO_HISTORY variable is the starting value only;
         # the screen decides from the first save on. Never in the open app.
-        history_enabled=bool(settings.cargopilot_history) and not settings.is_open,
+        history_enabled=bool(settings.emcargo_history) and not settings.is_open,
         public_url=_public_url(settings.public_url),
         brand_name=settings.brand_name.strip()[:80],
         # A host in the environment is a deliberate act, so it switches
@@ -248,7 +248,7 @@ def save_user_preferences(db: Session, user_id: int, values: UserPreferences) ->
 def language_for(db: Session, user) -> str:
     """The language to write to this person in.
 
-    Their own choice first — a colleague whose CargoPilot is in German gets
+    Their own choice first — a colleague whose EMCargo is in German gets
     a German invitation, whoever made the account. A brand-new account has
     no preference yet, and then the installation's default is the honest
     guess rather than the sender's language.

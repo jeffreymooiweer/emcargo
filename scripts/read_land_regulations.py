@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Read the official ADR, RID and ADN texts and quote the provisions we implement.
 
-CargoPilot's land-transport checks were built from an ADR Table A data export and
+EMCargo's land-transport checks were built from an ADR Table A data export and
 from general knowledge of how the regimes are structured. That is not the same as
 having read the regulation, and the difference matters: a rule implemented from
 memory looks exactly like a rule implemented from the text.
@@ -46,8 +46,8 @@ from typing import Any
 # store of backend/seed/dg/sources.json — a volume that outlives the container —
 # and a runner without /data lands on the path its actions/cache step persists.
 CACHE = Path(
-    os.environ.get("CARGOPILOT_REGULATIONS_DIR")
-    or ("/data/regulations" if Path("/data").is_dir() else "/tmp/cargopilot-regulations")
+    os.environ.get("EMCARGO_REGULATIONS_DIR")
+    or ("/data/regulations" if Path("/data").is_dir() else "/tmp/emcargo-regulations")
 )
 
 # Official, free-of-charge sources. Any change here changes what the app claims
@@ -107,7 +107,7 @@ SOURCES: dict[str, dict[str, Any]] = {
 #: cannot download.
 #:
 #: The five sources above are the ones a runner can fetch. They are not the only
-#: books CargoPilot reads: the printed Dutch ADR, the German volumes and the
+#: books EMCargo reads: the printed Dutch ADR, the German volumes and the
 #: Dutch ADN were supplied by the operator and live in the store, and a
 #: provision that has to be read twice needs a second edition more than it needs
 #: a downloadable one. Merging the register in means ``--doc adr_nl_2025`` works
@@ -167,7 +167,7 @@ class Provision:
 
 # Grouped by the question they answer, because that is how they get read.
 GROUPS: dict[str, list[Provision]] = {
-    # Does CargoPilot's LQ/EQ arithmetic match the text? This is the group that
+    # Does EMCargo's LQ/EQ arithmetic match the text? This is the group that
     # settles whether "verified against the published 3.4/3.5 text" is true.
     "lq_eq": [
         Provision("3.4.1", ("adr1", "rid", "adn"), chars=2200,
@@ -184,7 +184,7 @@ GROUPS: dict[str, list[Provision]] = {
         Provision("3.5.5", ("adr1", "rid", "adn"), chars=900,
                   note="packages per vehicle/wagon/container — expected 1000"),
     ],
-    # The LQ marking above a certain load. CargoPilot fires on 8 tonnes of LQ
+    # The LQ marking above a certain load. EMCargo fires on 8 tonnes of LQ
     # alone; the text is believed to add a condition on the transport unit.
     "lq_marking": [
         # The package first. 3.4.13 to 3.4.15 mark the transport unit, and
@@ -217,7 +217,7 @@ GROUPS: dict[str, list[Provision]] = {
                   note="the Code's own chapter 3.4 — its numbering is not ADR's"),
     ],
     # The 1000-point rule. RID and ADN are believed to have their own version;
-    # CargoPilot answers all three with ADR's table.
+    # EMCargo answers all three with ADR's table.
     "exemptions": [
         Provision("1.1.3.6", ("adr1", "rid", "adn"), chars=6000,
                   anchors=("Exemptions related to quantities carried",
@@ -238,12 +238,12 @@ GROUPS: dict[str, list[Provision]] = {
                   note="class 1 compatibility groups loaded together"),
     ],
     # The transport document. Settles whether the tunnel code belongs on a rail
-    # or inland waterway document — CargoPilot removed it in v1.29.5.
+    # or inland waterway document — EMCargo removed it in v1.29.5.
     "document": [
         Provision("5.4.1.1.1", ("adr1", "rid", "adn"), chars=4200,
                   note="the particulars of the description line, item by item"),
     ],
-    # Placarding and marking of the vehicle. The one chapter CargoPilot names
+    # Placarding and marking of the vehicle. The one chapter EMCargo names
     # in its output and does not derive. What has to be settled from the text:
     # which placards a vehicle carrying only *packages* needs — the rule is much
     # narrower than "the labels of what is on board" — and when an orange plate
@@ -264,7 +264,7 @@ GROUPS: dict[str, list[Provision]] = {
     ],
     # Security. Chapter 1.10 is named nowhere in the application, and the table
     # of 1.10.3.1.2 is a quantity threshold per substance, which is exactly the
-    # shape CargoPilot can compute with.
+    # shape EMCargo can compute with.
     "security": [
         Provision("1.10.3.1", ("adr1",), chars=5000,
                   anchors=("high consequence dangerous goods",),
@@ -426,7 +426,7 @@ def fetch(doc: str) -> Path:
     """
     CACHE.mkdir(parents=True, exist_ok=True)
     name = SOURCES[doc].get("filename", f"{doc}.pdf")
-    for base in (CACHE, Path("/tmp/cargopilot-regulations")):
+    for base in (CACHE, Path("/tmp/emcargo-regulations")):
         target = base / name
         if _looks_like_pdf(target):
             return target

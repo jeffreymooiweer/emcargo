@@ -444,7 +444,7 @@ def export_bundle(
                  summary=bundle_summary(payload), request=request)
     return FileResponse(
         path=bundle_path,
-        filename=f"cargopilot-documents-{ref}.zip",
+        filename=f"emcargo-documents-{ref}.zip",
         media_type="application/zip",
     )
 
@@ -466,7 +466,7 @@ def mail_bundle(
 
     Same bundle, same rules: it is built by :func:`_build_bundle`, so what
     arrives in the mail is what the download button produces, README and all.
-    The archive is deleted as soon as the message is out — CargoPilot keeps
+    The archive is deleted as soon as the message is out — EMCargo keeps
     no copy of a consignment's papers.
     """
     settings = instance_settings(db)
@@ -479,7 +479,7 @@ def mail_bundle(
     bundle_path, ref = build_bundle(payload.bundle, db)
     try:
         content = bundle_path.read_bytes()
-        filename = f"cargopilot-documents-{ref}.zip"
+        filename = f"emcargo-documents-{ref}.zip"
         # The reader is a carrier or a consignee, not a user of this
         # installation: the language the papers themselves are drawn up in
         # is the one they can read.

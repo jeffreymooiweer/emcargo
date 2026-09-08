@@ -205,7 +205,7 @@ def shipment_report_pdf(request: Request,
     background_tasks.add_task(delete_file, path)
     audit.record(db, "report.rendered", actor=user, target=("report", str(year)),
                  summary=f"{year} pdf", request=request)
-    return FileResponse(path=path, filename=f"cargopilot-dgsa-report-{year}.pdf",
+    return FileResponse(path=path, filename=f"emcargo-dgsa-report-{year}.pdf",
                         media_type="application/pdf")
 
 
@@ -226,7 +226,7 @@ def shipment_report_workbook(request: Request,
     return Response(
         content=content,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": f'attachment; filename="cargopilot-dgsa-report-{year}.xlsx"'})
+        headers={"Content-Disposition": f'attachment; filename="emcargo-dgsa-report-{year}.xlsx"'})
 
 
 def _kept(request: Request, db: Session, user: User, record: Shipment, action: str) -> Shipment:
@@ -271,7 +271,7 @@ def shipment_export(request: Request, shipment_id: int,
                     db: Session = Depends(get_db)):
     """The structured export as it was kept — the record, not a re-render."""
     record = _kept(request, db, user, _record(shipment_id, db, user), "shipment.export")
-    name = f"cargopilot-shipment-{record.reference or record.id}.json"
+    name = f"emcargo-shipment-{record.reference or record.id}.json"
     return JSONResponse(content=history.detail(record).export,
                         headers={"Content-Disposition": attachment(name)})
 
@@ -298,7 +298,7 @@ def shipment_documents(request: Request, shipment_id: int,
     background_tasks.add_task(delete_file, bundle_path)
     _kept(request, db, user, record, "shipment.documents")
     return FileResponse(path=bundle_path,
-                        filename=f"cargopilot-documents-{record.reference or ref}.zip",
+                        filename=f"emcargo-documents-{record.reference or ref}.zip",
                         media_type="application/zip")
 
 

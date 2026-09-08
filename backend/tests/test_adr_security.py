@@ -120,7 +120,7 @@ def test_one_qualifying_line_is_enough():
 
 def test_class_7_is_not_answered_and_says_so():
     """1.10.3.1.3 measures it in activity against 3,000 A2 with its own limits
-    per radionuclide. CargoPilot is not told an activity, and a silent "ok"
+    per radionuclide. EMCargo is not told an activity, and a silent "ok"
     there would be a wrong answer rather than an absent one."""
     result = check_adr_security(load(
         {"un_number": "2915", "class": "7", "classification_code": "7X"}), "en")

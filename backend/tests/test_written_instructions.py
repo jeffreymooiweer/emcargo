@@ -2,7 +2,7 @@
 
 ADR and ADN 5.4.3.4 print the instructions rather than describe them: the
 document a crew carries has to correspond in form and content to a model of
-four pages that the book sets out. So this is the one document CargoPilot does
+four pages that the book sets out. So this is the one document EMCargo does
 not compose — it takes the model out of the edition in the document store and
 hands that over. The rules these tests hold to:
 
@@ -74,7 +74,7 @@ def test_wat_nergens_is_wordt_niet_verzonnen(tmp_path, monkeypatch):
     would produce it — it never falls back to a neighbouring language."""
     data = json.loads(REGISTER.read_text(encoding="utf-8"))
     data["store"]["fallback_path"] = str(tmp_path / "fallback")
-    monkeypatch.setenv("CARGOPILOT_REGULATIONS_DIR", str(tmp_path / "store"))
+    monkeypatch.setenv("EMCARGO_REGULATIONS_DIR", str(tmp_path / "store"))
     monkeypatch.setattr(regulations, "BUNDLED_MODELS", tmp_path / "models")
     monkeypatch.setattr(regulations, "manifest", lambda: data)
     status = regulations.instruction_status("adr", "nl")
@@ -92,7 +92,7 @@ def test_de_opslag_van_de_beheerder_wint_van_de_meegeleverde_snede(tmp_path, mon
                and d["model_of"]["language"] == "nl")
     own = tmp_path / doc["filename"]
     own.write_bytes(b"%PDF-operator")
-    monkeypatch.setenv("CARGOPILOT_REGULATIONS_DIR", str(tmp_path))
+    monkeypatch.setenv("EMCARGO_REGULATIONS_DIR", str(tmp_path))
     regulations.manifest.cache_clear()
     assert regulations.locate(doc["id"]) == own
     assert regulations.instruction_status("adr", "nl")["source"] == "stored"
@@ -157,7 +157,7 @@ def test_elke_taal_is_nu_te_downloaden():
 def test_een_ontbrekend_model_weigert_met_de_reden(tmp_path, monkeypatch):
     data = json.loads(REGISTER.read_text(encoding="utf-8"))
     data["store"]["fallback_path"] = str(tmp_path / "fallback")
-    monkeypatch.setenv("CARGOPILOT_REGULATIONS_DIR", str(tmp_path / "store"))
+    monkeypatch.setenv("EMCARGO_REGULATIONS_DIR", str(tmp_path / "store"))
     monkeypatch.setattr(regulations, "BUNDLED_MODELS", tmp_path / "models")
     monkeypatch.setattr(regulations, "manifest", lambda: data)
     response = _client().get("/api/documents/instructions/adr/de")

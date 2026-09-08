@@ -1,6 +1,6 @@
 """The version number is in four places and they have to agree.
 
-This is not a theoretical risk. An external review of CargoPilot came back with
+This is not a theoretical risk. An external review of EMCargo came back with
 a list of problems that had largely been solved already, because the reviewer saw
 `frontend/package.json` at 1.14.1 while the rest of the project was well past it.
 Hours of work on findings that no longer existed.

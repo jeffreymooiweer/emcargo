@@ -7,7 +7,7 @@ const API_BASE = "/api";
  *  The nudge listens and takes the person to the panel that sets one up:
  *  the API client has no router of its own, and every page would
  *  otherwise have to recognise the refusal separately. */
-export const TWO_FACTOR_REQUIRED_EVENT = "cargopilot:two-factor-required";
+export const TWO_FACTOR_REQUIRED_EVENT = "emcargo:two-factor-required";
 
 /** The error for a refused response, after noticing what kind it is. */
 async function refusal(res: Response): Promise<Error> {
@@ -333,7 +333,7 @@ export const api = {
   downloadDgsaReport: (year: number, department = "", language = "nl") =>
     downloadBlob(
       `/shipments/report.xlsx?year=${year}&department=${encodeURIComponent(department)}&language=${encodeURIComponent(language)}`,
-      `cargopilot-dgsa-report-${year}.xlsx`),
+      `emcargo-dgsa-report-${year}.xlsx`),
   /** The report in the DVSA's shape: the form's definition, what the
    *  history can pre-fill, and the answers kept for this year and scope. */
   dgsaReportForm: (year: number, department = "", language = "nl") =>
@@ -346,7 +346,7 @@ export const api = {
   downloadDgsaReportPdf: (year: number, department = "", language = "nl") =>
     downloadBlob(
       `/shipments/report.pdf?year=${year}&department=${encodeURIComponent(department)}&language=${encodeURIComponent(language)}`,
-      `cargopilot-dgsa-report-${year}.pdf`),
+      `emcargo-dgsa-report-${year}.pdf`),
   /** The articles library: the organisation's own codes for what it ships,
    *  kept beside the history like the address book. */
   articles: (q = "") => request<Article[]>(`/articles${q ? `?q=${encodeURIComponent(q)}` : ""}`),
@@ -398,7 +398,7 @@ export const api = {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = match ? match[1] : `cargopilot-documents-${id}.zip`;
+    a.download = match ? match[1] : `emcargo-documents-${id}.zip`;
     a.click();
     URL.revokeObjectURL(url);
   },
@@ -583,7 +583,7 @@ export const api = {
     const blob = await res.blob();
     const disposition = res.headers.get("content-disposition") || "";
     const match = disposition.match(/filename="?([^";]+)"?/i);
-    const filename = match ? match[1] : `cargopilot-documents-${Date.now()}.zip`;
+    const filename = match ? match[1] : `emcargo-documents-${Date.now()}.zip`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -901,7 +901,7 @@ export interface ShipmentSummary {
 export interface ShipmentDetail extends ShipmentSummary {
   /** The wizard's own state, opaque to the server; see wizard/snapshot.ts. */
   snapshot: Record<string, unknown>;
-  /** The structured export as it was kept (format cargopilot.shipment). */
+  /** The structured export as it was kept (format emcargo.shipment). */
   export: Record<string, unknown>;
 }
 

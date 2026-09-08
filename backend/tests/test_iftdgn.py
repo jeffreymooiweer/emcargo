@@ -323,7 +323,7 @@ def test_the_export_route_refuses_a_shipment_without_dangerous_goods():
 
 
 def _directory() -> Path | None:
-    for candidate in (os.environ.get("CARGOPILOT_EDIFACT_D16A"), "/tmp/claude-0"):
+    for candidate in (os.environ.get("EMCARGO_EDIFACT_D16A"), "/tmp/claude-0"):
         if not candidate:
             continue
         for path in Path(candidate).rglob("IFTDGN_D.16A"):

@@ -73,9 +73,9 @@ def configured(**overrides) -> InstanceSettings:
         "mail_enabled": True,
         "mail_host": "smtp.example.com",
         "mail_port": 587,
-        "mail_from": "cargopilot@example.com",
-        "mail_from_name": "CargoPilot",
-        "mail_username": "cargopilot",
+        "mail_from": "emcargo@example.com",
+        "mail_from_name": "EMCargo",
+        "mail_username": "emcargo",
         "mail_password": "secret",
     }
     values.update(overrides)
@@ -193,9 +193,9 @@ def test_starttls_is_negotiated_and_the_login_is_the_configured_one(monkeypatch)
     server = FakeSMTP.instances[-1]
     assert (server.host, server.port) == ("smtp.example.com", 587)
     assert server.started_tls is True
-    assert server.login_as == ("cargopilot", "secret")
+    assert server.login_as == ("emcargo", "secret")
     assert server.sent[0]["To"] == "ada@example.com"
-    assert server.sent[0]["From"] == "CargoPilot <cargopilot@example.com>"
+    assert server.sent[0]["From"] == "EMCargo <emcargo@example.com>"
 
 
 def test_direct_tls_uses_the_ssl_client_and_does_not_start_tls(monkeypatch):
@@ -262,7 +262,7 @@ def test_the_test_uses_the_stored_password_the_screen_never_saw(db, client, monk
     redacted["mail_port"] = 2525
     client.put("/api/settings/instance", json=redacted)
     client.post("/api/settings/instance/mail-test", json={"to": "bob@example.com"})
-    assert FakeSMTP.instances[-1].login_as == ("cargopilot", "secret")
+    assert FakeSMTP.instances[-1].login_as == ("emcargo", "secret")
 
 
 def test_a_failing_test_answers_400_with_what_the_server_said(db, client, monkeypatch):

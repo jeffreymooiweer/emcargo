@@ -193,7 +193,7 @@ def test_a_group_stand_in_admits_that_it_is_broader():
 
 
 # --- Provisions whose target is ordinary cargo --------------------------------
-# CargoPilot does not know what non-dangerous cargo travels alongside, so these
+# EMCargo does not know what non-dangerous cargo travels alongside, so these
 # are raised whenever the substance is present, like the ADR CV28 warning.
 
 def test_a_foodstuff_provision_is_raised_on_its_own():

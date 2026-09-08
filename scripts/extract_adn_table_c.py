@@ -3,7 +3,7 @@
 
 Table C is the tank-vessel half of chapter 3.2: twenty columns that answer, per
 substance, which type of vessel may carry it (G, C or N), how the cargo tank
-must be built and equipped, and what the vessel must show and carry. CargoPilot
+must be built and equipped, and what the vessel must show and carry. EMCargo
 has said "table C is not covered" since v1.71.0; this script is how it stops
 being true.
 

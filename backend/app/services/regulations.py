@@ -68,7 +68,7 @@ def store_dir() -> Path:
     default = Path(store.get("default_path", "/data/regulations"))
     if default.parent.is_dir():
         return default
-    return Path(store.get("fallback_path", "/tmp/cargopilot-regulations"))
+    return Path(store.get("fallback_path", "/tmp/emcargo-regulations"))
 
 
 def documents() -> dict[str, dict]:
@@ -82,7 +82,7 @@ def locate(doc_id: str) -> Path | None:
         return None
     bases = [store_dir(), BUNDLED_MODELS,
              Path(manifest().get("store", {})
-                  .get("fallback_path", "/tmp/cargopilot-regulations"))]
+                  .get("fallback_path", "/tmp/emcargo-regulations"))]
     for base in bases:
         candidate = base / doc["filename"]
         if candidate.is_file() and candidate.stat().st_size > 0:

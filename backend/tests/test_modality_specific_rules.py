@@ -1,6 +1,6 @@
 """What applies to the road does not automatically apply to rail or water.
 
-CargoPilot treated ADR, RID and ADN as one thing. That is understandable — the
+EMCargo treated ADR, RID and ADN as one thing. That is understandable — the
 three regimes resemble each other closely and share their structure — but it
 produces two kinds of fault, and the second is the worse one.
 
@@ -13,7 +13,7 @@ itself.
 
 **An outcome that looks stricter or looser than it is.** The 1.1.3.6 points and
 the mixed loading of 7.5.2 are computed with the ADR tables. RID and ADN have
-their own versions of those chapters, and those are not in CargoPilot. Presenting
+their own versions of those chapters, and those are not in EMCargo. Presenting
 the outcome silently as "the RID result" gives the user a certainty that does not
 exist. They may have it as an indication — but then with that label on it.
 """

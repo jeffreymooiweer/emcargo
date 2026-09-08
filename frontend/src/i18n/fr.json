@@ -416,7 +416,7 @@
     "mailTesting": "Envoi en cours…",
     "mailTestSent": "Message de test envoyé à {{to}}.",
     "publicUrl": "Adresse de cette installation",
-    "publicUrlHint": "Utilisée pour les liens dans les messages sortants, par exemple https://cargopilot.example.fr. Laisser vide si le navigateur atteint EMCargo directement.",
+    "publicUrlHint": "Utilisée pour les liens dans les messages sortants, par exemple https://emcargo.example.fr. Laisser vide si le navigateur atteint EMCargo directement.",
     "cardLinks": "Code QR avec les fiches UN sur les documents",
     "cardLinksHint": "Ajoute sur chaque document de transport un code QR qui ouvre les fiches UN de cet envoi. La page ainsi atteinte ne demande pas de connexion — c'est voulu : le conducteur au bord de la route et l'intervenant sur place n'ont pas de compte ici. Elle n'affiche que les numéros ONU et l'existence d'une fiche pour chacun ; rien sur l'envoi, les parties ou les quantités. Désactivé tant que vous ne l'activez pas.",
     "cardLinksNeedsUrl": "Renseignez d'abord l'adresse publique ci-dessus. Sans elle, aucun code QR n'est imprimé : un code sur papier qui ne mène nulle part est pire que pas de code, car celui qui tient le papier ne peut pas faire la différence.",

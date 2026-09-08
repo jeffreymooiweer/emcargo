@@ -1,6 +1,6 @@
 """Tests for the per-substance IMDG data read from the UN cards.
 
-`card_data.json` is the first source CargoPilot has for column 16a (stowage, SW)
+`card_data.json` is the first source EMCargo has for column 16a (stowage, SW)
 and column 16b (segregation, SG) per substance. Until now the app knew which
 segregation *group* a substance belonged to and had to send the user to the
 Dangerous Goods List for what that meant in practice.

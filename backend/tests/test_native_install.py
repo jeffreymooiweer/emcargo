@@ -45,25 +45,25 @@ def test_the_scripts_parse():
 
 
 def test_the_unit_and_the_script_agree_on_the_paths():
-    unit = (NATIVE / "cargopilot.service").read_text(encoding="utf-8")
+    unit = (NATIVE / "emcargo.service").read_text(encoding="utf-8")
     script = (NATIVE / "install.sh").read_text(encoding="utf-8")
-    assert "WorkingDirectory=/opt/cargopilot/current/backend" in unit
-    assert "EnvironmentFile=/etc/cargopilot/cargopilot.env" in unit
-    assert "ExecStart=/opt/cargopilot/venv/bin/uvicorn app.main:app" in unit
+    assert "WorkingDirectory=/opt/emcargo/current/backend" in unit
+    assert "EnvironmentFile=/etc/emcargo/emcargo.env" in unit
+    assert "ExecStart=/opt/emcargo/venv/bin/uvicorn app.main:app" in unit
     assert "Environment=INSTALL_METHOD=native" in unit
-    assert 'PREFIX="/opt/cargopilot"' in script and 'CONF_DIR="/etc/cargopilot"' in script
-    assert 'DATA_DIR="/var/lib/cargopilot"' in script
-    assert "ReadWritePaths=/var/lib/cargopilot" in unit
+    assert 'PREFIX="/opt/emcargo"' in script and 'CONF_DIR="/etc/emcargo"' in script
+    assert 'DATA_DIR="/var/lib/emcargo"' in script
+    assert "ReadWritePaths=/var/lib/emcargo" in unit
     # The script installs the unit and the env example the bundle carries.
-    assert "deploy/native/cargopilot.service" in script
-    assert "deploy/native/cargopilot.env.example" in script
+    assert "deploy/native/emcargo.service" in script
+    assert "deploy/native/emcargo.env.example" in script
 
 
 def test_the_environment_example_names_only_variables_the_application_reads():
-    keys = env_keys((NATIVE / "cargopilot.env.example").read_text(encoding="utf-8"))
+    keys = env_keys((NATIVE / "emcargo.env.example").read_text(encoding="utf-8"))
     assert keys, "the example is empty"
     assert keys <= settings_fields(), keys - settings_fields()
-    assert {"DATA_DIR", "DATABASE_URL", "CARGOPILOT_MODE", "ADMIN_PASSWORD"} <= keys
+    assert {"DATA_DIR", "DATABASE_URL", "EMCARGO_MODE", "ADMIN_PASSWORD"} <= keys
 
 
 def test_the_kubernetes_manifests_parse_and_name_real_variables():
@@ -110,6 +110,6 @@ def test_an_unknown_install_method_is_docker(monkeypatch):
 def test_the_release_workflow_attaches_the_bundle_the_script_downloads():
     workflow = (ROOT / ".github" / "workflows" / "tag-release.yml").read_text(encoding="utf-8")
     script = (NATIVE / "install.sh").read_text(encoding="utf-8")
-    assert 'tar -czf "cargopilot-$VERSION-native.tar.gz"' in workflow
+    assert 'tar -czf "emcargo-$VERSION-native.tar.gz"' in workflow
     assert "gh release upload" in workflow
-    assert "cargopilot-$VERSION-native.tar.gz" in script
+    assert "emcargo-$VERSION-native.tar.gz" in script

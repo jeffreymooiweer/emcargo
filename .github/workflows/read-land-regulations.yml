@@ -2,7 +2,7 @@ name: Read land regulations
 
 # ADR, RID and ADN are published free of charge by UNECE and OTIF. The
 # development container has no route to those hosts; a runner does. This
-# workflow reads the official PDFs and prints the provisions CargoPilot
+# workflow reads the official PDFs and prints the provisions EMCargo
 # implements to the run log, so what the application does can be checked
 # against what the regulation says.
 #
@@ -102,7 +102,7 @@ jobs:
       - name: Volumes already fetched
         uses: actions/cache/restore@v4
         with:
-          path: /tmp/cargopilot-regulations
+          path: /tmp/emcargo-regulations
           key: regulations-${{ github.run_id }}
           restore-keys: |
             regulations-

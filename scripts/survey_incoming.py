@@ -21,7 +21,7 @@ Per document it reports:
 
 Usage::
 
-    python scripts/survey_incoming.py /tmp/cargopilot-regulations/incoming
+    python scripts/survey_incoming.py /tmp/emcargo-regulations/incoming
 """
 from __future__ import annotations
 
@@ -133,7 +133,7 @@ def survey(path: Path) -> None:
 
 def main() -> int:
     incoming = Path(sys.argv[1] if len(sys.argv) > 1
-                    else "/tmp/cargopilot-regulations/incoming")
+                    else "/tmp/emcargo-regulations/incoming")
     pdfs = sorted(incoming.rglob("*.pdf")) + sorted(incoming.rglob("*.PDF"))
     if not pdfs:
         print(f"nothing under {incoming}")

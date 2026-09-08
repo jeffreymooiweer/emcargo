@@ -4,7 +4,7 @@
 ADR 5.4.3.4 and ADN 5.4.3.4 do not describe the instructions in writing, they
 *print* them: "the instructions in writing shall correspond in form and content
 to the following four-page model". So the document a driver or a boatmaster has
-to carry is a reproduction of those pages, and the honest way for CargoPilot to
+to carry is a reproduction of those pages, and the honest way for EMCargo to
 hand one over is to serve the pages themselves rather than a paraphrase of them.
 
 The publishers do not offer those four pages as a standalone file that this

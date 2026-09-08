@@ -20,14 +20,13 @@ MMT-RDM, an eCMR pilot, a platform connector) builds on this file existing.
 
 ## What is in it
 
-The `format` value below is a placeholder. Its exact compatibility identifier is
-defined by `FORMAT` in `backend/app/services/documents/shipment_export.py` and
-is deliberately unchanged for existing integrations.
+The format identifier is now `emcargo.shipment`, with format version `2.0`.
+Integrations must accept this new identifier before consuming new exports.
 
 ```json
 {
-  "format": "<stable format identifier>",
-  "format_version": "1.0",
+  "format": "emcargo.shipment",
+  "format_version": "2.0",
   "generated_at": "2026-08-23T15:58:51+00:00",
   "generator": { "application": "EMCargo", "version": "1.161.0" },
   "language": "nl",
