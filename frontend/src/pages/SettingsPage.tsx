@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
 import { useToast } from "../toast/ToastProvider";
 import ConfirmDialog from "../toast/ConfirmDialog";
+import UpdatePanel from "../components/UpdatePanel";
 import NumberInput from "../components/NumberInput";
 import {
   AssistantStatus,
@@ -10,8 +11,6 @@ import {
   SettingsOptions,
   ThemeChoice,
   UnCardStoreStatus,
-  UpdateCapability,
-  UpdateStatus,
   User,
   UserPreferences,
   api,
@@ -20,7 +19,8 @@ import SignaturePad from "../components/SignaturePad";
 import TwoFactorPanel from "../components/TwoFactorPanel";
 import { LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from "../i18n/language";
 import { useBranding } from "../branding";
-import { MODALITIES } from "./ModalitySelectPage";
+import { PaletteIcon, ShipmentsIcon, UserIcon, ShieldIcon, BuildingIcon, NetworkIcon, MailIcon, RefreshIcon, DocumentIcon, SettingsIcon, SunIcon, MoonIcon, MonitorIcon } from "../components/icons";
+import { MODALITIES, AVAILABLE_MODALITIES } from "./ModalitySelectPage";
 import { usePreferences } from "../settings/preferences";
 
 const panelClass = "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800";
@@ -39,20 +39,23 @@ const THEMES: ThemeChoice[] = ["light", "dark", "system"];
  *  scroll made the personal fields and the instance-wide ones look like one
  *  list, which they are emphatically not. */
 const TABS = [
-  { key: "appearance", label: "settings.tabAppearance", admin: false },
-  { key: "shipment", label: "settings.tabShipment", admin: false },
-  { key: "details", label: "settings.tabDetails", admin: false },
-  { key: "admin", label: "settings.tabAdmin", admin: true },
-  // Maintenance holds the action panels (updating, the UN card set, the
-  // assistant's model): things an administrator does now, as opposed to
-  // settings an administrator saves. Mixing the two put buttons that act
-  // immediately above a save button that does not govern them.
-  { key: "maintenance", label: "settings.tabMaintenance", admin: true },
+  { key: "appearance", label: "settings.tabAppearance", admin: false, group: "personal", icon: PaletteIcon },
+  { key: "shipment", label: "settings.tabShipment", admin: false, group: "personal", icon: ShipmentsIcon },
+  { key: "details", label: "settings.tabDetails", admin: false, group: "personal", icon: UserIcon },
+  { key: "security", label: "settingsNav.security", admin: false, group: "personal", icon: ShieldIcon },
+  { key: "admin", label: "settingsNav.organisation", admin: true, group: "organisation", icon: BuildingIcon },
+  { key: "branding", label: "settings.adminBranding", admin: true, group: "organisation", icon: PaletteIcon },
+  { key: "mail", label: "settings.mailTitle", admin: true, group: "organisation", icon: MailIcon },
+  { key: "updates", label: "settings.adminUpdates", admin: true, group: "system", icon: RefreshIcon },
+  { key: "network", label: "settingsNav.connections", admin: true, group: "system", icon: NetworkIcon },
+  { key: "cards", label: "settingsNav.cards", admin: true, group: "system", icon: DocumentIcon },
+  { key: "assistant", label: "settingsNav.assistant", admin: true, group: "system", icon: SettingsIcon },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
 
 /** The personal tabs share one draft and therefore one save button. */
+const ADMIN_TABS: TabKey[] = ["admin", "branding", "mail", "network", "security", "cards"];
 const PERSONAL_TABS: TabKey[] = ["appearance", "shipment", "details"];
 
 interface Props {
@@ -77,7 +80,8 @@ export default function SettingsPage({ user }: Props) {
   // settings, with the panel it meant three tabs away, is not an answer to
   // the notice the user just clicked.
   const [params, setParams] = useSearchParams();
-  const tab_ = (params.get("tab") ?? "appearance") as TabKey;
+  const requestedTab = params.get("tab") ?? "appearance";
+  const tab_ = (requestedTab === "maintenance" ? "updates" : requestedTab) as TabKey;
   const setTab = (key: TabKey) => setParams({ tab: key }, { replace: true });
 
   useEffect(() => setDraft(preferences), [preferences]);
@@ -121,22 +125,25 @@ export default function SettingsPage({ user }: Props) {
     }
   };
 
-  const tabs = TABS.filter((tab) => !tab.admin || user.role === "admin");
+  const tabs = TABS.filter((tab) => (!tab.admin || user.role === "admin") && !(open && tab.key === "security"));
   const active = tabs.some((tab) => tab.key === tab_) ? tab_ : "appearance";
 
   return (
-    <div className="space-y-6 max-w-2xl pb-4">
+    <div className="settings-workspace page-enter">
+      <div className="page-heading">
       <div>
         <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{t("settings.title")}</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          {open ? t("settings.introOpen") : t("settings.intro")}
+          {open ? t("settings.introOpen") : t("settingsNav.intro")}
         </p>
       </div>
 
+      </div>
+      <div className="settings-layout">
       {/* On a phone a row of tabs would either wrap or scroll out of sight;
           a dropdown says which group you are in and holds the rest one tap
           away. From the medium breakpoint the tabs themselves fit. */}
-      <div className="md:hidden">
+      <div className="settings-mobile-nav">
         <label htmlFor="settings-tab" className="sr-only">
           {t("settings.tabPick")}
         </label>
@@ -154,28 +161,20 @@ export default function SettingsPage({ user }: Props) {
         </select>
       </div>
 
-      <div
-        role="tablist"
-        aria-label={t("settings.title")}
-        className="hidden md:flex flex-wrap gap-1 border-b border-slate-200 dark:border-slate-800"
-      >
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            role="tab"
-            aria-selected={active === tab.key}
-            onClick={() => setTab(tab.key)}
-            className={`-mb-px rounded-t-lg border-b-2 px-4 py-2.5 text-sm font-medium transition ${
-              active === tab.key
-                ? "border-brand-600 text-brand-700 dark:border-brand-400 dark:text-brand-300"
-                : "border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
-            }`}
-          >
-            {t(tab.label as "settings.tabAppearance")}
-          </button>
-        ))}
-      </div>
+      <nav className="settings-nav" aria-label={t("settings.title")}>
+        {(["personal", "organisation", "system"] as const).map((group) => {
+          const items = tabs.filter((tab) => tab.group === group);
+          return items.length > 0 && <div key={group} className="settings-nav-group">
+            <p>{t(`settingsNav.${group}`)}</p>
+            {items.map((tab) => <button key={tab.key} type="button" aria-current={active === tab.key ? "page" : undefined}
+              onClick={() => setTab(tab.key)} className={`settings-nav-item ${active === tab.key ? "is-active" : ""}`}>
+              <tab.icon className="h-5 w-5" /><span>{t(tab.label)}</span>
+            </button>)}
+          </div>;
+        })}
+        {version && <p className="settings-version">EMCargo <span>{version}</span></p>}
+      </nav>
+      <div className="settings-content" key="settings-content">
 
       {active === "appearance" && (
       <section className={`${panelClass} p-5 space-y-5`}>
@@ -192,13 +191,15 @@ export default function SettingsPage({ user }: Props) {
                 key={option}
                 type="button"
                 onClick={() => void setAndApply({ theme: option })}
-                className={`px-3 py-2.5 rounded-lg text-sm min-h-[44px] border ${
+                aria-pressed={draft.theme === option}
+                className={`theme-choice px-3 py-2.5 rounded-lg text-sm min-h-[44px] border ${
                   draft.theme === option
                     ? "border-brand-500 bg-brand-50 text-brand-700 dark:bg-brand-950/50 dark:text-brand-200"
                     : "border-slate-200 dark:border-slate-700"
                 }`}
               >
-                {t(option === "system" ? "settings.auto" : `theme.${option}`)}
+                <span className={`theme-preview theme-preview-${option}`} aria-hidden="true"><span /><span><i /><i /><i /></span></span>
+                <span className="theme-choice-label">{option === "light" ? <SunIcon /> : option === "dark" ? <MoonIcon /> : <MonitorIcon />}{t(option === "system" ? "settings.auto" : `theme.${option}`)}</span>
               </button>
             ))}
           </div>
@@ -341,7 +342,8 @@ export default function SettingsPage({ user }: Props) {
           tabs never loses what was typed on another. */}
       {PERSONAL_TABS.includes(active) && (
         <>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="settings-savebar">
+            <span className="settings-save-state">{t(dirty ? "settingsNav.unsaved" : "settingsNav.allSaved")}</span>
             <button type="button" onClick={submit} disabled={saving || !dirty} className={buttonPrimary}>
               {saving ? t("settings.saving") : t("settings.save")}
             </button>
@@ -350,21 +352,13 @@ export default function SettingsPage({ user }: Props) {
         </>
       )}
 
-      {active === "details" && !open && <TwoFactorPanel />}
-      {active === "admin" && user.role === "admin" && <AdminSettings />}
-      {active === "maintenance" && user.role === "admin" && (
-        <div className="space-y-4">
-          <UpdatePanel />
-          <UnCardsAdminPanel />
-          <AssistantAdmin />
-        </div>
-      )}
-
-      {version && (
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          {t("settings.version")}: {version}
-        </p>
-      )}
+      {active === "security" && !open && <TwoFactorPanel />}
+      {ADMIN_TABS.includes(active) && user.role === "admin" && <AdminSettings section={active} />}
+      {active === "updates" && user.role === "admin" && <UpdatePanel />}
+      {active === "cards" && user.role === "admin" && <UnCardsAdminPanel />}
+      {active === "assistant" && user.role === "admin" && <AssistantAdmin />}
+      </div>
+      </div>
     </div>
   );
 }
@@ -377,7 +371,7 @@ export default function SettingsPage({ user }: Props) {
  * server enforces that with `require_admin`; hiding the section here only keeps
  * it out of the way of people who cannot change it anyway.
  */
-function AdminSettings() {
+function AdminSettings({ section }: { section: TabKey }) {
   const { t } = useTranslation();
   const toast = useToast();
   const { reload } = usePreferences();
@@ -473,7 +467,7 @@ function AdminSettings() {
     <div className="space-y-4">
       <p className="text-xs text-slate-500 dark:text-slate-400">{t("settings.adminIntro")}</p>
 
-      <section className={`${panelClass} p-5 space-y-5`}>
+      <section hidden={section !== "admin"} className={`${panelClass} p-5 space-y-5`}>
         <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
           {t("settings.adminNewUsers")}
         </h4>
@@ -533,7 +527,7 @@ function AdminSettings() {
         </div>
       </section>
 
-      <section className={`${panelClass} p-5 space-y-5`}>
+      <section hidden={section !== "branding"} className={`${panelClass} p-5 space-y-5`}>
         <div>
           <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
             {t("settings.adminBranding")}
@@ -549,13 +543,20 @@ function AdminSettings() {
         <BrandingPictures />
       </section>
 
-      <section className={`${panelClass} p-5 space-y-5`}>
+      <section hidden={section !== "network"} className={`${panelClass} p-5 space-y-5`}>
         <div>
           <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
             {t("settings.adminNetwork")}
           </h4>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t("settings.adminNetworkHint")}</p>
         </div>
+
+        <Field
+          label={t("settings.publicUrl")}
+          hint={t("settings.publicUrlHint")}
+          value={draft.public_url}
+          onChange={(value) => set("public_url", value)}
+        />
 
         <Toggle
           label={t("settings.addressLookup")}
@@ -594,25 +595,13 @@ function AdminSettings() {
           onChange={(value) => set("catalog_auto_sync", value)}
         />
 
-        <Toggle
-          label={t("settings.updateCheck")}
-          hint={t("settings.updateCheckHint")}
-          checked={draft.update_check_enabled}
-          onChange={(value) => set("update_check_enabled", value)}
-        />
+
       </section>
 
-      <section className={`${panelClass} p-5 space-y-5`}>
+      <section hidden={section !== "admin"} className={`${panelClass} p-5 space-y-5`}>
         <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
           {t("settings.adminFeatures")}
         </h4>
-
-        <Toggle
-          label={t("settings.unCardsEnabled")}
-          hint={t("settings.unCardsEnabledHint")}
-          checked={draft.un_cards_enabled}
-          onChange={(value) => set("un_cards_enabled", value)}
-        />
 
         <Toggle
           label={t("settings.historyEnabled")}
@@ -634,21 +623,6 @@ function AdminSettings() {
 
         <div>
           <label className="text-sm font-medium text-slate-800 dark:text-slate-200">
-            {t("settings.sessionTimeout")}
-          </label>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t("settings.sessionTimeoutHint")}</p>
-          <NumberInput
-            min={15}
-            max={10080}
-            step={15}
-            className={`${inputClass} mt-1`}
-            value={draft.session_timeout_minutes}
-            onChange={(e) => set("session_timeout_minutes", Number(e.target.value))}
-          />
-        </div>
-
-        <div>
-          <label className="text-sm font-medium text-slate-800 dark:text-slate-200">
             {t("settings.auditRetention")}
           </label>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t("settings.auditRetentionHint")}</p>
@@ -663,14 +637,8 @@ function AdminSettings() {
         </div>
       </section>
 
-      <section className={`${panelClass} p-5 space-y-5`}>
-        <div>
-          <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            {t("settings.mailTitle")}
-          </h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t("settings.mailHint")}</p>
-        </div>
-
+      <section hidden={section !== "security"} className={`${panelClass} p-5 space-y-5`}>
+        <h4>{t("settingsNav.accessPolicy")}</h4>
         <div>
           <label className="text-sm font-medium text-slate-800 dark:text-slate-200">
             {t("settings.twoFactorPolicy")}
@@ -691,11 +659,29 @@ function AdminSettings() {
           </select>
         </div>
 
-        <Field
-          label={t("settings.publicUrl")}
-          hint={t("settings.publicUrlHint")}
-          value={draft.public_url}
-          onChange={(value) => set("public_url", value)}
+        <div>
+          <label className="text-sm font-medium text-slate-800 dark:text-slate-200">
+            {t("settings.sessionTimeout")}
+          </label>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t("settings.sessionTimeoutHint")}</p>
+          <NumberInput
+            min={15}
+            max={10080}
+            step={15}
+            className={`${inputClass} mt-1`}
+            value={draft.session_timeout_minutes}
+            onChange={(e) => set("session_timeout_minutes", Number(e.target.value))}
+          />
+        </div>
+
+      </section>
+      <section hidden={section !== "cards"} className={`${panelClass} p-5 space-y-5`}>
+        <h4>{t("settingsNav.cardOptions")}</h4>
+        <Toggle
+          label={t("settings.unCardsEnabled")}
+          hint={t("settings.unCardsEnabledHint")}
+          checked={draft.un_cards_enabled}
+          onChange={(value) => set("un_cards_enabled", value)}
         />
 
         <Toggle
@@ -713,6 +699,15 @@ function AdminSettings() {
             {t("settings.cardLinksNeedsUrl")}
           </p>
         )}
+
+      </section>
+      <section hidden={section !== "mail"} className={`${panelClass} p-5 space-y-5`}>
+        <div>
+          <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            {t("settings.mailTitle")}
+          </h4>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t("settings.mailHint")}</p>
+        </div>
 
         <Toggle
           label={t("settings.mailEnabled")}
@@ -841,11 +836,12 @@ function Field({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const id = useId();
   return (
     <div>
-      <label className="text-sm font-medium text-slate-800 dark:text-slate-200">{label}</label>
+      <label htmlFor={id} className="text-sm font-medium text-slate-800 dark:text-slate-200">{label}</label>
       {hint && <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{hint}</p>}
-      <input className={`${inputClass} mt-1`} value={value} onChange={(e) => onChange(e.target.value)} />
+      <input id={id} className={`${inputClass} mt-1`} value={value} onChange={(e) => onChange(e.target.value)} />
     </div>
   );
 }
@@ -1141,215 +1137,6 @@ function UnCardsAdminPanel() {
   );
 }
 
-/** The Updating section: check on click, and — where the operator mounted
- *  the Docker socket and set the switch — update and restart from here.
- *  Without that capability the panel explains the manual route and how to
- *  enable the in-app one, including what handing over the socket means. */
-function UpdatePanel() {
-  const { t } = useTranslation();
-  const toast = useToast();
-  const [capability, setCapability] = useState<UpdateCapability | null>(null);
-  const [status, setStatus] = useState<UpdateStatus | null>(null);
-  const [checking, setChecking] = useState(false);
-  const [applying, setApplying] = useState(false);
-  const [confirmApply, setConfirmApply] = useState(false);
-
-  useEffect(() => {
-    api.updateCapability().then(setCapability).catch(() => setCapability(null));
-    // How the previous in-app update went, surviving its own restart.
-    api
-      .updateState()
-      .then((answer) => {
-        if (answer.state?.phase === "done") {
-          toast.success(t("settings.updateDone", { version: answer.current }));
-        } else if (answer.state?.phase === "failed") {
-          toast.error(t("settings.updateFailed", { error: answer.state.error ?? "" }));
-        }
-      })
-      .catch(() => undefined);
-    // Runs once: t or toast retriggering it would repeat the outcome toast.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const checkNow = async () => {
-    setChecking(true);
-    try {
-      setStatus(await api.updateCheckNow());
-    } catch (e) {
-      toast.error(String(e));
-    } finally {
-      setChecking(false);
-    }
-  };
-
-  const apply = async () => {
-    if (!status?.latest) return;
-    setApplying(true);
-    // One loading toast follows the whole update: pulling, restarting, and —
-    // on success — the page reloads into the new version underneath it.
-    const pending = toast.loading(t("settings.updatePhasePulling"));
-    try {
-      await api.updateApply();
-    } catch (e) {
-      pending.error(String(e));
-      setApplying(false);
-      return;
-    }
-    // Follow the state until the restart cuts the connection, then wait for
-    // the new instance and reload into it.
-    const started = Date.now();
-    const poll = async () => {
-      try {
-        const answer = await api.updateState();
-        if (answer.state?.phase === "failed") {
-          pending.error(t("settings.updateFailed", { error: answer.state.error ?? "" }));
-          setApplying(false);
-          return;
-        }
-        if (answer.current !== status.current || answer.state?.phase === "done") {
-          window.location.reload();
-          return;
-        }
-        pending.progress(
-          answer.state?.phase === "handed_over" || answer.state?.phase === "stopping"
-            ? t("settings.updatePhaseRestarting")
-            : t("settings.updatePhasePulling"),
-        );
-      } catch {
-        // The application is restarting; keep knocking until it answers.
-        pending.progress(t("settings.updatePhaseRestarting"));
-      }
-      if (Date.now() - started < 10 * 60 * 1000) {
-        window.setTimeout(poll, 2500);
-      } else {
-        pending.error(t("settings.updateTimeout"));
-        setApplying(false);
-      }
-    };
-    window.setTimeout(poll, 2500);
-  };
-
-  const canApply = capability?.available === true;
-  const updateAvailable = status?.update_available === true;
-
-  return (
-    <section className={`${panelClass} p-5 space-y-3`}>
-      <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-        {t("settings.adminUpdates")}
-      </h4>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <button type="button" className={buttonSecondary} onClick={checkNow} disabled={checking || applying}>
-          {checking ? t("settings.updateChecking") : t("settings.updateCheckNow")}
-        </button>
-        {status && status.enabled && status.reachable === false && (
-          <span className="text-sm text-amber-700 dark:text-amber-300">{t("settings.updateUnreachable")}</span>
-        )}
-        {status && status.reachable && !updateAvailable && (
-          <span className="text-sm text-emerald-700 dark:text-emerald-400">
-            {t("settings.updateUpToDate", { version: status.current })}
-          </span>
-        )}
-        {status && updateAvailable && (
-          <span className="text-sm text-slate-700 dark:text-slate-200">
-            {t("settings.updateFound", { current: status.current, latest: status.latest })}
-          </span>
-        )}
-      </div>
-
-      {updateAvailable && canApply && (
-        <div className="space-y-2">
-          <button
-            type="button"
-            className={buttonPrimary}
-            onClick={() => setConfirmApply(true)}
-            disabled={applying}
-          >
-            {applying
-              ? t("settings.updateApplying")
-              : t("settings.updateApplyNow", { version: status?.latest })}
-          </button>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{t("settings.updateApplyHint")}</p>
-        </div>
-      )}
-      {/* Updating restarts the application for everyone using it — that asks
-          for a deliberate step before, not an undo window after. */}
-      <ConfirmDialog
-        open={confirmApply}
-        title={t("settings.adminUpdates")}
-        body={t("settings.updateApplyConfirm", { version: status?.latest ?? "" })}
-        confirmLabel={t("settings.updateApplyNow", { version: status?.latest ?? "" })}
-        onConfirm={() => {
-          setConfirmApply(false);
-          void apply();
-        }}
-        onCancel={() => setConfirmApply(false)}
-      />
-
-      {/* The operator did their part (switch on, socket mounted) and the
-          capability is still off: say why, right here — this state used to
-          be silent and looked like the feature simply not existing. */}
-      {capability && capability.apply_enabled && capability.socket && !capability.available && (
-        <p className="text-sm text-amber-700 dark:text-amber-300">
-          {capability.reason === "socket_permission"
-            ? t("settings.updateReasonPermission")
-            : capability.reason === "container_not_found"
-              ? t("settings.updateReasonContainerNotFound")
-              : capability.reason === "foreign_image"
-                ? t("settings.updateReasonForeignImage")
-                : t("settings.updateReasonSocketUnusable")}
-        </p>
-      )}
-
-      {!canApply && capability?.install_method === "native" && (
-        <div className="space-y-2">
-          <p className="text-sm text-slate-700 dark:text-slate-300">{t("settings.updateNative")}</p>
-          <pre className="overflow-x-auto rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-800 dark:bg-slate-800 dark:text-slate-200">
-            sudo /opt/emcargo/current/deploy/native/update.sh
-          </pre>
-        </div>
-      )}
-      {!canApply && capability?.install_method === "kubernetes" && (
-        <div className="space-y-2">
-          <p className="text-sm text-slate-700 dark:text-slate-300">{t("settings.updateKubernetes")}</p>
-          <pre className="overflow-x-auto rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-800 dark:bg-slate-800 dark:text-slate-200">
-            kubectl -n emcargo set image deployment/emcargo emcargo=ghcr.io/jeffreymooiweer/emcargo:{status?.latest ?? "<version>"}
-          </pre>
-        </div>
-      )}
-      {!canApply && (capability?.install_method ?? "docker") === "docker" && (
-        <div className="space-y-3">
-          <p className="text-sm text-slate-700 dark:text-slate-300">{t("settings.updateExplain")}</p>
-          <pre className="overflow-x-auto rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-800 dark:bg-slate-800 dark:text-slate-200">
-            docker compose pull && docker compose up -d
-          </pre>
-          <details className="text-sm text-slate-700 dark:text-slate-300">
-            <summary className="cursor-pointer font-medium">{t("settings.updateEnableApply")}</summary>
-            <div className="mt-2 space-y-2">
-              <p>{t("settings.updateAuto")}</p>
-              <p>{t("settings.updateEnableApplyHow")}</p>
-              <pre className="overflow-x-auto rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-800 dark:bg-slate-800 dark:text-slate-200">
-{`environment:
-  - UPDATE_APPLY_ENABLED=true
-volumes:
-  - /var/run/docker.sock:/var/run/docker.sock`}
-              </pre>
-              <p className="text-amber-700 dark:text-amber-300">{t("settings.updateSocketWarning")}</p>
-              {capability && capability.apply_enabled && capability.reason === "no_socket" && (
-                <p>{t("settings.updateReasonNoSocket")}</p>
-              )}
-              {capability && !capability.apply_enabled && capability.socket && (
-                <p>{t("settings.updateReasonSwitchOff")}</p>
-              )}
-            </div>
-          </details>
-        </div>
-      )}
-
-    </section>
-  );
-}
-
 /**
  * The logo and the six tile pictures.
  *
@@ -1393,7 +1180,7 @@ function BrandingPictures() {
   const slot = (key: string, label: string, current: string | null,
                 upload: (file: File) => Promise<unknown>, remove: () => Promise<unknown>,
                 fallback: string, fallbackClass = "") => (
-    <div key={key} className="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-800 p-3">
+    <div key={key} data-slot={key} className="branding-slot flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-800 p-3">
       <img
         src={current ?? fallback}
         alt=""
@@ -1435,16 +1222,16 @@ function BrandingPictures() {
         <label className="text-sm font-medium text-slate-800 dark:text-slate-200">{t("settings.brandLogo")}</label>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 mb-2">{t("settings.brandLogoHint")}</p>
         {slot("logo", t("settings.brandLogo"), branding.logo, api.uploadBrandLogo, api.removeBrandLogo,
-              "/shipping.png", "dark:brightness-0 dark:invert")}
+              "/emcargo.svg")}
       </div>
       <div>
         <label className="text-sm font-medium text-slate-800 dark:text-slate-200">{t("settings.brandModalities")}</label>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 mb-2">{t("settings.brandModalitiesHint")}</p>
-        <div className="grid gap-2 md:grid-cols-2">
+        <div className="grid gap-3">
           {MODALITIES.map((key) =>
             slot(key, t(`modality.${key}`), branding.modalities[key] ?? null,
                  (file) => api.uploadBrandModality(key, file), () => api.removeBrandModality(key),
-                 `/modalities/${key}-light.webp`),
+                 `/art/${key}.webp`),
           )}
         </div>
       </div>

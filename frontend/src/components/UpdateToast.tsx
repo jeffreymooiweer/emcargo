@@ -13,6 +13,7 @@
  * else.
  */
 import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 
 import { api, User } from "../api/client";
@@ -23,6 +24,7 @@ export const DISMISSED_KEY = "emcargo-update-dismissed";
 export default function UpdateToast({ user }: { user: User }) {
   const { t } = useTranslation();
   const toast = useToast();
+  const navigate = useNavigate();
   // One notice per mount, even if effects re-run (StrictMode).
   const pushed = useRef(false);
 
@@ -35,19 +37,12 @@ export default function UpdateToast({ user }: { user: User }) {
         if (cancelled || pushed.current) return;
         if (!answer.update_available || !answer.latest) return;
         const latest = answer.latest;
-        if (localStorage.getItem(DISMISSED_KEY) === latest) return;
+        try { if (localStorage.getItem(DISMISSED_KEY) === latest) return; } catch { /* Storage may be unavailable. */ }
         pushed.current = true;
         toast.info(`${t("update.available", { version: latest })} ${t("update.hint")}`, {
           sticky: true,
-          actions: answer.url
-            ? [
-                {
-                  label: t("update.releaseNotes"),
-                  run: () => window.open(answer.url, "_blank", "noopener,noreferrer"),
-                },
-              ]
-            : undefined,
-          onDismiss: () => localStorage.setItem(DISMISSED_KEY, latest),
+          actions: [{ label: t("updates.open"), run: () => navigate("/settings?tab=updates") }],
+          onDismiss: () => { try { localStorage.setItem(DISMISSED_KEY, latest); } catch { /* Optional persistence. */ } },
         });
       })
       .catch(() => {

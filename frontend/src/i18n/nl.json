@@ -6,7 +6,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "new": "Nieuwe zending",
-    "materieel": "Overzicht materieel",
+    "materieel": "Materieel",
     "settings": "Instellingen",
     "users": "Gebruikers",
     "logout": "Uitloggen",
@@ -358,10 +358,10 @@
     "tabPick": "Kies een onderdeel",
     "updateCheck": "Controleren op updates",
     "updateCheckHint": "Vraagt GitHub of er een nieuwere versie is. Uit betekent dat er nooit een verzoek uitgaat.",
-    "adminUpdates": "Bijwerken",
+    "adminUpdates": "Updates",
     "updateExplain": "Bijwerken is altijd: het nieuwere image ophalen en de container opnieuw aanmaken — vanaf de server, bijvoorbeeld:",
     "updateAuto": "Met Watchtower gaat dit vanzelf; op Unraid volstaat één klik op 'update' in het Docker-tabblad.",
-    "unCardsStoreTitle": "UN Cards",
+    "unCardsStoreTitle": "Geïnstalleerde kaartenset",
     "unCardsStoreIntro": "Door EMCargo gegenereerde kaarten, geïnstalleerd op het datavolume — geen onderdeel van het Docker-image.",
     "unCardsNone": "Er is nog geen kaartenset geïnstalleerd. Haal de nieuwste set op of importeer een gedownload ZIP-bestand.",
     "unCardsInstalled": "Geïnstalleerd: {{count}} kaarten, gegenereerd {{generated}}",
@@ -398,7 +398,7 @@
     "updateEnableApplyHow": "Mount de Docker-socket, zet de omgevingsvariabele aan en herstart de container eenmalig; daarna verschijnt hier een updateknop:",
     "updateSocketWarning": "Let op: wie de Docker-socket mount, geeft deze container feitelijk beheerdersrechten op de hele server.",
     "updateReasonNoSocket": "De schakelaar staat aan, maar er is geen Docker-socket in de container gemount — voeg de volume-regel hierboven toe en herstart de container.",
-    "updateReasonSwitchOff": "Er is wel een Docker-socket gevonden, maar UPDATE_APPLY_ENABLED staat niet aan — voeg de omgevingsvariabele toe en herstart de container.",
+    "updateReasonSwitchOff": "Bijwerken vanuit de app is nog niet ingeschakeld. Voeg UPDATE_APPLY_ENABLED=true toe aan de containerinstellingen en herstart de container.",
     "tabMaintenance": "Onderhoud",
     "updateReasonPermission": "De socket is gemount, maar de app mag hem niet openen. Dit is opgelost sinds v1.135.0 — werk de container nog één keer handmatig bij en herstart.",
     "updateReasonContainerNotFound": "De socket werkt, maar de app kan de eigen container niet terugvinden bij de Docker-daemon.",
@@ -449,7 +449,7 @@
     "brandLogo": "Logo",
     "brandLogoHint": "PNG, JPEG of WebP, tot 1 MB. Wordt in beide thema's in eigen kleuren getoond en gaat mee in uitgaande mail.",
     "brandModalities": "Tegelafbeeldingen",
-    "brandModalitiesHint": "Eén afbeelding per transportmodaliteit, PNG, JPEG of WebP tot 3 MB, getoond in beide thema's. Brede afbeeldingen passen het best: de tegel is drie keer zo breed als hoog.",
+    "brandModalitiesHint": "Eén afbeelding per vervoerswijze, PNG, JPEG of WebP tot 3 MB. Kies een liggend beeld met het onderwerp in het midden; de uitsnede past zich aan het scherm aan.",
     "brandUpload": "Uploaden",
     "brandReplace": "Vervangen",
     "brandRemove": "Terug naar standaard",
@@ -837,9 +837,15 @@
       "row_refused": "Regel {{row}}: {{reason}}"
     },
     "auth": {
-      "two_factor_required": "Deze installatie vereist tweestapsverificatie voor uw account. Stel die eerst in onder Instellingen, Mijn gegevens.",
+      "two_factor_required": "Deze installatie vereist tweestapsverificatie voor uw account. Stel die eerst in onder Instellingen, Beveiliging.",
       "two_factor_invalid_code": "Deze verificatiecode is niet geldig.",
       "two_factor_inactive": "Tweestapsverificatie is niet actief."
+    },
+    "update": {
+      "check_disabled": "Controleren op updates staat uit",
+      "in_progress": "Er wordt al een update uitgevoerd",
+      "unavailable": "Bijwerken vanuit de app is niet beschikbaar. Bekijk de installatievereisten onder Instellingen / Updates.",
+      "no_update": "Er is geen nieuwere release om te installeren. Controleer opnieuw op updates."
     }
   },
   "instructions": {
@@ -940,7 +946,7 @@
   },
   "update": {
     "available": "EMCargo {{version}} is beschikbaar.",
-    "hint": "Deze installatie werkt zichzelf niet bij; haal het nieuwere image op zoals u dat gewend bent.",
+    "hint": "Open Updates om deze versie te bekijken en te installeren.",
     "releaseNotes": "Bekijk de release-opmerkingen",
     "dismiss": "Melding sluiten"
   },
@@ -1467,5 +1473,52 @@
     "historyPrivacy": "Met zendinghistorie ingeschakeld worden uw concepten en opgeslagen zendingen op deze installatie bewaard.",
     "documentsSelected": "Gekozen: {{count}}",
     "showOptions": "Opties bekijken"
+  },
+  "settingsNav": {
+    "personal": "Persoonlijk",
+    "organisation": "Organisatie",
+    "system": "Systeem",
+    "security": "Beveiliging",
+    "connections": "Verbindingen",
+    "cards": "UN-kaarten",
+    "assistant": "Assistent",
+    "unsaved": "Niet-opgeslagen wijzigingen",
+    "allSaved": "Alles opgeslagen",
+    "intro": "Persoonlijke voorkeuren, organisatie en systeem. Alles op één plek.",
+    "accessPolicy": "Toegangsbeleid voor deze installatie",
+    "cardOptions": "UN-kaarten en QR-links"
+  },
+  "updates": {
+    "intro": "Versie, voortgang en updates op één plek.",
+    "installed": "Geïnstalleerd",
+    "latest": "Laatste release",
+    "open": "Naar updates",
+    "checkDisabled": "Automatisch controleren staat uit.",
+    "notChecked": "Controleer of een nieuwe versie beschikbaar is.",
+    "inApp": "Bijwerken vanuit EMCargo",
+    "ready": "Beschikbaar",
+    "setupNeeded": "Instelling nodig",
+    "loadingCapability": "Mogelijkheden ophalen…",
+    "setup": "Installatie-instructies",
+    "unraid": "Unraid: voeg bij de container de variabele UPDATE_APPLY_ENABLED met waarde true toe en koppel /var/run/docker.sock als pad aan dezelfde containerlocatie. Pas de container toe. Daarna verschijnt de updateknop zodra een nieuwe release beschikbaar is."
+  },
+  "dgFocus": {
+    "title": "Gevaarlijke goederen",
+    "intro": "Bevestig de stof en vul aan wat voor deze zending nog nodig is.",
+    "sources": "Bronnen en toelichting",
+    "preparing": "Gegevens en vervolgvragen worden bijgewerkt…",
+    "prepareError": "De stofgegevens konden niet worden opgehaald. De controle is niet compleet. Wijzig het UN-nummer om opnieuw te proberen.",
+    "editPosition": "Positieomschrijving aanpassen",
+    "chooseSubstance": "Kies eerst een stof. Daarna verschijnen de bijbehorende gegevens en vragen."
+  },
+  "exportFocus": {
+    "goods": "{{count}} goederenregels · gewicht aanpassen",
+    "reference": "Aanvullende documenten en instructies",
+    "checks": "Aandachtspunten voor dit pakket",
+    "appliesTo": "Van toepassing op {{count}} document(en)",
+    "validationFailed": "De documentcontrole is niet beschikbaar. Probeer het opnieuw voordat u deze documenten gebruikt."
+  },
+  "authArt": {
+    "title": "Van vertrek tot bestemming."
   }
 }

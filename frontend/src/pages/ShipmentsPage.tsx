@@ -153,7 +153,7 @@ function ShipmentList({ language, admin }: { language: string; admin: boolean })
   const parties = (s: ShipmentSummary) => [s.consignor_name, s.consignee_name].filter(Boolean).join(" → ") || "—";
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="collection-page page-enter space-y-4 sm:space-y-6">
       <div className={`${panelClass} p-5 sm:p-8 flex flex-wrap items-start justify-between gap-3`}>
         <div>
           <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-100">{t("history.title")}</h2>
@@ -164,7 +164,7 @@ function ShipmentList({ language, admin }: { language: string; admin: boolean })
         </Link>
       </div>
 
-      <div className={`${panelClass} p-4 sm:p-5 grid gap-3 md:grid-cols-[2fr_1fr_1fr_1fr]`}>
+      <div className={`${panelClass} p-4 sm:p-5 grid items-end gap-3 md:grid-cols-[2fr_1fr_1fr_1fr]`}>
         <input
           className={inputClass}
           placeholder={t("history.search")}
@@ -509,7 +509,7 @@ function ShipmentView({ id, language }: { id: number; language: string }) {
   );
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-3xl">
+    <div className="collection-page page-enter space-y-4 sm:space-y-6 max-w-3xl">
       <Link to="/shipments" className="text-sm text-brand-700 dark:text-brand-300 hover:underline">
         ← {t("history.back")}
       </Link>

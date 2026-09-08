@@ -32,12 +32,12 @@ interface Props {
 export default function CheckYourAnswers({ rows, title }: Props) {
   const { t } = useTranslation();
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6">
+    <div className="surface check-answers">
       <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{title}</h3>
-      <dl className="mt-3 divide-y divide-slate-100 dark:divide-slate-800">
+      <dl className="check-answers-grid">
         {rows.map((row) => (
-          <div key={row.key} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-2">
-            <dt className="w-full text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400 sm:w-48 sm:shrink-0">
+          <div key={row.key} className="check-answer">
+            <dt className="check-answer-label">
               {row.label}
             </dt>
             <dd
@@ -55,7 +55,7 @@ export default function CheckYourAnswers({ rows, title }: Props) {
               <button
                 type="button"
                 onClick={row.onChange}
-                className="text-xs font-medium text-brand-700 underline hover:text-brand-800 dark:text-brand-300"
+                className="check-answer-change"
               >
                 {t("check.change")}
                 <span className="sr-only"> — {row.label}</span>

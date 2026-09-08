@@ -1,3 +1,4 @@
+import { CloseIcon } from "./icons";
 /**
  * The what's-new card: shown once after an update, then never again.
  *
@@ -139,7 +140,7 @@ export default function WhatsNewModal() {
             aria-label={t("whatsNew.close")}
             className="ml-auto rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
           >
-            ×
+            <CloseIcon className="h-5 w-5" />
           </button>
         </div>
         <div className="overflow-y-auto p-5 pt-3">

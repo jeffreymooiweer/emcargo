@@ -20,6 +20,7 @@ rollback) to say what went wrong.
 from __future__ import annotations
 
 import json
+import os
 import sys
 import time
 from datetime import datetime, timezone
@@ -28,7 +29,7 @@ from pathlib import Path
 import httpx
 
 DOCKER_SOCKET = "/var/run/docker.sock"
-DATA_DIR = Path("/data")
+DATA_DIR = Path(os.environ.get("DATA_DIR") or "/data")
 
 #: HostConfig keys carried over to the successor. Deliberately a list of
 #: the common ones rather than the whole inspect blob: the blob mixes
@@ -49,8 +50,10 @@ def write_state(state: dict) -> None:
     payload = {**state,
                "at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
     try:
-        (DATA_DIR / "update-state.json").write_text(
-            json.dumps(payload, indent=1) + "\n", encoding="utf-8")
+        destination = DATA_DIR / "update-state.json"
+        temporary = DATA_DIR / f".update-state.{os.getpid()}.{time.time_ns()}.tmp"
+        temporary.write_text(json.dumps(payload, indent=1) + "\n", encoding="utf-8")
+        temporary.replace(destination)
     except OSError:
         pass
 
@@ -69,14 +72,17 @@ def wait_until_stopped(client: httpx.Client, container_id: str,
 
 
 def wait_until_running(client: httpx.Client, container_id: str,
-                       timeout: float = 60.0) -> bool:
+                       timeout: float = 180.0) -> bool:
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
         response = client.get(f"/containers/{container_id}/json")
         if response.status_code == 200:
             state = response.json()["State"]
-            if state["Running"]:
+            health = (state.get("Health") or {}).get("Status")
+            if state["Running"] and health in (None, "healthy"):
                 return True
+            if health == "unhealthy":
+                return False
             if state.get("ExitCode") not in (None, 0) and not state.get("Restarting"):
                 return False
         time.sleep(1.0)
@@ -139,7 +145,7 @@ def main() -> int:
         if start.status_code not in (204, 304):
             raise RuntimeError(f"start failed: HTTP {start.status_code}")
         if not wait_until_running(client, new_id):
-            raise RuntimeError("the new container did not stay running")
+            raise RuntimeError("the new container did not become healthy")
 
         client.delete(f"/containers/{old_id}")
         write_state({"phase": "done", "to_image": new_image,

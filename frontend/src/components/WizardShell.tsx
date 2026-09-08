@@ -44,7 +44,7 @@ import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import WizardProgress, { WizardStepKey } from "./WizardProgress";
-import { AirIcon, RailIcon, RoadIcon, SeaIcon } from "./icons";
+import { AirIcon, InlandIcon, MultimodalIcon, RailIcon, RoadIcon, SeaIcon } from "./icons";
 
 interface Slot {
   el: HTMLElement | null;
@@ -76,12 +76,12 @@ export function ModalityIcon({ modality, className }: { modality: string; classN
   switch (modality) {
     case "rail":
       return <RailIcon className={className} />;
-    // One ship for both: a cargo ship is what sails a sea route and what sails
-    // an inland one, and drawing a second, subtly different ship would say
-    // there is a distinction here that there is not.
     case "sea":
-    case "inland":
       return <SeaIcon className={className} />;
+    case "inland":
+      return <InlandIcon className={className} />;
+    case "multimodal":
+      return <MultimodalIcon className={className} />;
     case "air":
       return <AirIcon className={className} />;
     default:

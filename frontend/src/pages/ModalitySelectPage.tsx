@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useBranding } from "../branding";
 import { ModalityIcon } from "../components/WizardShell";
-import { ImportIcon } from "../components/icons";
+import { ArrowRightIcon, ImportIcon } from "../components/icons";
 import { usePreferences } from "../settings/preferences";
 
 export const MODALITIES = ["road", "rail", "sea", "inland", "air", "multimodal"] as const;
@@ -104,26 +104,28 @@ export default function ModalitySelectPage() {
         <p>{t("modality.intro")}</p></div>
       </header>
       <div className="start-layout">
-        <section className="mode-list surface" aria-label={t("wizard.mode")}>
-          {AVAILABLE_MODALITIES.map((key, index) => <button key={key} className="mode-option" onClick={() => navigate(`/wizard/${key}`)}>
-            <span className="mode-index" aria-hidden="true">0{index + 1}</span>
-            {custom[key] ? <img src={custom[key] ?? undefined} alt="" className="mode-custom-image" /> : <ModalityIcon modality={key} className="mode-glyph" />}
-            <span className="mode-copy"><strong>{t(`modality.${key}`)}</strong><span>{t(`modality.${key}Desc`)}</span></span>
-            <span className="mode-rule">{({ road: "ADR", rail: "RID", sea: "IMDG", inland: "ADN" } as Record<string,string>)[key]}</span>
-            <span className="mode-arrow" aria-hidden="true">↗</span>
+        <section className="mode-grid" aria-label={t("wizard.mode")}>
+          {AVAILABLE_MODALITIES.map((key) => <button key={key} type="button" className={`mode-card mode-card-${key}`} onClick={() => navigate(`/wizard/${key}`)}>
+            <span className="mode-card-visual"><img src={custom[key] || `/art/${key}.webp`} alt="" width="768" height="384" decoding="async" />
+              <span className="mode-card-rule">{({ road: "ADR", rail: "RID", sea: "IMDG", inland: "ADN" } as Record<string,string>)[key]}</span>
+            </span>
+            <span className="mode-card-content"><ModalityIcon modality={key} className="mode-card-icon" />
+              <span className="mode-copy"><strong>{t(`modality.${key}`)}</strong><span>{t(`modality.${key}Desc`)}</span></span>
+              <span className="mode-card-arrow"><ArrowRightIcon className="h-5 w-5" /></span>
+            </span>
           </button>)}
         </section>
         <aside className="start-import surface">
           <span className="import-glyph"><ImportIcon className="h-6 w-6" /></span>
           <h3>{t("studio.importTitle")}</h3>
           <p>{t("studio.importHint")}</p>
-          <button className="action-primary" onClick={() => navigate(`/wizard/${isModalityAvailable(preferred) ? preferred : "road"}?input=paste`)}>{t("overview.paste")}<span aria-hidden="true">↗</span></button>
+          <button className="action-primary" onClick={() => navigate(`/wizard/${isModalityAvailable(preferred) ? preferred : "road"}?input=paste`)}>{t("overview.paste")}<ArrowRightIcon className="h-4 w-4" /></button>
           <span className="import-formats">XLSX <span>·</span> CSV <span>·</span> TXT</span>
         </aside>
       </div>
       <div className="start-footnote">
         <p>{t(publicSettings?.history_enabled ? "studio.historyPrivacy" : "dashboard.privacy")}</p>
-        <details className="future-modes"><summary>{t("studio.otherModes")}</summary><div>{MODALITIES.filter((key): boolean => !isModalityAvailable(key)).map(key => <div key={key}><strong>{t(`modality.${key}`)}</strong><span>{t("modality.lockedReason")}</span></div>)}</div></details>
+        <details className="future-modes"><summary>{t("studio.otherModes")}</summary><div>{MODALITIES.filter((key): boolean => !isModalityAvailable(key)).map(key => <div key={key} className="mode-future"><img src={custom[key] || `/art/${key}.webp`} alt="" width="160" height="80" loading="lazy" /><div><strong>{t(`modality.${key}`)}</strong><span>{t("modality.lockedReason")}</span></div></div>)}</div></details>
       </div>
     </div>
   );

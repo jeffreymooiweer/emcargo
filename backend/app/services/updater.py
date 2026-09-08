@@ -156,7 +156,8 @@ def capability() -> dict[str, Any]:
         return result
     result["container"] = container_id
     result["image"] = image
-    repo = image.rsplit(":", 1)[0] if ":" in image.rsplit("/", 1)[-1] else image
+    without_digest = image.split("@", 1)[0]
+    repo = without_digest.rsplit(":", 1)[0] if ":" in without_digest.rsplit("/", 1)[-1] else without_digest
     if repo != IMAGE_REPOSITORY:
         result["reason"] = "foreign_image"
         return result
@@ -174,7 +175,10 @@ def read_state() -> dict[str, Any] | None:
 def write_state(state: dict[str, Any]) -> None:
     payload = {**state, "at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
     try:
-        state_file().write_text(json.dumps(payload, indent=1) + "\n", encoding="utf-8")
+        destination = state_file()
+        temporary = destination.with_name(f".{destination.name}.{os.getpid()}.{time.time_ns()}.tmp")
+        temporary.write_text(json.dumps(payload, indent=1) + "\n", encoding="utf-8")
+        temporary.replace(destination)
     except OSError as exc:  # pragma: no cover - full disk
         logger.warning("Could not record update state: %s", exc)
 
@@ -259,9 +263,11 @@ def start_update(target_version: str) -> dict[str, Any]:
         inspect.raise_for_status()
         own = inspect.json()
         binds = list((own.get("HostConfig") or {}).get("Binds") or [])
+        mounts = list((own.get("HostConfig") or {}).get("Mounts") or [])
         socket_bind = f"{DOCKER_SOCKET}:{DOCKER_SOCKET}"
-        if not any(_bind_destination(bind) == str(DOCKER_SOCKET)
-                   for bind in binds):
+        if not any(_bind_destination(bind) == str(DOCKER_SOCKET) for bind in binds) and not any(
+            mount.get("Target") == str(DOCKER_SOCKET) for mount in mounts
+        ):
             binds.append(socket_bind)
 
         helper_name = f"{HELPER_NAME_PREFIX}-{int(time.time())}"
@@ -272,8 +278,11 @@ def start_update(target_version: str) -> dict[str, Any]:
                 "Image": reference,
                 "Entrypoint": ["python", "-m", "app.update_helper"],
                 "Cmd": [own["Id"], reference],
+                "Env": [f"DATA_DIR={get_settings().data_dir}"],
+                "User": "0",
                 "HostConfig": {
                     "Binds": binds,
+                    "Mounts": mounts,
                     "AutoRemove": True,
                     "NetworkMode": "none",
                 },
@@ -285,11 +294,12 @@ def start_update(target_version: str) -> dict[str, Any]:
                 "Could not create the updater container: "
                 f"HTTP {create.status_code} {create.text[:300]}")
         helper_id = create.json()["Id"]
+        # Publish the handover before the helper can write its own progress.
+        # A fast restart must never have its done state overwritten here.
+        write_state({"phase": "handed_over", "to": target_version, "helper": helper_name})
         start = client.post(f"/containers/{helper_id}/start")
         if start.status_code not in (204, 304):
             raise UpdateError(
                 f"Could not start the updater container: HTTP {start.status_code}")
 
-    write_state({"phase": "handed_over", "to": target_version,
-                 "helper": helper_name})
     return {"helper": helper_name, "to": target_version}

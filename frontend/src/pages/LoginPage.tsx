@@ -1,3 +1,5 @@
+import AuthLayout from "../components/AuthLayout";
+import { ArrowRightIcon } from "../components/icons";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/client";
@@ -83,7 +85,7 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
 
   if (challenge) {
     return (
-      <div className="auth-page">
+      <AuthLayout>
         <form
           onSubmit={submitCode}
           className="auth-card page-enter space-y-5"
@@ -142,12 +144,12 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
             {t("login.twoFactorBack")}
           </button>
         </form>
-      </div>
+      </AuthLayout>
     );
   }
 
   return (
-    <div className="auth-page">
+    <AuthLayout>
       <form onSubmit={submit} className="auth-card page-enter space-y-5">
         <div className="auth-brand"><img src={branding.logo || "/emcargo.svg"} alt="" /><span>{branding.name || t("app.name")}</span></div>
         <div><h1>{t("studio.loginTitle")}</h1><p className="auth-intro">{t("studio.loginHint")}</p></div>
@@ -162,7 +164,7 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
         </div>
         {error && <p role="alert" className="text-red-600 dark:text-red-400 text-sm">{error}</p>}
         <button type="submit" disabled={busy} aria-busy={busy} className="action-primary w-full">
-          {busy ? t("studio.loginBusy") : t("login.submit")}
+          {busy ? t("studio.loginBusy") : t("login.submit")}<ArrowRightIcon className="h-4 w-4" />
         </button>
 
         <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
@@ -202,6 +204,6 @@ export default function LoginPage({ onLogin }: { onLogin: () => void }) {
           )}
         </div>
       </form>
-    </div>
+    </AuthLayout>
   );
 }

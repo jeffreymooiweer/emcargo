@@ -1,3 +1,4 @@
+import AuthLayout from "../components/AuthLayout";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
@@ -83,14 +84,14 @@ export default function ResetPasswordPage() {
   };
 
   const frame = (children: React.ReactNode) => (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-950 px-4">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-8 w-full max-w-md space-y-4">
+    <AuthLayout>
+      <div className="auth-card page-enter space-y-5">
         <div className="text-center">
           <img
-            src={branding.logo ?? "/shipping.png"}
+            src={branding.logo ?? "/emcargo.svg"}
             alt=""
             aria-hidden="true"
-            className={`mx-auto h-16 w-16 object-contain ${branding.logo ? "" : "dark:brightness-0 dark:invert"}`}
+            className={`mx-auto h-16 w-16 object-contain ${branding.logo ? "" : ""}`}
           />
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mt-3">
             {t("reset.title")}
@@ -98,7 +99,7 @@ export default function ResetPasswordPage() {
         </div>
         {children}
       </div>
-    </div>
+    </AuthLayout>
   );
 
   if (linkState === "checking") {

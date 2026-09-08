@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { api, ImportAnalysis, ImportMapping } from "../api/client";
 import { useToast } from "../toast/ToastProvider";
 import ImportColumnMapping from "./ImportColumnMapping";
-import { ImportIcon } from "./icons";
+import { ImportIcon, PasteIcon, CloseIcon } from "./icons";
 
 const buttonClass =
   "inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-3 text-sm font-medium " +
@@ -21,16 +21,6 @@ const primaryClass =
   "rounded-lg bg-brand-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50";
 const secondaryClass =
   "rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700 dark:border-slate-700 dark:text-slate-200";
-
-function PasteIcon() {
-  return (
-    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} aria-hidden>
-      <path d="M8 4H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2" strokeLinecap="round" />
-      <rect x="8" y="2.5" width="4" height="3" rx="1" />
-      <path d="M7.5 10h5M7.5 13h3" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 interface Props {
   /** Whether the shipment already holds a line worth replacing. */
@@ -152,7 +142,7 @@ export default function GoodsImport({ hasLines, onImport, dropped, onDroppedHand
         {open && <div className="goods-import-content" aria-busy={busy}>
           <header className="goods-import-heading">
             <h3 ref={heading} id="goods-import-title" tabIndex={-1}>{t("review.importTitle")}</h3>
-            <button type="button" onClick={close} className="goods-import-close" aria-label={t("review.cancel")}>×</button>
+            <button type="button" onClick={close} className="goods-import-close" aria-label={t("review.cancel")}><CloseIcon className="h-5 w-5" /></button>
           </header>
           <p className="goods-import-intro">{t("review.importIntro")}</p>
           <label className={buttonClass + " goods-file-button"}>

@@ -26,7 +26,7 @@ vi.mock("../api/client", () => ({
   api: { validateDocument: (payload: unknown) => validateDocument(payload) },
 }));
 
-import DocumentWarnings, { useDocumentValidation } from "./DocumentWarnings";
+import DocumentWarnings, { groupDocumentWarnings, useDocumentValidation } from "./DocumentWarnings";
 
 function payload(key: string, quantity = "100"): DocumentExportPayload {
   return {
@@ -39,7 +39,7 @@ function payload(key: string, quantity = "100"): DocumentExportPayload {
 }
 
 function Harness({ payloads, active }: { payloads: DocumentExportPayload[]; active: boolean }) {
-  const warnings = useDocumentValidation(payloads, active);
+  const warnings = useDocumentValidation(payloads, active, "Controle niet beschikbaar");
   return (
     <div>
       {payloads.map((p) => (
@@ -82,13 +82,11 @@ describe("de documentwaarschuwingen op de exportstap", () => {
     expect(screen.queryByText("Aandachtspunten")).not.toBeInTheDocument();
   });
 
-  it("laat de kaart met rust als het endpoint faalt", async () => {
-    // A validation that cannot run must not take the export step down: the
-    // download still works without it, and errors have their own channel.
+  it("keeps a failed check visible on the affected document", async () => {
+    // An empty list must never imply a successful check when its request failed.
     validateDocument.mockRejectedValue(new Error("boom"));
     render(<Harness payloads={[payload("cmr")]} active={true} />);
-    await waitFor(() => expect(validateDocument).toHaveBeenCalled());
-    expect(screen.queryByText("Aandachtspunten")).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText("Controle niet beschikbaar")).toBeInTheDocument());
   });
 
   it("vraagt niets zolang de exportstap niet open is", async () => {
@@ -120,4 +118,21 @@ describe("de documentwaarschuwingen op de exportstap", () => {
     expect(screen.getByText("Eerste waarschuwing")).toBeInTheDocument();
     expect(screen.getByText("Aandachtspunten")).toBeInTheDocument();
   });
+});
+
+
+it("groups repeated warnings without dropping any affected document", () => {
+  expect(groupDocumentWarnings({cmr: ["Missing unit", "Missing unit"], adr: ["Missing unit", "Tunnel E"], labels: []})).toEqual([
+    {message: "Missing unit", documents: ["cmr", "adr"]},
+    {message: "Tunnel E", documents: ["adr"]},
+  ]);
+});
+
+it("clears stale findings as soon as the input changes", async () => {
+  validateDocument.mockResolvedValueOnce({errors: [], warnings: ["Old substance warning"]});
+  const {rerender} = render(<Harness payloads={[payload("cmr", "100")]} active />);
+  await waitFor(() => expect(screen.getByText("Old substance warning")).toBeInTheDocument());
+  validateDocument.mockImplementation(() => new Promise(() => {}));
+  rerender(<Harness payloads={[payload("cmr", "200")]} active />);
+  expect(screen.queryByText("Old substance warning")).not.toBeInTheDocument();
 });

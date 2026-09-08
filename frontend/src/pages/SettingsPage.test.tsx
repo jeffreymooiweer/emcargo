@@ -8,7 +8,7 @@
  * would wrap or scroll out of sight, and the administrator's groups exist
  * only for an administrator.
  */
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -35,6 +35,7 @@ vi.mock("../api/client", () => ({
       download: { state: "idle" },
     }),
     // The maintenance tab's panels ask for their state on mount.
+    updateStatus: vi.fn().mockResolvedValue({current:"2.1.1",enabled:false}),
     updateCapability: vi.fn().mockResolvedValue({ available: false }),
     updateState: vi.fn().mockResolvedValue({ current: "1.115.0", state: null }),
     unCardStoreStatus: vi.fn().mockResolvedValue({
@@ -84,7 +85,7 @@ describe("SettingsPage tabs", () => {
 
   it("switching tabs shows the other group", async () => {
     renderAt(userOf("user"));
-    await userEvent.click(await screen.findByRole("tab", { name: "settings.tabDetails" }));
+    await userEvent.click(await screen.findByRole("button", { name: "settings.tabDetails" }));
     expect(screen.getByText("settings.myDetails")).toBeTruthy();
     expect(screen.queryByText("settings.appearance")).toBeNull();
     // The save button travels with the personal tabs; one draft, one button.
@@ -101,18 +102,22 @@ describe("SettingsPage tabs", () => {
   it("the administrator groups exist only for an administrator", async () => {
     const { unmount } = renderAt(userOf("user"));
     await screen.findByText("settings.appearance");
-    expect(screen.queryByRole("tab", { name: "settings.tabAdmin" })).toBeNull();
-    expect(screen.queryByRole("tab", { name: "settings.tabMaintenance" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "settingsNav.organisation" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "settings.adminUpdates" })).toBeNull();
     unmount();
 
     renderAt(userOf("admin"));
-    expect(await screen.findByRole("tab", { name: "settings.tabAdmin" })).toBeTruthy();
-    // Maintenance holds the action panels: updating, the UN card set and
-    // the assistant's model live here, away from the saved settings.
-    await userEvent.click(screen.getByRole("tab", { name: "settings.tabMaintenance" }));
-    await waitFor(() => expect(screen.getByText("settings.adminUpdates")).toBeTruthy());
-    expect(screen.getByText("settings.unCardsStoreTitle")).toBeTruthy();
-    await waitFor(() => expect(screen.getByText("settings.assistantTitle")).toBeTruthy());
+    expect(await screen.findByRole("button", { name: "settingsNav.organisation" })).toBeTruthy();
+    // Maintenance actions now have distinct destinations. The update must be
+    // discoverable without loading the UN-card store or assistant model.
+    await userEvent.click(screen.getByRole("button", { name: "settings.adminUpdates" }));
+    expect(await screen.findByRole("heading", { name: "settings.adminUpdates" })).toBeTruthy();
+    expect(screen.queryByText("settings.unCardsStoreTitle")).toBeNull();
+    expect(screen.queryByText("settings.assistantTitle")).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "settingsNav.cards" }));
+    expect(await screen.findByText("settings.unCardsStoreTitle")).toBeTruthy();
+    await userEvent.click(screen.getByRole("button", { name: "settingsNav.assistant" }));
+    expect(await screen.findByText("settings.assistantTitle")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "settings.saveAdmin" })).toBeNull();
   });
 

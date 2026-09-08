@@ -1,3 +1,4 @@
+import { DocumentIcon, DownloadIcon } from "../components/icons";
 /** The page a QR code on a transport document opens.
  *
  *  Public, and the only page in the application that is. The people this is
@@ -32,6 +33,7 @@ export default function CardsPage() {
 
   useEffect(() => {
     let cancelled = false;
+    setCards(null); setFailed(false);
     api
       .cardLookup(un, modality)
       .then((r) => {
@@ -46,8 +48,10 @@ export default function CardsPage() {
   }, [un, modality]);
 
   return (
-    <div className="mx-auto max-w-lg p-6">
-      <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+    <main className="public-cards page-enter">
+      <div className="public-cards-brand"><img src="/emcargo.svg" alt="" /><span>EMCargo</span></div>
+      <DocumentIcon className="mb-5 h-8 w-8 text-brand-600" />
+      <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
         {t("cards.title")}
       </h1>
       <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
@@ -69,17 +73,17 @@ export default function CardsPage() {
           {cards.map((card) => (
             <li
               key={card.un_number}
-              className="flex items-center justify-between rounded-lg border border-slate-200 p-3 dark:border-slate-700"
+              className="surface flex items-center justify-between gap-4 p-4"
             >
               <span className="font-medium text-slate-900 dark:text-slate-100">
                 UN {card.un_number}
               </span>
               {card.available ? (
                 <a
-                  className="text-sm font-medium text-brand-700 underline dark:text-brand-300"
+                  className="action-secondary"
                   href={`/api/cards/${card.un_number}/${modality}.pdf`}
                 >
-                  {t("cards.open")}
+                  <DownloadIcon />{t("cards.open")}
                 </a>
               ) : (
                 <span className="text-sm text-slate-500 dark:text-slate-400">
@@ -92,6 +96,6 @@ export default function CardsPage() {
       )}
 
       <p className="mt-8 text-xs text-slate-500 dark:text-slate-400">{t("cards.note")}</p>
-    </div>
+    </main>
   );
 }

@@ -101,7 +101,7 @@ export default function AuditPage() {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="collection-page page-enter space-y-4 sm:space-y-6">
       <div className={`${panelClass} p-5 sm:p-8 flex flex-wrap items-start justify-between gap-3`}>
         <div>
           <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-100">{t("audit.title")}</h2>
@@ -117,7 +117,7 @@ export default function AuditPage() {
         </div>
       </div>
 
-      <div className={`${panelClass} p-4 sm:p-5 grid gap-3 md:grid-cols-4`}>
+      <div className={`${panelClass} p-4 sm:p-5 grid items-end gap-3 md:grid-cols-4`}>
         <select
           className={inputClass}
           value={actor}

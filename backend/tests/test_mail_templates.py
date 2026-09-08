@@ -278,7 +278,8 @@ def test_the_glyph_is_the_applications_own_drawing():
 
     docs/data-sources.md records that the copy, delete, pencil and chevron
     glyphs are hand-written paths in this repository, and the mail renders
-    from those same paths — so the eight credited Uicons icons stay eight.
+    from those same paths. The v2.2.0 icon consolidation moved the source
+    out of ReviewLinesPanel, so the assertion follows the shared module.
     """
     import pathlib
     import re
@@ -289,7 +290,7 @@ def test_the_glyph_is_the_applications_own_drawing():
     repo = pathlib.Path(__file__).resolve().parents[2]
     script = (repo / "scripts" / "render_mail_icons.py").read_text(encoding="utf-8")
     component = (repo / "frontend" / "src" / "components"
-                 / "ReviewLinesPanel.tsx").read_text(encoding="utf-8")
+                 / "icons.tsx").read_text(encoding="utf-8")
 
     paths = re.findall(r'd="(M[^"]+)"', script)
     assert paths, "the script no longer carries the glyph's paths"

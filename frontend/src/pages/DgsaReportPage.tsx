@@ -168,7 +168,7 @@ export default function DgsaReportPage({ user }: { user?: User | null }) {
 
   if (!historyOn) {
     return (
-      <div className={`${panelClass} p-5 sm:p-8`}>
+      <div className="page-heading report-heading">
         <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{t("dgsa.title")}</h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{t("history.off")}</p>
       </div>
@@ -179,7 +179,7 @@ export default function DgsaReportPage({ user }: { user?: User | null }) {
   const yearChoices = years.includes(year) ? years : [year, ...years];
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="collection-page page-enter space-y-4 sm:space-y-6">
       <Link to="/shipments" className="text-sm text-brand-700 dark:text-brand-300 hover:underline">
         {t("history.back")}
       </Link>

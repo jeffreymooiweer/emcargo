@@ -1,3 +1,4 @@
+import { PlusIcon, ChevronDownIcon } from "../components/icons";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api, Department, User } from "../api/client";
@@ -124,16 +125,15 @@ export default function UsersPage({ user: self }: { user: User | null }) {
     kind === "self" ? t("users.guardSelf") : kind === "lastAdmin" ? t("users.guardLastAdmin") : undefined;
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="collection-page page-enter space-y-6 max-w-4xl">
       <div>
         <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{t("users.title")}</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t("users.intro")}</p>
       </div>
 
-      <form onSubmit={create} className={`${panelClass} p-5 space-y-4`}>
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-          {t("users.newUser")}
-        </h3>
+      <details className="surface collection-form">
+        <summary><PlusIcon /><span>{t("users.newUser")}</span><ChevronDownIcon /></summary>
+        <form onSubmit={create} className="collection-form-body space-y-4">
         <div className="grid gap-3 md:grid-cols-2">
           <div>
             <label className="text-sm font-medium text-slate-800 dark:text-slate-200" htmlFor="new-username">
@@ -213,11 +213,13 @@ export default function UsersPage({ user: self }: { user: User | null }) {
         <button className={buttonPrimary} disabled={busy}>
           {canInvite && invite ? t("users.createAndInvite") : t("users.create")}
         </button>
-      </form>
+        </form>
+      </details>
 
-      {historyOn && (
+      {historyOn && <details className="surface collection-form">
+        <summary><PlusIcon /><span>{t("departments.title")}</span><ChevronDownIcon /></summary>
         <DepartmentsPanel departments={departments} reload={loadDepartments} busy={busy} />
-      )}
+      </details>}
 
       <div className="space-y-3">
         {users.map((u) => {

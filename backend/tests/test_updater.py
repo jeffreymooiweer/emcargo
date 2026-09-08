@@ -300,6 +300,105 @@ def test_the_api_refuses_without_capability(data_dir, monkeypatch):
             assert ability.json()["available"] is False
             response = client.post("/api/update-apply")
             assert response.status_code == 409
-            assert response.json()["detail"]["reason"] == "switch_off"
+            assert response.json()["detail"]["params"]["reason"] == "switch_off"
     finally:
         app.dependency_overrides.pop(get_current_user, None)
+
+
+def test_named_mounts_and_custom_data_dir_survive_handover(data_dir, monkeypatch):
+    """Compose can describe volumes in HostConfig.Mounts instead of Binds.
+    Losing those mounts leaves the helper writing progress into its own image,
+    while adding the socket again makes Docker reject the helper entirely.
+    Completion written by a fast helper must also win over the parent state.
+    """
+    own_id = 'f' * 64
+    socket = str(updater.DOCKER_SOCKET)
+    mounts = [
+        {"Type": "volume", "Source": "emcargo-data", "Target": str(data_dir)},
+        {"Type": "bind", "Source": socket, "Target": socket},
+    ]
+    monkeypatch.setattr(updater, "capability", lambda: {"available": True, "container": own_id})
+    monkeypatch.setattr(updater, "_pull", lambda *args: None)
+
+    def handler(request):
+        if request.url.path == f'/containers/{own_id}/json':
+            return httpx.Response(200, json={"Id": own_id, "HostConfig": {"Mounts": mounts}})
+        if request.url.path == '/containers/create':
+            payload = json.loads(request.read())
+            assert payload['HostConfig']['Mounts'] == mounts
+            assert not payload['HostConfig']['Binds']
+            assert payload['Env'] == [f'DATA_DIR={data_dir}']
+            assert payload['User'] == '0'
+            return httpx.Response(201, json={'Id': 'helper'})
+        if request.url.path == '/containers/helper/start':
+            assert updater.read_state()['phase'] == 'handed_over'
+            updater.write_state({'phase': 'done', 'to': '2.2.0'})
+            return httpx.Response(204)
+        return httpx.Response(404)
+
+    monkeypatch.setattr(updater, 'docker_client', lambda: make_client(handler))
+    updater.start_update('2.2.0')
+    assert updater.read_state()['phase'] == 'done'
+
+
+@pytest.mark.parametrize('reference', [
+    updater.IMAGE_REPOSITORY + '@sha256:' + 'a' * 64,
+    updater.IMAGE_REPOSITORY + ':2.1.1@sha256:' + 'b' * 64,
+])
+def test_capability_accepts_our_repository_pinned_by_digest(data_dir, tmp_path, monkeypatch, reference):
+    """A digest pins an image; it does not change which repository owns it.
+    Previously splitting at the digest colon classified official images as foreign.
+    """
+    monkeypatch.setenv('UPDATE_APPLY_ENABLED', 'true')
+    get_settings.cache_clear()
+    _socket(tmp_path, monkeypatch)
+    monkeypatch.setattr(updater, 'own_container_id', lambda client: 'abc')
+    monkeypatch.setattr(updater, 'docker_client', lambda: make_client(
+        lambda request: httpx.Response(200, json={'Config': {'Image': reference}})))
+    assert updater.capability()['available'] is True
+
+
+@pytest.mark.parametrize('health,expected', [('healthy', True), ('unhealthy', False)])
+def test_running_is_not_enough_to_commit_an_update(monkeypatch, health, expected):
+    """Docker starts the process before FastAPI finishes booting. An unhealthy
+    running replacement must not cause the working previous container to be deleted.
+    """
+    statuses = iter(['starting', health])
+    monkeypatch.setattr(update_helper.time, 'sleep', lambda _: None)
+    with make_client(lambda request: httpx.Response(200, json={
+        'State': {'Running': True, 'ExitCode': 0, 'Health': {'Status': next(statuses)}}
+    })) as client:
+        assert update_helper.wait_until_running(client, 'new') is expected
+
+
+def test_apply_refuses_a_second_request_before_handover(data_dir, monkeypatch):
+    """Two browser tabs must not start two helper containers. The recent state
+    also protects the short period after the pull thread hands over and exits.
+    """
+    from app.api.routes import meta
+    from fastapi import HTTPException
+    monkeypatch.setattr(updater, 'capability', lambda: {'available': True})
+    monkeypatch.setattr(meta, 'update_status', lambda **kwargs: {'update_available': True, 'latest': '2.2.0'})
+    updater.write_state({'phase': 'handed_over', 'to': '2.2.0'})
+    with pytest.raises(HTTPException) as failure:
+        meta.update_apply(admin=SimpleNamespace(role='admin'), db=None)
+    assert failure.value.status_code == 409
+    assert failure.value.detail['code'] == 'update.in_progress'
+    assert not meta._apply_lock.locked()
+
+
+def test_apply_records_unexpected_worker_failure_and_releases_lock(data_dir, monkeypatch):
+    """A transport exception is different from UpdateError, but the operator
+    still needs a terminal failure and must be able to retry the update.
+    """
+    from app.api.routes import meta
+    monkeypatch.setattr(updater, 'capability', lambda: {'available': True})
+    monkeypatch.setattr(meta, 'update_status', lambda **kwargs: {'update_available': True, 'latest': '2.2.0'})
+    def fail(*args):
+        raise OSError('socket disconnected')
+    monkeypatch.setattr(updater, 'start_update', fail)
+    monkeypatch.setattr(meta.threading, 'Thread', lambda *, target, **kwargs: SimpleNamespace(start=target))
+    meta.update_apply(admin=SimpleNamespace(role='admin'), db=None)
+    assert updater.read_state()['phase'] == 'failed'
+    assert 'socket disconnected' in updater.read_state()['error']
+    assert not meta._apply_lock.locked()

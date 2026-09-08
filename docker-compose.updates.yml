@@ -1,0 +1,8 @@
+# Optional: docker compose -f docker-compose.yml -f docker-compose.updates.yml up -d
+# The socket grants Docker host control. Enable only for a trusted installation.
+services:
+  emcargo:
+    environment:
+      UPDATE_APPLY_ENABLED: "true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

@@ -261,6 +261,22 @@ to come from the sources above.
 
 ## Interface icons
 
+### Current set (v2.2.0)
+
+The interface and toast icons now use original, hand-written geometry from
+`frontend/src/components/icons.tsx`, on one 24px grid with a 1.7px stroke.
+The existing assistant mark in `AiIcon.tsx` retains its attribution. The
+historical sources below remain documented, and the Legal page retains its
+credits.
+
+The mail copy glyph is rendered from the same current `CopyIcon` path by
+`scripts/render_mail_icons.py`; the regression test checks the shared module.
+Run the script with `--logo` to also regenerate the mail logo from
+`frontend/public/emcargo.svg`. Both are attached PNGs, so mail clients do not
+need SVG support or an outbound image request.
+
+### Previous icon sets (before v2.2.0)
+
 Most icons in the interface are drawn in this repository — the copy, delete,
 pencil and chevron glyphs are a handful of hand-written SVG paths in the
 component that uses them, which is why they share one line weight and one

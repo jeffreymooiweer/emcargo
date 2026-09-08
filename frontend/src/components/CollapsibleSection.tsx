@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { ChevronDownIcon } from "./icons";
 
 /** A collapsible card with a summary line that is always visible.
  *
@@ -22,15 +23,10 @@ export default function CollapsibleSection({
   return (
     <details
       open={defaultOpen}
-      className="group rounded-xl border border-slate-200 dark:border-slate-800"
+      className="disclosure group rounded-xl border border-slate-200 dark:border-slate-800"
     >
       <summary className="flex cursor-pointer select-none list-none flex-wrap items-center gap-2 rounded-xl px-3 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 [&::-webkit-details-marker]:hidden">
-        <span
-          aria-hidden
-          className="text-[10px] text-slate-400 transition-transform group-open:rotate-90"
-        >
-          ▶
-        </span>
+        <ChevronDownIcon className="h-4 w-4 shrink-0 text-slate-400 -rotate-90 transition-transform group-open:rotate-0" />
         <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{title}</span>
         {chips}
       </summary>
@@ -49,7 +45,7 @@ export function SummaryChip({
   children: ReactNode;
 }) {
   return (
-    <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${className}`}>
+    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${className}`}>
       {children}
     </span>
   );

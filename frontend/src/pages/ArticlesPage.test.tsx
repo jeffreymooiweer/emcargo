@@ -68,6 +68,8 @@ describe("de artikelenbibliotheek", () => {
     renderPage();
     expect(await screen.findByText("PAINT-25")).toBeInTheDocument();
     expect(screen.getByText("UN 1263")).toBeInTheDocument();
+    expect(screen.getByText("articles.add").closest("details")).not.toHaveAttribute("open");
+    await userEvent.click(screen.getByText("articles.add"));
     const inputs = screen.getAllByRole("textbox");
     // The first field of the form is the code; a form without one cannot be saved.
     expect(screen.getByRole("button", { name: "articles.create" })).toBeDisabled();

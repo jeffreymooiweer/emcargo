@@ -1,3 +1,4 @@
+import { PlusIcon, ChevronDownIcon } from "../components/icons";
 /** The articles library: the organisation's own codes for what it ships.
  *
  *  One article per code — the code is what the office types on a goods
@@ -42,6 +43,7 @@ export default function ArticlesPage() {
   const [items, setItems] = useState<Article[]>([]);
   const [search, setSearch] = useState("");
   const [form, setForm] = useState<ArticleIn>(empty());
+  const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [removing, setRemoving] = useState<Article | null>(null);
@@ -68,6 +70,7 @@ export default function ArticlesPage() {
       if (editingId !== null) await api.updateArticle(editingId, form);
       else await api.saveArticle(form);
       setForm(empty());
+      setFormOpen(false);
       setEditingId(null);
       await load();
       toast.success(t("articles.saved"));
@@ -112,7 +115,7 @@ export default function ArticlesPage() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="collection-page page-enter space-y-4 sm:space-y-6">
       <div className={`${panelClass} p-5 sm:p-8`}>
         <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-100">{t("articles.title")}</h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 max-w-3xl">{t("articles.intro")}</p>
@@ -137,10 +140,9 @@ export default function ArticlesPage() {
         </div>
       </div>
 
-      <section className={`${panelClass} p-4 sm:p-6`}>
-        <h3 className="font-semibold text-slate-900 dark:text-slate-100">
-          {editingId === null ? t("articles.add") : t("articles.edit")}
-        </h3>
+      <details className="surface collection-form" open={formOpen} onToggle={(event) => setFormOpen(event.currentTarget.open)}>
+        <summary><PlusIcon /><span>{editingId === null ? t("articles.add") : t("articles.edit")}</span><ChevronDownIcon /></summary>
+        <div className="collection-form-body">
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {FIELDS.map((key) => (
             <label key={key} className={`text-xs text-slate-500 dark:text-slate-400 ${key === "notes" ? "sm:col-span-2 lg:col-span-3" : ""}`}>
@@ -167,7 +169,8 @@ export default function ArticlesPage() {
             </button>
           )}
         </div>
-      </section>
+        </div>
+      </details>
 
       <section className={`${panelClass} p-4 sm:p-6`}>
         <input className={inputClass} placeholder={t("articles.search")} aria-label={t("articles.search")} value={search} onChange={(e) => setSearch(e.target.value)} />
@@ -197,7 +200,7 @@ export default function ArticlesPage() {
                     <td className="px-2 py-2 text-slate-800 dark:text-slate-200">{article.type_of_package || "—"}</td>
                     <td className="px-2 py-2 text-slate-800 dark:text-slate-200">{article.net_per_package || "—"}</td>
                     <td className="px-2 py-2 whitespace-nowrap">
-                      <button type="button" className="text-brand-700 hover:underline dark:text-brand-300" onClick={() => { setEditingId(article.id); setForm({ ...article }); }}>
+                      <button type="button" className="text-brand-700 hover:underline dark:text-brand-300" onClick={() => { setEditingId(article.id); setFormOpen(true); setForm({ ...article }); window.scrollTo({ top: 0, behavior: "auto" }); }}>
                         {t("articles.edit")}
                       </button>
                       <button type="button" className="ml-3 text-red-700 hover:underline dark:text-red-300" onClick={() => setRemoving(article)}>

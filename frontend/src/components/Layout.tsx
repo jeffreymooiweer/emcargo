@@ -8,7 +8,7 @@ import CommandMenu from "./CommandMenu";
 import UpdateToast from "./UpdateToast";
 import TwoFactorNudge, { clearTwoFactorNudge } from "./TwoFactorNudge";
 import WhatsNewModal from "./WhatsNewModal";
-import { CollapseIcon, GroupageIcon, HistoryIcon, HomeIcon, LibraryIcon, MenuIcon, MoreIcon, PlusIcon, RoadIcon, SettingsIcon, ShipmentsIcon, TripsIcon, UserIcon } from "./icons";
+import { ChevronDownIcon, CloseIcon, CollapseIcon, DocumentIcon, LogoutIcon, GroupageIcon, HistoryIcon, HomeIcon, LibraryIcon, MenuIcon, PlusIcon, RoadIcon, SettingsIcon, ShipmentsIcon, TripsIcon, UserIcon } from "./icons";
 
 interface Props { user: User; onLogout: () => void }
 
@@ -65,7 +65,10 @@ export default function Layout({ user, onLogout }: Props) {
     ...(admin ? [{to: "/materieel", label: t("nav.materieel")}, {to: "/users", label: t("nav.users")}, {to: "/audit", label: t("nav.audit")}] : []),
     {to: "/settings", label: t("nav.settings")}, {to: "/legal", label: t("nav.legal")},
   ];
-  const currentLabel = location.pathname.startsWith("/wizard") ? t("nav.new") : destinations.find(item => item.to === location.pathname)?.label || t("studio.workspace");
+  const currentLabel = location.pathname.startsWith("/wizard") ? t("nav.new")
+    : location.pathname === "/shipments/report" ? t("dgsa.title")
+    : destinations.find(item => item.to === location.pathname)?.label
+      || (location.pathname.startsWith("/shipments/") ? t("nav.shipments") : location.pathname.startsWith("/trips/") ? t("nav.trips") : t("studio.workspace"));
   const name = branding.name || t("app.name");
   const versionLabel = version ? (version.startsWith("v") ? version : `v${version}`) : "";
   const brand = (compact = false) => <div className="emcargo-brand">
@@ -90,7 +93,7 @@ export default function Layout({ user, onLogout }: Props) {
         {history && link("/articles", t("nav.articles"), LibraryIcon, true)}
         {admin && link("/materieel", t("nav.materieel"), RoadIcon, true)}
       </> : <details className="emcargo-nav-group" open={["/articles", "/materieel"].includes(location.pathname) || undefined}>
-        <summary className="emcargo-nav-link"><LibraryIcon className="h-[22px] w-[22px]" /><span>{t("nav.library")}</span><span className="ml-auto text-xs" aria-hidden="true">⌄</span></summary>
+        <summary className="emcargo-nav-link"><LibraryIcon className="h-[22px] w-[22px]" /><span>{t("nav.library")}</span><ChevronDownIcon className="ml-auto h-3.5 w-3.5" /></summary>
         <div className="emcargo-subnav">{history && link("/articles", t("nav.articles"), LibraryIcon, false)}{admin && link("/materieel", t("nav.materieel"), RoadIcon, false)}</div>
       </details>)}
       {compact ? <>
@@ -98,15 +101,15 @@ export default function Layout({ user, onLogout }: Props) {
         {history && link("/groupage", t("nav.groupage"), GroupageIcon, true)}
         {admin && link("/users", t("nav.users"), UserIcon, true)}
         {admin && link("/audit", t("nav.audit"), HistoryIcon, true)}
-        {link("/legal", t("nav.legal"), MoreIcon, true)}
+        {link("/legal", t("nav.legal"), DocumentIcon, true)}
       </> : <details className="emcargo-nav-group" open={["/settings", "/users", "/audit", "/legal", "/groupage"].includes(location.pathname) || undefined}>
-        <summary className="emcargo-nav-link"><SettingsIcon className="h-[22px] w-[22px]" /><span>{t("nav.manage")}</span><span className="ml-auto text-xs" aria-hidden="true">⌄</span></summary>
+        <summary className="emcargo-nav-link"><SettingsIcon className="h-[22px] w-[22px]" /><span>{t("nav.manage")}</span><ChevronDownIcon className="ml-auto h-3.5 w-3.5" /></summary>
         <div className="emcargo-subnav">
           {history && link("/groupage", t("nav.groupage"), GroupageIcon, false)}
           {link("/settings", t("nav.settings"), SettingsIcon, false)}
           {admin && link("/users", t("nav.users"), UserIcon, false)}
           {admin && link("/audit", t("nav.audit"), HistoryIcon, false)}
-          {link("/legal", t("nav.legal"), MoreIcon, false)}
+          {link("/legal", t("nav.legal"), DocumentIcon, false)}
         </div>
       </details>}
     </>;
@@ -116,7 +119,7 @@ export default function Layout({ user, onLogout }: Props) {
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold dark:bg-slate-700" aria-hidden="true">{open ? <UserIcon className="h-5 w-5" /> : user.username.slice(0, 2).toUpperCase()}</span>
       {!compact && <div className="min-w-0"><p className="truncate text-sm">{open ? t("nav.openMode") : user.username}</p>{versionLabel && <p className="mt-1 text-xs text-slate-500 dark:text-slate-400" aria-label={`${t("settings.version")} ${versionLabel}`}>{versionLabel}</p>}</div>}
     </div>
-    {!open && <button onClick={() => void logout()} className="mt-3 min-h-[44px] w-full border-t border-slate-200 pt-3 text-left text-sm dark:border-slate-700" aria-label={t("nav.logout")}>{compact ? <span aria-hidden="true">↪</span> : t("nav.logout")}</button>}
+    {!open && <button onClick={() => void logout()} className="mt-3 min-h-[44px] w-full border-t border-slate-200 pt-3 text-left text-sm dark:border-slate-700" aria-label={t("nav.logout")}>{compact ? <LogoutIcon className="h-5 w-5" /> : t("nav.logout")}</button>}
   </div>;
 
   return <div className={`emcargo-shell ${railOpen ? "" : "emcargo-shell-folded"}`}>
@@ -133,7 +136,7 @@ export default function Layout({ user, onLogout }: Props) {
     {menuOpen && <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true" aria-label={t("nav.menu")}>
       <div className="absolute inset-0 bg-black/60" onClick={() => setMenuOpen(false)} />
       <aside ref={drawer} className="emcargo-mobile-drawer">
-        <div className="flex items-center justify-between p-4">{brand()}<button className="h-11 w-11 text-2xl" onClick={() => setMenuOpen(false)} aria-label={t("nav.closeMenu")}>×</button></div>
+        <div className="flex items-center justify-between p-4">{brand()}<button className="h-11 w-11 text-2xl" onClick={() => setMenuOpen(false)} aria-label={t("nav.closeMenu")}><CloseIcon className="mx-auto h-6 w-6" /></button></div>
         <nav className="emcargo-navigation">{navigation()}</nav>{account()}
       </aside>
     </div>}
