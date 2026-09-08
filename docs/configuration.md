@@ -1,6 +1,6 @@
 # Configuration
 
-CargoPilot is configured through environment variables. Copy `.env.example` to `.env` and
+EMCargo is configured through environment variables. Copy `.env.example` to `.env` and
 adjust what you need — every setting has a working default, including the signing key,
 which the application makes for itself.
 
@@ -34,7 +34,7 @@ because those are read while the application is starting and there is no screen 
 | — | Organisation name and address | immediately |
 | `BRAND_NAME` | The name on the door (header, sign-in page, browser tab) | immediately |
 | `SMTP_HOST` and friends | Mail server | immediately |
-| `CARGOPILOT_HISTORY` (starting value only, see below) | Keep shipments (history) | immediately |
+| `EMCARGO_HISTORY` (starting value only, see below) | Keep shipments (history) | immediately |
 | — | Audit log retention | at the next start |
 
 The screen also carries per-user preferences — language, theme, the consignor details that
@@ -45,7 +45,7 @@ to the installation, and are described in the [user guide](user-guide.md#setting
 
 | Variable | What it does | Default |
 |---|---|---|
-| `CARGOPILOT_MODE` | `organisation` (accounts; people sign in) or `open` (no accounts; anyone may use it, nothing is kept about anyone) | `organisation` |
+| `EMCARGO_MODE` | `organisation` (accounts; people sign in) or `open` (no accounts; anyone may use it, nothing is kept about anyone) | `organisation` |
 
 The image holds two applications, and this variable picks one at start-up. It is read
 once and has no screen counterpart on purpose: a privacy promise an administrator could
@@ -77,9 +77,9 @@ for administrators of the organisation application. Off by default.
 
 | Variable | What it does | Default |
 |---|---|---|
-| `CARGOPILOT_HISTORY` | The *starting value* of that setting, for installations that set it before v1.188.0. Read until an administrator saves the Administration screen, ignored from then on. New installations need not set it. | `false` |
+| `EMCARGO_HISTORY` | The *starting value* of that setting, for installations that set it before v1.188.0. Read until an administrator saves the Administration screen, ignored from then on. New installations need not set it. | `false` |
 
-`CARGOPILOT_HISTORY_DISCARD` is gone: the application no longer refuses to start over a
+`EMCARGO_HISTORY_DISCARD` is gone: the application no longer refuses to start over a
 switched-off history. Switching off happens on the screen, and the screen deletes first
 (below).
 
@@ -121,7 +121,7 @@ screen. The name is a setting like the others; the pictures are files.
 
 | Variable | What it does | Default |
 |---|---|---|
-| `BRAND_NAME` | The name in the header, on the sign-in page and in the browser tab | empty, meaning CargoPilot |
+| `BRAND_NAME` | The name in the header, on the sign-in page and in the browser tab | empty, meaning EMCargo |
 
 The pictures live in `DATA_DIR/branding`, one file per asset, named by what it is and
 by what it *is* rather than what it was called: `logo.png`, `logo.jpg` or `logo.webp`,
@@ -130,9 +130,9 @@ and `modality-road.png` and so on for `road`, `rail`, `sea`, `inland`, `air` and
 because an SVG can carry script and an image route that serves one is a page that runs
 it. A logo may be 1 MB, a tile 3 MB. The open application has no screen to upload from:
 its operator places the same files in that folder and sets `BRAND_NAME`, and the door
-reads the same. The uploaded logo also travels in outgoing mail in place of CargoPilot's,
+reads the same. The uploaded logo also travels in outgoing mail in place of EMCargo's,
 and since v1.178.0 the name and the logo are printed in the header and the foot of every
-document CargoPilot draws itself; the official forms are filled in, not rebranded.
+document EMCargo draws itself; the official forms are filled in, not rebranded.
 `/api/health` reports `"mode"` on every
 installation, so what an operator got is a line away, and [Privacy](privacy.md) says in
 one section what the open application means for its visitors.
@@ -141,7 +141,7 @@ one section what the open application means for its visitors.
 
 | Variable | What it does | Default |
 |---|---|---|
-| `APP_SECRET_KEY` | Signs login sessions. Leave it empty and CargoPilot generates one on first start and keeps it in `DATA_DIR/secret_key`. | generated |
+| `APP_SECRET_KEY` | Signs login sessions. Leave it empty and EMCargo generates one on first start and keeps it in `DATA_DIR/secret_key`. | generated |
 | `ADMIN_USERNAME` | Username of the first admin, created on first startup | — |
 | `ADMIN_EMAIL` | Email of the first admin | — |
 | `ADMIN_PASSWORD` | Password of the first admin. **Set this.** | — |
@@ -157,7 +157,7 @@ is published in this repository — so an installation that never set it would r
 anyone can look up, and anyone holding that key can write themselves a valid admin token.
 There is no login to bypass at that point; it is already bypassed.
 
-You do not have to do anything about that. On the first start CargoPilot generates a key,
+You do not have to do anything about that. On the first start EMCargo generates a key,
 stores it as `secret_key` in `DATA_DIR` (readable only by the owner) and uses it from then
 on. It survives restarts and container recreation because it lives on the mounted volume.
 
@@ -178,7 +178,7 @@ was issued. After a password change that fingerprint no longer matches and the u
 log in again on every device.
 
 > **This used to be a refusal, and that was a mistake.** From v1.25.0 to v1.29.2
-> CargoPilot stopped at startup on a published or empty key. The reasoning was sound —
+> EMCargo stopped at startup on a published or empty key. The reasoning was sound —
 > nobody reads a warning in a log — but the defaults it shipped with (`change-me` and
 > `CORS_ALLOWED_ORIGINS=*`) and the Unraid template, which leaves the key blank, meant
 > that every installation which had not filled both in by itself simply died on startup,
@@ -191,7 +191,7 @@ Two settings are worth a line in the log without being worth a dead application:
 
 | Reported | Why | What to do |
 |---|---|---|
-| `CORS_ALLOWED_ORIGINS=*` | The wildcard is answered without credentials since v1.190.0, so a call from another website cannot carry the login cookie — but the setting still says more than it should | Name the address you reach CargoPilot on |
+| `CORS_ALLOWED_ORIGINS=*` | The wildcard is answered without credentials since v1.190.0, so a call from another website cannot carry the login cookie — but the setting still says more than it should | Name the address you reach EMCargo on |
 | `ADMIN_PASSWORD` set to one that appears in this project's documentation | It is not a password if it is printed in a README | Pick your own, and change it after first login |
 
 ### While developing
@@ -208,7 +208,7 @@ published string.
 | Variable | What it does | Default |
 |---|---|---|
 | `DATA_DIR` | Folder for the database, templates and logs | `/data` |
-| `DATABASE_URL` | SQLite database location | `sqlite:////data/cargopilot.db` |
+| `DATABASE_URL` | SQLite database location | the existing SQLite file in `/data` (override with `DATABASE_URL` only for a deliberate database migration) |
 | `PUID` / `PGID` | User and group that should own `/data` | `1000` / `1000` |
 
 Keep `/data` on a persistent volume. It holds your users, the equipment you imported and
@@ -236,7 +236,7 @@ takes effect on the next restart.
 | `INSTALL_METHOD` | How this installation runs: `docker` (the image), `native` (the systemd service of `deploy/native`) or `kubernetes` (`deploy/kubernetes`). Decides only what the settings screen says about updating: the routes that are not Docker have no in-app updater and the screen names theirs instead | `docker` |
 | `UPDATE_APPLY_PULL_TIMEOUT_SECONDS` | How long the image pull may take before the update is abandoned | `600` |
 
-The check only tells the administrator there is something to pull. Off means CargoPilot
+The check only tells the administrator there is something to pull. Off means EMCargo
 never contacts GitHub; the switch also sits on the settings screen under **Outbound
 connections** and is read per request, so flipping it needs no restart.
 
@@ -258,7 +258,7 @@ belongs to root (Unraid) or the docker group (most distributions); the container
 start script joins the app user to the socket's own group id before dropping
 privileges, so no permission fiddling is needed on the host — this works since
 v1.135.0, and when something else still blocks the capability, the Updating section
-now names the exact reason instead of staying silent. Pressing it pulls `jeffersonmouze/cargopilot` at the
+now names the exact reason instead of staying silent. Pressing it pulls `ghcr.io/jeffreymooiweer/emcargo` at the
 release's own tag (never `latest`, never a caller-supplied name), then hands the swap to
 a short-lived helper container started from that new image: it stops the application,
 renames it aside, recreates it with the identical configuration on the new image, starts
@@ -269,7 +269,7 @@ a working installation.
 > [!WARNING]
 > Mounting the Docker socket into a container gives that container administrator rights
 > over the whole host — that is what makes the swap possible at all. It is a deliberate
-> operator decision, off by default; without it, CargoPilot only ever *reports* updates
+> operator decision, off by default; without it, EMCargo only ever *reports* updates
 > and the manual `docker compose pull && docker compose up -d` (or Unraid's update
 > button, or Watchtower) remains the way.
 
@@ -284,13 +284,13 @@ Point this at your own Photon instance if you would rather not call an external 
 Without it, address autocomplete simply stops offering suggestions — typing addresses by
 hand always works, and airport, port and station search runs entirely offline.
 
-This is the only request CargoPilot makes to the outside world while somebody is using it,
+This is the only request EMCargo makes to the outside world while somebody is using it,
 so the settings screen carries a switch that stops it being made at all. Turning it off is
 not the same as pointing it at an unreachable address: no request leaves the server.
 
 ## Mail server
 
-CargoPilot sends nothing until an administrator says where to send it. **Settings →
+EMCargo sends nothing until an administrator says where to send it. **Settings →
 Administration → Mail server** asks for the server, the port, how the connection is
 encrypted, the sign-in if the server wants one, and the sender address.
 
@@ -321,10 +321,10 @@ unchanged: a refused password, an unreachable host and a rejected sender are dif
 problems with different fixes.
 
 **The address of this installation.** The links in outgoing mail need to say where
-CargoPilot lives. Left empty, the address is read from the request, including the
+EMCargo lives. Left empty, the address is read from the request, including the
 `X-Forwarded-*` headers when `TRUSTED_PROXY_HEADERS` is on — right whenever the browser
-reaches CargoPilot directly or through a proxy that passes its own host on. Fill it in
-(`https://cargopilot.example.com`) when it does not, or the mail carries a link to an
+reaches EMCargo directly or through a proxy that passes its own host on. Fill it in
+(`https://emcargo.example.com`) when it does not, or the mail carries a link to an
 internal container name.
 
 **Forgotten passwords.** With a mail server configured, the sign-in screen offers "Forgot
@@ -349,7 +349,7 @@ knows to pass the link on by hand.
 **What uses it.** The test message, the forgotten-password link, the invitation, and the export step: with a mail server configured, the
 documents step offers to mail the same archive the download button produces — to the
 carrier, the consignee, or several addresses at once. The archive is deleted the moment the
-message is out; CargoPilot keeps no copy of a consignment's papers. One message may carry
+message is out; EMCargo keeps no copy of a consignment's papers. One message may carry
 15 MB of attachments; beyond that the size and the limit are named rather than left to the
 relay to refuse.
 
@@ -391,10 +391,10 @@ one 30-second step either side of now, which is what an unsynced phone looks lik
 ## QR code with UN cards on documents
 
 **Settings → Administration → QR code with UN cards on documents** prints a QR code on
-every transport document CargoPilot renders. Scanning it opens a page listing the UN
+every transport document EMCargo renders. Scanning it opens a page listing the UN
 numbers on that document and, per number, the UN card this installation holds for it.
 
-That page is the only one in CargoPilot that does not ask for a sign-in. That is the
+That page is the only one in EMCargo that does not ask for a sign-in. That is the
 point: the driver at the roadside, the warehouse taking the pallet in and the responder
 who arrived because something went wrong have no account here, and a code that asks them
 to log in is a code that does nothing.
@@ -434,7 +434,7 @@ scanned in a year answers what it answered on the day it was printed.
 
 | Variable | What it does | Default |
 |---|---|---|
-| `APP_NAME` | Name in the API title and in `GET /api/health`. **Not** the name on screen — the interface takes that from its own language files. | `CargoPilot` |
+| `APP_NAME` | Name in the API title and in `GET /api/health`. **Not** the name on screen — the interface takes that from its own language files. | `EMCargo` |
 | `APP_ENV` | `production` or `development` | `production` |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | How long a login stays valid | `480` (8 hours) |
 | `COOKIE_SECURE` | Override the login-cookie `Secure` flag. Empty means automatic: enabled for HTTPS or trusted `X-Forwarded-Proto=https`. | automatic |
@@ -453,7 +453,7 @@ malformed or hostile file, not a preference, and they live in
 > nothing is worse than an undocumented one: it invites somebody to tune it and conclude
 > the app ignores them.
 
-If you put CargoPilot behind a reverse proxy, keep `TRUSTED_PROXY_HEADERS=true` and set
+If you put EMCargo behind a reverse proxy, keep `TRUSTED_PROXY_HEADERS=true` and set
 `CORS_ALLOWED_ORIGINS` to your actual hostname instead of `*`. The login cookie is then
 marked `Secure` when the proxy sends `X-Forwarded-Proto=https`. Set `COOKIE_SECURE=true`
 when you want to force that behaviour, or `false` only for a deliberate HTTP-only setup.
@@ -473,7 +473,7 @@ which entry of `X-Forwarded-For` the sign-in rate limit is counted against, and 
 default of `1` is right for one nginx, Caddy or Traefik in front. Put a CDN in front of
 that and it is `2`.
 
-The number matters in both directions. Too high and CargoPilot cannot find the entry it
+The number matters in both directions. Too high and EMCargo cannot find the entry it
 was told to trust, falls back to the proxy's own address, and everyone shares one budget
 again — which is the bug fixed in v1.163.4, where fifteen colleagues behind one proxy
 shared ten sign-in attempts a minute and could lock each other out. Too low and it reads
@@ -481,7 +481,7 @@ an entry the caller wrote themselves, which hands every caller a fresh budget pe
 and is a rate limit that does not limit. A proxy *appends* what it saw, so the rightmost
 entries are the trustworthy ones and each proxy in the chain accounts for one of them.
 
-User roles are restricted to `admin` and `user`. CargoPilot prevents an administrator from
+User roles are restricted to `admin` and `user`. EMCargo prevents an administrator from
 disabling or demoting their own account and refuses to remove the last active administrator.
 This prevents an installation from locking itself out through the user-management screen.
 
@@ -494,7 +494,7 @@ curl http://localhost:8080/api/health
 ```json
 {
   "status": "ok",
-  "app": "CargoPilot",
+  "app": "EMCargo",
   "version": "1.45.0",
   "regulatory": {
     "manifest_id": "1dbeb6c1ca91cfd5",

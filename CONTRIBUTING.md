@@ -1,10 +1,10 @@
-# Contributing to CargoPilot
+# Contributing to EMCargo
 
 Thank you for taking the time. Before you invest any of it in code, one thing up front.
 
 ## What this project is
 
-CargoPilot is a personal project, built and maintained by one person alongside other
+EMCargo is a personal project, built and maintained by one person alongside other
 work. It is under active development and its internals move around a lot.
 
 **Reports, corrections and ideas are very welcome.** Unsolicited pull requests are not —
@@ -16,7 +16,7 @@ So:
 
 | You have | Do this |
 |---|---|
-| A bug, a wrong number, a form that comes out wrong | [Open an issue](https://github.com/jeffreymooiweer/CargoPilot/issues/new/choose) |
+| A bug, a wrong number, a form that comes out wrong | [Open an issue](https://github.com/jeffreymooiweer/emcargo/issues/new/choose) |
 | An idea for a feature | Open an issue and describe the situation you are in |
 | A security problem | **Not** an issue — see [SECURITY.md](SECURITY.md) |
 | Code you would like to contribute | Open an issue first and ask. If it fits, we agree on the shape before you write it |
@@ -26,7 +26,7 @@ That is not a judgement on the code.
 
 ## The most useful thing you can report
 
-CargoPilot's value is in its data being right. A wrong density, a mislabelled segregation
+EMCargo's value is in its data being right. A wrong density, a mislabelled segregation
 code, a form field that lands in the wrong box — these are the reports that matter most,
 and they are the ones a user is best placed to spot.
 
@@ -53,11 +53,11 @@ consignee details** first — see below.
 
 ### Dangerous goods
 
-Give the UN number, the column (class, packing group, EmS, 16a, 16b …), what CargoPilot
+Give the UN number, the column (class, packing group, EmS, 16a, 16b …), what EMCargo
 showed and what the source says. Name the source and the edition: ADR 2025, IMDG
 Amendment 42-24, the EmS Guide (MSC.1/Circ.1588/Rev.3), the IATA DGR.
 
-Note that CargoPilot deliberately runs behind on some points and says so — see
+Note that EMCargo deliberately runs behind on some points and says so — see
 [Rule set editions](docs/dangerous-goods.md#rule-set-editions) before reporting a
 mismatch as a bug.
 
@@ -74,7 +74,7 @@ from.
 
 ## Privacy in issues
 
-Issues are public. CargoPilot is built so that your shipment data never leaves your
+Issues are public. EMCargo is built so that your shipment data never leaves your
 machine, and it would be a shame to undo that in a bug report. Before you attach anything:
 
 - Replace real company names, addresses and contact details with placeholders.
@@ -119,7 +119,7 @@ Participation is covered by the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Licence
 
-CargoPilot is Apache 2.0 **with the Commons Clause** — you may use, modify and
+EMCargo is Apache 2.0 **with the Commons Clause** — you may use, modify and
 self-host it freely, but you may not sell it or a service whose value derives
 substantially from it. Anything you contribute is taken to be offered under those same
 terms. See [LICENSE](LICENSE).

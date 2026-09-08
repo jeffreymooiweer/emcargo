@@ -1,5 +1,9 @@
 # The shell: one screen instead of four steps of furniture
 
+> Historical design/research notes. For the current interface and setup, use the
+> [user guide](user-guide.md), [configuration](configuration.md) and
+> [design verification notes](design/README.md).
+
 *A second plan, after [the usability plan](ux-plan.md) was measured to its end. That one
 made the work cheaper — 83 actions became 53 and the two impossible tasks became possible.
 This one is about where the work **sits**: the frame around it, which is still the frame of
@@ -8,7 +12,7 @@ This one is about where the work **sits**: the frame around it, which is still t
 ## Where it comes from
 
 A set of mockups, drawn from scratch rather than from the existing screens. They are not
-adopted as a design — the colours, the button shapes and the exact wording stay CargoPilot's
+adopted as a design — the colours, the button shapes and the exact wording stay EMCargo's
 — but as a **layout**, and the layout is right in four ways this application is not yet.
 
 ## What is already built, and only badly placed
@@ -16,7 +20,7 @@ adopted as a design — the colours, the button shapes and the exact wording sta
 Most of it. This matters, because it decides how much of the plan is risk and how much is
 rearrangement:
 
-| In the mockup | In CargoPilot today |
+| In the mockup | In EMCargo today |
 |---|---|
 | *Concept • automatisch bewaard* under the title | v1.199.0 — kept as a draft, with an honest saved/saving/failed |
 | **Plakken uit Excel** / **Bestand kiezen** on the goods panel | v1.194.0 — the same two, in the panel body |
@@ -50,7 +54,7 @@ starts with the text, a substring) and that rank is an order, not a probability.
 number that looks measured and is not is the one thing this project does not do. The banner
 stays; it says what matched, not how confident a machine feels.
 
-**The colours and the components.** They stay CargoPilot's, in both themes.
+**The colours and the components.** They stay EMCargo's, in both themes.
 
 ## Two decisions, and why
 

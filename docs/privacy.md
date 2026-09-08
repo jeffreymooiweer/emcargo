@@ -1,6 +1,6 @@
 # Privacy and data storage
 
-CargoPilot runs on your own machine or server. There is no CargoPilot cloud service, no
+EMCargo runs on your own machine or server. There is no EMCargo cloud service, no
 account with us, and no telemetry.
 
 ## What is stored
@@ -28,7 +28,7 @@ Settings are stored per account, so they follow you to a second device rather th
 behind in one browser. They hold what you chose to put there: your consignor name and
 address, a contact, a carrier, a loading point, an emergency number — and, if you draw one,
 **your signature**. That last one is worth naming explicitly, because it is the only image
-CargoPilot keeps. It is saved only when you draw or upload it on the settings screen,
+EMCargo keeps. It is saved only when you draw or upload it on the settings screen,
 clearing it removes it, and it never leaves your server. If you would rather not keep one,
 leave that section on "skip" and sign the printed documents with a pen.
 
@@ -65,10 +65,10 @@ through the very same switch.
 **Catalogue sync** fetches public reference data (steel profiles, material densities) at
 startup. Switch it off on the settings screen or with `CATALOG_AUTO_SYNC=false`.
 
-**The update check** asks GitHub's public release listing whether a newer CargoPilot
+**The update check** asks GitHub's public release listing whether a newer EMCargo
 exists, only while an administrator is signed in, and sends nothing but the request
 itself. Switch it off on the settings screen or with `UPDATE_CHECK_ENABLED=false`;
-off means CargoPilot never asks. Either way the application cannot update itself —
+off means EMCargo never asks. Either way the application cannot update itself —
 the answer only tells the administrator there is something to pull.
 
 **The assistant's model download** happens once, only when an administrator clicks
@@ -78,7 +78,7 @@ repository. Nothing about your shipments is ever sent — the download is the on
 traffic, and after it the assistant runs entirely locally. Never installing it is the
 default, and the assistant works without it.
 
-**The in-app update** pulls the newer CargoPilot image from Docker Hub, and only
+**The in-app update** pulls the newer EMCargo image from GHCR, and only
 when an administrator presses the update button — which only exists where the
 operator explicitly enabled applying updates (`UPDATE_APPLY_ENABLED` plus a mounted
 Docker socket, see [Configuration](configuration.md#updating-from-inside-the-application)).
@@ -108,14 +108,14 @@ sign on the outside. They are what an administrator chose to put there and nothi
 
 **The QR code on transport documents** (**Settings → QR code with UN cards on
 documents**, off by default) prints a code on every document that opens a page of UN
-cards. That page is the only one in CargoPilot that does not ask for a sign-in, and
+cards. That page is the only one in EMCargo that does not ask for a sign-in, and
 deliberately so: the people it is for — the driver at the roadside, the warehouse taking
 the pallet in, the responder who arrived because something went wrong — have no account
 here, and a code that asks them to log in is a code that does nothing.
 
 What the code carries is the UN numbers and the regime, and nothing else. No consignor,
 no consignee, no quantity, no reference, no shipment identifier — there is no shipment to
-look up, because CargoPilot stores none. The document that carries the code already
+look up, because EMCargo stores none. The document that carries the code already
 prints those same UN numbers in plain text and larger, so the code discloses nothing the
 paper in the reader's hand does not already say.
 
@@ -143,7 +143,7 @@ It is what every installation is unless its operator says otherwise, and nothing
 page changes for it.
 
 The same image also runs as the **open** application, for an installation anyone may
-use without leaving anything behind. Its operator sets `CARGOPILOT_MODE=open` at deploy
+use without leaving anything behind. Its operator sets `EMCARGO_MODE=open` at deploy
 time, and this is what that means for you as its visitor:
 
 **There is no account, because there is nothing to have one for.** No sign-in, no user
@@ -254,16 +254,13 @@ round of keeping, exporting and mailing, and finds none of them.
 changed — and whatever is older is deleted when the application starts. The same
 selection the page shows can be exported as CSV for whoever keeps records elsewhere.
 
-## Older Docker images
+## Container distribution
 
-> [!WARNING]
-> Docker images older than **v1.4.0** still contain an internal form that is not intended
-> for civilian use.
+Current EMCargo images are published exclusively to GHCR:
 
-1. Use `v1.4.0` or newer.
-2. Remove old tags on Docker Hub: GitHub → **Actions** → **Cleanup Docker Hub tags** →
-   **Run workflow**, with `keep_tags`: `latest,v1.33.0,1.33.0`.
-3. `docker pull jeffersonmouze/cargopilot:latest` and restart the container.
+```bash
+docker pull ghcr.io/jeffreymooiweer/emcargo:latest
+```
 
-On upgrade to v1.0.0 or later, any legacy items with the source `overzicht_materieel` are
-removed from an existing database automatically.
+Preserve the existing data volume when replacing a container. Historical images
+from other registries are not maintained by this repository's release workflow.

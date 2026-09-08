@@ -1,5 +1,9 @@
 # The database, and what the roadmap asks of it
 
+> Historical design/research notes. For the current interface and setup, use the
+> [user guide](user-guide.md), [configuration](configuration.md) and
+> [design verification notes](design/README.md).
+
 *Groundwork for a decision, not a licence to start building. The question was whether
 SQLite still suffices given what the [roadmap](../ROADMAP.md) plans. Everything under
 "What is there today" was measured in this repository in August 2026 — no value here
@@ -11,7 +15,7 @@ comes from memory. The stages at the end are a proposal; none of them has been b
 
 | Measured | Value |
 |---|---|
-| Engine | `sqlite:////data/cargopilot.db`, a single setting (`app/core/config.py`) |
+| Engine | the existing SQLite file in `/data` (override with `DATABASE_URL` only for a deliberate database migration), a single setting (`app/core/config.py`) |
 | SQLite references in application code | **two**, both in `app/core/database.py` — everything else goes through SQLAlchemy |
 | Tables | 12; roughly six carry real data |
 | `journal_mode` | `delete` — the rollback journal, not WAL |
@@ -157,7 +161,7 @@ Four questions were put and answered before this plan was written:
 | Largest realistic installation | **A company of 50–200 employees** |
 | Retention for stored shipments | **Five years**, matching DGSA practice |
 
-The goal behind those answers is that CargoPilot should install easily on the common
+The goal behind those answers is that EMCargo should install easily on the common
 platforms and be **manageable** by a company of that size. That is the honest argument for
 PostgreSQL here, and it is worth separating from the one usually given: not that SQLite
 cannot keep up — it can, by three orders of magnitude — but that an IT department already

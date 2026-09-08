@@ -1,5 +1,5 @@
 <!--
-CargoPilot is a personal project. Please open an issue and agree the shape of a change
+EMCargo is a personal project. Please open an issue and agree the shape of a change
 before writing it — see CONTRIBUTING.md. A pull request that arrives without one may be
 closed unmerged, which is a waste of your time rather than a judgement on your code.
 -->

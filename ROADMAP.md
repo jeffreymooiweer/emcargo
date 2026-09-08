@@ -1,6 +1,6 @@
 # Roadmap
 
-Where CargoPilot is going. For what has already shipped, see the [changelog](CHANGELOG.md);
+Where EMCargo is going. For what has already shipped, see the [changelog](CHANGELOG.md);
 for the groundwork behind the items below — market findings, measured regulation, open
 questions — see [Roadmap research](docs/roadmap-research.md). What several of these
 items ask of the database, and what would have to be built before they can land, is set
@@ -11,7 +11,7 @@ Versioning follows [Semantic Versioning](https://semver.org/) — see
 
 ## Status
 
-CargoPilot is **under active development**. It is usable today: the current release
+EMCargo is **under active development**. It is usable today: the current release
 covers the full flow from package entry to finished documents for **road, rail, sea and
 inland waterway** transport. Air and multimodal are built in and reachable in the code,
 but their tiles are locked until their remaining regulatory checks are complete — a
@@ -71,7 +71,7 @@ defects before a real consignment did). The work per mode is what
 ### Companion modules, each in its own repository
 
 Larger capabilities that do not belong inside the core application are planned as
-separate projects with their own repositories, talking to CargoPilot over its API. The
+separate projects with their own repositories, talking to EMCargo over its API. The
 core stays what it is — a civilian documentation tool:
 
 - **Route planner** — plan the journey the documents describe, with mode-aware
@@ -122,12 +122,12 @@ account in front of it: a record of what was shipped with no record of who typed
 the one combination this page does not offer.
 
 **Two independent pieces of work, on either side of today.** Organisation is what
-CargoPilot does now. Open is *removing* from it; history is *adding* to it. Neither
+EMCargo does now. Open is *removing* from it; history is *adding* to it. Neither
 waits on the other, and Open can ship with history never built.
 
 #### Open — shipped in v1.171.0
 
-`CARGOPILOT_MODE=open`, built as this section promised. The account routes are not
+`EMCARGO_MODE=open`, built as this section promised. The account routes are not
 mounted — sign-in, users, the settings screen, the equipment library, mail, the
 administrator's maintenance — and the test suite asserts their absence route by route.
 The defaults live in the visitor's browser and the settings screen says so in four
@@ -148,13 +148,13 @@ default and the one mode that needs no migration to reach.
 
 #### History — the switch, the storage and the page shipped in v1.173.0
 
-`CARGOPILOT_HISTORY=true` at the time; since v1.188.0 the switch is the administrator's
+`EMCARGO_HISTORY=true` at the time; since v1.188.0 the switch is the administrator's
 own, *Keep shipments* under Administration, and the variable is only its starting value.
 The export step keeps each shipment when its documents are downloaded, a shipments page
 lists them with filters and cards, a kept shipment reopens in the wizard and hands out
 its documents again, and switching the history off with shipments in the table is
 refused until the administrator has them deleted on the screen (until v1.188.0 the
-application refused to start instead, until `CARGOPILOT_HISTORY_DISCARD=true` said they
+application refused to start instead, until `EMCARGO_HISTORY_DISCARD=true` said they
 may go). Underneath it is the schema runner the database plan asked for: numbered
 steps, a version table, a fresh database stamped rather than migrated. What a kept
 shipment holds — the wizard's own state, the bundle request, and the structured export
@@ -221,7 +221,7 @@ sign-in errors and regulatory findings stay inline by design.)
 
 - **A plugin page** in the application to manage what is installed.
 - ~~**A licence change** to MIT or similar.~~ Decided in September 2026: no change.
-  CargoPilot stays Apache 2.0, which already permits plugins to be written, shared,
+  EMCargo stays Apache 2.0, which already permits plugins to be written, shared,
   sold and installed freely, and which carries the patent grant MIT does not.
 - **A community hub** — a website where people share plugins, loadable inside the
   application so a plugin installs directly from it. The companion modules above will
@@ -230,7 +230,7 @@ sign-in errors and regulatory findings stay inline by design.)
 
 ### Installing it without Docker
 
-CargoPilot ships as a container and assumes one: a single image, a Docker
+EMCargo ships as a container and assumes one: a single image, a Docker
 Compose file and an Unraid template, with the in-app updater pulling a newer
 image over the Docker socket. That is the right default and it stays — but it
 is currently also the *only* way in, which rules out anyone who runs services
@@ -281,7 +281,7 @@ none is committed until it is planned against that brief.
   application does not hold named element by element (see
   [The eFTI mapping](docs/efti-mapping.md)). What remains is the split address model
   the party elements need, the code lists by value, and the per-party signature flow.
-  CargoPilot does not become a certified platform; it becomes trivially connectable
+  EMCargo does not become a certified platform; it becomes trivially connectable
   to one.
 - ~~**DGSA annual report.**~~ Shipped in v1.177.0, see above; it exists only with the
   history switched on, because without stored shipments there is nothing to report.
@@ -316,7 +316,7 @@ none is committed until it is planned against that brief.
   packaging to transport category 4 the points check was not making (v1.166.0).
 - **A QR code on documents** shipped in v1.168.0: every rendered transport document can
   carry a code that opens this installation's UN cards for the UN numbers on that
-  document. It is the first and only route in CargoPilot that answers without a sign-in,
+  document. It is the first and only route in EMCargo that answers without a sign-in,
   which is the whole point — the driver at the roadside and the responder on the scene
   have no account here. Off until an administrator turns it on, and it needs the
   installation's public address configured before a single code is printed: a code on
@@ -357,5 +357,5 @@ none is committed until it is planned against that brief.
 
 ## Not planned
 
-- A pre-filled operational equipment library in the public repository or on Docker Hub.
+- A pre-filled operational equipment library in the public repository or in a published container image.
   The library starts empty by design; see [Privacy](docs/privacy.md).

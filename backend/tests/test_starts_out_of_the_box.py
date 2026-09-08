@@ -68,7 +68,7 @@ def test_the_app_starts_with_nothing_configured(tmp_path):
 
 
 def test_the_app_starts_the_way_the_unraid_template_configures_it(tmp_path):
-    """The template in unraid/CargoPilot.xml passes APP_SECRET_KEY empty."""
+    """The template in unraid/EMCargo.xml passes APP_SECRET_KEY empty."""
     result = start_with(tmp_path, APP_SECRET_KEY="")
     assert "STARTED" in result.stdout, result.stderr[-3000:]
 

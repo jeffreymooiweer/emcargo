@@ -6,7 +6,7 @@
 
 Use GitHub's private vulnerability reporting instead:
 
-> **[Report a vulnerability](https://github.com/jeffreymooiweer/CargoPilot/security/advisories/new)**
+> **[Report a vulnerability](https://github.com/jeffreymooiweer/emcargo/security/advisories/new)**
 > — or go to the repository's **Security** tab → *Report a vulnerability*.
 
 That opens a private thread visible only to you and the maintainer.
@@ -40,15 +40,15 @@ programme.
 
 | Version | Supported |
 |---|---|
-| The [latest release](https://github.com/jeffreymooiweer/CargoPilot/releases/latest) | Yes |
+| The [latest release](https://github.com/jeffreymooiweer/emcargo/releases/latest) | Yes |
 | Anything older | No — upgrade first |
 
-CargoPilot is pre-2.0 and under active development. Fixes go into the next release; there
+EMCargo is pre-2.0 and under active development. Fixes go into the next release; there
 are no backports to older tags.
 
 ## What is in scope
 
-CargoPilot is **self-hosted**. There is no CargoPilot cloud service, no account with us
+EMCargo is **self-hosted**. There is no EMCargo cloud service, no account with us
 and no telemetry, so the attack surface is your own deployment. In scope:
 
 - Authentication and session handling, and the admin bootstrap
@@ -62,7 +62,7 @@ and no telemetry, so the attack surface is your own deployment. In scope:
 - `CATALOG_AUTO_SYNC`, which fetches reference catalogues from external URLs at startup:
   anything that turns that into a way to reach the host or poison the data.
 - Secrets leaking into logs, exports or error responses.
-- Dependencies with a known, exploitable vulnerability reachable from CargoPilot.
+- Dependencies with a known, exploitable vulnerability reachable from EMCargo.
 
 ## What is not in scope
 
@@ -74,7 +74,7 @@ and no telemetry, so the attack surface is your own deployment. In scope:
   check and sign. That is the design, stated in [DISCLAIMER.md](DISCLAIMER.md), and not a
   defect.
 - **An installation you exposed to the internet without a reverse proxy, TLS or a
-  password.** CargoPilot is meant to run on your own machine or a private network.
+  password.** EMCargo is meant to run on your own machine or a private network.
   Hardening the perimeter is the operator's job.
 - Missing hardening headers, rate limits or similar with no demonstrated impact, and
   automated scanner output without a working reproduction.

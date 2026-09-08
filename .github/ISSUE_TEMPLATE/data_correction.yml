@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        This is the most valuable kind of report CargoPilot gets. The application is only
+        This is the most valuable kind of report EMCargo gets. The application is only
         worth as much as its data, and a user in the field is far better placed to spot a
         wrong density or a misplaced box than anyone reading the code.
 
@@ -33,12 +33,12 @@ body:
   - type: textarea
     id: what
     attributes:
-      label: What CargoPilot shows
+      label: What EMCargo shows
       description: >-
         Be exact. For a weight, give the input line and the kilos it produced. For
         dangerous goods, give the UN number and the column.
       placeholder: |
-        UN 2984, column 16b: CargoPilot shows SG16, SG59, SG72.
+        UN 2984, column 16b: EMCargo shows SG16, SG59, SG72.
     validations:
       required: true
 
@@ -78,8 +78,8 @@ body:
       options:
         - label: >-
             I checked
-            [Rule set editions](https://github.com/jeffreymooiweer/CargoPilot/blob/main/docs/dangerous-goods.md#rule-set-editions)
-            — not all of the data is from the same year, and where CargoPilot runs behind
+            [Rule set editions](https://github.com/jeffreymooiweer/emcargo/blob/main/docs/dangerous-goods.md#rule-set-editions)
+            — not all of the data is from the same year, and where EMCargo runs behind
             it says so.
           required: false
         - label: >-

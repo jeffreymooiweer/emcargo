@@ -1,4 +1,4 @@
-# Disclaimer en aansprakelijkheidsuitsluiting — CargoPilot
+# Disclaimer en aansprakelijkheidsuitsluiting — EMCargo
 
 _Laatst bijgewerkt: 2 augustus 2026_
 
@@ -10,7 +10,7 @@ _Laatst bijgewerkt: 2 augustus 2026_
 
 ## 1. Aard van de applicatie
 
-CargoPilot is een hulpmiddel dat vervoers- en begeleidingsdocumenten (zoals
+EMCargo is een hulpmiddel dat vervoers- en begeleidingsdocumenten (zoals
 CMR, CIM, de IMO Multimodal Dangerous Goods Form, de IATA Shipper's Declaration,
 VGM-verklaringen, shipping instructions en paklijsten)
 **voorbereidt** op basis van door de gebruiker ingevoerde gegevens. De
@@ -20,7 +20,7 @@ veiligheidskundig advies**.
 
 ## 2. Concept — geen definitief of ondertekend document
 
-Elk door CargoPilot voortgebracht document is een **concept**. Vóór gebruik,
+Elk door EMCargo voortgebracht document is een **concept**. Vóór gebruik,
 overdracht, indiening of ondertekening moet het document in zijn geheel worden:
 
 1. **gecontroleerd** op juistheid en volledigheid door een daartoe **bevoegde
@@ -30,7 +30,7 @@ overdracht, indiening of ondertekening moet het document in zijn geheel worden:
 3. **ondertekend** door de verantwoordelijke persoon, waar het formulier of de
    toepasselijke regelgeving dit vereist.
 
-CargoPilot vult handtekeningvelden, carriergegevens en operationele velden
+EMCargo vult handtekeningvelden, carriergegevens en operationele velden
 bewust **niet** vooraf in. Het feit dat de applicatie een veld invult, betekent
 niet dat de inhoud juist, volledig of rechtsgeldig is.
 
@@ -39,7 +39,7 @@ niet dat de inhoud juist, volledig of rechtsgeldig is.
 Voor gevaarlijke stoffen (ADR, RID, ADN, IMDG, IATA DGR) geldt dat classificatie,
 verpakking, markering, etikettering en documentatie onder de **exclusieve
 verantwoordelijkheid** van de afzender en andere wettelijk aangewezen partijen
-vallen. CargoPilot zet een vrije omschrijving **nooit** automatisch om in een
+vallen. EMCargo zet een vrije omschrijving **nooit** automatisch om in een
 definitieve classificatie en vervangt geen gecertificeerde gevaarlijke-stoffen-
 masterdata, een DGSA/veiligheidsadviseur of de actuele, geautoriseerde
 regelgeving. De gebruiker is te allen tijde zelf verantwoordelijk voor naleving
@@ -58,7 +58,7 @@ formuliersjablonen of regelgeving) juist, actueel of compleet is.
 ## 5. Uitsluiting van aansprakelijkheid
 
 Voor zover maximaal toegestaan onder het toepasselijke recht sluiten de maker(s),
-rechthebbende(n) en bijdragers van CargoPilot **elke aansprakelijkheid** uit voor
+rechthebbende(n) en bijdragers van EMCargo **elke aansprakelijkheid** uit voor
 enige directe, indirecte, incidentele, bijzondere, punitieve of gevolgschade,
 daaronder mede begrepen — zonder uitputtend te zijn — winstderving, bedrijfs-
 of productiestilstand, boetes, sancties, vertragingen, in beslag genomen of
@@ -69,7 +69,7 @@ of de daarmee gegenereerde documenten, ongeacht de rechtsgrond (contract,
 onrechtmatige daad, wettelijke aansprakelijkheid of anderszins) en zelfs indien
 op de mogelijkheid van dergelijke schade is gewezen.
 
-De gebruiker gebruikt CargoPilot **volledig op eigen risico** en is als enige
+De gebruiker gebruikt EMCargo **volledig op eigen risico** en is als enige
 verantwoordelijk voor de controle, de juistheid, de rechtsgeldigheid en het
 gebruik van de ingevoerde gegevens en de gegenereerde documenten, alsmede voor
 de naleving van alle toepasselijke nationale en internationale wet- en
@@ -77,13 +77,13 @@ regelgeving.
 
 ## 6. Vrijwaring
 
-De gebruiker vrijwaart de maker(s) en rechthebbende(n) van CargoPilot tegen alle
+De gebruiker vrijwaart de maker(s) en rechthebbende(n) van EMCargo tegen alle
 aanspraken van derden die voortvloeien uit of verband houden met het gebruik van
 de applicatie of de gegenereerde documenten door de gebruiker.
 
 ## 7. Licentie
 
-CargoPilot wordt in licentie gegeven onder de **Apache License, Version 2.0**,
+EMCargo wordt in licentie gegeven onder de **Apache License, Version 2.0**,
 aangevuld met de **Commons Clause**. De volledige licentietekst staat in het
 bestand [`LICENSE`](LICENSE).
 
@@ -104,5 +104,5 @@ kracht.
 
 ---
 
-Door CargoPilot te gebruiken erkent u deze disclaimer te hebben gelezen,
+Door EMCargo te gebruiken erkent u deze disclaimer te hebben gelezen,
 begrepen en aanvaard.

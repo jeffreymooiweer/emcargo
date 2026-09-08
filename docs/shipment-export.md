@@ -1,7 +1,7 @@
 # The structured shipment export
 
 *A shipment as data rather than paper: what was filled in, what is carried, and
-what CargoPilot worked out. Offered from the export step as **Structured
+what EMCargo worked out. Offered from the export step as **Structured
 shipment export (JSON)**, and produced by the same code path as every other
 document, so what the button hands out is what the bundle contains.*
 
@@ -12,7 +12,7 @@ applies in full from **9 July 2027**: from then, authorities must accept freight
 information electronically through certified eFTI platforms, and the eFTI data
 set is built on the UN/CEFACT Multi-Modal Transport reference data model.
 
-CargoPilot is not going to become a certified platform. That is a certification
+EMCargo is not going to become a certified platform. That is a certification
 regime for platform providers; this is a documentation tool. What it can be is
 **trivially connectable to one** — and that starts with a shipment being able to
 leave the application as structured data at all. Everything else (a mapping onto
@@ -20,12 +20,16 @@ MMT-RDM, an eCMR pilot, a platform connector) builds on this file existing.
 
 ## What is in it
 
+The `format` value below is a placeholder. Its exact compatibility identifier is
+defined by `FORMAT` in `backend/app/services/documents/shipment_export.py` and
+is deliberately unchanged for existing integrations.
+
 ```json
 {
-  "format": "cargopilot.shipment",
+  "format": "<stable format identifier>",
   "format_version": "1.0",
   "generated_at": "2026-08-23T15:58:51+00:00",
-  "generator": { "application": "CargoPilot", "version": "1.161.0" },
+  "generator": { "application": "EMCargo", "version": "1.161.0" },
   "language": "nl",
   "modality": "road",
   "regulations": ["ADR"],
@@ -83,7 +87,7 @@ answered.
 ## What this is *not*
 
 - **Not an eFTI message.** The eFTI data set is defined by the implementing
-  acts and built on MMT-RDM. This is CargoPilot's own structure and says so in
+  acts and built on MMT-RDM. This is EMCargo's own structure and says so in
   its first key.
 - **Not an eCMR.** An eCMR is a consignment note under the e-CMR Protocol, with
   a signature regime this file has nothing to say about.
@@ -102,7 +106,7 @@ person does not start from nothing:
 
 1. ~~**Read the MMT-RDM.**~~ Read as the eFTI common data set, the profile of it
    the regulation adopted, from the Official Journal.
-2. **Decide what a "consignment" is.** CargoPilot's wizard produces one
+2. **Decide what a "consignment" is.** EMCargo's wizard produces one
    consignment per run; the data set distinguishes the consignment, its items,
    the used transport equipment and the transport movement, and the mapping
    places one goods line as one consignment item and one container as one piece

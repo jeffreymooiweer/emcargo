@@ -2,6 +2,8 @@
 
 # EMCargo
 
+Developed and maintained by **Jeffrey Mooiweer**.
+
 **Turn a list of packages into finished transport documents.**
 
 Paste your load, and EMCargo works out the weights and volumes, fills in the official
@@ -33,7 +35,7 @@ EMCargo uses a dark navy workspace with a persistent desktop sidebar, a mobile
 navigation drawer, three visible shipment stages and a bottom action bar.
 Dangerous-goods assessment remains mandatory within the goods stage. Existing
 light/system preferences, custom branding, saved drafts and shipment files stay
-compatible. CargoPilot storage keys and database filenames are intentionally kept
+compatible. Historical storage keys and database filenames are intentionally kept
 so upgrading does not discard existing data. The original licence and attribution
 remain in LICENSE.
 
@@ -105,7 +107,7 @@ docker compose up -d --build
 Open <http://localhost:8080> and log in with the admin account from your `.env`.
 
 Want an installation anyone may use without an account, that keeps nothing about
-anyone? Set `CARGOPILOT_MODE=open` — see [Privacy](docs/privacy.md#two-applications)
+anyone? Set `EMCARGO_MODE=open` — see [Privacy](docs/privacy.md#two-applications)
 for exactly what that promises and [Configuration](docs/configuration.md) for how.
 
 Running Unraid, or want the full set of options? See **[Getting started](docs/getting-started.md)**.

@@ -1,11 +1,12 @@
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore", populate_by_name=True)
 
     app_name: str = "EMCargo"
     app_env: str = "production"
@@ -23,7 +24,10 @@ class Settings(BaseSettings):
     #: A value that is neither is read as ``organisation`` and reported: the
     #: closed application is the one a typo may safely land in, and the mode
     #: is printed by ``/api/health`` so the operator can see what they got.
-    cargopilot_mode: str = "organisation"
+    cargopilot_mode: str = Field(
+        default="organisation",
+        validation_alias=AliasChoices("EMCARGO_MODE", "CARGOPILOT_MODE"),
+    )
     #: Whether the organisation application keeps the shipments it makes.
     #: Since v1.188.0 this is an administrator's setting on the screen —
     #: *Keep shipments* under Administration — and the variable is only its
@@ -32,7 +36,10 @@ class Settings(BaseSettings):
     #: Kept so an installation that set it before keeps its history across
     #: the upgrade. The open application ignores it: nothing is kept about
     #: anyone there.
-    cargopilot_history: bool = False
+    cargopilot_history: bool = Field(
+        default=False,
+        validation_alias=AliasChoices("EMCARGO_HISTORY", "CARGOPILOT_HISTORY"),
+    )
     app_secret_key: str = "change-me"
     database_url: str = "sqlite:////data/cargopilot.db"
     data_dir: Path = Path("/data")

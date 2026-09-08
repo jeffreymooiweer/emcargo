@@ -33,8 +33,8 @@ and reachable at the URL below. Then:
 ```bash
 pip install playwright requests && playwright install chromium
 cd scripts/ux_bench
-CARGOPILOT_BENCH_OUT=../../bench-out python tasks.py        # all ten tasks
-CARGOPILOT_BENCH_OUT=../../bench-out python one.py task_3   # one of them
+EMCARGO_BENCH_OUT=../../bench-out python tasks.py        # all ten tasks
+EMCARGO_BENCH_OUT=../../bench-out python one.py task_3   # one of them
 ```
 
 It writes `baseline.json` and `baseline.md` next to the screenshots in the output
@@ -42,10 +42,10 @@ directory.
 
 | Variable | Default |
 |---|---|
-| `CARGOPILOT_BENCH_URL` | `http://127.0.0.1:8765` |
-| `CARGOPILOT_BENCH_OUT` | `bench-out` |
-| `CARGOPILOT_BENCH_USER` / `CARGOPILOT_BENCH_PASSWORD` | `root` / `Root-pass-123` |
-| `CARGOPILOT_BENCH_CHROME` | Playwright's own browser |
+| `EMCARGO_BENCH_URL` | `http://127.0.0.1:8765` |
+| `EMCARGO_BENCH_OUT` | `bench-out` |
+| `EMCARGO_BENCH_USER` / `EMCARGO_BENCH_PASSWORD` | `root` / `Root-pass-123` |
+| `EMCARGO_BENCH_CHROME` | Playwright's own browser |
 
 **Not at the same time as the backend suite.** The run copies the built frontend into
 `backend/static` so the application it drives serves the interface. While that directory

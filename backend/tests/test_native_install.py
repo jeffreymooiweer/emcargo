@@ -21,11 +21,18 @@ from app.services import updater
 
 ROOT = Path(__file__).resolve().parents[2]
 NATIVE = ROOT / "deploy" / "native"
-KUBERNETES = ROOT / "deploy" / "kubernetes" / "cargopilot.yaml"
+KUBERNETES = ROOT / "deploy" / "kubernetes" / "emcargo.yaml"
 
 
 def settings_fields() -> set[str]:
-    return {name.upper() for name in Settings.model_fields}
+    names = {name.upper() for name in Settings.model_fields}
+    for field in Settings.model_fields.values():
+        alias = field.validation_alias
+        if isinstance(alias, str):
+            names.add(alias)
+        elif hasattr(alias, "choices"):
+            names.update(choice for choice in alias.choices if isinstance(choice, str))
+    return names
 
 
 def env_keys(text: str) -> set[str]:

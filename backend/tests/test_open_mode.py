@@ -308,10 +308,10 @@ def test_the_privacy_page_says_what_open_means():
     application answers; this is the paragraph a visitor reads to know what
     that means, and it has to exist and name the variable."""
     text = (ROOT / "docs" / "privacy.md").read_text(encoding="utf-8")
-    assert "CARGOPILOT_MODE" in text
+    assert "EMCARGO_MODE" in text
     assert "## Two applications" in text
 
 
 def test_the_configuration_page_lists_the_mode():
     text = (ROOT / "docs" / "configuration.md").read_text(encoding="utf-8")
-    assert "`CARGOPILOT_MODE`" in text
+    assert "`EMCARGO_MODE`" in text
