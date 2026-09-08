@@ -144,7 +144,7 @@ export default function WizardShell({
             <div className="mt-2 text-sm text-slate-500 dark:text-slate-400">{draft}</div>
           </div>
           <div className="wizard-progress-wrap">
-            <p className="mb-3 text-sm font-medium sm:hidden">{t("wizard.progressStep", { current: index + 1, total: steps.length })} — {steps[index]?.label}</p>
+            <p className="wizard-progress-copy">{t("wizard.progressStep", { current: index + 1, total: steps.length })} — {steps[index]?.label}</p>
             <WizardProgress steps={steps} currentStep={currentStep} visited={visited} onGoTo={onGoTo} />
           </div>
           <div className="wizard-mode-block">
@@ -178,7 +178,7 @@ export default function WizardShell({
               : "hidden"
           }
         >
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+          <div className="wizard-action-layout">
             {secondaryAction}
             {/* One count, in one place at a time. From `xl` the panel is on
                 the screen and carries it; below that there is no panel beside
@@ -187,10 +187,8 @@ export default function WizardShell({
               <p className={`text-xs font-medium text-amber-700 dark:text-amber-300 ${panel ? "xl:hidden" : ""}`}>
                 {t("wizard.attention", { count: attention })}
               </p>
-            ) : (
-              <span />
-            )}
-            <div ref={setEl} className="sm:ml-auto" />
+            ) : null}
+            <div ref={setEl} className="wizard-action-slot" />
           </div>
         </div>
       </div>

@@ -147,7 +147,7 @@
     "removeLine": "Supprimer",
     "noLines": "Ajoutez au moins une ligne de marchandises avec une désignation.",
     "importExcel": "Importer",
-    "importTitle": "Importer depuis un fichier ou un texte",
+    "importTitle": "Importer des marchandises",
     "importHint": "Collez des colonnes copiées depuis Excel (désignation | quantité | unité), ou téléchargez le modèle et téléversez un fichier.",
     "importExampleTitle": "Exemple",
     "importExample": "cornière acier 80x80x8x6000 | 8 | pcs",
@@ -207,7 +207,22 @@
     "typeOfPackage": "Type d'emballage",
     "netPerPackage": "Net par emballage",
     "derivedLater": "Depuis les tableaux",
-    "moreActions": "Autres actions"
+    "moreActions": "Autres actions",
+    "simpleIntro": "Que transportez-vous ? Ajoutez un article ou une liste de marchandises.",
+    "simplePlaceholder": "Ex. essence 25 L ou tôles en acier",
+    "importAction": "Importer",
+    "importIntro": "Choisissez un fichier ou collez votre liste depuis Excel.",
+    "dgIdentityNeeded": "Substance à préciser",
+    "dgCandidateRejected": "Suggestion rejetée",
+    "dgMarked": "Marchandise dangereuse",
+    "continue": "Continuer",
+    "continueTo": "Continuer : {{step}}",
+    "shortStep": {
+      "lines": "Articles",
+      "dg": "Matières",
+      "details": "Détails",
+      "export": "Vérifier"
+    }
   },
   "import": {
     "downloadTemplate": "Télécharger le modèle",

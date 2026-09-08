@@ -78,6 +78,35 @@ beforeEach(() => {
 afterEach(() => { vi.useRealTimers(); });
 
 describe("shipment restoration", () => {
+  // Saved results round per-piece and total weights separately. Sending both
+  // back made the backend multiply the rounded piece value and change a
+  // shipment merely by reopening it. Older manual corrections must survive
+  // too: their snapshots do not distinguish computed and entered weights.
+  it.each([
+    { each: 18.62, total: 37.25, override: { weight_total_kg: 37.25 } },
+    { each: 20.56, total: 41.13, override: { weight_total_kg: 41.13 } },
+    { each: 12.5, total: null, override: { weight_each_kg: 12.5 } },
+  ])("preserves the authoritative saved weight when recalculating $total kg", async ({ each, total, override }) => {
+    const shipment = saved("Benzine 25L");
+    shipment.snapshot = {
+      ...shipment.snapshot,
+      draftLines: [{ id: 1, description: "Benzine 25L", quantity: 2, unit: "pcs" }],
+      result: {
+        lines: [{ line_id: 1, description: "Benzine 25L", quantity: 2, unit: "pcs",
+          include: true, status: "ok", weight_each_kg: each, weight_total_kg: total,
+          messages: [], detected_un_numbers: [] }],
+        totals: { line_count: 1, included_count: 1, total_quantity: 2, total_weight_kg: total,
+          total_material_volume_m3: 0, total_transport_volume_m3: 0, warning_count: 0, error_count: 0 },
+      },
+    };
+    mocks.api.runningDraft.mockResolvedValue(shipment);
+    open();
+    await screen.findByLabelText("Goods description");
+    await waitFor(() => expect(mocks.api.calculate).toHaveBeenCalledWith(expect.objectContaining({
+      line_overrides: [{ line_id: 1, ...override }],
+    })));
+  });
+
   it("restores a running draft once under StrictMode", async () => {
     const draft = deferred<ShipmentDetail | null>();
     mocks.api.runningDraft.mockReturnValue(draft.promise);

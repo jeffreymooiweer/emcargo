@@ -147,7 +147,7 @@
     "removeLine": "Remove",
     "noLines": "Add at least one goods line with a description.",
     "importExcel": "Import",
-    "importTitle": "Import from file or text",
+    "importTitle": "Import goods",
     "importHint": "Paste copied columns from Excel (description | quantity | unit), or download the template and upload a file.",
     "importExampleTitle": "Example",
     "importExample": "steel angle 80x80x8x6000 | 8 | pcs",
@@ -207,7 +207,22 @@
     "typeOfPackage": "Type of package",
     "netPerPackage": "Net per package",
     "derivedLater": "From the tables",
-    "moreActions": "More actions"
+    "moreActions": "More actions",
+    "simpleIntro": "What are you shipping? Add an item or a goods list.",
+    "simplePlaceholder": "E.g. petrol 25 L or steel plates",
+    "importAction": "Import",
+    "importIntro": "Choose a file or paste your list from Excel.",
+    "dgIdentityNeeded": "Identify substance",
+    "dgCandidateRejected": "Suggestion rejected",
+    "dgMarked": "Dangerous goods",
+    "continue": "Continue",
+    "continueTo": "Continue: {{step}}",
+    "shortStep": {
+      "lines": "Goods",
+      "dg": "Substances",
+      "details": "Details",
+      "export": "Review"
+    }
   },
   "import": {
     "downloadTemplate": "Download template",

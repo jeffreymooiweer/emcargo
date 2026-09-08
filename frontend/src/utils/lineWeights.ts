@@ -73,12 +73,18 @@ export function scaleLinesToTotalWeight(lines: LineItem[], newTotal: number): Li
 }
 
 export function weightOverridesFromLines(lines: LineItem[]) {
+  // Results round each weight independently. Reusing 18.62 kg per package
+  // for two packages would turn a saved 37.25 kg total into 37.24 kg. Keep
+  // the total authoritative, including manual corrections in older snapshots
+  // that do not record whether a weight was calculated or entered by hand.
+  // The wizard clears results whenever calculation inputs change.
   return lines
     .filter((line) => line.weight_each_kg != null || line.weight_total_kg != null)
     .map((line) => ({
       line_id: line.line_id,
-      ...(line.weight_each_kg != null ? { weight_each_kg: line.weight_each_kg } : {}),
-      ...(line.weight_total_kg != null ? { weight_total_kg: line.weight_total_kg } : {}),
+      ...(line.weight_total_kg != null
+        ? { weight_total_kg: line.weight_total_kg }
+        : { weight_each_kg: line.weight_each_kg! }),
     }));
 }
 
