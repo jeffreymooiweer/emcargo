@@ -184,6 +184,8 @@ def public_settings(db: Session) -> PublicSettings:
         mail_enabled=bool(current.mail_enabled and current.mail_host
                           and current.mail_from),
         history_enabled=history_enabled(db),
+        dg_review_enabled=current.dg_review_enabled,
+        super_user_dgsa_enabled=current.super_user_dgsa_enabled,
     )
 
 

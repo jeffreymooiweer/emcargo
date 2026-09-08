@@ -56,12 +56,10 @@ function renderAt(path = "/") {
 }
 
 describe("de modaliteitkeuze", () => {
-  it("laat wegvervoer, spoorvervoer, zeevervoer en binnenvaart toe", () => {
-    // Rail came off the lock in v1.122.0 and sea in v1.152.0, once chapter
-    // 5.3 was derived (v1.150.0) and the flow was verified end to end. Air
-    // stays locked: its one demonstration (v1.117.0) is over and the IATA
-    // quantity tables are still not held.
-    expect([...AVAILABLE_MODALITIES]).toEqual(["road", "rail", "sea", "inland"]);
+  it("offers road, rail and inland while sea is in development", () => {
+    // The product owner moved sea back into development in v2.4.0.
+    // A saved preference must obey that change just like the visible tile.
+    expect([...AVAILABLE_MODALITIES]).toEqual(["road", "rail", "inland"]);
     for (const key of AVAILABLE_MODALITIES) {
       expect(isModalityAvailable(key)).toBe(true);
     }
@@ -71,15 +69,14 @@ describe("de modaliteitkeuze", () => {
     }
   });
 
-  it("explains unavailable modes in a disclosure without offering navigation", async () => {
+  it("shows developing modes beside the released modes as disabled buttons", async () => {
     preferences.default_modality = undefined;
     renderAt("/?choose=1");
-    await userEvent.click(screen.getByText("studio.otherModes"));
-    for (const key of ["air", "multimodal"]) {
+    for (const key of ["sea", "air", "multimodal"]) {
       expect(screen.getByText(`modality.${key}`)).toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: new RegExp(`modality.${key}`) })).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: new RegExp(`modality.${key}`) })).toBeDisabled();
     }
-    expect(screen.getAllByText("modality.lockedReason")).toHaveLength(2);
+    expect(screen.getAllByText("modality.inDevelopment")).toHaveLength(3);
     expect(screen.queryByText("wizard")).not.toBeInTheDocument();
   });
 

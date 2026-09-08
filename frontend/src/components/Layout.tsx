@@ -1,3 +1,5 @@
+import { canManage } from "../permissions";
+import BrandName from "./BrandName";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -8,7 +10,7 @@ import CommandMenu from "./CommandMenu";
 import UpdateToast from "./UpdateToast";
 import TwoFactorNudge, { clearTwoFactorNudge } from "./TwoFactorNudge";
 import WhatsNewModal from "./WhatsNewModal";
-import { ChevronDownIcon, CloseIcon, CollapseIcon, DocumentIcon, LogoutIcon, GroupageIcon, HistoryIcon, HomeIcon, LibraryIcon, MenuIcon, PlusIcon, RoadIcon, SettingsIcon, ShipmentsIcon, TripsIcon, UserIcon } from "./icons";
+import { ShieldIcon, ChevronDownIcon, CloseIcon, CollapseIcon, DocumentIcon, LogoutIcon, GroupageIcon, HistoryIcon, HomeIcon, LibraryIcon, MenuIcon, PlusIcon, RoadIcon, SettingsIcon, ShipmentsIcon, TripsIcon, UserIcon } from "./icons";
 
 interface Props { user: User; onLogout: () => void }
 
@@ -19,6 +21,7 @@ export default function Layout({ user, onLogout }: Props) {
   const location = useLocation();
   const navigate = useNavigate();
   const admin = user.role === "admin";
+  const manager = canManage(user);
   const [menuOpen, setMenuOpen] = useState(false);
   const [railOpen, setRailOpen] = useState(true);
   const [version, setVersion] = useState<string | null>(null);
@@ -59,7 +62,9 @@ export default function Layout({ user, onLogout }: Props) {
   const destinations = [
     {to: "/overzicht", label: t("nav.overview")}, {to: "/shipments", label: t("nav.shipments")}, {to: "/trips", label: t("nav.trips")}, {to: "/articles", label: t("nav.articles")},
     {to: "/", label: t("nav.new")}, {to: "/groupage", label: t("nav.groupage")},
-    ...(admin ? [{to: "/materieel", label: t("nav.materieel")}, {to: "/users", label: t("nav.users")}, {to: "/audit", label: t("nav.audit")}] : []),
+    ...(manager ? [{to: "/materieel", label: t("nav.materieel")}, {to: "/users", label: t("nav.users")}] : []),
+    ...(admin ? [{to: "/audit", label: t("nav.audit")}] : []),
+    {to: "/dg-reviews", label: t("dgReview.title")},
     {to: "/settings", label: t("nav.settings")}, {to: "/legal", label: t("nav.legal")},
   ];
   const currentLabel = location.pathname.startsWith("/wizard") ? t("nav.new")
@@ -70,7 +75,7 @@ export default function Layout({ user, onLogout }: Props) {
   const versionLabel = version ? (version.startsWith("v") ? version : `v${version}`) : "";
   const brand = (compact = false) => <div className="emcargo-brand">
     <img src={branding.logo || "/emcargo.svg"} alt="" className="h-9 w-9 shrink-0 object-contain" />
-    {!compact && <span className="truncate text-2xl font-semibold tracking-tight">{name}</span>}
+    {!compact && <span className="truncate text-2xl font-semibold tracking-tight"><BrandName name={name} /></span>}
   </div>;
   const linkClass = ({ isActive }: { isActive: boolean }) => `emcargo-nav-link ${isActive ? "emcargo-nav-active" : ""}`;
   type Icon = typeof HomeIcon;
@@ -85,12 +90,13 @@ export default function Layout({ user, onLogout }: Props) {
       {link("/", t("nav.new"), PlusIcon, compact)}
       {link("/shipments", t("nav.shipments"), ShipmentsIcon, compact)}
       {link("/trips", t("nav.trips"), TripsIcon, compact)}
+      {link("/dg-reviews", t("dgReview.title"), ShieldIcon, compact)}
       {link("/articles", t("nav.articles"), LibraryIcon, compact)}
-      {admin && link("/materieel", t("nav.materieel"), RoadIcon, compact)}
+      {manager && link("/materieel", t("nav.materieel"), RoadIcon, compact)}
       {compact ? <>
         {link("/settings", t("nav.settings"), SettingsIcon, true)}
         {link("/groupage", t("nav.groupage"), GroupageIcon, true)}
-        {admin && link("/users", t("nav.users"), UserIcon, true)}
+        {manager && link("/users", t("nav.users"), UserIcon, true)}
         {admin && link("/audit", t("nav.audit"), HistoryIcon, true)}
         {link("/legal", t("nav.legal"), DocumentIcon, true)}
       </> : <details className="emcargo-nav-group" open={["/settings", "/users", "/audit", "/legal", "/groupage"].includes(location.pathname) || undefined}>
@@ -98,7 +104,7 @@ export default function Layout({ user, onLogout }: Props) {
         <div className="emcargo-subnav">
           {link("/groupage", t("nav.groupage"), GroupageIcon, false)}
           {link("/settings", t("nav.settings"), SettingsIcon, false)}
-          {admin && link("/users", t("nav.users"), UserIcon, false)}
+          {manager && link("/users", t("nav.users"), UserIcon, false)}
           {admin && link("/audit", t("nav.audit"), HistoryIcon, false)}
           {link("/legal", t("nav.legal"), DocumentIcon, false)}
         </div>

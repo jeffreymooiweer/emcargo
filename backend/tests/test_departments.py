@@ -304,3 +304,7 @@ def test_the_rule_in_one_place(db):
         listed = {s.id for s in departments.visible_to(db.query(Shipment), viewer).all()}
         by_rule = {s.id for s in db.query(Shipment).all() if departments.may_see(s, viewer)}
         assert listed == by_rule, viewer.username
+
+
+# These fixtures exercise document/retention behaviour with optional review off.
+pytestmark = pytest.mark.usefixtures("dg_review_disabled")

@@ -40,7 +40,7 @@ def visible_to(query: Query, viewer: User, department: str = "",
     shipments by default, the kept trips carry the same column.
     """
     column = model.department_id
-    if viewer.role == "admin":
+    if viewer.role in {"admin", "super_user", "dg_specialist"}:
         if department == "none":
             return query.filter(column.is_(None))
         if department:
@@ -55,7 +55,7 @@ def visible_to(query: Query, viewer: User, department: str = "",
 
 
 def may_see(record: Any, viewer: User) -> bool:
-    if viewer.role == "admin":
+    if viewer.role in {"admin", "super_user", "dg_specialist"}:
         return True
     return record.department_id == viewer.department_id
 

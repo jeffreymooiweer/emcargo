@@ -57,7 +57,7 @@ def scope_for(viewer: User, department: str = "") -> str:
     Anybody else gets their own department whatever they ask — the same rule
     the shipments page applies.
     """
-    if getattr(viewer, "role", "") == "admin":
+    if getattr(viewer, "role", "") in {"admin", "super_user", "dg_specialist"}:
         wanted = (department or "").strip()
         return wanted if wanted == "none" or wanted.isdigit() else ""
     own = getattr(viewer, "department_id", None)

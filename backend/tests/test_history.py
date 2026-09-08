@@ -389,6 +389,8 @@ def test_nobody_elses_draft(db, monkeypatch):
 
 def test_the_annual_report_counts_shipments_and_not_drafts(db, monkeypatch):
     from datetime import datetime
+    db.get(User, 1).role = "dg_specialist"
+    db.commit()
 
     with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         client.post("/api/shipments", json=shipment())
@@ -499,3 +501,7 @@ def test_public_settings_say_whether_shipments_are_kept(db, monkeypatch):
     assert settings_store.public_settings(db).history_enabled is False
     switch_history(db, True)
     assert settings_store.public_settings(db).history_enabled is True
+
+
+# These fixtures exercise document/retention behaviour with optional review off.
+pytestmark = pytest.mark.usefixtures("dg_review_disabled")

@@ -84,3 +84,28 @@ def require_history(db: Session = Depends(get_db)) -> None:
 
     if not history_enabled(db):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not Found")
+
+
+def require_manager(user: User = Depends(get_current_user)) -> User:
+    """Operational management never implies installation administration."""
+    from app.core.messages import error
+    if user.role not in {"admin", "super_user"}:
+        raise error(403, "permissions.manager_required")
+    return user
+
+
+def require_dg_specialist(user: User = Depends(get_current_user)) -> User:
+    from app.core.messages import error
+    if user.role != "dg_specialist":
+        raise error(403, "permissions.specialist_required")
+    return user
+
+
+def require_dgsa(user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> User:
+    from app.core.messages import error
+    from app.services.settings_store import instance_settings
+    if user.role in {"admin", "dg_specialist"}:
+        return user
+    if user.role == "super_user" and instance_settings(db).super_user_dgsa_enabled:
+        return user
+    raise error(403, "permissions.dgsa_required")

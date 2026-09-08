@@ -8,11 +8,12 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.deps import get_current_user, require_admin
+from app.core.deps import get_current_user, require_admin, require_manager
 from app.models.user import User
 from app.schemas.settings import (
     MODALITIES,
     InstanceSettings,
+    OrganisationSettings,
     MailTestRequest,
     MailTestResult,
     PublicSettings,
@@ -145,3 +146,20 @@ def send_test_mail(
         # configuration, not a server fault: 400, with what the server said.
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return MailTestResult(ok=True, to=to)
+
+
+@router.get("/organisation", response_model=OrganisationSettings)
+def organisation_settings(user: User = Depends(require_manager), db: Session = Depends(get_db)):
+    return OrganisationSettings(**{key: getattr(settings_store.instance_settings(db), key)
+                                   for key in OrganisationSettings.model_fields})
+
+
+@router.put("/organisation", response_model=OrganisationSettings)
+def save_organisation_settings(request: Request, payload: OrganisationSettings,
+                               user: User = Depends(require_manager), db: Session = Depends(get_db)):
+    current = settings_store.instance_settings(db)
+    values = payload.model_dump()
+    settings_store.save_instance_settings(db, current.model_copy(update=values))
+    audit.record(db, "settings.changed", actor=user, target=("settings", "organisation"),
+                 summary=", ".join(sorted(values)), request=request)
+    return payload

@@ -1,3 +1,5 @@
+import { canManage } from "./permissions";
+const DgReviewsPage = lazy(() => import("./pages/DgReviewsPage"));
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router";
 import { api, User } from "./api/client";
@@ -93,8 +95,10 @@ export default function App() {
           <Route path="/trips" element={<TripsPage user={user} />} />
           <Route path="/trips/:id" element={<TripsPage user={user} />} />
           <Route path="/articles" element={<ArticlesPage user={user} />} />
-          <Route path="/materieel" element={<MaterieelPage />} />
-          {user.role === "admin" && <Route path="/users" element={<UsersPage user={user} />} />}
+          {canManage(user) && <Route path="/materieel" element={<MaterieelPage />} />}
+          <Route path="/dg-reviews" element={<DgReviewsPage user={user} />} />
+          <Route path="/dg-reviews/:id" element={<DgReviewsPage user={user} />} />
+          {canManage(user) && <Route path="/users" element={<UsersPage user={user} />} />}
           {user.role === "admin" && <Route path="/audit" element={<AuditPage />} />}
           <Route path="/settings" element={<SettingsPage user={user} onUserChange={setUser} />} />
           <Route path="/legal" element={<LegalPage />} />

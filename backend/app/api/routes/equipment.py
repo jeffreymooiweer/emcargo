@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.messages import error as api_error
 from app.core.database import get_db
-from app.core.deps import get_current_user, require_admin
+from app.core.deps import get_current_user, require_manager
 from app.models.user import Equipment, User
 from app.schemas import EquipmentBase, EquipmentOut, EquipmentUpdate
 from app.services.equipment_import import (
@@ -74,7 +74,7 @@ def list_equipment(user: User = Depends(get_current_user), db: Session = Depends
 @equipment_router.post("", response_model=EquipmentOut)
 def create_equipment(
     payload: EquipmentBase,
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_manager),
     db: Session = Depends(get_db),
 ):
     item = Equipment(
@@ -127,7 +127,7 @@ def export_equipment_library(user: User = Depends(get_current_user), db: Session
 @equipment_router.post("/import", response_model=EquipmentImportResultOut)
 async def import_equipment_file(
     file: UploadFile = File(...),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_manager),
     db: Session = Depends(get_db),
 ):
     if not file.filename:
@@ -163,7 +163,7 @@ async def import_equipment_file(
 def update_equipment(
     item_id: int,
     payload: EquipmentUpdate,
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_manager),
     db: Session = Depends(get_db),
 ):
     item = db.query(Equipment).filter(Equipment.id == item_id).first()
@@ -184,7 +184,7 @@ def update_equipment(
 
 
 @equipment_router.delete("/{item_id}")
-def delete_equipment(item_id: int, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def delete_equipment(item_id: int, admin: User = Depends(require_manager), db: Session = Depends(get_db)):
     item = db.query(Equipment).filter(Equipment.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Equipment not found")

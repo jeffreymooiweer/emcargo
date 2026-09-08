@@ -6,6 +6,8 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 class UserRole(str, Enum):
     ADMIN = "admin"
     USER = "user"
+    DG_SPECIALIST = "dg_specialist"
+    SUPER_USER = "super_user"
 
 
 class LoginRequest(BaseModel):

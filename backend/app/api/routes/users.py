@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.api.routes.auth import _public_base_url
 from app.core.database import get_db
-from app.core.deps import get_current_user, require_admin
+from app.core.deps import get_current_user, require_manager
 from app.core.messages import error
 from app.core.security import hash_password
 from app.models.user import Department, User, UserAvatar
@@ -54,7 +54,7 @@ def get_avatar(user_id: int, request: Request, user: User = Depends(get_current_
                db: Session = Depends(get_db)):
     # Photos are for their owner and the administrator's user directory.
     # Authorize before cache validation, including responses without a body.
-    if user.id != user_id and user.role != "admin":
+    if user.id != user_id and user.role not in {"admin", "super_user"}:
         raise error(404, "avatar.not_found")
     avatar = db.get(UserAvatar, user_id)
     if avatar is None:
@@ -64,6 +64,17 @@ def get_avatar(user_id: int, request: Request, user: User = Depends(get_current_
     if request.headers.get("if-none-match") == headers["ETag"]:
         return Response(status_code=304, headers=headers)
     return Response(avatar.image, media_type="image/webp", headers=headers)
+
+
+def _ensure_manageable(actor: User, target: User | None = None, role: str | None = None) -> None:
+    # Resetting a specialist's password also grants report/approval access.
+    # Super Users therefore cannot manage either privileged role, including
+    # their own promotion or the creation of a privileged replacement account.
+    if actor.role != "admin" and (
+        role in {"admin", "dg_specialist"}
+        or (target is not None and target.role in {"admin", "dg_specialist"})
+    ):
+        raise error(403, "permissions.protected_account")
 
 
 def _is_active_admin(user: User) -> bool:
@@ -81,7 +92,8 @@ def _ensure_update_is_safe(
     next_active: bool,
     active_admin_count: int,
 ) -> None:
-    removes_admin_access = next_role != UserRole.ADMIN.value or not next_active
+    _ensure_manageable(acting_admin, target, next_role)
+    removes_admin_access = next_role != acting_admin.role or not next_active
 
     if target.id == acting_admin.id and removes_admin_access:
         raise HTTPException(status_code=400, detail="Cannot deactivate or demote yourself")
@@ -91,6 +103,7 @@ def _ensure_update_is_safe(
 
 
 def _ensure_delete_is_safe(target: User, acting_admin: User, active_admin_count: int) -> None:
+    _ensure_manageable(acting_admin, target)
     if target.id == acting_admin.id:
         raise HTTPException(status_code=400, detail="Cannot delete yourself")
     if _is_active_admin(target) and active_admin_count <= 1:
@@ -98,7 +111,7 @@ def _ensure_delete_is_safe(target: User, acting_admin: User, active_admin_count:
 
 
 @router.get("", response_model=list[UserOut])
-def list_users(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+def list_users(admin: User = Depends(require_manager), db: Session = Depends(get_db)):
     # Batch avatar metadata only where it is displayed. Global eager loading
     # would add photo queries to shipment and trip ownership lookups too.
     return db.query(User).options(selectinload(User.avatar)).order_by(User.id).all()
@@ -108,7 +121,7 @@ def list_users(admin: User = Depends(require_admin), db: Session = Depends(get_d
 def create_user(
     request: Request,
     payload: UserCreate,
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_manager),
     db: Session = Depends(get_db),
 ):
     """Make an account, optionally inviting its owner to set a password.
@@ -119,6 +132,7 @@ def create_user(
     account carries an unguessable random hash — an account nobody can sign
     in to, rather than one with a password somebody might guess.
     """
+    _ensure_manageable(admin, role=payload.role.value)
     if db.query(User).filter(User.username == payload.username).first():
         raise HTTPException(status_code=400, detail="Username exists")
 
@@ -177,7 +191,7 @@ def update_user(
     request: Request,
     user_id: int,
     payload: UserUpdate,
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_manager),
     db: Session = Depends(get_db),
 ):
     user = db.query(User).filter(User.id == user_id).first()
@@ -214,7 +228,7 @@ def update_user(
 def clear_two_factor(
     request: Request,
     user_id: int,
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_manager),
     db: Session = Depends(get_db),
 ):
     """Remove somebody's second factor: the phone is gone and the recovery
@@ -227,6 +241,7 @@ def clear_two_factor(
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    _ensure_manageable(admin, user)
     two_factor.disable(db, user.id)
     logger.info("%s cleared the second factor of %s", admin.username, user.username)
     audit.record(db, "user.two_factor_cleared", actor=admin, target=("user", user.id),
@@ -235,7 +250,7 @@ def clear_two_factor(
 
 
 @router.delete("/{user_id}")
-def delete_user(request: Request, user_id: int, admin: User = Depends(require_admin),
+def delete_user(request: Request, user_id: int, admin: User = Depends(require_manager),
                 db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -243,6 +258,10 @@ def delete_user(request: Request, user_id: int, admin: User = Depends(require_ad
 
     _ensure_delete_is_safe(user, admin, _active_admin_count(db))
     name, gone_id = user.username, user.id
+    # SQLite installations may not enforce foreign keys. Do not let a reused
+    # account id inherit another person’s submitted review data.
+    from app.models.dg_review import DgReview
+    db.query(DgReview).filter_by(created_by_id=user.id).update({DgReview.created_by_id: None})
     db.delete(user)
     db.commit()
     audit.record(db, "user.deleted", actor=admin, target=("user", gone_id),

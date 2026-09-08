@@ -1,3 +1,4 @@
+import { ROLES, roleLabel, canManageAccount } from "../permissions";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { api, type Department, type User } from "../api/client";
@@ -81,7 +82,7 @@ export default function UsersPage({ user: self }: { user: User | null }) {
   const target = typeof editing === "number" ? users.find(u => u.id === editing) : undefined;
 
   return <div className="collection-page page-enter users-workspace">
-    <header className="page-heading"><div><h2>{t("users.title")}</h2><p>{t("directory.intro")}</p></div>
+    <header className="page-heading"><div><h2>{t("users.title")}</h2><p>{t("directory.intro")}</p><p className="mt-2 text-sm text-slate-500">{t("roles.managementHint")}</p></div>
       <button type="button" className="action-primary" disabled={busy || loading || failed} onClick={() => openEditor("new")}><PlusIcon />{t("users.newUser")}</button>
     </header>
     {historyOn && <nav className="directory-sections" aria-label={t("users.title")}>
@@ -91,7 +92,7 @@ export default function UsersPage({ user: self }: { user: User | null }) {
     {section === "departments" && historyOn ? <DepartmentsPanel departments={departments} reload={loadDepartments} busy={busy} /> : <section className="surface directory-surface">
       <div className="directory-toolbar">
         <label className="directory-search"><SearchIcon /><span className="sr-only">{t("directory.search")}</span><input type="search" value={query} placeholder={t("directory.search")} onChange={e => setQuery(e.target.value)} /></label>
-        <label><span className="sr-only">{t("users.role")}</span><select className={inputClass} value={role} onChange={e => setRole(e.target.value)}><option value="">{t("directory.allRoles")}</option><option value="admin">{t("users.roleAdmin")}</option><option value="user">{t("users.roleUser")}</option></select></label>
+        <label><span className="sr-only">{t("users.role")}</span><select className={inputClass} value={role} onChange={e => setRole(e.target.value)}><option value="">{t("directory.allRoles")}</option>{ROLES.map(value => <option key={value} value={value}>{t(roleLabel(value))}</option>)}</select></label>
         <label><span className="sr-only">{t("directory.status")}</span><select className={inputClass} value={status} onChange={e => setStatus(e.target.value)}><option value="">{t("directory.allStatuses")}</option><option value="active">{t("directory.active")}</option><option value="inactive">{t("users.inactive")}</option></select></label>
       </div>
       <p className="directory-count" role="status">{loading ? t("wizard.loading") : t("directory.count", { shown: shown.length, total: users.length })}</p>
@@ -99,9 +100,9 @@ export default function UsersPage({ user: self }: { user: User | null }) {
         : !loading && !shown.length ? <div className="directory-empty"><UserIcon className="h-8 w-8" /><p>{t(users.length ? "directory.noResults" : "directory.empty")}</p></div>
         : <ul className="directory-list">{shown.map(u => <li className="directory-row" key={u.id}>
           <div className="directory-identity"><Avatar user={u} /><div><p><strong>{u.username}</strong>{u.id === self?.id && <span className="directory-you">{t("users.you")}</span>}</p><span className="directory-email">{u.email}</span></div></div>
-          <div className="directory-membership"><span className={`directory-role ${u.role === "admin" ? "is-admin" : ""}`}>{u.role === "admin" && <ShieldIcon />}{t(u.role === "admin" ? "users.roleAdmin" : "users.roleUser")}</span>{historyOn && <span>{departments.find(d => d.id === u.department_id)?.name || t("departments.none")}</span>}</div>
+          <div className="directory-membership"><span className={`directory-role ${u.role === "admin" ? "is-admin" : ""}`}>{u.role === "admin" && <ShieldIcon />}{t(roleLabel(u.role))}</span>{historyOn && <span>{departments.find(d => d.id === u.department_id)?.name || t("departments.none")}</span>}</div>
           <span className="directory-state" data-active={u.active !== false}>{t(u.active === false ? "users.inactive" : "directory.active")}</span>
-          <button type="button" className="action-secondary directory-edit" aria-label={`${t("directory.edit")} ${u.username}`} disabled={busy} onClick={() => openEditor(u.id)}><PenIcon /><span>{t("directory.edit")}</span></button>
+          <button type="button" className="action-secondary directory-edit" aria-label={`${t("directory.edit")} ${u.username}`} disabled={busy || !canManageAccount(self, u)} title={!canManageAccount(self, u) ? t("roles.protected") : undefined} onClick={() => openEditor(u.id)}><PenIcon /><span>{t("directory.edit")}</span></button>
         </li>)}</ul>}
     </section>}
     {editing !== null && (editing === "new" || target) && <UserEditor key={editing} target={target} self={self} guard={target ? guarded(target, self, users) : null}
@@ -158,12 +159,12 @@ function UserEditor({ target, self, guard, departments, historyOn, canInvite, bu
     if (success) onClose();
   }
   return <EditorDialog title={t(target ? "directory.editTitle" : "users.newUser")} busy={busy} onClose={onClose}>
-    {target && <div className="editor-identity"><Avatar user={target} large /><div><strong>{target.username}</strong><p>{target.id === self?.id ? t("users.you") : t(target.role === "admin" ? "users.roleAdmin" : "users.roleUser")}</p></div></div>}
+    {target && <div className="editor-identity"><Avatar user={target} large /><div><strong>{target.username}</strong><p>{target.id === self?.id ? t("users.you") : t(roleLabel(target.role))}</p></div></div>}
     {feedback && <p className="editor-feedback" data-kind={feedback.kind} role={feedback.kind === "error" ? "alert" : "status"}>{feedback.text}</p>}
     <form className="editor-form" onSubmit={event => void save(event)}>
       {!target && <label>{t("users.username")}<input className={inputClass} value={username} minLength={3} maxLength={64} required autoComplete="off" onChange={e => setUsername(e.target.value)} /></label>}
       <label>{t("users.email")}<input className={inputClass} type="email" value={email} required onChange={e => setEmail(e.target.value)} /></label>
-      <div className="editor-fields"><label>{t("users.role")}<select className={inputClass} value={role} disabled={busy || !!guard} title={guardText} onChange={e => setRole(e.target.value)}><option value="user">{t("users.roleUser")}</option><option value="admin">{t("users.roleAdmin")}</option></select></label>
+      <div className="editor-fields"><label>{t("users.role")}<select className={inputClass} value={role} disabled={busy || !!guard} title={guardText} onChange={e => setRole(e.target.value)}>{ROLES.filter(value => self?.role === "admin" || ["user", "super_user"].includes(value)).map(value => <option key={value} value={value}>{t(roleLabel(value))}</option>)}</select></label>
         {historyOn && target && <label>{t("departments.userDepartment")}<select className={inputClass} value={department} onChange={e => setDepartment(e.target.value)}><option value="">{t("departments.none")}</option>{departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}</select></label>}
       </div>
       {target && <label className="editor-toggle"><input type="checkbox" checked={active} disabled={busy || !!guard} onChange={e => setActive(e.target.checked)} /><span>{t("directory.activeAccount")}</span></label>}

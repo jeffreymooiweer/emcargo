@@ -5,6 +5,7 @@ that turns every untouched field into an empty string looks complete and is
 noise; one that reports a check as passing when it never ran is worse than that.
 """
 import json
+import pytest
 
 from fastapi.testclient import TestClient
 
@@ -206,3 +207,7 @@ def test_every_mode_can_leave_as_data():
     per_mode = {mode["key"]: mode["documents"] for mode in get_registry()["modalities"]}
     for mode in per_mode:
         assert "shipment_export" in per_mode[mode], mode
+
+
+# These fixtures exercise document/retention behaviour with optional review off.
+pytestmark = pytest.mark.usefixtures("dg_review_disabled")

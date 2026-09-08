@@ -13,7 +13,7 @@
     "menu": "Menu",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "legal": "Disclaimer",
+    "legal": "Terms of use",
     "collapseMenu": "Collapse menu",
     "expandMenu": "Expand menu",
     "groupage": "Groupage",
@@ -458,7 +458,7 @@
     "auditRetention": "Audit log retention (days)",
     "auditRetentionHint": "How long a line stays in the audit log. Whatever is older is removed at start-up. 365 is one year.",
     "historyEnabled": "Keep shipments (history)",
-    "historyEnabledHint": "On: the export step keeps every shipment when its documents are downloaded, and the Shipments, Trips and Articles pages, the address book and the safety adviser's annual report appear. Off: nothing is kept, and switching off is only possible once the kept shipments and trips are deleted — this screen asks first.",
+    "historyEnabledHint": "Keep completed shipments and use trips, articles, addresses and DGSA reporting. Stored shipments and trips must be deleted before switching off. Submitted DG reviews are stored separately.",
     "historyDiscardTitle": "Switch the history off and delete what it kept?",
     "historyDiscardBody": "The history still holds {{shipments}} kept shipment(s) and {{trips}} kept trip(s). Switching off deletes them for good; the address book, the articles and the annual reports stay. This cannot be undone.",
     "historyDiscardConfirm": "Delete and switch off"
@@ -479,7 +479,8 @@
     "multimodal": "Multimodal",
     "multimodalDesc": "Combination of modes — all forms",
     "locked": "in development",
-    "lockedReason": "This modality has not been released yet. Its regulatory checks are not complete, and a half-right document is worse than none. Carriage by road is available."
+    "lockedReason": "This modality has not been released yet. Its regulatory checks are not complete, and a half-right document is worse than none. Carriage by road is available.",
+    "inDevelopment": "In development"
   },
   "forms": {
     "title": "Which forms do you want to prepare?",
@@ -581,7 +582,7 @@
     "checkWarnings": "Points to check on this document:",
     "dgBlocked": "Dangerous goods classification is incomplete. Fill in UN number, Proper Shipping Name, class and packaging details in the dangerous goods step.",
     "exporting": "Exporting…",
-    "exportNotice": "Note: generated documents are drafts. Verify, complete and sign by an authorised person before use. See the disclaimer.",
+    "exportNotice": "Check the final files and have an authorised person sign where required. See the terms of use.",
     "documentLanguage": "Language of the documents",
     "documentLanguageRule": "5.4.1.4.1: an official language of the forwarding country, and where that is not German, English or French, additionally in one of those three. For Dutch the application puts both names in the field.",
     "downloadAll": "Download the document package ({{count}})",
@@ -610,41 +611,15 @@
     "download": "Download UN cards ({{count}})"
   },
   "legal": {
-    "title": "Disclaimer and licence",
-    "updated": "Last updated: 12 July 2026 · EMCargo v1.4.0",
-    "intro": "EMCargo is a tool that prepares transport and accompanying documents based on your input. It does not provide legal, customs or safety advice. Please read the terms below carefully; by using EMCargo you accept them.",
-    "sections": [
-      {
-        "heading": "1. Draft — not a final document",
-        "body": "Every document produced by EMCargo is a draft. Before use, hand-over, submission or signature it must be fully verified, completed and signed by a duly authorised and qualified person. Signature fields, carrier data and operational fields are deliberately not pre-filled."
-      },
-      {
-        "heading": "2. Dangerous goods",
-        "body": "Classification, packaging, marking, labelling and documentation of dangerous goods (ADR, RID, ADN, IMDG, IATA DGR) are the exclusive responsibility of the shipper and other legally designated parties. EMCargo never automatically turns a free-text description into a final classification and does not replace certified master data, a safety adviser or the current, authorised regulations."
-      },
-      {
-        "heading": "3. No warranties (AS IS)",
-        "body": "The software and all generated documents are provided \"AS IS\" and \"AS AVAILABLE\", without any express or implied warranty, including warranties of merchantability, fitness for a particular purpose, accuracy, timeliness, completeness or non-infringement. No warranty is given that reference data or form templates are correct, current or complete."
-      },
-      {
-        "heading": "4. Limitation of liability",
-        "body": "To the maximum extent permitted by applicable law, the author(s), rights holder(s) and contributors of EMCargo exclude all liability for any direct, indirect, incidental, special, punitive or consequential damages — including loss of profit, business interruption, fines, penalties, delays, seized or refused shipments, loss of or damage to goods, environmental damage, personal injury or loss of data — arising out of or in connection with the use of, or inability to use, the application or the generated documents, on any legal basis and even if advised of the possibility of such damage. You use EMCargo entirely at your own risk."
-      },
-      {
-        "heading": "5. Indemnification",
-        "body": "You indemnify the author(s) and rights holder(s) of EMCargo against all third-party claims arising out of or in connection with your use of the application or the generated documents."
-      },
-      {
-        "heading": "6. Licence — Apache License 2.0 with Commons Clause",
-        "body": "EMCargo is licensed under the Apache License, Version 2.0, supplemented by the Commons Clause. Under the Apache License 2.0 the software is provided without warranties and with a limitation of liability (sections 7 and 8 of that licence). Use within your own organisation is permitted; selling, reselling, hosting as a paid service or otherwise commercially redistributing the software itself requires prior written permission from the rights holder (Commons Clause). The full text is in the repository's LICENSE file."
-      },
-      {
-        "heading": "7. Governing law",
-        "body": "This disclaimer is governed by Dutch law, to the extent not precluded by mandatory law. If any provision is held void or unenforceable, the remaining provisions remain in full force."
-      }
-    ],
+    "title": "Terms of use",
+    "updated": "Version 0.2 · draft · 8 September 2026",
+    "intro": "Terms for using EMCargo, based on the supplied draft. The contracting party, legal contact details and effective date have not yet been confirmed. This draft is not presented as terms already agreed.",
     "creditsHeading": "Icons",
-    "creditsBody": "The icons in this interface — for notifications, the menu, the transport modes, importing and the assistant — come from sets that are free to use on the condition that their maker is credited:"
+    "creditsBody": "The icons in this interface — for notifications, the menu, the transport modes, importing and the assistant — come from sets that are free to use on the condition that their maker is credited:",
+    "sourceLanguage": "The complete text below is available in Dutch. You can download and keep a copy.",
+    "download": "Download terms",
+    "expandAll": "Expand all articles",
+    "collapseAll": "Collapse articles"
   },
   "compliance": {
     "title": "Dangerous goods compliance check",
@@ -690,7 +665,7 @@
     "qValueFor": "Position {{position}}: Q = {{value}}",
     "qExceeded": "EXCEEDS the maximum of 1.0",
     "caoHint": "Cargo Aircraft Only applies to: {{products}}. State this on the Shipper's Declaration and the AWB handling information.",
-    "disclaimer": "These checks are guidance based on ADR 2025 and IATA DGR 67th edition and do not replace a safety adviser or the official regulations. See the disclaimer.",
+    "disclaimer": "These checks support review and do not replace a safety adviser or applicable regulations. See the terms of use.",
     "segGroupsTitle": "IMDG 7.2.5 segregation groups (acids, alkalis, cyanides, …)",
     "adnExemptionTitle": "ADN 1.1.3.6.1 — exemption on gross mass",
     "adnTotalMass": "{{total}} kg of at most {{threshold}} kg",
@@ -847,6 +822,23 @@
       "invalid": "Choose a valid, static JPG, PNG or WebP image.",
       "too_large": "Choose an image up to 5 MB and 16 megapixels.",
       "not_found": "Profile photo not found."
+    },
+    "permissions": {
+      "manager_required": "Operational management access is required.",
+      "specialist_required": "Only a DG Specialist can release shipments.",
+      "dgsa_required": "You do not have access to DGSA reports.",
+      "protected_account": "Only an admin can manage this account."
+    },
+    "review": {
+      "required": "This shipment must first be released by a DG Specialist.",
+      "changed": "The shipment changed after release. Submit the new version for review.",
+      "not_found": "Review not found.",
+      "incomplete": "Complete the DG declaration and selected documents before submitting.",
+      "inconsistent": "Document data does not match the shipment. Open the wizard and submit again.",
+      "too_large": "This request is too large. The limit is 3 MB.",
+      "comment_required": "Explain what needs to be changed.",
+      "already_decided": "This review already has a decision. Refresh the page.",
+      "owner_required": "Only the submitter or admin can delete this review."
     }
   },
   "instructions": {
@@ -1319,7 +1311,8 @@
       "shipment": "Shipments",
       "documents": "Documents",
       "report": "Reports",
-      "trip": "Trips"
+      "trip": "Trips",
+      "dg_review": "DG reviews"
     },
     "actions": {
       "auth.login": "Signed in",
@@ -1347,7 +1340,12 @@
       "trip.updated": "Kept trip updated",
       "trip.forgotten": "Kept trip removed",
       "settings.history_discarded": "History emptied before switching off",
-      "auth.recovery_codes_replaced": "Recovery codes replaced"
+      "auth.recovery_codes_replaced": "Recovery codes replaced",
+      "dg_review": {
+        "submitted": "DG review submitted",
+        "decided": "DG review decided",
+        "forgotten": "DG review deleted"
+      }
     }
   },
   "trips": {
@@ -1394,7 +1392,7 @@
     "failed": "The draft could not be saved — your entry is still on the screen.",
     "discard": "Discard the draft",
     "resumed": "Your earlier entry is back; you are where you left off.",
-    "notKeptHere": "This installation stores nothing: a reload loses your entry.",
+    "notKeptHere": "This draft is not saved automatically. Download it to continue later.",
     "download": "Download the draft",
     "open": "Open a draft",
     "opened": "Draft opened.",
@@ -1429,7 +1427,7 @@
   "overview": {
     "title": "Overview",
     "intro": "Here is what needs your attention today",
-    "introNoHistory": "This installation keeps no shipments, so there is nothing to come back to. Starting one works here all the same.",
+    "introNoHistory": "Start a shipment or follow a submitted DG review. Shipment history is switched off.",
     "resumeTitle": "Carry on where you left off",
     "resume": "Carry on",
     "todayTitle": "Today",
@@ -1560,5 +1558,83 @@
     "save": "Save changes",
     "saving": "Saving…",
     "security": "Security and recovery"
+  },
+  "roles": {
+    "superUser": "Super User",
+    "dgSpecialist": "DG Specialist",
+    "protected": "Only an admin can manage this account.",
+    "managementHint": "Admins assign all roles. Super Users manage users and other Super Users.",
+    "superSettingsHint": "Manage organisation details and defaults. The admin manages system settings and DG permissions."
+  },
+  "dgReview": {
+    "title": "DG review",
+    "eyebrow": "Dangerous goods",
+    "queueHint": "Review submitted shipments. The DG Specialist releases the reviewed version.",
+    "mineHint": "Track the review and release of your shipments.",
+    "pending": "Awaiting review",
+    "approved": "Released",
+    "changes_requested": "Changes requested",
+    "requiredHint": "This shipment contains dangerous goods. Submit it for review before downloading or sending documents.",
+    "storageHint": "Submission stores this version, including document data and any signature, for the DG Specialist. This is separate from shipment history. Deleting the request later revokes its release.",
+    "submit": "Submit for review",
+    "submitting": "Submitting…",
+    "view": "View review",
+    "refresh": "Refresh",
+    "finishFirst": "Complete the selected documents and DG declaration first.",
+    "back": "All reviews",
+    "disabledHint": "Mandatory DG review is switched off. Existing reviews remain available.",
+    "filter": "Status",
+    "count": "{{count}} reviews",
+    "empty": "No reviews found",
+    "emptyHint": "Shipments appear here when submitted from the final wizard step.",
+    "submittedBy": "Submitted by {{name}} · {{date}}",
+    "reviewedBy": "Reviewed by {{name}} · {{date}}",
+    "submittedShipment": "Submitted shipment",
+    "snapshotHint": "These are the submitted version’s data. Release applies only to this document content.",
+    "declaration": "DG declaration",
+    "packaging": "Packaging and linked goods line",
+    "decision": "Record your decision",
+    "decisionHint": "Check the inputs and all document fields. Release is an internal review and does not replace a required declaration or signature.",
+    "comment": "Comment — required when requesting changes",
+    "approve": "Release shipment",
+    "requestChanges": "Request changes",
+    "openWizard": "Open in wizard",
+    "forget": "Delete review",
+    "forgetHint": "The stored shipment for this review will be deleted. Any release is revoked and linked documents may require another review.",
+    "settingsTitle": "DG review and reporting",
+    "settingsHint": "Choose when specialist review is required and who may use DGSA reports.",
+    "enabledSetting": "Require DG release",
+    "enabledHint": "On by default. Dangerous goods shipments require release by a DG Specialist before documents can be downloaded, emailed or kept as completed shipments. Changes require another review.",
+    "superDgsaSetting": "Super User access to DGSA reports",
+    "superDgsaHint": "Off by default. Admins and DG Specialists always have access. Enable this to let Super Users create and view reports too.",
+    "yes": "Yes",
+    "no": "No",
+    "fields": {
+      "consignor_name": "Consignor",
+      "consignor_address": "Consignor address",
+      "consignee_name": "Consignee",
+      "consignee_address": "Consignee address",
+      "shipment_reference": "Shipment reference",
+      "reference": "Reference",
+      "un_number": "UN number",
+      "proper_shipping_name": "Proper shipping name",
+      "class": "Hazard class",
+      "packing_group": "Packing group",
+      "quantity_packages": "Number of packages",
+      "type_of_package": "Package type",
+      "adr_total_quantity": "Total quantity",
+      "classification_code": "Classification code",
+      "labels": "Labels",
+      "hazard_number": "Hazard identification number",
+      "tunnel_code": "Tunnel code",
+      "transport_category": "Transport category",
+      "line_id": "Goods line",
+      "vehicle": "Transport unit",
+      "loading_point": "Loading point",
+      "discharge_point": "Discharge point"
+    },
+    "signature": "Signature in the documents",
+    "signatureAlt": "Submitted signature",
+    "privacyLink": "Submitted DG reviews are stored separately. View your reviews."
   }
 }

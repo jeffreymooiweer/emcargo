@@ -26,7 +26,7 @@ from app.schemas import (
     DocumentExportRequest,
     UnCardsRequest,
 )
-from app.services import audit, mail, mail_templates
+from app.services import audit, mail, mail_templates, dg_review
 from app.services.documents import (
     build_un_cards_zip,
     fill_pdf_document,
@@ -345,6 +345,7 @@ def export(
     if errors:
         raise HTTPException(status_code=422, detail={"errors": errors})
 
+    dg_review.enforce_document(db, user, payload)
     brand.use(db)
     signature_png = _decoded_signature(payload.signature_image)
     ref = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -435,6 +436,7 @@ def export_bundle(
     archive's README rather than silently dropped — a bundle that looks
     complete and is not would be worse than no bundle.
     """
+    dg_review.enforce_bundle(db, user, payload)
     bundle_path, ref = build_bundle(payload, db)
     background_tasks.add_task(delete_file, bundle_path)
     audit.record(db, "documents.bundle", actor=user, target=("bundle", ref),
@@ -466,6 +468,7 @@ def mail_bundle(
     The archive is deleted as soon as the message is out — EMCargo keeps
     no copy of a consignment's papers.
     """
+    dg_review.enforce_bundle(db, user, payload.bundle)
     settings = instance_settings(db)
     if not mail.is_configured(settings):
         raise HTTPException(

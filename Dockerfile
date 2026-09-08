@@ -2,10 +2,11 @@
 # The static bundle is architecture-independent. Build it once on the native
 # runner instead of running Node and Vite again through ARM64 QEMU.
 FROM --platform=$BUILDPLATFORM node:22-alpine AS frontend-build
-WORKDIR /build
+WORKDIR /build/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci --no-audit
 COPY frontend/ ./
+COPY TERMS.nl.md /build/TERMS.nl.md
 RUN npm run build
 
 # Stage 2: Python backend
@@ -32,12 +33,13 @@ COPY templates/ ./templates/
 # The changelog the what's-new card serves after an update. Next to /app/backend
 # so app/services/changelog.py finds it where a checkout keeps it: one level up.
 COPY CHANGELOG.md ./CHANGELOG.md
+COPY TERMS.nl.md LICENSE ./
 # The UN cards are deliberately NOT in the image any more. The set (thousands
 # of generated PDFs) is published as a GitHub Release by the "Generate UN
 # cards" workflow and imported by an administrator into <data-dir>/un-cards/,
 # where it survives restarts and updates. That took ~575 MB out of the image.
 
-COPY --from=frontend-build /build/dist ./backend/static/
+COPY --from=frontend-build /build/frontend/dist ./backend/static/
 
 RUN chmod +x /app/backend/entrypoint.sh && chown -R emcargo:emcargo /app
 

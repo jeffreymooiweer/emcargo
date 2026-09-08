@@ -154,18 +154,24 @@ def test_only_the_forms_keys_survive_a_save_in_the_forms_shape(db, a_year):
 
 
 def test_a_report_is_kept_per_year_and_scope(db, a_year):
+    """Specialists can select an organisation-wide or department report.
+
+    Report creation is no longer available to ordinary department users. The
+    scope still names the same stored record for every authorised reviewer.
+    """
+    db.get(User, 2).role = "dg_specialist"
+    db.get(User, 3).role = "dg_specialist"
+    db.commit()
     with client_as(db, 1) as root, client_as(db, 2) as ada, client_as(db, 3) as cyd:
         root.put("/api/shipments/report/answers?year=2026", json={"answers": {"executive_summary": "all"}})
         root.put("/api/shipments/report/answers?year=2026&department=1", json={"answers": {"executive_summary": "sales by root"}})
-        ada.put("/api/shipments/report/answers?year=2026&department=none", json={"answers": {"executive_summary": "sales by ada"}})
-        cyd.put("/api/shipments/report/answers?year=2025", json={"answers": {"executive_summary": "pool 2025"}})
-        # Ada's filter meant nothing: she wrote the Sales report, over root's.
+        ada.put("/api/shipments/report/answers?year=2026&department=1", json={"answers": {"executive_summary": "sales by ada"}})
+        cyd.put("/api/shipments/report/answers?year=2025&department=none", json={"answers": {"executive_summary": "pool 2025"}})
         assert root.get("/api/shipments/report/form?year=2026&department=1").json()["answers"]["executive_summary"] == "sales by ada"
         assert root.get("/api/shipments/report/form?year=2026").json()["answers"]["executive_summary"] == "all"
-        # Cyd, without a department, answers for the unassigned pool.
-        assert cyd.get("/api/shipments/report/form?year=2025").json()["scope"] == "none"
-        assert cyd.get("/api/shipments/report/form?year=2025").json()["answers"]["executive_summary"] == "pool 2025"
-        assert cyd.get("/api/shipments/report/form?year=2026").json()["answers"] == {}
+        assert cyd.get("/api/shipments/report/form?year=2025&department=none").json()["scope"] == "none"
+        assert cyd.get("/api/shipments/report/form?year=2025&department=none").json()["answers"]["executive_summary"] == "pool 2025"
+        assert cyd.get("/api/shipments/report/form?year=2026&department=none").json()["answers"] == {}
 
 
 def test_an_oversized_answer_set_is_refused(db, a_year):

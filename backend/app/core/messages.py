@@ -50,6 +50,20 @@ class ApiError(HTTPException):
 #: Kept here rather than at the raise sites so that the set of codes is
 #: countable — a translation guard cannot check what it cannot enumerate.
 MESSAGES: dict[str, str] = {
+    'permissions.manager_required': 'Operational management access is required.',
+    'permissions.specialist_required': 'Only a DG Specialist can release shipments.',
+    'permissions.dgsa_required': 'You do not have access to DGSA reports.',
+    'permissions.protected_account': 'Only an admin can manage this account.',
+    'review.required': 'This shipment must first be released by a DG Specialist.',
+    'review.changed': 'The shipment changed after release. Submit the new version for review.',
+    'review.not_found': 'Review not found.',
+    'review.incomplete': 'Complete the DG declaration and selected documents before submitting.',
+    'review.inconsistent': 'Document data does not match the shipment. Open the wizard and submit again.',
+    'review.too_large': 'This request is too large. The limit is 3 MB.',
+    'review.comment_required': 'Explain what needs to be changed.',
+    'review.already_decided': 'This review already has a decision. Refresh the page.',
+    'review.owner_required': 'Only the submitter or admin can delete this review.',
+
     "avatar.invalid": "Choose a valid, static JPG, PNG or WebP image.",
     "avatar.too_large": "Choose an image up to 5 MB and 16 megapixels.",
     "avatar.not_found": "Profile photo not found.",

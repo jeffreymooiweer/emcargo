@@ -21,3 +21,18 @@ from app.core.ratelimit import limiter
 def a_fresh_rate_limit_budget():
     limiter.reset()
     yield
+
+
+@pytest.fixture
+def dg_review_disabled(monkeypatch):
+    """Rendering, retention and regulation fixtures opt out of the new workflow.
+
+    They intentionally construct incomplete or synthetic shipments to test a
+    specific renderer or persistence rule. Keep the release policy disabled
+    in that explicit test configuration; test_dg_review_permissions exercises
+    the real default-on policy across all final-output routes.
+    """
+    from app.services import dg_review
+    original = dg_review.instance_settings
+    monkeypatch.setattr(dg_review, "instance_settings", lambda db:
+                        original(db).model_copy(update={"dg_review_enabled": False}))

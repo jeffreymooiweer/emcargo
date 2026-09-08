@@ -1,3 +1,4 @@
+import { useDgReview, DgReviewGate } from "../wizard/useDgReview";
 import { ArrowRightIcon, ChevronDownIcon, DownloadIcon, DocumentIcon } from "../components/icons";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate, useParams, useSearchParams } from "react-router";
@@ -208,6 +209,7 @@ export default function WizardPage() {
   // reference, or its dates.
   const templateId = searchParams.get("template");
   const reopenId = searchParams.get("shipment") ?? templateId;
+  const reviewSourceId = searchParams.get("review");
   const asTemplate = !searchParams.get("shipment") && !!templateId;
   const historyOn = !!publicSettings?.history_enabled;
   /** The fields the registry marks as a declaration somebody signs for.
@@ -231,7 +233,7 @@ export default function WizardPage() {
   const [historyId, setHistoryId] = useState<number | null>(null);
   const [keeping, setKeeping] = useState(false);
   const [keptAt, setKeptAt] = useState<Date | null>(null);
-  const restoreKey = reopenId
+  const restoreKey = reviewSourceId ? `review:${reviewSourceId}` : reopenId
     ? `${asTemplate ? "template" : "shipment"}:${reopenId}`
     : historyOn ? `draft:${modality}` : null;
   const restoredSource = useRef<string | null>(null);
@@ -249,12 +251,12 @@ export default function WizardPage() {
   }, []);
 
   useEffect(() => {
-    if (!historyOn || reopenId) return;
+    if (!historyOn || reopenId || reviewSourceId) return;
     api
       .shipments({ per_page: 3 })
       .then((page) => setRecent(page.items))
       .catch(() => setRecent([]));
-  }, [historyOn, reopenId]);
+  }, [historyOn, reopenId, reviewSourceId]);
 
   // The saved details land in the form as soon as they arrive, and only in
   // fields that are still empty — the preferences come back over the network,
@@ -810,11 +812,12 @@ export default function WizardPage() {
   );
 
   const exportGenericDoc = async (doc: DocumentDefinition) => {
-    if (!result) return;
+    if (!result || reviewBlocked) return;
     setExportingDoc(doc.key);
     try {
       await api.exportDocument({
         ...payloadFor(doc),
+        dg_review_id: dgReview.id,
         signature_image: signature ?? undefined,
       });
       // What was exported is worth offering next time.
@@ -842,9 +845,11 @@ export default function WizardPage() {
   //: the Downloads folder is not a document that reached the driver.
   const [handedOver, setHandedOver] = useState(false);
   const downloadAll = async () => {
+    if (reviewBlocked) return;
     setDownloadingAll(true);
     try {
       await api.exportBundle({
+        dg_review_id: dgReview.id,
         documents: readyDocs.map(payloadFor),
         dangerous_goods: dgEntries.length > 0 ? dgEntries : undefined,
         profiles: dgProfiles,
@@ -910,6 +915,10 @@ export default function WizardPage() {
     draft,
   });
 
+  const reviewRequired = (dgEntries.length > 0 || (result?.lines.some(line => line.include && line.dangerous_goods) ?? false)) && publicSettings?.dg_review_enabled !== false;
+  const dgReview = useDgReview(shipmentPayload(false), reviewRequired, stepKey === "export" && preferencesLoaded && !restorePending);
+  const reviewBlocked = reviewRequired && (!preferencesLoaded || dgReview.blocked);
+
   // --- the draft: what happens to the entry while it is being made ----------
   //
   // The baseline reloaded halfway through a shipment and found the wizard back
@@ -960,7 +969,7 @@ export default function WizardPage() {
   };
 
   useEffect(() => {
-    if (restorePending || !historyOn || !hasEntry || reopenId || closing) return;
+    if (restorePending || !historyOn || !hasEntry || reopenId || reviewSourceId || closing) return;
     const payload = shipmentPayload(true);
     const body = JSON.stringify(payload);
     if (body === draftBody.current) return;
@@ -981,7 +990,7 @@ export default function WizardPage() {
     return () => window.clearTimeout(draftTimer.current);
     // The payload is rebuilt from these; the body comparison does the rest.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [historyOn, hasEntry, reopenId, stepKey, draftLines, docValues, result, dgEntries,
+  }, [historyOn, hasEntry, reopenId, reviewSourceId, stepKey, draftLines, docValues, result, dgEntries,
       selectedDocs, signature, chosenDocLang, skippedQuestions, closing, restorePending]);
 
   // Finish a read before allowing entry or autosave. Marking it restored when
@@ -996,7 +1005,9 @@ export default function WizardPage() {
     }
     let cancelled = false;
     setRestoreError(false);
-    const request = reopenId ? api.shipment(Number(reopenId)) : api.runningDraft();
+    const request = reviewSourceId
+      ? api.dgReview(reviewSourceId).then(review => ({ snapshot: review.shipment.snapshot, id: 0, updated_at: review.created_at, reference: review.reference, consignee_name: "" }))
+      : reopenId ? api.shipment(Number(reopenId)) : api.runningDraft();
     request
       .then((detail) => {
         if (cancelled || restoredSource.current === restoreKey || (!reopenId && carriedEntry.current)) return;
@@ -1015,9 +1026,9 @@ export default function WizardPage() {
             setSignature(asTemplate ? null : snap.signature);
             setChosenDocLang(snap.docLang as Language | null);
             setStepKey(asTemplate ? "lines" : snap.stepKey);
-            setHistoryId(asTemplate ? null : detail.id);
+            setHistoryId(asTemplate || reviewSourceId ? null : detail.id);
             setKeptAt(reopenId && !asTemplate ? new Date(detail.updated_at) : null);
-            if (!reopenId) {
+            if (!reopenId && !reviewSourceId) {
               setDraftSavedAt(new Date(detail.updated_at));
               setDraftStatus("saved");
               draftBody.current = "";
@@ -1035,7 +1046,7 @@ export default function WizardPage() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [restoreKey, reopenId, asTemplate, modality, registry, preferencesLoaded, restoreAttempt, location.state]);
+  }, [restoreKey, reopenId, reviewSourceId, asTemplate, modality, registry, preferencesLoaded, restoreAttempt, location.state]);
 
   // --- switching transport mode without losing the shipment -----------------
   //
@@ -1155,10 +1166,12 @@ export default function WizardPage() {
   // "the documents again"; the snapshot is this page's own state and comes
   // back untouched when the shipment is reopened.
   const keepInHistory = async (quietly = false) => {
-    if (!historyOn || !result) return;
+    if (!historyOn || !result || reviewBlocked) return;
     setKeeping(true);
     try {
       const payload = shipmentPayload(false);
+      payload.dg_review_id = dgReview.id;
+      if (payload.bundle) payload.bundle.dg_review_id = dgReview.id;
       const kept = historyId
         ? await api.updateShipment(historyId, payload)
         : await api.keepShipment(payload);
@@ -1209,6 +1222,7 @@ export default function WizardPage() {
   const [mailing, setMailing] = useState(false);
 
   const mailAll = async () => {
+    if (reviewBlocked) return;
     setMailing(true);
     // Mailing takes as long as the mail server takes: the loading toast holds
     // the user's place until the send has actually succeeded or failed.
@@ -1222,6 +1236,7 @@ export default function WizardPage() {
         .filter(Boolean);
       const result = await api.mailBundle({
         bundle: {
+          dg_review_id: dgReview.id,
           documents: readyDocs.map(payloadFor),
           dangerous_goods: dgEntries.length > 0 ? dgEntries : undefined,
           profiles: dgProfiles,
@@ -1476,7 +1491,7 @@ export default function WizardPage() {
         setReturnTo(null);
         setStepKey(key as StepKey);
       }}
-      secondaryAction={historyOn && hasEntry && !reopenId ? (
+      secondaryAction={historyOn && hasEntry && !reopenId && !reviewSourceId ? (
         <button type="button" disabled={closing} className={buttonSecondary} onClick={() => void saveAndClose()}>{t("wizard.saveAndClose")}</button>
       ) : undefined}
       attention={attention}
@@ -1496,7 +1511,7 @@ export default function WizardPage() {
           mode={historyOn ? "kept" : "file"}
           status={draftStatus}
           savedAt={draftSavedAt}
-          active={hasEntry && !reopenId}
+          active={hasEntry && !reopenId && !reviewSourceId}
           onDiscard={historyOn ? discardDraft : undefined}
           onDownload={historyOn ? undefined : downloadDraft}
           onOpenFile={historyOn ? undefined : openDraftFile}
@@ -1665,6 +1680,7 @@ export default function WizardPage() {
           {/* The last look before anything is produced: what is about to go on
               paper, and one way back to each answer that is not right. */}
           <CheckYourAnswers title={t("check.title")} rows={answerRows} />
+          {reviewRequired && <DgReviewGate control={dgReview} ready={readyDocs.length > 0 && readyDocs.length === selectedDefinitions.length && unanswered === 0} />}
 
             {needsDg && (
               <p className="text-sm text-amber-700 dark:text-amber-300">
@@ -1762,7 +1778,7 @@ export default function WizardPage() {
                   <button
                     type="button"
                     onClick={() => setMailOpen((open) => !open)}
-                    disabled={mailing}
+                    disabled={mailing || reviewBlocked}
                     className={buttonSecondary}
                   >
                     {t("wizardDocs.mail", { count: readyDocs.length })}
@@ -1775,7 +1791,7 @@ export default function WizardPage() {
                   <button
                     type="button"
                     onClick={downloadAll}
-                    disabled={downloadingAll}
+                    disabled={downloadingAll || reviewBlocked}
                     className={buttonPrimary}
                   >
                     {downloadingAll
@@ -1854,7 +1870,7 @@ export default function WizardPage() {
                 <button
                   type="button"
                   onClick={mailAll}
-                  disabled={mailing || !mailTo.trim()}
+                  disabled={mailing || reviewBlocked || !mailTo.trim()}
                   className={buttonPrimary}
                 >
                   {mailing ? t("wizardDocs.mailSending") : t("wizardDocs.mailSend")}
@@ -1937,7 +1953,7 @@ export default function WizardPage() {
                       <button
                         type="button"
                         onClick={() => exportGenericDoc(doc)}
-                        disabled={busy || info.status === "blocked" || info.status === "not_applicable" || info.status === "draft"}
+                        disabled={busy || reviewBlocked || info.status === "blocked" || info.status === "not_applicable" || info.status === "draft"}
                         className={buttonSecondary + " gap-2"}
                       >
                         <DownloadIcon />{busy ? t("wizardDocs.exporting") : t("wizard.download")}
@@ -1987,7 +2003,7 @@ export default function WizardPage() {
               <button
                 type="button"
                 onClick={() => void keepInHistory()}
-                disabled={keeping}
+                disabled={keeping || reviewBlocked}
                 className={buttonSecondary}
               >
                 {/* Kept, not merely written: a draft has a row of its own, and

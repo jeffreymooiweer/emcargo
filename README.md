@@ -27,7 +27,15 @@ CMR, CIM and AVC forms and sea/inland documents, and checks your dangerous goods
 > [!WARNING]
 > **EMCargo is under active development.** Every document it produces is a **draft**.
 > Check it, complete it and have it signed by a qualified person before you use it.
-> See the [disclaimer](DISCLAIMER.md).
+> See the [terms of use (Dutch draft)](TERMS.nl.md).
+
+## DG review and roles
+
+Dangerous goods shipments require release by a **DG Specialist** before final
+exports by default. **Super Users** manage daily operations without gaining
+administrator system controls. DGSA reports are restricted to specialists and
+administrators unless the admin explicitly enables Super User report access.
+See [roles, release and storage](docs/dg-review.md) for the workflow and settings.
 
 ## EMCargo interface
 
@@ -62,9 +70,9 @@ stops at the gate.
 
 EMCargo does that part for you. You enter your shipment once. It recognises what you
 are shipping, calculates the weights and volumes, and fills in the paperwork for the
-transport mode you picked. **Road, rail, sea and inland waterway are released today**;
-air and multimodal are built in but stay locked until their remaining regulatory checks
-are complete — see the [roadmap](ROADMAP.md).
+transport mode you picked. **Road, rail and inland waterway can be selected today**. Sea, air and multimodal
+are shown as in development. Sea’s existing calculations and saved records remain
+available internally; its wizard selection is disabled in this release.
 
 It runs on your own machine or server and always requires an account.
 An administrator can enable saved shipments and private
@@ -141,7 +149,7 @@ Running Unraid, or want the full set of options? See **[Getting started](docs/ge
 | **[Privacy](docs/privacy.md)** | What is stored, and what is deliberately not |
 | **[Development](docs/development.md)** | Running from source, tests, versioning, releases |
 
-Also: **[Changelog](CHANGELOG.md)** · **[Roadmap](ROADMAP.md)** · **[Disclaimer](DISCLAIMER.md)**
+Also: **[Changelog](CHANGELOG.md)** · **[Roadmap](ROADMAP.md)** · **[Terms of use (Dutch draft)](TERMS.nl.md)**
 
 ## Found something wrong?
 

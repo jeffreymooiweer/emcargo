@@ -209,6 +209,8 @@ class InstanceSettings(BaseModel):
     #: administrator has them deleted first, so a table is never kept while
     #: the interface claims it does not exist.
     history_enabled: bool = False
+    dg_review_enabled: bool = True
+    super_user_dgsa_enabled: bool = False
 
     #: Used as the consignor for users who filled in nothing of their own, so a
     #: new colleague starts with the company already on the form.
@@ -348,6 +350,19 @@ class PublicSettings(BaseModel):
     #: Whether this installation keeps its shipments. The export step offers
     #: to keep one and the menu shows the shipments page only when it does.
     history_enabled: bool = False
+    dg_review_enabled: bool = True
+    super_user_dgsa_enabled: bool = False
     #: Whether the export step may offer to mail the documents. Only that a
     #: mail server exists, never which one or under whose name.
     mail_enabled: bool
+
+
+class OrganisationSettings(BaseModel):
+    """Strict allowlist for operational managers; no secrets or access policy."""
+    model_config = {"extra": "forbid"}
+    organisation_name: str = Field(default="", max_length=255)
+    organisation_address: str = Field(default="", max_length=2000)
+    default_language: str = DEFAULT_LANGUAGE
+    default_theme: ThemeChoice = "dark"
+
+    _known_language = field_validator("default_language")(InstanceSettings._known_language.__func__)

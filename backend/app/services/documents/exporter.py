@@ -9,6 +9,7 @@ import openpyxl
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
+from app.services.documents.notices import OUTPUT_NOTICES
 from app.core.languages import normalise, pick
 from app.services.documents import brand, customs_route
 from app.services.dg.autofill import adr_quantity, description_line
@@ -278,26 +279,7 @@ TEXTS = {
               "le serveur de cette installation. Le code ne contient que les numéros "
               "UN — rien sur l'envoi, les parties ni les quantités.",
     },
-    "disclaimer": {
-        "nl": (
-            "Dit document is automatisch gegenereerd met EMCargo en is een concept: het moet vóór gebruik "
-            "volledig worden gecontroleerd, aangevuld en ondertekend door een daartoe bevoegde persoon. "
-            "EMCargo en de maker(s) aanvaarden geen enkele aansprakelijkheid; de software wordt geleverd "
-            "\"AS IS\" onder de Apache License 2.0 met Commons Clause (zie DISCLAIMER.md en LICENSE)."
-        ),
-        "en": (
-            "This document was generated automatically with EMCargo and is a draft: before use it must be "
-            "fully verified, completed and signed by a duly authorised person. EMCargo and its author(s) "
-            "accept no liability whatsoever; the software is provided \"AS IS\" under the Apache License 2.0 "
-            "with Commons Clause (see DISCLAIMER.md and LICENSE)."
-        ),
-        "de": (
-            "Dieses Dokument wurde automatisch mit EMCargo erstellt und ist ein Entwurf: Vor der "
-            "Verwendung muss es von einer dazu befugten Person vollständig geprüft, ergänzt und "
-            "unterschrieben werden. EMCargo und seine Urheber übernehmen keinerlei Haftung; die "
-            "Software wird \"AS IS\" unter der Apache License 2.0 mit Commons Clause bereitgestellt "
-            "(siehe DISCLAIMER.md und LICENSE)."
-        ), "fr": "Ce document a été généré automatiquement avec EMCargo et constitue un projet : avant utilisation, il doit être intégralement vérifié, complété et signé par une personne dûment habilitée. EMCargo et son ou ses auteurs déclinent toute responsabilité ; le logiciel est fourni « EN L'ÉTAT » sous licence Apache 2.0 avec Commons Clause (voir DISCLAIMER.md et LICENSE)."},
+    "disclaimer": OUTPUT_NOTICES,
     "iata_dg_headers": {
         "nl": [
             "UN- of ID-nr.",

@@ -1,3 +1,4 @@
+import { canUseDgsa, canOversee } from "../permissions";
 import HistoryStatus from "../components/HistoryStatus";
 /**
  * The shipments this installation kept.
@@ -62,15 +63,15 @@ export default function ShipmentsPage({ user }: { user?: User | null }) {
   // Only an administrator sees more than one department, so only an
   // administrator gets the filter; for anybody else the server answers
   // with their own department whatever is asked.
-  const admin = user?.role === "admin";
+  const admin = canOversee(user);
 
-  if (!publicSettings?.history_enabled) return <HistoryStatus title={t("history.title")} admin={admin} />;
+  if (!publicSettings?.history_enabled) return <HistoryStatus title={t("history.title")} admin={user?.role === "admin"} />;
 
   if (id) return <ShipmentView id={Number(id)} language={i18n.language} />;
-  return <ShipmentList language={i18n.language} admin={admin} />;
+  return <ShipmentList language={i18n.language} admin={admin} dgsa={canUseDgsa(user, publicSettings)} />;
 }
 
-function ShipmentList({ language, admin }: { language: string; admin: boolean }) {
+function ShipmentList({ language, admin, dgsa }: { language: string; admin: boolean; dgsa: boolean }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const toast = useToast();
@@ -153,9 +154,9 @@ function ShipmentList({ language, admin }: { language: string; admin: boolean })
           <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-100">{t("history.title")}</h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 max-w-2xl">{t("history.intro")}</p>
         </div>
-        <Link to="/shipments/report" className={buttonSecondary} title={t("dgsa.intro")}>
+        {dgsa && <Link to="/shipments/report" className={buttonSecondary} title={t("dgsa.intro")}>
           {t("dgsa.title")}
-        </Link>
+        </Link>}
       </div>
 
       <div className={`${panelClass} p-4 sm:p-5 grid items-end gap-3 md:grid-cols-[2fr_1fr_1fr_1fr]`}>

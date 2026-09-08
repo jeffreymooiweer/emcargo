@@ -18,7 +18,7 @@ flow is one wizard; you can go back to any earlier step at any time.
 
 The desktop sidebar provides the overview, new shipment, shipments, trips, library
 and administration. On smaller screens, open the menu in the top bar. Availability
-of account and history features depends on the installation mode and your role.
+of account and history features depends on the retention setting and your role.
 
 The overview lets you resume a draft, search recent shipments or start directly by
 pasting an Excel list. Counts and document availability come from actual saved data.
@@ -33,9 +33,9 @@ New installations use the dark theme. Existing explicit theme choices are preser
 
 ## 1. Pick a transport mode
 
-Click **New shipment** and choose how the goods travel. **Road, rail, sea and inland
-waterway are released**; the air and multimodal tiles are visible but locked — their
-regulatory checks are not complete yet, and a half-right document is worse than none.
+Click **New shipment** and choose how the goods travel. **Road, rail and inland
+waterway are selectable**. Sea, air and multimodal appear alongside them with a
+short **In development** label and cannot be selected.
 The [roadmap](../ROADMAP.md) tracks when each one unlocks.
 
 This choice decides which documents are offered, which rulebook applies to any dangerous
@@ -284,6 +284,13 @@ untick as you like — the advice is a starting point, not a lock.
 | **Waiting for carrier data** | Fields only the carrier can supply are missing |
 | **Blocked** | A safety check failed — see the compliance panel |
 
+For dangerous goods, first choose **Submit for review**. A DG Specialist reviews
+the submitted version and releases it or requests changes with a comment. The
+status appears here and on **DG review**; changing document inputs requires a
+new review. Downloads, mail and completed shipment saving remain blocked until
+release, unless an administrator disabled the requirement. Submitted versions
+are stored separately from optional history. See [DG review and roles](dg-review.md).
+
 Click **Download document** for each one, or **Download all as ZIP** for one archive
 holding every document that is ready — and, when the shipment carries dangerous goods,
 the UN cards and the instructions in writing for the journey's regimes as well.
@@ -407,7 +414,8 @@ current version; **Remove** takes it out of the history after a confirmation. Th
 **Structured export (JSON)** is the same file the export step offers, and it is what the
 groupage page accepts.
 
-The **DGSA annual report** button on the shipments page draws the safety adviser's
+The **DGSA annual report** button is available to Admin and DG Specialist, and
+to Super Users only when an admin enables their report access. It draws the safety adviser's
 yearly report of ADR 1.8.3.3 over the kept shipments of one calendar year, within what
 you may see: how many shipments, with and without dangerous goods, per month, mode,
 regulation and department, per class and per UN number with kilograms and litres kept
@@ -434,11 +442,11 @@ the installation's paper in the template's order, with the adviser's saved signa
 the settings, the counted figures as an appendix and the DGSA1 to DGSA21 checklist last,
 each line naming the section of the report that answers it.
 
-Who sees which is a matter of **departments**. An administrator sees every kept shipment
-and gets a department filter on the page; everyone else sees their own department's
+Who sees which is a matter of **departments**. Admins, Super Users and DG Specialists see every kept shipment
+and get a department filter on the page; other users see their own department's
 shipments, and someone without a department sees the ones that belong to none. An
 installation that never makes a department keeps the plain rule: everyone sees
-everything. Administrators make departments and assign people on the **Users** page.
+everything. Admins and Super Users make departments and assign people on the **Users** page.
 
 ## The equipment library
 
@@ -446,13 +454,19 @@ Under **Equipment overview** you can keep a library of your own items so they ca
 picked from the catalogue while entering packages.
 
 It starts **empty on purpose** — no operational data ships with the app. An
-administrator fills it by downloading the template, filling it in and importing it.
+admin or Super User fills it by downloading the template, filling it in and importing it.
 
 **Export library** hands the whole list back as a spreadsheet in the very same columns
 the import reads, so the file round-trips: it is your backup, the hand-over to a
 colleague who maintains the list in Excel, and the seed for a second installation, all
 in one. Nothing is exported unless you click — there is no schedule and no copy kept
 anywhere.
+
+## Roles and specialist review
+
+The [roles and release guide](dg-review.md) lists every role’s permissions,
+review workflow, defaults and storage behaviour. The **DG review** page is
+available from the main navigation and overview even when history is disabled.
 
 ## Settings
 

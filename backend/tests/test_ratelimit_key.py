@@ -222,6 +222,8 @@ def test_every_rate_limit_in_the_application_in_one_table():
         # The running entry, saved a few seconds after the typing stops.
         "save_draft": "60 per 1 minute",
         # The adviser's annual report reads every kept shipment of a year.
+        "review_status": "60 per 1 minute",
+        "submit_review": "60 per 1 minute",
         "shipment_report": "20 per 1 minute",
         "shipment_report_workbook": "20 per 1 minute",
         "shipment_report_form": "20 per 1 minute",

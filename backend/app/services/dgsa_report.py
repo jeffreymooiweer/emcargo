@@ -203,7 +203,7 @@ def build_report(db: Session, viewer: User, year: int, department: str = "",
 
     modality_labels = _modality_labels()
     document_labels = _document_labels()
-    if viewer.role == "admin":
+    if viewer.role in {"admin", "super_user", "dg_specialist"}:
         if department == "none":
             scope = L("scope_none")
         elif department.isdigit():
