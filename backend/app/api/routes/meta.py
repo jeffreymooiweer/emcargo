@@ -90,9 +90,8 @@ def update_check_now(admin: User = Depends(require_admin),
 def update_capability(admin: User = Depends(require_admin)):
     """Whether this installation can update itself, and if not, why not.
 
-    "No, because the switch is off" and "no, because no Docker socket is
-    mounted" are different answers with different fixes, and the settings
-    screen shows the right instructions for each.
+    Missing socket access, container identity and unsupported installation
+    methods need different fixes; the screen names the actual prerequisite.
     """
     return updater.capability()
 
@@ -115,7 +114,7 @@ def update_state(admin: User = Depends(require_admin)):
 @router.post("/update-apply")
 def update_apply(admin: User = Depends(require_admin),
                  db: Session = Depends(get_db)):
-    """Update to the newest release and restart, where the operator allows.
+    """Update to the newest release and restart on a supported installation.
 
     The version is never caller input: it is whatever the check found,
     compared against what runs. The pull and the swap happen in the

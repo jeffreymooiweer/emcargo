@@ -393,10 +393,9 @@
     "updateFailed": "La dernière mise à jour a échoué : {{error}} La version précédente continue de fonctionner.",
     "updateTimeout": "La nouvelle version n'a pas répondu dans les dix minutes. Vérifiez le conteneur sur le serveur.",
     "updateEnableApply": "Activer la mise à jour depuis l'application",
-    "updateEnableApplyHow": "Montez le socket Docker, activez la variable d'environnement et redémarrez le conteneur une fois ; un bouton de mise à jour apparaît alors ici :",
+    "updateEnableApplyHow": "Les mises à jour depuis l’application sont activées par défaut. Montez le socket Docker et redémarrez le conteneur une fois :",
     "updateSocketWarning": "Attention : monter le socket Docker donne de fait à ce conteneur les droits d'administrateur sur tout le serveur.",
-    "updateReasonNoSocket": "L'interrupteur est activé, mais aucun socket Docker n'est monté dans le conteneur — ajoutez la ligne de volume ci-dessus et redémarrez le conteneur.",
-    "updateReasonSwitchOff": "L’installation depuis l’application n’est pas encore activée. Ajoutez UPDATE_APPLY_ENABLED=true aux paramètres du conteneur et redémarrez-le.",
+    "updateReasonNoSocket": "La connexion Docker est absente. Ajoutez le socket en suivant les instructions d’installation pour mettre à jour EMCargo depuis l’application.",
     "tabMaintenance": "Maintenance",
     "updateReasonPermission": "Le socket est monté, mais l'application n'a pas le droit de l'ouvrir. Corrigé depuis la v1.135.0 — mettez à jour le conteneur manuellement une dernière fois et redémarrez.",
     "updateReasonContainerNotFound": "Le socket fonctionne, mais l'application ne retrouve pas son propre conteneur auprès du démon Docker.",
@@ -1499,7 +1498,7 @@
     "setupNeeded": "Configuration nécessaire",
     "loadingCapability": "Vérification des possibilités…",
     "setup": "Instructions de configuration",
-    "unraid": "Unraid : ajoutez la variable de conteneur UPDATE_APPLY_ENABLED avec la valeur true et montez /var/run/docker.sock au même chemin dans le conteneur. Appliquez les paramètres. Le bouton de mise à jour apparaît lorsqu’une nouvelle version est disponible."
+    "unraid": "Unraid : montez /var/run/docker.sock au même chemin dans le conteneur et appliquez les paramètres. Le bouton de mise à jour sera alors disponible dès qu’une nouvelle version existe."
   },
   "dgFocus": {
     "title": "Marchandises dangereuses",

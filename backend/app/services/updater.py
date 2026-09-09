@@ -2,7 +2,7 @@
 
 A container cannot swap its own image: the process would die halfway
 through its own replacement. What it *can* do, when the operator has
-mounted the Docker socket and set ``UPDATE_APPLY_ENABLED=true``, is pull
+mounted the Docker socket, is pull
 the newer image of itself and hand the actual swap to a short-lived
 helper container **started from that new image** (`app.update_helper`):
 the helper stops this container, renames it aside, creates a new one
@@ -12,8 +12,8 @@ the old one back. The restart the user sees is the update happening.
 
 Two honesty rules govern everything here:
 
-* The capability is the operator's, not ours. Without the socket and the
-  explicit switch, this module reports exactly why applying is not
+* The capability depends on the installation. Without socket access,
+  this module reports exactly why applying is not
   available; it never suggests the application could do something it
   cannot.
 * The image reference is never caller input. The repository comes from
@@ -111,7 +111,8 @@ def capability() -> dict[str, Any]:
     settings = get_settings()
     method = (settings.install_method or "docker").strip().lower()
     result: dict[str, Any] = {
-        "apply_enabled": bool(settings.update_apply_enabled),
+        # Retained for clients of older releases; there is no opt-in switch.
+        "apply_enabled": True,
         "socket": DOCKER_SOCKET.exists(),
         "container": None,
         "image": None,
@@ -123,9 +124,6 @@ def capability() -> dict[str, Any]:
     # no socket to do it with; the screen names the route that applies.
     if result["install_method"] != "docker":
         result["reason"] = result["install_method"]
-        return result
-    if not result["apply_enabled"]:
-        result["reason"] = "switch_off"
         return result
     if not result["socket"]:
         result["reason"] = "no_socket"

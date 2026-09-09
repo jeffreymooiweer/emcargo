@@ -38,13 +38,8 @@ class Settings(BaseSettings):
     catalog_sync_timeout_seconds: float = 20.0
     update_check_enabled: bool = True
     update_check_timeout_seconds: float = 8.0
-    #: Whether the administrator may update the application from inside it.
-    #: Off by default, and only effective when the Docker socket is mounted
-    #: into the container as well: replacing the running container needs the
-    #: Docker API, and handing a container the socket is a deliberate,
-    #: host-root-equivalent decision the operator makes in their compose
-    #: file or Unraid template — never something the application assumes.
-    update_apply_enabled: bool = False
+    #: In-app updates are always enabled for administrators. Capability depends
+    #: on the installation and Docker socket access, not an environment switch.
     update_apply_pull_timeout_seconds: float = 600.0
     #: How this installation was put on its host: ``docker`` (the image, the
     #: default), ``native`` (the systemd service of deploy/native) or

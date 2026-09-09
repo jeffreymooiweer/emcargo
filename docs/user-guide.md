@@ -549,13 +549,13 @@ an administrator *does* rather than saves: updating, the **UN Cards** section wh
 card set is installed, checked for updates or removed (see [un-cards.md](un-cards.md)),
 and the assistant's optional local model. When the update check is on and a newer
 release exists, administrators get a small dismissible note in the
-corner. The **Updating** panel carries a **check now** button and,
-where the operator has deliberately enabled it (Docker socket plus
-`UPDATE_APPLY_ENABLED`, see
+corner. The **Updates** panel carries a **check now** button and,
+on supported installations with Docker socket access (see
 [Configuration](configuration.md#updating-from-inside-the-application)), an **update
 and restart** button that pulls the new release and swaps the container — the brief
 restart is the update happening, and a failed attempt puts the previous version back.
-Without that opt-in the section explains the manual route: pulling the newer image and
+In-app updates are enabled by default; no environment switch is needed.
+Without Docker socket access the section explains the manual route: pulling the newer image and
 restarting the container, by hand, with Docker Compose, via Watchtower or from Unraid's
 Docker tab. See
 [Configuration](configuration.md#two-places-and-which-one-wins) for how these relate to the

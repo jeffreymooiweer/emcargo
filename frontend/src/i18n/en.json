@@ -393,10 +393,9 @@
     "updateFailed": "The last update did not succeed: {{error}} The previous version keeps running.",
     "updateTimeout": "The new version did not answer within ten minutes. Check the container on the server.",
     "updateEnableApply": "Enable updating from the app",
-    "updateEnableApplyHow": "Mount the Docker socket, set the environment variable and restart the container once; an update button then appears here:",
+    "updateEnableApplyHow": "In-app updates are enabled by default. Mount the Docker socket and restart the container once:",
     "updateSocketWarning": "Careful: mounting the Docker socket effectively gives this container administrator rights over the whole server.",
-    "updateReasonNoSocket": "The switch is on, but no Docker socket is mounted into the container — add the volume line above and restart the container.",
-    "updateReasonSwitchOff": "In-app installation is not enabled yet. Add UPDATE_APPLY_ENABLED=true to the container settings and restart it.",
+    "updateReasonNoSocket": "The Docker connection is missing. Add the socket using the installation instructions to update from EMCargo.",
     "tabMaintenance": "Maintenance",
     "updateReasonPermission": "The socket is mounted, but the app is not permitted to open it. Fixed since v1.135.0 — update the container manually once more and restart.",
     "updateReasonContainerNotFound": "The socket works, but the app cannot find its own container at the Docker daemon.",
@@ -1499,7 +1498,7 @@
     "setupNeeded": "Setup required",
     "loadingCapability": "Checking capabilities…",
     "setup": "Setup instructions",
-    "unraid": "Unraid: add the container variable UPDATE_APPLY_ENABLED with value true and map /var/run/docker.sock to the same container path. Apply the container. The update button then appears when a new release is available."
+    "unraid": "Unraid: map /var/run/docker.sock to the same container path and apply the container. The update button is then available when a new release exists."
   },
   "dgFocus": {
     "title": "Dangerous goods",

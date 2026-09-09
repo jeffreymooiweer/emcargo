@@ -2,6 +2,18 @@
 
 All notable changes are documented here, following [Semantic Versioning](https://semver.org/).
 
+## [2.4.1] — 2026-09-09
+
+### In-app updates without an extra switch
+
+- Enable in-app updates for administrators whenever the installation supports
+  them. Retire `UPDATE_APPLY_ENABLED`, including existing `false` values from
+  older Unraid templates. Remove the extra setup step from the interface,
+  translations, Compose override and Unraid template.
+- Keep administrator authorization, update confirmation, Docker socket and
+  official-image checks, progress reporting and rollback. Updates still start
+  only when an administrator confirms them.
+
 ## [2.4.0] — 2026-09-08
 
 ### Specialist release and operational roles

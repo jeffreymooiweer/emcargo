@@ -121,7 +121,7 @@ export default function UpdatePanel() {
   const enabled = instance?.update_check_enabled ?? status?.enabled;
   const method = capability?.install_method || "docker";
   const reason = capability?.reason;
-  const reasonKey = ({ switch_off: "settings.updateReasonSwitchOff", no_socket: "settings.updateReasonNoSocket",
+  const reasonKey = ({ no_socket: "settings.updateReasonNoSocket",
     socket_permission: "settings.updateReasonPermission", container_not_found: "settings.updateReasonContainerNotFound",
     socket_unusable: "settings.updateReasonSocketUnusable", foreign_image: "settings.updateReasonForeignImage",
     native: "settings.updateNative", kubernetes: "settings.updateKubernetes" } as Record<string, string>)[reason || ""];
@@ -166,7 +166,7 @@ export default function UpdatePanel() {
       {capability && !capability.available && <details className="update-setup">
         <summary>{t("updates.setup")}</summary>
         {method === "docker" ? <div><p>{t("settings.updateEnableApplyHow")}</p>
-          <pre>{"environment:\n  - UPDATE_APPLY_ENABLED=true\nvolumes:\n  - /var/run/docker.sock:/var/run/docker.sock"}</pre>
+          <pre>{"volumes:\n  - /var/run/docker.sock:/var/run/docker.sock"}</pre>
           <p>{t("updates.unraid")}</p><p>{t("settings.updateSocketWarning")}</p></div>
           : <pre>{method === "native" ? "sudo /opt/emcargo/current/deploy/native/update.sh" : `kubectl -n emcargo set image deployment/emcargo emcargo=ghcr.io/jeffreymooiweer/emcargo:${status?.latest || "<version>"}`}</pre>}
       </details>}

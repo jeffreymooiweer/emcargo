@@ -84,7 +84,6 @@ def test_the_kubernetes_manifests_parse_and_name_real_variables():
 @pytest.mark.parametrize("method", ["native", "kubernetes"])
 def test_the_settings_screen_is_told_the_route_that_applies(monkeypatch, method):
     monkeypatch.setenv("INSTALL_METHOD", method)
-    monkeypatch.setenv("UPDATE_APPLY_ENABLED", "true")
     get_settings.cache_clear()
     try:
         ability = updater.capability()
@@ -95,16 +94,16 @@ def test_the_settings_screen_is_told_the_route_that_applies(monkeypatch, method)
     assert ability["reason"] == method
 
 
-def test_an_unknown_install_method_is_docker(monkeypatch):
+def test_an_unknown_install_method_is_docker(monkeypatch, tmp_path):
     monkeypatch.setenv("INSTALL_METHOD", "bare-metal-typo")
-    monkeypatch.delenv("UPDATE_APPLY_ENABLED", raising=False)
+    monkeypatch.setattr(updater, "DOCKER_SOCKET", tmp_path / "missing-socket")
     get_settings.cache_clear()
     try:
         ability = updater.capability()
     finally:
         get_settings.cache_clear()
     assert ability["install_method"] == "docker"
-    assert ability["reason"] == "switch_off"
+    assert ability["reason"] == "no_socket"
 
 
 def test_the_release_workflow_attaches_the_bundle_the_script_downloads():

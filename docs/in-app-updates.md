@@ -7,10 +7,10 @@ supports this. The update notification opens this same page. The legacy
 
 ## Docker Compose
 
-The application must use the official image and have both the explicit opt-in
-and access to the Docker socket. Socket access grants control of the Docker
-host; enable it only for a trusted installation. The base Compose file keeps
-this optional.
+In-app updates are enabled by default for administrators. The application must
+use the official image and have access to the Docker socket. Socket access
+grants control of the Docker host; enable it only for a trusted installation.
+The base Compose file keeps this optional.
 
 From the existing project directory, enable the provided override:
 
@@ -18,7 +18,7 @@ From the existing project directory, enable the provided override:
 docker compose -f docker-compose.yml -f docker-compose.updates.yml up -d
 ```
 
-The override sets `UPDATE_APPLY_ENABLED=true` and mounts
+The override mounts
 `/var/run/docker.sock:/var/run/docker.sock`. The standard image entrypoint
 adds its application user to the socket's group; it does not change host
 socket permissions. Installations overriding the image user or entrypoint
@@ -31,14 +31,18 @@ on does not itself authorize installation or grant Docker access.
 ## Unraid
 
 Edit the existing EMCargo container template and show advanced settings.
-Set **In-app updates** (`UPDATE_APPLY_ENABLED`) to `true`. Set the host path
-of **Docker socket (optional)** to `/var/run/docker.sock`, keeping its container
-path `/var/run/docker.sock`. Apply the template and let Unraid recreate the
-container. Previously installed templates may need these entries added once;
+Set the host path of **Docker socket (optional)** to `/var/run/docker.sock`,
+keeping its container path `/var/run/docker.sock`. Apply the template and let Unraid recreate the
+container. Previously installed templates may need this path added once;
 a repository template change cannot edit a running Unraid host.
 
-Open **Settings → Updates**. The capability result explains a missing switch,
-socket, permission, container identity or official image separately. Once it
+The former `UPDATE_APPLY_ENABLED` variable is retired and ignored, including
+an existing `false` value. No replacement switch is needed. Installations still
+running an older release with in-app updates disabled need one update from
+Unraid's Docker tab to receive this change.
+
+Open **Settings → Updates**. The capability result explains a missing socket,
+permission, container identity or official image separately. Once it
 reports ready and a newer release is available, the installation button is
 enabled. Confirming it starts the pull and restart.
 
