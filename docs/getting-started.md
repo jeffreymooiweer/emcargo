@@ -56,6 +56,15 @@ Every other setting has a sensible default. If you want to change one, see
    first start and kept in `/data/secret_key`.
 5. Pick a WebUI port, for example `http://<server-ip>:9935`.
 
+**Updates from EMCargo.** The template includes **Docker socket (in-app updates)**:
+`/var/run/docker.sock` on the host maps to the same container path with read/write
+access. This lets an EMCargo administrator install updates and restart the
+container from **Settings → Updates**. It also grants full Docker control and
+can provide administrator-level access to the Unraid host, so use it only with
+a trusted image. Updates require confirmation. Remove this mapping to manage
+updates only through Unraid. Existing installations may need the mapping added
+once in Unraid's container settings; see [In-app updates](in-app-updates.md#unraid).
+
 **File permissions.** On startup the container sets the owner of `/data` to `PUID`/`PGID`
 (both default to `1000`). If your Unraid share uses different IDs, set them as
 environment variables.

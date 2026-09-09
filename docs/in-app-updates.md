@@ -30,11 +30,20 @@ on does not itself authorize installation or grant Docker access.
 
 ## Unraid
 
-Edit the existing EMCargo container template and show advanced settings.
-Set the host path of **Docker socket (optional)** to `/var/run/docker.sock`,
-keeping its container path `/var/run/docker.sock`. Apply the template and let Unraid recreate the
-container. Previously installed templates may need this path added once;
-a repository template change cannot edit a running Unraid host.
+The Unraid template includes **Docker socket (in-app updates)** in the normal
+settings view, with `/var/run/docker.sock` as both the host and container path
+and read/write access. Its description explains the purpose and permissions.
+The socket connects EMCargo to Unraid's Docker engine so an administrator can
+install an update and replace/restart the application container from the app.
+This grants full Docker control and can provide administrator-level access to
+the Unraid host; use it only with a trusted image. Updates still require an
+administrator's confirmation in EMCargo. Removing the mapping leaves the
+application usable, with updates managed through Unraid instead.
+
+For an existing installation, edit the container in Unraid and add or fill in
+this path once if it is absent or empty, then apply the template. Older templates
+may list it as **Docker socket (optional)** under advanced settings. Updating the
+repository template or pulling an image cannot add a mount to a running container.
 
 The former `UPDATE_APPLY_ENABLED` variable is retired and ignored, including
 an existing `false` value. No replacement switch is needed. Installations still

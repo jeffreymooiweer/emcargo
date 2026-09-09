@@ -163,12 +163,9 @@ export default function UpdatePanel() {
         <strong>{t(capability?.available ? "updates.ready" : capability ? "updates.setupNeeded" : "updates.loadingCapability")}</strong></div>
       {reasonKey && <p className="update-reason">{t(reasonKey)}</p>}
       {capability?.available && <p className="update-reason">{t("settings.updateApplyHint")}</p>}
-      {capability && !capability.available && <details className="update-setup">
+      {capability && !capability.available && method !== "docker" && <details className="update-setup">
         <summary>{t("updates.setup")}</summary>
-        {method === "docker" ? <div><p>{t("settings.updateEnableApplyHow")}</p>
-          <pre>{"volumes:\n  - /var/run/docker.sock:/var/run/docker.sock"}</pre>
-          <p>{t("updates.unraid")}</p><p>{t("settings.updateSocketWarning")}</p></div>
-          : <pre>{method === "native" ? "sudo /opt/emcargo/current/deploy/native/update.sh" : `kubectl -n emcargo set image deployment/emcargo emcargo=ghcr.io/jeffreymooiweer/emcargo:${status?.latest || "<version>"}`}</pre>}
+        <pre>{method === "native" ? "sudo /opt/emcargo/current/deploy/native/update.sh" : `kubectl -n emcargo set image deployment/emcargo emcargo=ghcr.io/jeffreymooiweer/emcargo:${status?.latest || "<version>"}`}</pre>
       </details>}
     </section>
     <ConfirmDialog tone="primary" open={confirm} title={t("settings.adminUpdates")}
