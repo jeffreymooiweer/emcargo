@@ -40,14 +40,24 @@ it('keeps an unreachable release check distinct from an up-to-date installation'
   expect(screen.getByRole('button', { name: 'settings.updateApplyNow' })).toBeEnabled();
 });
 
-it('explains the installation prerequisite and prevents an impossible apply', async () => {
+it('keeps unavailable updates disabled without showing Docker setup instructions', async () => {
   vi.mocked(api.updateCapability).mockResolvedValue({ ...ability, available: false, socket: false, reason: 'no_socket' });
   await setup();
   expect(screen.getByRole('button', { name: 'settings.updateApplyNow' })).toBeDisabled();
   expect(screen.getByText('settings.updateReasonNoSocket')).toBeInTheDocument();
-  expect(screen.getByText('volumes: - /var/run/docker.sock:/var/run/docker.sock')).toBeInTheDocument();
-  expect(screen.queryByText(/UPDATE_APPLY_ENABLED/)).not.toBeInTheDocument();
+  expect(screen.queryByText('updates.setup')).not.toBeInTheDocument();
+  expect(screen.queryByText(/docker\.sock|UPDATE_APPLY_ENABLED/)).not.toBeInTheDocument();
   expect(api.updateApply).not.toHaveBeenCalled();
+});
+
+it.each(['native', 'kubernetes'] as const)('preserves the update command for %s installations', async (method) => {
+  vi.mocked(api.updateCapability).mockResolvedValue({ ...ability, available: false, install_method: method, reason: method });
+  await setup();
+  expect(screen.getByRole('button', { name: 'settings.updateApplyNow' })).toBeDisabled();
+  expect(screen.getByText('updates.setup')).toBeInTheDocument();
+  expect(screen.getByText(method === 'native'
+    ? 'sudo /opt/emcargo/current/deploy/native/update.sh'
+    : 'kubectl -n emcargo set image deployment/emcargo emcargo=ghcr.io/jeffreymooiweer/emcargo:2.2.0')).toBeInTheDocument();
 });
 
 it('changes only the update switch against the latest organisation settings', async () => {

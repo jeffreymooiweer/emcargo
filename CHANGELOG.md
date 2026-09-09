@@ -2,6 +2,18 @@
 
 All notable changes are documented here, following [Semantic Versioning](https://semver.org/).
 
+## [2.4.2] — 2026-09-09
+
+### Unraid update setup and a cleaner update screen
+
+- Prefill the Unraid Docker socket mapping and show it in the normal template
+  view. Explain in the template how it enables administrator-confirmed in-app
+  updates and the Docker/host permissions it grants. Keep the mapping removable.
+- Remove Docker installation instructions from the app and use concise capability
+  messages. Keep the Check for updates switch, update confirmation and native or
+  Kubernetes update commands. Update installation documentation for new and
+  existing Unraid containers.
+
 ## [2.4.1] — 2026-09-09
 
 ### In-app updates without an extra switch
