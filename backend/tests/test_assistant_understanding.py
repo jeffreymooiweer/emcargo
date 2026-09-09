@@ -275,6 +275,18 @@ def test_unrelated_compound_does_not_select_bulk_transport(db):
     assert not result["state"]["dg_entries"][0]["products"][0].get("carriage_mode")
 
 
+@pytest.mark.parametrize("text", ["portable tank", "it goes in a portable tank", "het gaat in een losse tank", "in einem ortsbeweglichen Tank", "dans une citerne mobile"])
+def test_portable_tank_never_becomes_a_fixed_tank(db, text):
+    """The word tank inside a more specific mode selected the wrong option.
+
+    The distinction must survive both a bare answer and a complete sentence
+    in each interface language, without needing the model to repair it.
+    """
+    result = answer(db, begin(db, "20 jerrycans diesel"), "ja")
+    result = answer(db, result, text)
+    assert result["state"]["dg_entries"][0]["products"][0]["carriage_mode"] == "portable_tank"
+
+
 def test_model_interpretation_of_a_choice_requires_explicit_confirmation(db, monkeypatch):
     result = answer(db, begin(db, "20 jerrycans diesel"), "ja")
     monkeypatch.setattr(runtime, "installed", lambda: True)

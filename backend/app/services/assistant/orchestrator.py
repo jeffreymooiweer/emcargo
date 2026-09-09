@@ -1131,7 +1131,11 @@ def _match_option(
         return None
     aliases: dict[str, set[str]] = {}
     for option in options:
-        names = {str(option).casefold()}
+        names = {str(option).casefold(), str(option).replace("_", " ").casefold()}
+        if option == "portable_tank":
+            names |= {"losse tank", "transporttank", "tankcontainer", "portable tank",
+                      "tank container", "ortsbeweglicher tank", "ortsbeweglichen tank",
+                      "absetzbarer tank", "citerne mobile"}
         label = (option_labels or {}).get(option)
         if isinstance(label, dict):
             names |= {str(text).casefold() for text in label.values() if text}
@@ -1163,6 +1167,7 @@ def _carriage_phrase(message: str, options: list[str]) -> str | None:
     words = {
         "packages": r"\b(?:colli|verpakkingen|dozen|kratten|vaten|jerrycans|packages|boxed|packaged|drums|barrels|packstücke|verpackungen|kanister|fässer|colis|emballages|bidons|fûts)\b",
         "tank": r"\b(?:tankwagen|tankauto|tanker|tankfahrzeug|citerne)\b",
+        "portable_tank": r"\b(?:losse tank|transporttank|tankcontainer|portable tank|tank container|ortsbeweglicher tank|ortsbeweglichen tank|absetzbarer tank|citerne mobile)\b",
         "bulk": r"\b(?:losgestort|unpackaged|schüttgut|vrac)\b",
     }
     matches = [key for key, pattern in words.items() if key in options and re.search(pattern, message, re.I)]

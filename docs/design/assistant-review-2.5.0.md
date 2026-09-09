@@ -42,6 +42,9 @@ shipments, plus a broader corpus of real-model answers in all four languages.
 - Backend assistant regression suite: 119 passing tests before publication,
   including real calculation and DG services, malicious/stale question metadata,
   model hallucinations, ambiguous weights, counts, date validity and corrections.
+  A final review added five passing portable-tank cases across the four languages:
+  a specific tank mode must not collapse to the generic word "tank". All 14
+  affected tank, package and unrelated-compound cases passed after that fix.
 - Full frontend suite: 420 passing tests; after the last confirmation and manual
   DG-decision fixes, the three affected suites passed all 42 tests. TypeScript
   and production builds passed. The full final tree is checked again by CI.
