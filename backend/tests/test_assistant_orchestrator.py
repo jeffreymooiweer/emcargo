@@ -207,7 +207,7 @@ def test_a_typed_date_is_understood_day_first_and_nonsense_is_asked_again(db):
     assert state["doc_values"]["established_date"] == "2026-08-16"
 
 
-def test_the_survey_pursues_the_optional_fields_and_each_is_skippable(db):
+def test_optional_details_are_an_explicit_choice_after_essential_questions(db):
     """Complete documents are the goal: after the required fields the optional
     ones follow, every one of them skippable — the ride ends on ready."""
     turns = ["1000 jerrycans diesel", "ja", "colli", "3A1", "DIESELOLIE",
@@ -215,6 +215,9 @@ def test_the_survey_pursues_the_optional_fields_and_each_is_skippable(db):
              "Kade 1, Rotterdam", "Afnemer GmbH", "Hafenstr. 2, Duisburg",
              "Rotterdam", "Duisburg", "Franco", "Rotterdam", "vandaag"]
     state, pending, events = drive(db, turns)
+    assert pending is None
+    result = step(state, "", None, db, "nl", action="optional")
+    state, pending = result["state"], result["pending"]
     assert pending is not None and pending["required"] is False
     state, pending, events = skip_rest(db, state, pending, events)
     assert pending is None

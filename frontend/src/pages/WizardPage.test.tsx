@@ -3,7 +3,7 @@ import { StrictMode } from "react";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { DocumentRegistry, ShipmentDetail } from "../api/client";
+import type { AssistantState, DgEntry, DocumentRegistry, ShipmentDetail } from "../api/client";
 import type { DraftLine } from "../components/ReviewLinesPanel";
 import WizardPage from "./WizardPage";
 
@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
     documentsRegistry: vi.fn(), shipments: vi.fn(), shipment: vi.fn(), runningDraft: vi.fn(),
     saveDraft: vi.fn(), calculate: vi.fn(),
   },
+  assistantProps: null as null | { onApplyState: (state: AssistantState) => void; buildState: () => AssistantState },
   toast: { info: vi.fn(), error: vi.fn(), success: vi.fn() },
   settings: { history_enabled: true },
   preferences: { prefill_documents: false, consignor_name: "", default_unit: "pcs" },
@@ -22,7 +23,11 @@ vi.mock("../settings/preferences", () => ({
   usePreferences: () => ({ preferences: mocks.preferences, publicSettings: mocks.settings, loaded: true }),
 }));
 vi.mock("../toast/ToastProvider", () => ({ useToast: () => mocks.toast }));
-vi.mock("../components/AssistantModal", () => ({ default: () => null }));
+vi.mock("../components/AssistantModal", () => ({ default: (props: NonNullable<typeof mocks.assistantProps>) => { mocks.assistantProps = props; return null; } }));
+vi.mock("../components/DangerousGoodsStep", async original => ({
+  ...await original<typeof import("../components/DangerousGoodsStep")>(),
+  default: ({ entries }: { entries: DgEntry[] }) => <pre aria-label="DG answers">{JSON.stringify(entries)}</pre>,
+}));
 vi.mock("../components/ReviewLinesPanel", async (original) => ({
   ...await original<typeof import("../components/ReviewLinesPanel")>(),
   default: ({ draftLines, onDraftChange }: { draftLines: DraftLine[]; onDraftChange: (lines: DraftLine[]) => void }) => (
@@ -196,4 +201,31 @@ describe("shipment restoration", () => {
     expect(mocks.api.runningDraft).not.toHaveBeenCalled();
     expect(mocks.api.saveDraft).not.toHaveBeenCalled();
   });
+});
+
+
+it("carries assistant DG answers through calculation and into the DG step", async () => {
+  mocks.api.calculate.mockResolvedValue({ success: true, lines: [{ line_id: 1, description: "diesel", quantity: 20,
+    unit: "jerrycan", include: true, dangerous_goods: true, detected_un_numbers: ["1202"], messages: [],
+    status: "ok", weight_each_kg: 20, weight_total_kg: 400 }], totals: { total_weight_kg: 400 } });
+  open(); await screen.findByLabelText("Goods description");
+  await act(async () => mocks.assistantProps!.onApplyState({ modality: "road",
+    draft_lines: [{ id: 7, description: "diesel", quantity: 20, unit: "jerrycan", confirmed_un: "1202", dangerous_goods: true }],
+    dg_entries: [{ line_id: 7, vehicle: "diesel", products: [{ un_number: "1202", carriage_mode: "packages", type_of_package: "3A1", net_mass_liters_per_package: "25 L" }] }],
+    doc_values: { consignor_name: "Test company" },
+  }));
+  await waitFor(() => expect(mocks.api.calculate).toHaveBeenCalled());
+  expect(mocks.assistantProps!.buildState().dg_entries?.[0].products[0].type_of_package).toBe("3A1");
+  fireEvent.click(screen.getByRole("button", { name: "review.continueTo" }));
+  const entries = JSON.parse((await screen.findByLabelText("DG answers")).textContent!);
+  expect(entries[0].line_id).toBe(1);
+  expect(entries[0].products[0]).toMatchObject({ carriage_mode: "packages", type_of_package: "3A1", net_mass_liters_per_package: "25 L" });
+});
+
+it("undoing the assistant intake also clears document values in the actual wizard", async () => {
+  open(); await screen.findByLabelText("Goods description");
+  await act(async () => mocks.assistantProps!.onApplyState({ draft_lines: [{ id: 1, description: "Test goods", quantity: 1, unit: "pcs" }], dg_entries: [], doc_values: { consignor_name: "Test company" } }));
+  await act(async () => mocks.assistantProps!.onApplyState({ draft_lines: [], dg_entries: [], doc_values: {} }));
+  expect(mocks.assistantProps!.buildState().draft_lines).toEqual([]);
+  expect(mocks.assistantProps!.buildState().doc_values).toEqual({});
 });

@@ -19,6 +19,11 @@ export interface DraftLine {
   id: number;
   description: string;
   quantity: number | "";
+  /** The assistant must ask when the description omitted the count. */
+  quantity_unconfirmed?: boolean;
+  weight_basis?: "each" | "total";
+  stated_weight_kg?: number;
+  unconfirmed_weight_kg?: number;
   unit: string;
   /** The form this commodity travels in: solid, stacked, loose bulk. Determines
    *  how much of a cubic metre is actually material. */

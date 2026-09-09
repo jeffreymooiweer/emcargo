@@ -42,7 +42,7 @@ import {
   dimensionOverridesFromDrafts,
   mergeOverrides,
 } from "../utils/lineWeights";
-import { buildAssistantState, draftLinesFromAssistant } from "../utils/assistantState";
+import { buildAssistantState, draftLinesFromAssistant, wizardDgEntriesFromAssistant, retainAssistantDgAnswers } from "../utils/assistantState";
 import { useToast } from "../toast/ToastProvider";
 import NumberInput from "../components/NumberInput";
 
@@ -193,6 +193,7 @@ export default function WizardPage() {
   const [checklist, setChecklist] = useState<WrittenInstruction[]>([]);
   const [unCardsBusy, setUnCardsBusy] = useState(false);
   const [assistantOpen, setAssistantOpen] = useState(false);
+  const assistantDraftSignature = useRef<string | null>(null);
   const toast = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -528,13 +529,19 @@ export default function WizardPage() {
   };
 
   const calculateFromDraft = async (): Promise<CalcResult | null> => {
+    if (draftLines.some(line => line.quantity_unconfirmed)) {
+      toast.error(t("assistant.quantityNeeded"));
+      return null;
+    }
     const text = draftToText(draftLines);
     if (!text.trim()) {
       toast.error(t("review.noLines"));
       return null;
     }
     setLoading(true);
-    setDgEntries([]);
+    // Assistant answers belong to this exact draft. A recalculation must not
+    // erase the DG facts the guided interview has just collected.
+    if (assistantDraftSignature.current !== signatureOf(draftLines)) setDgEntries([]);
     try {
       const res = await api.calculate({
         text,
@@ -545,7 +552,7 @@ export default function WizardPage() {
         // result to correct.
         line_overrides: mergeOverrides(
           dimensionOverridesFromDrafts(draftLines),
-          result ? weightOverridesFromLines(result.lines) : [],
+          result && assistantDraftSignature.current !== signatureOf(draftLines) ? weightOverridesFromLines(result.lines) : [],
         ),
       });
       // Apply the DG ticks of the packages (same order as the non-empty lines),
@@ -594,6 +601,7 @@ export default function WizardPage() {
         line.width_cm ?? "",
         line.height_cm ?? "",
         line.wall_thickness_mm ?? "",
+        line.weight_each_kg ?? "",
       ]),
     );
   const draftSignature = signatureOf(draftLines);
@@ -604,7 +612,7 @@ export default function WizardPage() {
   // stops. The delay is there so as not to send a request on every keystroke.
   const calculatedSignature = useRef<string | null>(null);
   useEffect(() => {
-    if (restorePending || stepKey !== "lines") return;
+    if (restorePending || stepKey !== "lines" || assistantOpen || draftLines.some(line => line.quantity_unconfirmed)) return;
     if (!draftLines.some((line) => line.description.trim())) return;
     if (calculatedSignature.current === draftSignature) return;
 
@@ -614,7 +622,7 @@ export default function WizardPage() {
     }, 600);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draftSignature, stepKey, restorePending, modality]);
+  }, [draftSignature, stepKey, restorePending, modality, assistantOpen]);
 
   const addLine = () => {
     const unit = preferences.default_unit || "pcs";
@@ -715,7 +723,9 @@ export default function WizardPage() {
       // The lines as typed travel with the computed ones, so what the user
       // answered about a substance on its own line is what the step starts
       // from rather than something it asks for again.
-      setDgEntries(withEmergencyContact(buildDgEntries(res.lines, draftLines)));
+      const prepared = buildDgEntries(res.lines, draftLines.filter(line => line.description.trim()));
+      setDgEntries(withEmergencyContact(assistantDraftSignature.current === signatureOf(draftLines)
+        ? retainAssistantDgAnswers(prepared, dgEntries) : prepared));
       setStepKey("dg");
     } else if (genericDocs.length > 0) {
       setStepKey("details");
@@ -1381,9 +1391,15 @@ export default function WizardPage() {
   /** What the assistant changed lands in the same state the classic wizard
    *  uses — switching between the two can therefore never lose data. */
   const applyAssistantState = (state: import("../api/client").AssistantState) => {
-    setDraftLines((current) => draftLinesFromAssistant(state, current) ?? current);
-    if (Array.isArray(state.dg_entries)) setDgEntries(state.dg_entries);
-    if (state.doc_values) setDocValues((current) => ({ ...current, ...state.doc_values }));
+    const nextLines = draftLinesFromAssistant(state, draftLines);
+    if (nextLines) {
+      assistantDraftSignature.current = signatureOf(nextLines);
+      setDraftLines(nextLines);
+      if (!nextLines.length) { setResult(null); calculatedSignature.current = null; }
+      setNextId(Math.max(0, ...nextLines.map(line => line.id)) + 1);
+    }
+    if (Array.isArray(state.dg_entries)) setDgEntries(wizardDgEntriesFromAssistant(state));
+    if (state.doc_values) setDocValues(state.doc_values);
     if (Array.isArray(state.skipped_questions)) {
       setSkippedQuestions(state.skipped_questions.map(String));
     }
@@ -1488,6 +1504,7 @@ export default function WizardPage() {
       currentStep={stepKey === "export" ? 3 : stepKey === "details" ? 2 : 1}
       visited={visited}
       onGoTo={(key) => {
+        if (key !== "lines" && draftLines.some(line => line.quantity_unconfirmed)) { toast.error(t("assistant.quantityNeeded")); return; }
         setReturnTo(null);
         setStepKey(key as StepKey);
       }}
@@ -1523,13 +1540,13 @@ export default function WizardPage() {
           onClick={() => setAssistantOpen((open) => !open)}
           aria-label={assistantOpen ? t("assistant.close") : t("assistant.open")}
           title={assistantOpen ? t("assistant.close") : t("assistant.open")}
-          className={`inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${
+          className={`inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-3 transition dark:border-brand-900 dark:bg-brand-950/40 ${
             assistantOpen
               ? "bg-brand-50 text-brand-700 dark:bg-brand-950/50 dark:text-brand-200"
               : "text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
           }`}
         >
-          <AiIcon className="h-5 w-5" />
+          <AiIcon className="h-5 w-5" /><span className="hidden text-xs font-medium sm:inline">{t("assistant.shortTitle")}</span>
         </button>
       }
     >
@@ -1540,6 +1557,7 @@ export default function WizardPage() {
         modality={modality}
         buildState={buildStateForAssistant}
         onApplyState={applyAssistantState}
+        onReview={() => setStepKey("lines")}
       />
 
       {stepKey === "lines" && (
@@ -1570,6 +1588,8 @@ export default function WizardPage() {
             draftLines={draftLines}
             resultLines={result?.lines}
             onDraftChange={(lines) => {
+              lines = lines.map(line => ({ ...line, quantity_unconfirmed: line.quantity_unconfirmed
+                && line.quantity === draftLines.find(old => old.id === line.id)?.quantity }));
               setDraftLines(lines);
               // Ticking DG or answering a name suggestion does not change what
               // was calculated; clearing the result for it would wipe the

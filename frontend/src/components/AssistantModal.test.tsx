@@ -8,7 +8,7 @@
  * value/label split of the answers, and that a misunderstood answer neither
  * advances the survey nor grows the history.
  */
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -119,6 +119,22 @@ describe("AssistantModal", () => {
     await userEvent.click(screen.getByRole("button", { name: "assistant.next" }));
     expect(await screen.findByText("assistant.notUnderstood")).toBeTruthy();
     expect(screen.getByText(/Vervoerswijze/)).toBeTruthy();
+  });
+
+  it("shows a model interpretation for confirmation without saving it or losing the typed answer", async () => {
+    const applied = await reachQuestion();
+    applied.mockClear();
+    await userEvent.type(screen.getByLabelText("assistant.orDescribe"), "in het reservoir op de wagen");
+    stepMock.mockResolvedValueOnce({ ...QUESTION, events: [{ kind: "clarify", reason: "confirm_choice", suggested_choice: "tank", option_label: { nl: "Tank" } }] });
+    await userEvent.click(screen.getByRole("button", { name: "assistant.next" }));
+    expect(await screen.findByText(/assistant.problem.confirm_choice.*Tank/)).toBeTruthy();
+    expect(applied).not.toHaveBeenCalled();
+    expect((screen.getByLabelText("assistant.orDescribe") as HTMLInputElement).value).toBe("in het reservoir op de wagen");
+    await userEvent.click(screen.getByRole("radio", { name: "Tank" }));
+    stepMock.mockResolvedValueOnce({ ...QUESTION, events: [] });
+    await userEvent.click(screen.getByRole("button", { name: "assistant.next" }));
+    expect(stepMock).toHaveBeenLastCalledWith(expect.objectContaining({ message: "tank" }));
+    expect(applied).toHaveBeenCalledTimes(1);
   });
 
   it("shows the lay phrasing and keeps label and help behind the info mark", async () => {
@@ -302,4 +318,66 @@ describe("AssistantModal", () => {
     await userEvent.click(screen.getByTestId("assistant-backdrop"));
     expect(onClose).toHaveBeenCalled();
   });
+});
+
+
+it("retains an unclear typed answer even if the reply has no next question", async () => {
+  const apply = await reachQuestion();
+  const input = screen.getByLabelText("assistant.orDescribe");
+  await userEvent.type(input, "geen tank");
+  stepMock.mockResolvedValueOnce({ state: {}, events: [{ kind: "clarify", attempt: "geen tank" }], pending: null });
+  await userEvent.click(screen.getByRole("button", { name: "assistant.next" }));
+  await screen.findByRole("alert");
+  expect(input).toHaveValue("geen tank");
+  expect(screen.getByRole("radio", { name: "Colli" })).toBeInTheDocument();
+  expect(apply).toHaveBeenCalledTimes(1);
+});
+
+it("uses the latest accepted state even when the parent's snapshot stays stale", async () => {
+  await reachQuestion();
+  await userEvent.click(screen.getByRole("radio", { name: "Colli" }));
+  stepMock.mockResolvedValueOnce({ state: QUESTION.state, events: [], pending: null });
+  await userEvent.click(screen.getByRole("button", { name: "assistant.next" }));
+  expect(stepMock).toHaveBeenLastCalledWith(expect.objectContaining({ state: QUESTION.state }));
+});
+
+it("keeps the answer on connection failure and allows retry without a toast", async () => {
+  await reachQuestion();
+  await userEvent.type(screen.getByLabelText("assistant.orDescribe"), "colli");
+  stepMock.mockRejectedValueOnce(new Error("private runtime path"));
+  await userEvent.click(screen.getByRole("button", { name: "assistant.next" }));
+  expect(await screen.findByText("assistant.problem.connection")).toBeInTheDocument();
+  expect(screen.getByLabelText("assistant.orDescribe")).toHaveValue("colli");
+  expect(screen.queryByText("private runtime path")).toBeNull();
+  stepMock.mockResolvedValueOnce({ state: QUESTION.state, events: [], pending: null });
+  await userEvent.click(screen.getByRole("button", { name: "assistant.next" }));
+  expect(await screen.findByText("assistant.ready")).toBeInTheDocument();
+});
+
+it("ignores a late answer after the assistant closes", async () => {
+  let resolve!: (result: typeof QUESTION) => void;
+  stepMock.mockReturnValue(new Promise(yes => { resolve = yes; }));
+  const props = { onClose: vi.fn(), buildState: () => ({ modality: "road", draft_lines: [] }), onApplyState: vi.fn() };
+  const view = render(<AssistantModal open {...props} />);
+  await userEvent.type(screen.getByLabelText("assistant.describeLabel"), "20 jerrycans diesel");
+  await userEvent.click(screen.getByRole("button", { name: "assistant.start" }));
+  view.rerender(<AssistantModal open={false} {...props} />);
+  await act(async () => resolve(QUESTION));
+  expect(props.onApplyState).not.toHaveBeenCalled();
+});
+
+it("reopens on current wizard data instead of asking for the goods again", async () => {
+  stepMock.mockResolvedValueOnce(QUESTION);
+  render(<AssistantModal open onClose={vi.fn()} buildState={() => QUESTION.state} onApplyState={vi.fn()} />);
+  await screen.findByText(/Vervoerswijze/);
+  expect(stepMock).toHaveBeenCalledWith(expect.objectContaining({ message: "", state: QUESTION.state, pending: null }));
+});
+
+it("keeps keyboard focus inside the dialog and restores the trigger on close", async () => {
+  const trigger = document.createElement("button"); document.body.append(trigger); trigger.focus();
+  const view = render(<AssistantModal open onClose={vi.fn()} buildState={() => ({})} onApplyState={vi.fn()} />);
+  const close = screen.getByRole("button", { name: "assistant.close" });
+  close.focus(); await userEvent.tab({ shift: true });
+  expect(screen.getByRole("dialog")).toContainElement(document.activeElement as HTMLElement);
+  view.unmount(); expect(trigger).toHaveFocus(); trigger.remove();
 });

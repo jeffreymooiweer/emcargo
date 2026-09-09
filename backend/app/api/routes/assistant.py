@@ -4,7 +4,7 @@ Stateless on the server: the wizard state travels with the request and comes
 back patched. Nothing of the conversation is stored — the same privacy stance
 the rest of the application takes with pasted data and documents.
 """
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
@@ -27,6 +27,7 @@ class AssistantStepRequest(BaseModel):
     state: dict[str, Any] = Field(default_factory=dict)
     pending: dict[str, Any] | None = None
     language: str = Field(default="nl", max_length=10)
+    action: Literal["answer", "revise", "optional", "add_goods"] = "answer"
 
 
 @router.post("/step")
@@ -37,7 +38,7 @@ def assistant_step(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    return step(payload.state, payload.message, payload.pending, db, payload.language)
+    return step(payload.state, payload.message, payload.pending, db, payload.language, payload.action)
 
 
 @router.get("/status")

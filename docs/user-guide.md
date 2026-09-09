@@ -327,28 +327,45 @@ cards are available.
 
 ## The AI assistant
 
-The AI mark in the wizard header opens the assistant: a small survey that fills the
-same wizard through natural language. Describe the shipment — `1000 jerricans of 25 l
-of petrol and a pallet of sand-lime brick` — and it becomes goods lines through the
-same recognition the lines step uses, one line per item.
+The compass button in the wizard header opens the shipment assistant. Describe
+what you are sending, how much and where to. For example:
 
-From there the assistant asks **one question per screen**, and only questions the app
-itself has open: a substance to confirm, an open dangerous goods question, a
-measurement the calculation still misses, a document field. Each question is phrased in
-plain language; the formal field name and the help with its article references sit
-behind the **info mark**. Address questions search real addresses and route questions
-suggest airports, ports and stations, exactly like the wizard's own fields. **Previous**
-really goes back, optional questions have a **skip**, and a vague answer gets a
-follow-up with an example instead of a shrug.
+`4 pallets of machine parts from Rotterdam to Duisburg; sender: Example Ltd; receiver: Demo GmbH`
 
-Everything lands in the same wizard state, so you can close the assistant at any point
-and continue by hand — or the other way round — without losing anything.
+This is guided entry, not a chat. The ordinary goods calculation, dangerous goods
+preparation and selected document definitions decide what is still needed. One
+question is shown at a time, with plain-language help and choices. You can also
+answer in your own words. Explicit labels let one answer supply several facts,
+such as `Sender: Example Ltd; receiver: Demo GmbH`. A route answer can fill both
+endpoints. Corrections can name a field or use **Edit** in the shipment summary.
 
-The assistant works without any model installed. An administrator can add a small local
-language model under **Settings** which only makes the *reading* more flexible (free
-prose, paraphrased answers, measurements written as words); it never decides regulatory
-content. See the [README](../README.md#the-ai-assistant-optional) for what it is and
-what it costs.
+The summary shows what has actually been recorded, with calculated weights
+labelled separately. If a weight could mean a total or a weight per item, the
+assistant asks which. Missing counts, uncertain measurements, invalid dates and
+unrecognised answers stay open. Your typed answer remains available to correct;
+the assistant does not silently advance or turn “I don't know” into a field value.
+A required question cannot be skipped. Additional details can be left for later;
+optional document fields are offered as a separate choice after the main questions.
+
+Address and route lookups use the same fields as the ordinary wizard. **Previous**
+restores the complete previous draft. You can close the assistant and continue
+manually; reopening reads the current wizard data. Late responses from a closed
+assistant do not overwrite later work. Questions about quantities and DG facts
+remain attached to their goods when rows have been removed or renumbered.
+
+The final screen is a handoff for review in the ordinary wizard, not transport
+release. Calculation, document validation, saving and the configured DG Specialist
+release still happen through the application's existing workflow.
+
+The assistant works without a model. An administrator can install the optional
+local model under **Settings → AI assistant**. It helps read richer prose while
+simple counted descriptions, familiar answers and uncertain replies are handled
+without a model round trip. Model output must be traceable to the source text;
+it cannot supply a missing address, a guessed measurement or a regulatory choice.
+A paraphrased choice understood only by the model is shown as a suggestion. It
+is recorded only when you explicitly select the intended option.
+See the [README](../README.md#the-ai-assistant-optional) for resource requirements.
+
 
 ## Groupage: several consignments on one vehicle
 

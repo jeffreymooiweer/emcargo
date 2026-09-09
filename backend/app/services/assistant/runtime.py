@@ -11,7 +11,7 @@ The model's only job is translation (see the orchestrator): every call is
 constrained to a JSON schema by llama.cpp's grammar support, so output that
 is not the expected structure cannot exist. When the runtime is absent,
 downloading, or broken, the assistant keeps working on its deterministic
-floor — this module failing may never take the chat down.
+floor — a runtime failure must never prevent guided shipment entry.
 """
 from __future__ import annotations
 
@@ -69,6 +69,33 @@ def _model_path() -> Path:
     return assistant_dir() / filename
 
 
+def _repair_library_links(directory: Path) -> None:
+    """Restore the SONAME links of the pinned, flattened runtime archive.
+
+    Tar symbolic links were previously discarded while their versioned
+    libraries were extracted. The binary then exited before serving a single
+    request. Repair older installations too; never link outside this folder
+    or choose between conflicting versions.
+    """
+    aliases: dict[str, list[Path]] = {}
+    for library in directory.glob("*.so.*"):
+        if library.is_symlink() or not library.is_file():
+            continue
+        stem, version = library.name.split(".so.", 1)
+        if not version or not all(part.isdigit() for part in version.split(".")):
+            continue
+        for name in (f"{stem}.so", f"{stem}.so.{version.split('.')[0]}"):
+            if name != library.name:
+                aliases.setdefault(name, []).append(library)
+    for name, targets in aliases.items():
+        alias = directory / name
+        if len(targets) == 1 and not alias.exists() and not alias.is_symlink():
+            try:
+                alias.symlink_to(targets[0].name)
+            except OSError as exc:
+                logger.warning("Assistant library link unavailable: %s", exc)
+
+
 def installed() -> bool:
     return _server_binary().exists() and _model_path().exists()
 
@@ -114,11 +141,8 @@ def _fetch_verified(url: str, sha256: str, destination: Path, label: str) -> Non
     temp.replace(destination)
 
 
-def _install(config: dict[str, Any]) -> None:
-    server_pin = (config.get("server") or {}).get(_arch()) or {}
-    model_pin = config.get("model") or {}
-    base = assistant_dir()
-
+def install_server(server_pin: dict[str, Any], base: Path) -> Path:
+    """Install the verified server independently of the large model weights."""
     archive = base / "server.tar.gz"
     _fetch_verified(server_pin["url"], server_pin["sha256"], archive, "server")
     _download.update({"state": "downloading", "detail": "unpack"})
@@ -138,10 +162,18 @@ def _install(config: dict[str, Any]) -> None:
             with source, (bin_dir / name).open("wb") as target:
                 shutil.copyfileobj(source, target)
     archive.unlink(missing_ok=True)
+    _repair_library_links(bin_dir)
     server = bin_dir / "llama-server"
     if not server.exists():
         raise ValueError("server: archive held no llama-server binary")
     server.chmod(0o755)
+    return server
+
+
+def _install(config: dict[str, Any]) -> None:
+    server_pin = (config.get("server") or {}).get(_arch()) or {}
+    model_pin = config.get("model") or {}
+    install_server(server_pin, assistant_dir())
 
     _fetch_verified(model_pin["url"], model_pin["sha256"], _model_path(), "model")
     _download.update({"state": "done", "detail": ""})
@@ -189,7 +221,7 @@ def _base_url() -> str:
     return f"http://127.0.0.1:{_port}"
 
 
-def ensure_server(timeout: float = 60.0) -> bool:
+def ensure_server(timeout: float = 15.0) -> bool:
     """Start llama-server once and wait for its health endpoint."""
     global _process, _port
     if not installed():
@@ -199,6 +231,7 @@ def ensure_server(timeout: float = 60.0) -> bool:
             return True
         _port = _free_port()
         binary = _server_binary()
+        _repair_library_links(binary.parent)
         # --reasoning-budget 0 turns the model's thinking mode off. Measured
         # with it on (the Qwen3 default): 31-36 s per turn on 4 vCPUs, most of
         # it spent thinking about a one-word answer — and the schema already
@@ -240,7 +273,8 @@ def stop() -> None:
 # --- constrained extraction ------------------------------------------------
 
 def extract_json(
-    system: str, user: str, schema: dict[str, Any], timeout: float = 120.0,
+    system: str, user: str, schema: dict[str, Any], timeout: float = 25.0,
+    *, max_tokens: int = 768,
 ) -> dict[str, Any] | None:
     """One schema-constrained completion; None on any failure.
 
@@ -248,14 +282,19 @@ def extract_json(
     failure makes the caller fall back to the deterministic route. Either
     way the orchestrator's rules hold.
     """
-    if not ensure_server():
+    try:
+        if not ensure_server():
+            return None
+    except (OSError, subprocess.SubprocessError) as exc:
+        logger.warning("Assistant runtime unavailable: %s", exc)
         return None
     payload = {
         "messages": [
             {"role": "system", "content": system},
             {"role": "user", "content": user},
         ],
-        "temperature": 0.1,
+        "temperature": 0.0,
+        "max_tokens": max_tokens,
         "response_format": {
             "type": "json_schema",
             "json_schema": {"name": "extraction", "schema": schema},
@@ -266,7 +305,8 @@ def extract_json(
             f"{_base_url()}/v1/chat/completions", json=payload, timeout=timeout)
         response.raise_for_status()
         content = response.json()["choices"][0]["message"]["content"]
-        return json.loads(content)
-    except (httpx.HTTPError, KeyError, IndexError, ValueError) as exc:
+        result = json.loads(content)
+        return result if isinstance(result, dict) else None
+    except (httpx.HTTPError, KeyError, IndexError, ValueError, TypeError) as exc:
         logger.warning("Assistant extraction failed: %s", exc)
         return None
