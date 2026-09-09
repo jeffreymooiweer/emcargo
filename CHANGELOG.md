@@ -2,6 +2,32 @@
 
 All notable changes are documented here, following [Semantic Versioning](https://semver.org/).
 
+## [2.5.0] — 2026-09-09
+
+### A guided shipment assistant
+
+- Replace the small survey with a focused shipment workspace: a live summary,
+  editable facts, optional details by choice, clear progress stages and a review
+  handoff. Add an original compass icon, restrained motion, reduced-motion
+  support, keyboard focus management and a compact layout for small screens.
+- Let the application's calculation, DG preparation and document definitions
+  drive the questions. Read multiple labelled facts, corrections, route answers,
+  relative dates and spoken counts. Keep unclear answers visible and explain
+  what is still needed instead of saving guesses or silently advancing.
+- Validate dates, quantities, negative and ambiguous measurements, weight units,
+  and total versus per-item weight. Ground local-model output in the source text
+  and prevent guessed addresses, measurements and regulatory choices.
+- Preserve assistant answers across recalculation and the move into the DG step.
+  Restore complete snapshots on Previous, retain the weight basis, map removed
+  goods rows correctly and ignore late responses after closing the assistant.
+- Repair missing shared-library links in the downloaded local model runtime,
+  including existing installations, and include its system libraries in the
+  container. Verify the pinned server starts inside the built image. Bound extraction time and output, and improve
+  the structured intake prompt. Simple inputs avoid a model round trip.
+- Keep ordinary document validation, authentication, specialist release and DGSA
+  permissions in force. The assistant prepares a draft for review; it grants no
+  transport release. Include regression tests and a critical review record.
+
 ## [2.4.2] — 2026-09-09
 
 ### Unraid update setup and a cleaner update screen

@@ -1,421 +1,249 @@
-import { CloseIcon } from "./icons";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
-import { api, AssistantEvent, AssistantPending, AssistantState } from "../api/client";
+import { api, AssistantEvent, AssistantPending, AssistantReview, AssistantState } from "../api/client";
 import { documentLanguage, localised } from "../i18n/language";
-import { useToast } from "../toast/ToastProvider";
+import { ArrowRightIcon, CheckIcon, CloseIcon } from "./icons";
 import AiIcon from "./AiIcon";
-import {
-  AddressTextarea,
-  LOCATION_FIELD_KEYS,
-  LocationInput,
-  MODALITY_LOCATION_TYPES,
-} from "./GeoInputs";
+import { AddressTextarea, LOCATION_FIELD_KEYS, LocationInput, MODALITY_LOCATION_TYPES } from "./GeoInputs";
+import "./AssistantModal.css";
 
-interface Snapshot {
-  state: AssistantState;
-  pending: AssistantPending | null;
-}
-
+type Screen = "describe" | "question" | "ready";
+type Action = "answer" | "revise" | "optional" | "add_goods";
+interface Snapshot { state: AssistantState; pending: AssistantPending | null; review?: AssistantReview; screen: Screen; answer: string }
 interface Props {
   open: boolean;
   onClose: () => void;
-  /** The wizard state as the assistant sees it; built by the wizard page. */
   buildState: () => AssistantState;
-  /** The patched state coming back; the wizard page maps it onto its own. */
   onApplyState: (state: AssistantState) => void;
-  /** Transport mode, deciding which locations are suggested (✈/⚓/🚆). */
+  onReview?: () => void;
   modality?: string;
 }
+const copy = <T,>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
-/** The assistant as a survey in a modal: one question per screen, a previous
- *  button that really goes back, and no chat transcript.
- *
- * Every question is still a translation of something the backend produced —
- * a substance the name recognition offered, an open question `dg/prepare`
- * named, a document field the registry requires. Going back restores the
- *  snapshot taken before that answer was applied: the server is stateless,
- *  so the history is the client's to keep, and re-answering a question is
- *  simply replaying from an earlier state.
+/** A focused shipment interview, with an inspectable working draft.
+ * Successful turns are saved in the ordinary wizard. Failed interpretations
+ * keep the original answer. Every history entry is a complete snapshot, and
+ * late responses cannot overwrite the wizard after the panel closes.
  */
-export default function AssistantModal({ open, onClose, buildState, onApplyState, modality }: Props) {
+export default function AssistantModal({ open, onClose, buildState, onApplyState, onReview, modality }: Props) {
   const { t, i18n } = useTranslation();
   const lang = documentLanguage(i18n.language);
   const [pending, setPending] = useState<AssistantPending | null>(null);
+  const [working, setWorking] = useState<AssistantState>({});
+  const [review, setReview] = useState<AssistantReview>();
   const [history, setHistory] = useState<Snapshot[]>([]);
-  const [screen, setScreen] = useState<"describe" | "question" | "ready">("describe");
-  const [describe, setDescribe] = useState("");
+  const [screen, setScreen] = useState<Screen>("describe");
+  const [input, setInput] = useState("");
   const [choice, setChoice] = useState("");
-  const [freeText, setFreeText] = useState("");
-  const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
-  const toast = useToast();
+  const dialog = useRef<HTMLDivElement>(null);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const sequence = useRef(0);
+  const inFlight = useRef(false);
+  const callbacks = useRef({ buildState, onApplyState, onClose });
+  callbacks.current = { buildState, onApplyState, onClose };
+  const current = useRef({ working, pending, review, screen, input, choice });
+  current.current = { working, pending, review, screen, input, choice };
+
+  const L = (value: unknown) => typeof value === "string" ? value : localised(value as Record<string, string> | undefined, lang);
+  const unitLabel = (value: unknown) => t(`units.name.${String(value ?? "pcs")}`, { defaultValue: String(value ?? "pcs") });
+  const errorFor = (event: AssistantEvent) => {
+    if (event.reason) return t(`assistant.problem.${String(event.reason)}`, { choice: L(event.option_label) || String(event.suggested_choice ?? "") });
+    if (event.kind === "not_understood") return t("assistant.notUnderstood");
+    return event.example ? t("assistant.clarify", { example: String(event.example) })
+      : t("assistant.corrected", { attempt: String(event.attempt ?? "") });
+  };
+
+  async function send(message: string, action: Action = "answer", target?: AssistantPending, initial?: AssistantState) {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    const request = ++sequence.current;
+    const view = current.current;
+    const state = copy(initial ?? view.working);
+    const question = target ?? (view.screen === "describe" ? null : view.pending);
+    const snapshot: Snapshot = { state, pending: view.pending, review: view.review, screen: view.screen, answer: message };
+    setBusy(true);
+    setError("");
+    try {
+      const result = await api.assistantStep({ message, state, pending: question, language: lang, ...(action === "answer" ? {} : { action }) });
+      if (sequence.current !== request) return;
+      const failure = result.events.find(event => event.kind === "clarify" || event.kind === "not_understood");
+      if (failure) {
+        setError(errorFor(failure));
+        // A stale question is the only failure that requires a new question.
+        if (failure.reason === "stale") { setPending(result.pending); setScreen(result.pending?.scope === "goods_intake" ? "describe" : result.pending ? "question" : "ready"); }
+        return;
+      }
+      if (!initial) setHistory(stack => [...stack, snapshot]);
+      setWorking(copy(result.state));
+      setReview(result.review);
+      setPending(result.pending);
+      setScreen(result.pending?.scope === "goods_intake" ? "describe" : result.pending ? "question" : "ready");
+      if (action !== "revise") callbacks.current.onApplyState(copy(result.state));
+      setInput("");
+      setChoice("");
+      setShowInfo(false);
+      const answered = result.events.filter(event => event.kind === "answered");
+      const added = result.events.find(event => event.kind === "lines_added");
+      setNotice(added ? t("assistant.linesAdded", { count: Number(added.count) })
+        : answered.length ? t("assistant.factsUpdated", { count: answered.length })
+        : result.events.some(event => event.kind === "un_confirmed") ? t("assistant.unConfirmed", { un: String(result.events.find(e => e.kind === "un_confirmed")?.un) })
+        : result.events.some(event => event.kind === "un_dismissed") ? t("assistant.unDismissed") : "");
+
+    } catch {
+      if (sequence.current === request) setError(t("assistant.problem.connection"));
+    } finally {
+      if (sequence.current === request) { inFlight.current = false; setBusy(false); }
+    }
+  }
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    const trigger = document.activeElement as HTMLElement | null;
+    return () => trigger?.focus();
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
+    const before = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const initial = copy(callbacks.current.buildState());
+    setWorking(initial); setHistory([]); setPending(null); setReview(undefined);
+    setInput(""); setChoice(""); setError(""); setNotice(""); setShowInfo(false); setScreen("describe");
+    if (initial.draft_lines?.length) void send("", "answer", undefined, initial);
+
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") { event.preventDefault(); callbacks.current.onClose(); }
+      if (event.key !== "Tab") return;
+      const items = Array.from(dialog.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), summary, [tabindex="0"]') ?? [])
+        .filter(el => !el.closest("details:not([open])") || el.tagName === "SUMMARY");
+      const first = items[0], last = items[items.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !items.includes(document.activeElement as HTMLElement))) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && (document.activeElement === last || !dialog.current?.contains(document.activeElement))) { event.preventDefault(); first?.focus(); }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      ++sequence.current; inFlight.current = false; setBusy(false);
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = before;
+    };
+    // A fresh opening deliberately reads the latest manual wizard edits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    // Focus before paint: a delayed focus callback could interrupt someone
+    // already typing in the address suggestions of the next question.
+    if (screen === "describe") dialog.current?.querySelector<HTMLTextAreaElement>("textarea")?.focus();
+    else heading.current?.focus();
+  }, [open, screen, pending?.scope, pending?.field, pending?.line_id]);
+
+  function goBack() {
+    const snapshot = history[history.length - 1];
+    if (!snapshot || busy) return;
+    setHistory(stack => stack.slice(0, -1)); setWorking(copy(snapshot.state));
+    callbacks.current.onApplyState(copy(snapshot.state)); setPending(snapshot.pending);
+    setScreen(snapshot.screen); setReview(snapshot.review); setInput(snapshot.answer);
+    setChoice(""); setError(""); setNotice(""); setShowInfo(false);
+
+  }
 
   if (!open) return null;
+  const candidates = (pending?.candidates ?? []) as { un: string; name: string; class: string }[];
+  const title = pending?.scope === "un_confirm"
+    ? candidates.length === 1 ? t("assistant.unConfirmOne", candidates[0]) : t("assistant.unConfirmMany")
+    : pending?.scope === "goods_weight_basis" ? t("assistant.weightBasisQuestion", { weight: pending.weight })
+    : pending?.scope === "goods_quantity" ? t("assistant.quantityQuestion", { unit: unitLabel(pending.unit) })
+    : L(pending?.simple) || t("assistant.question", { label: L(pending?.label) || pending?.field });
+  const options = pending?.scope === "un_confirm"
+    ? candidates.length === 1 ? [{ value: "ja", label: t("assistant.yes") }, { value: "nee", label: t("assistant.no") }]
+      : [...candidates.map(c => ({ value: `UN ${c.un}`, label: `UN ${c.un} · ${c.name}` })), { value: "nee", label: t("assistant.noneOfThese") }]
+    : pending?.scope === "goods_weight_basis" ? [{ value: "total", label: t("assistant.weightTotal") }, { value: "each", label: t("assistant.weightEach") }]
+    : (pending?.options ?? []).map(value => ({ value, label: L(pending?.option_labels?.[value]) || value }));
+  const answer = input.trim() || choice;
+  const field = String(pending?.field ?? "");
+  const isAddress = pending?.scope === "doc_question" && field.endsWith("_address");
+  const isLocation = pending?.scope === "doc_question" && LOCATION_FIELD_KEYS.has(field);
+  const goods = working.draft_lines ?? [];
+  const description = goods.map(line => `${line.quantity_unconfirmed ? "?" : line.quantity ?? "?"} ${unitLabel(line.unit)} ${line.description ?? ""}`).join(" · ");
+  const info = [L(pending?.label), L(pending?.help)].filter(Boolean).join(" — ");
+  const section = screen === "describe" ? 0 : screen === "ready" ? 3 : pending?.scope === "doc_question" ? 2 : 1;
+  const facts = review?.facts ?? [];
+  const documentFacts = facts.filter(f => f.scope === "doc_question");
+  const dgFacts = facts.filter(f => f.scope === "dg_question");
+  const edit = (target: AssistantPending) => { void send("", "revise", target); };
+  const summary = <div className="assistant-summary-content">
+    <p className="assistant-eyebrow">{t("assistant.recorded")}</p>
+    {!goods.length && <p className="assistant-empty">{t("assistant.summaryEmpty")}</p>}
+    {goods.map(line => <div className="assistant-cargo" key={String(line.id)}>
+      <div className="assistant-cargo-title"><span>{String(line.description ?? "")}</span>
+        <button type="button" disabled={busy} className="assistant-edit" onClick={() => edit({ scope: "goods_quantity", field: "quantity", line_id: line.id })} aria-label={t("assistant.editQuantity", { goods: String(line.description ?? "") })}>{t("assistant.edit")}</button></div>
+      <p>{line.quantity_unconfirmed ? t("assistant.quantityMissing") : `${line.quantity} ${unitLabel(line.unit)}`}</p>
+      {line.weight_total_kg != null && <p className="assistant-measure">{Number(line.weight_total_kg).toLocaleString(i18n.language, { maximumFractionDigits: 3 })} kg <span>· {t(line.weight_each_kg != null ? "assistant.statedWeight" : "assistant.calculatedWeight")}</span></p>}
+      {line.confirmed_un ? <span className="assistant-un">UN {String(line.confirmed_un)}</span> : null}
+    </div>)}
+    {documentFacts.length > 0 && <dl className="assistant-facts">{documentFacts.map(fact => <div key={fact.field}>
+      <dt>{L(fact.label) || fact.field}</dt><dd><span>{String(fact.value)}</span><button type="button" disabled={busy} className="assistant-edit" aria-label={t("assistant.editField", { field: L(fact.label) || fact.field })} onClick={() => edit(fact)}>{t("assistant.edit")}</button></dd>
+    </div>)}</dl>}
+    {dgFacts.length > 0 && <details className="assistant-dg-facts"><summary>{t("assistant.dgDetails")}</summary><dl className="assistant-facts">{dgFacts.map((fact, i) => <div key={i}><dt>{L(fact.label) || fact.field}</dt><dd>{String(fact.value)}</dd></div>)}</dl></details>}
+    {Boolean(review?.deferred_count) && <p className="assistant-deferred">{t("assistant.deferred", { count: review!.deferred_count })}</p>}
+    {!!goods.length && <p className="assistant-saved"><CheckIcon className="h-3.5 w-3.5" />{t("assistant.savedInWizard")}</p>}
+  </div>;
 
-  const noticeFor = (events: AssistantEvent[]): string => {
-    const lines: string[] = [];
-    for (const event of events) {
-      if (event.kind === "lines_added") {
-        lines.push(t("assistant.linesAdded", { count: Number(event.count ?? 0) }));
-      }
-      if (event.kind === "un_confirmed") {
-        lines.push(t("assistant.unConfirmed", { un: String(event.un ?? "") }));
-      }
-      if (event.kind === "un_dismissed") lines.push(t("assistant.unDismissed"));
-    }
-    return lines.join(" ");
-  };
-
-  const send = async (message: string) => {
-    if (busy) return;
-    setBusy(true);
-    setError("");
-    const snapshot: Snapshot = { state: buildState(), pending };
-    try {
-      const result = await api.assistantStep({
-        message,
-        state: snapshot.state,
-        pending,
-        language: lang,
-      });
-      const clarify = result.events.find((event) => event.kind === "clarify");
-      const misunderstood = result.events.some((event) => event.kind === "not_understood");
-      if (clarify) {
-        // A correction or a follow-up: nothing was written, the question
-        // stays — with either what was tried or an example of a full answer.
-        setError(
-          clarify.example
-            ? t("assistant.clarify", { example: String(clarify.example) })
-            : t("assistant.corrected", { attempt: String(clarify.attempt ?? "") }),
-        );
-      } else if (misunderstood) {
-        setError(t("assistant.notUnderstood"));
-      } else {
-        setHistory((stack) => [...stack, snapshot]);
-        onApplyState(result.state);
-        setNotice(noticeFor(result.events));
-      }
-      setPending(result.pending ?? null);
-      setScreen(result.pending ? "question" : "ready");
-      setChoice("");
-      setFreeText("");
-      setShowInfo(false);
-    } catch (e) {
-      // Unlike a clarification — which is part of the conversation and stays
-      // at the question — a failed request is a system event: toast.
-      toast.error(String(e));
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const goBack = () => {
-    const previous = history[history.length - 1];
-    if (!previous) return;
-    setHistory((stack) => stack.slice(0, -1));
-    onApplyState(previous.state);
-    setPending(previous.pending);
-    setScreen(previous.pending ? "question" : "describe");
-    setNotice("");
-    setError("");
-    setChoice("");
-    setFreeText("");
-    setShowInfo(false);
-  };
-
-  const questionTitle = (): string => {
-    if (!pending) return "";
-    if (pending.scope === "un_confirm") {
-      const candidates = (pending.candidates ?? []) as {
-        un: string; name: string; class: string;
-      }[];
-      if (candidates.length === 1) {
-        const c = candidates[0];
-        return t("assistant.unConfirmOne", { un: c.un, name: c.name, class: c.class });
-      }
-      return t("assistant.unConfirmMany");
-    }
-    // The lay phrasing first — a question a first-time consignor understands.
-    // The formal label stays behind the info mark, next to the help text.
-    const simple = localised(pending.simple as Record<string, string> | undefined, lang);
-    if (simple) return simple;
-    const label =
-      localised(pending.label as Record<string, string> | undefined, lang) ||
-      String(pending.field ?? "");
-    return t("assistant.question", { label });
-  };
-
-  /** The formal label and the help with its article references, shown when
-   *  the info mark is open. */
-  const infoText = (): string => {
-    if (!pending || pending.scope === "un_confirm") return "";
-    const label =
-      typeof pending.label === "string"
-        ? pending.label
-        : localised(pending.label as Record<string, string> | undefined, lang);
-    const help =
-      typeof pending.help === "string"
-        ? pending.help
-        : localised(pending.help as Record<string, string> | undefined, lang);
-    return [label, help].filter(Boolean).join(" — ");
-  };
-
-  const questionReason = (): string => {
-    const key = `dgopen.${String(pending?.reason ?? "")}`;
-    if (!pending?.reason) return "";
-    const text = t(key as "dgopen.sp274");
-    return text === key ? "" : text;
-  };
-
-  /** The selectable answers of the current question, as value/label pairs. */
-  const answerOptions = (): { value: string; label: string }[] => {
-    if (!pending) return [];
-    if (pending.scope === "un_confirm") {
-      const candidates = (pending.candidates ?? []) as {
-        un: string; name: string; class: string;
-      }[];
-      if (candidates.length === 1) {
-        return [
-          { value: "ja", label: t("assistant.yes") },
-          { value: "nee", label: t("assistant.no") },
-        ];
-      }
-      return [
-        ...candidates.map((c) => ({
-          value: `UN ${c.un}`,
-          label: `UN ${c.un} — ${c.name.slice(0, 60)}`,
-        })),
-        { value: "nee", label: t("assistant.noneOfThese") },
-      ];
-    }
-    const labels = (pending.option_labels ?? {}) as Record<string, unknown>;
-    return (pending.options ?? []).map((option) => {
-      const label = labels[option];
-      return {
-        value: option,
-        label:
-          (label && typeof label === "object"
-            ? localised(label as Record<string, string>, lang)
-            : (label as string)) || option,
-      };
-    });
-  };
-
-  const options = answerOptions();
-  const answer = options.length > 0 ? choice : freeText.trim();
-  const skippable = pending?.scope !== "un_confirm" && pending?.required === false;
-
-  // Address and location questions get the same suggestions the wizard's own
-  // fields have: addresses from the address API, and airports, ports and
-  // stations from the location catalogue — filtered by the transport mode.
-  const docField = String(pending?.field ?? "");
-  const isAddressField =
-    pending?.scope === "doc_question" && pending?.type === "textarea" && docField.endsWith("_address");
-  const isLocationField = pending?.scope === "doc_question" && LOCATION_FIELD_KEYS.has(docField);
-  const locationTypes = MODALITY_LOCATION_TYPES[modality ?? ""] ?? ["airport", "port", "station"];
-
-  const submit = () => {
-    if (screen === "describe") {
-      if (describe.trim()) void send(describe.trim());
-      return;
-    }
-    if (answer) void send(answer);
-  };
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={onClose}
-      data-testid="assistant-backdrop"
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={t("assistant.title")}
-        className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-700 dark:bg-slate-900"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="flex items-center gap-2">
-          <AiIcon className="h-6 w-6 text-slate-900 dark:text-slate-100" />
-          <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
-            {t("assistant.title")}
-          </h3>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t("assistant.close")}
-            className="ml-auto rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-          >
-            <CloseIcon className="h-5 w-5" />
-          </button>
-        </div>
-
-        {notice && (
-          <p className="mt-3 rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
-            {notice}
-          </p>
-        )}
-
-        {screen === "describe" && (
-          <div className="mt-4 space-y-3">
-            <label
-              htmlFor="assistant-describe"
-              className="text-sm font-medium text-slate-800 dark:text-slate-200"
-            >
-              {t("assistant.describeLabel")}
-            </label>
-            <textarea
-              id="assistant-describe"
-              className="min-h-[80px] w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-              placeholder={t("assistant.describePlaceholder")}
-              value={describe}
-              onChange={(event) => setDescribe(event.target.value)}
-            />
-            <p className="text-xs text-slate-500 dark:text-slate-400">{t("assistant.describeHint")}</p>
+  return createPortal(<div className="assistant-backdrop" data-testid="assistant-backdrop" onClick={onClose}>
+    <div ref={dialog} role="dialog" aria-modal="true" aria-labelledby="assistant-title" className="assistant-dialog" data-busy={busy} onClick={event => event.stopPropagation()}>
+      <header className="assistant-header"><div className="assistant-mark"><AiIcon className="h-7 w-7" /></div><div><h2 id="assistant-title">{t("assistant.title")}</h2><p>{t("assistant.subtitle")}</p></div><button type="button" className="assistant-close" aria-label={t("assistant.close")} onClick={onClose}><CloseIcon className="h-5 w-5" /></button></header>
+      <ol className="assistant-stages" aria-label={t("assistant.progress")}>{["brief", "cargo", "details", "review"].map((key, i) => <li key={key} data-active={i === section} data-complete={i < section} aria-current={i === section ? "step" : undefined}><span>{i < section ? <CheckIcon className="h-3 w-3" /> : i + 1}</span>{t(`assistant.stage.${key}`)}</li>)}</ol>
+      <div className="assistant-layout">
+        <div className="assistant-main">
+          <details className="assistant-mobile-summary"><summary>{t("assistant.summary")}<span>{description || t("assistant.summaryEmptyShort")}</span></summary>{summary}</details>
+          <div className="assistant-question" key={`${screen}:${pending?.scope}:${pending?.line_id}:${pending?.field}`}>
+            {screen === "describe" ? <>
+              <p className="assistant-eyebrow">{t("assistant.begin")}</p>
+              <h3 ref={heading} tabIndex={-1}>{t("assistant.describeLabel")}</h3>
+              <p className="assistant-intro">{t("assistant.describeHint")}</p>
+              <label className="sr-only" htmlFor="assistant-description">{t("assistant.describeLabel")}</label>
+              <textarea id="assistant-description" className="assistant-input assistant-description" value={input} onChange={e => setInput(e.target.value)} maxLength={4000} placeholder={t("assistant.describePlaceholder")} disabled={busy} aria-describedby={error ? "assistant-error" : "assistant-examples"} />
+              <div id="assistant-examples" className="assistant-examples"><span>{t("assistant.tryExample")}</span>{["ordinaryExample", "dgExample"].map(key => <button type="button" key={key} disabled={busy} onClick={() => setInput(t(`assistant.${key}`))}>{t(`assistant.${key}Label`)}</button>)}</div>
+            </> : screen === "ready" ? <>
+              <div className="assistant-ready-mark"><CheckIcon className="h-7 w-7" /></div>
+              <p className="assistant-eyebrow">{t("assistant.readyEyebrow")}</p>
+              <h3 ref={heading} tabIndex={-1}>{t("assistant.readyTitle")}</h3><p className="assistant-intro">{t("assistant.ready")}</p>
+              {review?.has_dangerous_goods && <p className="assistant-release-note">{t("assistant.dgReviewNotice")}</p>}
+              {!!review?.optional_count && !working.include_optional && <button type="button" disabled={busy} className="assistant-optional" onClick={() => void send("", "optional")}>{t("assistant.optionalDetails", { count: review.optional_count })}<ArrowRightIcon className="h-4 w-4" /></button>}
+              <button type="button" disabled={busy} className="assistant-text-button" onClick={() => { setScreen("describe"); setPending(null); setInput(""); setError(""); }}>{t("assistant.addGoods")}</button>
+            </> : <>
+              <div className="assistant-question-meta"><p className="assistant-eyebrow">{t(pending?.scope === "doc_question" ? "assistant.shipmentDetails" : "assistant.yourGoods")}</p><span>{t(pending?.required ? "assistant.required" : "assistant.optional")}</span></div>
+              <h3 ref={heading} tabIndex={-1} id="assistant-question-title">{title}</h3>
+              {pending?.goods ? <p className="assistant-for-goods">{String(pending.goods)}</p> : null}
+              {options.length > 0 && <div className="assistant-options" role="radiogroup" aria-labelledby="assistant-question-title">{options.map(option => <label key={option.value} data-selected={choice === option.value && !input}>
+                <input type="radio" name="assistant-choice" value={option.value} checked={choice === option.value && !input} disabled={busy} onChange={() => { setChoice(option.value); setInput(""); }} /><span>{option.label}</span><CheckIcon className="assistant-option-check h-4 w-4" />
+              </label>)}</div>}
+              <label className="assistant-answer-label" htmlFor="assistant-answer">{t(options.length ? "assistant.orDescribe" : "assistant.yourAnswer")}</label>
+              <fieldset disabled={busy} className="assistant-answer-field">
+                {isAddress ? <AddressTextarea value={input} onChange={setInput} textareaId="assistant-answer" textareaClassName="assistant-input" />
+                  : isLocation ? <LocationInput id="assistant-answer" value={input} onChange={setInput} types={MODALITY_LOCATION_TYPES[modality ?? ""] ?? ["airport", "port", "station"]} className="assistant-input" />
+                  : <input id="assistant-answer" className="assistant-input" type="text" inputMode={pending?.scope === "goods_quantity" ? "numeric" : "text"} value={input} onChange={e => { setInput(e.target.value); setChoice(""); }} placeholder={t(pending?.type === "date" ? "assistant.dateExample" : "assistant.answerPlaceholder")} maxLength={4000} aria-invalid={!!error} aria-describedby={error ? "assistant-error" : undefined} onKeyDown={event => { if (event.key === "Enter" && answer) { event.preventDefault(); void send(answer); } }} />}
+                {pending?.type === "date" && <input className="assistant-date-picker" type="date" aria-label={t("assistant.chooseDate")} value={/^\d{4}-\d{2}-\d{2}$/.test(input) ? input : ""} onChange={e => setInput(e.target.value)} />}
+              </fieldset>
+              {info && <button type="button" className="assistant-text-button" onClick={() => setShowInfo(!showInfo)} aria-expanded={showInfo}>{t("assistant.info")}</button>}
+              {showInfo && <p className="assistant-help">{info}</p>}
+            </>}
+            {error && <div id="assistant-error" role="alert" className="assistant-error"><strong>{t("assistant.needsClarification")}</strong><p>{error}</p>{pending?.required && <p>{t("assistant.requiredHelp")}</p>}</div>}
+            <div className="assistant-status" role="status" aria-live="polite">{busy ? <span className="assistant-thinking"><AiIcon className="h-4 w-4" />{t("assistant.thinking")}</span> : !error && notice ? <span><CheckIcon className="h-4 w-4" />{notice}</span> : null}</div>
           </div>
-        )}
-
-        {screen === "question" && pending && (
-          <div className="mt-4 space-y-3">
-            {typeof pending.goods === "string" && pending.goods && (
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                {pending.goods}
-              </p>
-            )}
-            <div className="flex items-start gap-2">
-              <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{questionTitle()}</p>
-              {infoText() && (
-                <button
-                  type="button"
-                  onClick={() => setShowInfo((value) => !value)}
-                  aria-label={t("assistant.info")}
-                  aria-expanded={showInfo}
-                  className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-slate-300 text-[11px] font-semibold text-slate-500 hover:border-slate-400 hover:text-slate-700 dark:border-slate-600 dark:text-slate-400 dark:hover:text-slate-200"
-                >
-                  i
-                </button>
-              )}
-            </div>
-            {showInfo && infoText() && (
-              <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                {infoText()}
-              </p>
-            )}
-            {questionReason() && (
-              <p className="text-xs text-slate-500 dark:text-slate-400">{questionReason()}</p>
-            )}
-            {options.length > 0 ? (
-              <div className="space-y-1.5" role="radiogroup" aria-label={questionTitle()}>
-                {options.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    role="radio"
-                    aria-checked={choice === option.value}
-                    onClick={() => setChoice(option.value)}
-                    className={`block w-full rounded-lg border px-3 py-2 text-left text-sm transition ${
-                      choice === option.value
-                        ? "border-brand-500 bg-brand-50 text-brand-800 ring-1 ring-brand-500 dark:bg-brand-950/50 dark:text-brand-200"
-                        : "border-slate-200 text-slate-700 hover:border-slate-300 dark:border-slate-700 dark:text-slate-200 dark:hover:border-slate-600"
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            ) : isAddressField ? (
-              <AddressTextarea
-                value={freeText}
-                onChange={setFreeText}
-                textareaClassName="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 min-h-[64px]"
-              />
-            ) : isLocationField ? (
-              <LocationInput
-                value={freeText}
-                onChange={setFreeText}
-                types={locationTypes}
-                includeAddresses={modality === "road" || modality === "multimodal"}
-              />
-            ) : pending.type === "date" ? (
-              <input
-                type="date"
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-                value={freeText}
-                onChange={(event) => setFreeText(event.target.value)}
-              />
-            ) : (
-              <input
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-                value={freeText}
-                placeholder={t("assistant.answerPlaceholder")}
-                onChange={(event) => setFreeText(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") submit();
-                }}
-              />
-            )}
-          </div>
-        )}
-
-        {screen === "ready" && (
-          <p className="mt-4 rounded-lg bg-emerald-50 px-3 py-3 text-sm text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
-            {t("assistant.ready")}
-          </p>
-        )}
-
-        {error && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{error}</p>}
-
-        <div className="mt-5 flex items-center gap-2">
-          <button
-            type="button"
-            onClick={goBack}
-            disabled={busy || history.length === 0}
-            className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-          >
-            {t("assistant.previous")}
-          </button>
-          {skippable && screen === "question" && (
-            <button
-              type="button"
-              onClick={() => void send("skip")}
-              disabled={busy}
-              className="rounded-lg border border-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-            >
-              {t("assistant.skip")}
-            </button>
-          )}
-          {screen === "ready" ? (
-            <button
-              type="button"
-              onClick={onClose}
-              className="ml-auto rounded-lg bg-brand-600 px-5 py-2 text-sm font-medium text-white hover:bg-brand-700"
-            >
-              {t("assistant.done")}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={submit}
-              disabled={busy || (screen === "describe" ? !describe.trim() : !answer)}
-              className="ml-auto rounded-lg bg-brand-600 px-5 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
-            >
-              {screen === "describe" ? t("assistant.start") : t("assistant.next")}
-            </button>
-          )}
         </div>
+        <aside className="assistant-summary" aria-label={t("assistant.summary")}><h3>{t("assistant.summary")}</h3>{summary}</aside>
       </div>
+      <footer className="assistant-footer"><div className="assistant-footer-left"><button type="button" disabled={busy || !history.length} className="assistant-secondary" onClick={goBack}>{t("assistant.previous")}</button>{screen === "question" && pending?.required === false && <button type="button" disabled={busy} className="assistant-text-button" onClick={() => void send("overslaan")}>{t("assistant.skip")}</button>}</div>
+        {screen === "ready" ? <button type="button" disabled={busy} className="assistant-primary" onClick={() => { onClose(); onReview?.(); }}>{t("assistant.done")}<ArrowRightIcon className="h-4 w-4" /></button>
+          : <button type="button" disabled={busy || !answer} className="assistant-primary" onClick={() => void send(answer)}>{t(screen === "describe" ? "assistant.start" : "assistant.next")}<ArrowRightIcon className="h-4 w-4" /></button>}
+      </footer>
     </div>
-  );
+  </div>, document.body);
 }

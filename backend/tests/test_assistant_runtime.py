@@ -211,17 +211,15 @@ def goods_state():
              "field": "goods_dimensions", "required": False})
 
 
-def test_the_model_reads_a_spoken_measurement_the_patterns_cannot(db, monkeypatch):
-    """A measurement nobody writes as numbers — "a euro pallet, chest high" —
-    is exactly what a language model is for. What it returns is three numbers
-    and nothing else, and those go through the same validation as typed ones."""
+def test_the_model_cannot_turn_chest_height_into_an_exact_measurement(db, monkeypatch):
+    """The previous test blessed a fabricated 140 cm. A comparison to a
+    person's body supplies no measured height and must now prompt again."""
     state, pending = goods_state()
-    fake_model(monkeypatch, lambda system, user, schema, **_: {
+    fake_model(monkeypatch, lambda *args, **kwargs: {
         "length_cm": 120, "width_cm": 80, "height_cm": 140})
     result = step(state, "een europallet, borsthoog gestapeld", pending, db, "nl")
-    line = result["state"]["draft_lines"][0]
-    assert (line["length_cm"], line["width_cm"], line["height_cm"]) == (120.0, 80.0, 140.0)
-    assert line["weight_total_kg"] == 8601.6
+    assert any(e["kind"] == "clarify" for e in result["events"])
+    assert "height_cm" not in result["state"]["draft_lines"][0]
 
 
 def test_a_measurement_the_model_invents_out_of_range_is_refused(db, monkeypatch):

@@ -172,9 +172,21 @@ jobs:
           context: .
           platforms: ${{ steps.plan.outputs.platforms }}
           push: ${{ steps.plan.outputs.publishing == 'true' }}
+          load: ${{ steps.plan.outputs.publishing == 'false' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: |
             type=gha,scope=${{ github.ref_name }}
             type=gha,scope=main
           cache-to: ${{ steps.plan.outputs.cache_to }}
+
+      - name: Check installed assistant runtime in container
+        if: steps.plan.outputs.publishing == 'false'
+        env:
+          IMAGE_TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          image_tag="$(printf '%s\n' "$IMAGE_TAGS" | head -n 1)"
+          docker run --rm --entrypoint python \
+            -e PYTHONPATH=/app/backend \
+            -v "$PWD/scripts/check_assistant_runtime.py:/tmp/check_assistant_runtime.py:ro" \
+            "$image_tag" /tmp/check_assistant_runtime.py

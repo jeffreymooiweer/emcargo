@@ -17,10 +17,13 @@ pipeline left it.
 from __future__ import annotations
 
 import json
+import math
 import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
+
+from app.services.assistant.understanding import (ALTERNATIVE, NEGATED, NUMBER, unsure, number, stated_number)
 
 _INSTRUCTIONS_PATH = (
     Path(__file__).resolve().parents[2] / "config" / "goods_instructions.json"
@@ -88,7 +91,7 @@ _WEIGHT = re.compile(rf"({_NUMBER})\s*(kg|kilo|kilogram|kilogramme[s]?|t|ton|ton
                      re.IGNORECASE)
 _TO_KG = {"kg": 1.0, "kilo": 1.0, "kilogram": 1.0, "kilogramme": 1.0,
           "kilogrammes": 1.0, "t": 1000.0, "ton": 1000.0, "tonne": 1000.0,
-          "tonnes": 1000.0, "tonnen": 1000.0}
+          "tonnes": 1000.0, "tonnen": 1000.0, "g": 0.001, "gram": 0.001, "grams": 0.001, "gramme": 0.001, "grammes": 0.001}
 
 
 def parse_dimensions(text: str) -> dict[str, float] | None:
@@ -98,7 +101,10 @@ def parse_dimensions(text: str) -> dict[str, float] | None:
     per measurement counts for that one. Without any unit the numbers are
     centimetres, the same as the wizard's own columns.
     """
-    match = _DIMENSIONS.search(text or "")
+    if unsure(text) or NEGATED.search(text) or re.search(r"-\s*\d", text):
+        return None
+    matches = list(_DIMENSIONS.finditer(text or ""))
+    match = matches[0] if len(matches) == 1 else None
     if not match:
         return None
     numbers = [match.group(1), match.group(3), match.group(5)]
@@ -112,7 +118,7 @@ def parse_dimensions(text: str) -> dict[str, float] | None:
             value = float(number.replace(",", ".")) * factor
         except ValueError:  # pragma: no cover - the regex only matches numbers
             return None
-        if value <= 0:
+        if not math.isfinite(value) or not 0 < value <= 100_000:
             return None
         values.append(round(value, 2))
     return {"length_cm": values[0], "width_cm": values[1], "height_cm": values[2]}
@@ -121,19 +127,24 @@ def parse_dimensions(text: str) -> dict[str, float] | None:
 def parse_weight_kg(text: str) -> float | None:
     """One weight out of a spoken answer, in kilograms. A bare number is
     kilograms; tonnes are converted."""
-    if _DIMENSIONS.search(text or ""):
-        # Three measurements are not a weight, however they are phrased.
+    if unsure(text) or NEGATED.search(text) or ALTERNATIVE.search(text) or re.search(r"-\s*\d", text):
         return None
-    match = _WEIGHT.search(text or "")
-    if not match:
+    if _DIMENSIONS.search(text):
         return None
-    try:
-        value = float(match.group(1).replace(",", "."))
-    except ValueError:  # pragma: no cover - the regex only matches numbers
+    # Prefer the number carrying a mass unit; a package count is not mass.
+    pattern = re.compile(rf"({NUMBER})\s*(kilogrammes?|kilograms?|kilogram|kilo|kg|grams?|grammes?|g|tonnes?|tonnen|ton|t)\b", re.I)
+    matches = list(pattern.finditer(text))
+    if len(matches) == 1:
+        match = matches[0]
+        value = number(match.group(1))
+        factor = _TO_KG.get(match.group(2).lower(), 1.0)
+    elif not matches:
+        value, factor = number(text.strip()), 1.0
+    else:
         return None
-    factor = _TO_KG.get((match.group(2) or "kg").lower(), 1.0)
-    weight = value * factor
-    return round(weight, 3) if weight > 0 else None
+    weight = value * factor if value is not None else 0
+    return round(weight, 3) if math.isfinite(weight) and 0 < weight <= 1e9 else None
+
 
 
 #: What the model may say about a measurement, and nothing else: three
@@ -162,7 +173,7 @@ def dimensions_from_model(text: str) -> dict[str, float] | None:
     measurements or nothing."""
     from app.services.assistant import runtime
 
-    if not runtime.installed():
+    if unsure(text) or len(re.findall(NUMBER, text)) < 3 or not runtime.installed():
         return None
     result = runtime.extract_json(DIMENSIONS_PROMPT, text, DIMENSIONS_SCHEMA)
     if not result:
@@ -173,7 +184,12 @@ def dimensions_from_model(text: str) -> dict[str, float] | None:
             value = float(result.get(key))
         except (TypeError, ValueError):
             return None
-        if not 0 < value <= 100_000:
+        if not math.isfinite(value) or not 0 < value <= 100_000:
+            return None
+        # A vague comparison such as "chest high" supplies no measurement.
+        # Conversions are accepted only when the corresponding source number
+        # is explicit. The model cannot turn an estimate into measured fact.
+        if not any(stated_number(text, value / factor) for factor in (0.1, 1, 100)):
             return None
         values[key] = round(value, 2)
     return values

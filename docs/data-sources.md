@@ -265,7 +265,7 @@ to come from the sources above.
 
 The interface and toast icons now use original, hand-written geometry from
 `frontend/src/components/icons.tsx`, on one 24px grid with a 1.7px stroke.
-The existing assistant mark in `AiIcon.tsx` retains its attribution. The
+Since v2.5.0 the compass in `AiIcon.tsx` is also original geometry. The
 historical sources below remain documented, and the Legal page retains its
 credits.
 

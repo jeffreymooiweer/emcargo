@@ -208,6 +208,7 @@ export const api = {
     state: AssistantState;
     pending: AssistantPending | null;
     language: string;
+    action?: "answer" | "revise" | "optional" | "add_goods";
   }) =>
     request<AssistantStepResult>("/assistant/step", {
       method: "POST",
@@ -1347,6 +1348,7 @@ export interface AssistantState {
   doc_values?: Record<string, string>;
   selected_docs?: string[] | null;
   skipped_questions?: string[];
+  include_optional?: boolean;
 }
 
 export interface AssistantPending {
@@ -1368,10 +1370,20 @@ export interface AssistantEvent {
   [key: string]: unknown;
 }
 
+export interface AssistantReview {
+  facts: (AssistantPending & { value: unknown; editable?: boolean })[];
+  remaining_required: number;
+  optional_count: number;
+  documents: string[];
+  has_dangerous_goods: boolean;
+  deferred_count: number;
+}
+
 export interface AssistantStepResult {
   state: AssistantState;
   events: AssistantEvent[];
   pending: AssistantPending | null;
+  review?: AssistantReview;
 }
 
 export interface CalcResult {
