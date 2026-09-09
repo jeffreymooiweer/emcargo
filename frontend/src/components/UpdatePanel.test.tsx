@@ -41,10 +41,12 @@ it('keeps an unreachable release check distinct from an up-to-date installation'
 });
 
 it('explains the installation prerequisite and prevents an impossible apply', async () => {
-  vi.mocked(api.updateCapability).mockResolvedValue({ ...ability, available: false, apply_enabled: false, reason: 'switch_off' });
+  vi.mocked(api.updateCapability).mockResolvedValue({ ...ability, available: false, socket: false, reason: 'no_socket' });
   await setup();
   expect(screen.getByRole('button', { name: 'settings.updateApplyNow' })).toBeDisabled();
-  expect(screen.getByText('settings.updateReasonSwitchOff')).toBeInTheDocument();
+  expect(screen.getByText('settings.updateReasonNoSocket')).toBeInTheDocument();
+  expect(screen.getByText('volumes: - /var/run/docker.sock:/var/run/docker.sock')).toBeInTheDocument();
+  expect(screen.queryByText(/UPDATE_APPLY_ENABLED/)).not.toBeInTheDocument();
   expect(api.updateApply).not.toHaveBeenCalled();
 });
 

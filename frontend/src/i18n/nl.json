@@ -393,10 +393,9 @@
     "updateFailed": "De laatste update is niet gelukt: {{error}} De vorige versie draait gewoon door.",
     "updateTimeout": "De nieuwe versie antwoordde niet binnen tien minuten. Controleer de container op de server.",
     "updateEnableApply": "Updaten vanuit de app inschakelen",
-    "updateEnableApplyHow": "Mount de Docker-socket, zet de omgevingsvariabele aan en herstart de container eenmalig; daarna verschijnt hier een updateknop:",
+    "updateEnableApplyHow": "Bijwerken vanuit de app staat standaard aan. Koppel de Docker-socket en herstart de container eenmalig:",
     "updateSocketWarning": "Let op: wie de Docker-socket mount, geeft deze container feitelijk beheerdersrechten op de hele server.",
-    "updateReasonNoSocket": "De schakelaar staat aan, maar er is geen Docker-socket in de container gemount — voeg de volume-regel hierboven toe en herstart de container.",
-    "updateReasonSwitchOff": "Bijwerken vanuit de app is nog niet ingeschakeld. Voeg UPDATE_APPLY_ENABLED=true toe aan de containerinstellingen en herstart de container.",
+    "updateReasonNoSocket": "De Docker-koppeling ontbreekt. Voeg de socket toe via de installatie-instructies om vanuit EMCargo bij te werken.",
     "tabMaintenance": "Onderhoud",
     "updateReasonPermission": "De socket is gemount, maar de app mag hem niet openen. Dit is opgelost sinds v1.135.0 — werk de container nog één keer handmatig bij en herstart.",
     "updateReasonContainerNotFound": "De socket werkt, maar de app kan de eigen container niet terugvinden bij de Docker-daemon.",
@@ -1499,7 +1498,7 @@
     "setupNeeded": "Instelling nodig",
     "loadingCapability": "Mogelijkheden ophalen…",
     "setup": "Installatie-instructies",
-    "unraid": "Unraid: voeg bij de container de variabele UPDATE_APPLY_ENABLED met waarde true toe en koppel /var/run/docker.sock als pad aan dezelfde containerlocatie. Pas de container toe. Daarna verschijnt de updateknop zodra een nieuwe release beschikbaar is."
+    "unraid": "Unraid: koppel /var/run/docker.sock aan dezelfde locatie in de container en pas de container toe. De updateknop is daarna beschikbaar zodra er een nieuwe versie is."
   },
   "dgFocus": {
     "title": "Gevaarlijke goederen",

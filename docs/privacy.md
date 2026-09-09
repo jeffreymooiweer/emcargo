@@ -82,10 +82,10 @@ traffic, and after it the assistant runs entirely locally. Never installing it i
 default, and the assistant works without it.
 
 **The in-app update** pulls the newer EMCargo image from GHCR, and only
-when an administrator presses the update button — which only exists where the
-operator explicitly enabled applying updates (`UPDATE_APPLY_ENABLED` plus a mounted
-Docker socket, see [Configuration](configuration.md#updating-from-inside-the-application)).
-Off by default; nothing about your shipments travels with the pull.
+when an administrator confirms an update. This action is enabled by default on
+supported installations with a mounted Docker socket; see
+[Configuration](configuration.md#updating-from-inside-the-application).
+Updates never install automatically; nothing about your shipments travels with the pull.
 
 **The UN card download** happens only when an administrator clicks *check* or
 *download* under **Settings → UN Cards**: the server asks GitHub's public release

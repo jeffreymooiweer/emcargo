@@ -393,10 +393,9 @@
     "updateFailed": "Das letzte Update ist fehlgeschlagen: {{error}} Die vorherige Version läuft weiter.",
     "updateTimeout": "Die neue Version hat nicht innerhalb von zehn Minuten geantwortet. Prüfen Sie den Container auf dem Server.",
     "updateEnableApply": "Aktualisieren aus der App aktivieren",
-    "updateEnableApplyHow": "Docker-Socket einbinden, Umgebungsvariable setzen und den Container einmal neu starten; danach erscheint hier eine Update-Schaltfläche:",
+    "updateEnableApplyHow": "Updates innerhalb der App sind standardmäßig aktiviert. Binden Sie den Docker-Socket ein und starten Sie den Container einmal neu:",
     "updateSocketWarning": "Achtung: Wer den Docker-Socket einbindet, gibt diesem Container faktisch Administratorrechte über den ganzen Server.",
-    "updateReasonNoSocket": "Der Schalter ist an, aber es ist kein Docker-Socket in den Container gemountet — fügen Sie die Volume-Zeile oben hinzu und starten Sie den Container neu.",
-    "updateReasonSwitchOff": "Die Installation in der App ist noch nicht aktiviert. Fügen Sie UPDATE_APPLY_ENABLED=true zu den Container-Einstellungen hinzu und starten Sie ihn neu.",
+    "updateReasonNoSocket": "Die Docker-Verbindung fehlt. Fügen Sie den Socket gemäß der Installationsanleitung hinzu, um EMCargo aus der App heraus zu aktualisieren.",
     "tabMaintenance": "Wartung",
     "updateReasonPermission": "Der Socket ist eingebunden, aber die App darf ihn nicht öffnen. Seit v1.135.0 behoben — den Container einmal manuell aktualisieren und neu starten.",
     "updateReasonContainerNotFound": "Der Socket funktioniert, aber die App findet ihren eigenen Container beim Docker-Daemon nicht.",
@@ -1499,7 +1498,7 @@
     "setupNeeded": "Einrichtung erforderlich",
     "loadingCapability": "Möglichkeiten werden geprüft…",
     "setup": "Installationsanleitung",
-    "unraid": "Unraid: Fügen Sie die Container-Variable UPDATE_APPLY_ENABLED mit dem Wert true hinzu und binden Sie /var/run/docker.sock unter demselben Container-Pfad ein. Übernehmen Sie die Container-Einstellungen. Bei einer neuen Version erscheint dann die Update-Schaltfläche."
+    "unraid": "Unraid: Binden Sie /var/run/docker.sock unter demselben Container-Pfad ein und übernehmen Sie die Container-Einstellungen. Die Update-Schaltfläche ist danach verfügbar, sobald eine neue Version vorliegt."
   },
   "dgFocus": {
     "title": "Gefährliche Güter",

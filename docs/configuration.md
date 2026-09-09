@@ -211,27 +211,26 @@ takes effect on the next restart.
 |---|---|---|
 | `UPDATE_CHECK_ENABLED` | Ask GitHub whether a newer release exists, when an administrator is signed in | `true` |
 | `UPDATE_CHECK_TIMEOUT_SECONDS` | HTTP timeout for that one request | `8` |
-| `UPDATE_APPLY_ENABLED` | Allow the administrator to update and restart from the settings screen (needs the Docker socket, below) | `false` |
 | `INSTALL_METHOD` | How this installation runs: `docker` (the image), `native` (the systemd service of `deploy/native`) or `kubernetes` (`deploy/kubernetes`). Decides only what the settings screen says about updating: the routes that are not Docker have no in-app updater and the screen names theirs instead | `docker` |
 | `UPDATE_APPLY_PULL_TIMEOUT_SECONDS` | How long the image pull may take before the update is abandoned | `600` |
 
 The check only tells the administrator there is something to pull. Off means EMCargo
-never contacts GitHub; the switch also sits on the settings screen under **Outbound
-connections** and is read per request, so flipping it needs no restart.
+never contacts GitHub for release checks; the switch also sits under **Settings →
+Updates** and is read per request, so flipping it needs no restart.
 
 ### Updating from inside the application
 
-A container cannot swap its own image — unless the operator hands it the Docker API.
-With both of these in the compose file (or as extra parameters on Unraid):
+In-app updates are enabled by default for administrators. The retired
+`UPDATE_APPLY_ENABLED` variable is ignored, even when an older template sets it
+to `false`. A supported Docker installation still needs access to the Docker API.
+Mount its socket in the compose file (or as a path mapping on Unraid):
 
 ```yaml
-environment:
-  - UPDATE_APPLY_ENABLED=true
 volumes:
   - /var/run/docker.sock:/var/run/docker.sock
 ```
 
-the settings screen's **Updating** section grows an **Update and restart** button
+The settings screen's **Updates** section offers an **Update and restart** button
 whenever a newer release exists. The application runs as uid 1000 while the socket
 belongs to root (Unraid) or the docker group (most distributions); the container's
 start script joins the app user to the socket's own group id before dropping

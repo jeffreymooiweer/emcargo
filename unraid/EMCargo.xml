@@ -30,6 +30,5 @@
   <Config Name="ADMIN_PASSWORD" Target="ADMIN_PASSWORD" Default="" Mode="" Description="Bootstrap admin password" Type="Variable" Display="always" Required="true" Mask="true"/>
   <Config Name="PUID" Target="PUID" Default="1000" Mode="" Description="User ID for /data volume permissions" Type="Variable" Display="advanced" Required="false" Mask="false">1000</Config>
   <Config Name="PGID" Target="PGID" Default="1000" Mode="" Description="Group ID for /data volume permissions" Type="Variable" Display="advanced" Required="false" Mask="false">1000</Config>
-  <Config Name="In-app updates" Target="UPDATE_APPLY_ENABLED" Default="false" Mode="" Description="Enable updating from Settings / Updates. Also requires the Docker socket path below; this grants control over the Docker host." Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
   <Config Name="Docker socket (optional)" Target="/var/run/docker.sock" Default="" Mode="rw" Description="Optional: set the host path to /var/run/docker.sock to allow in-app updates. Grants Docker host control; only enable for a trusted installation." Type="Path" Display="advanced" Required="false" Mask="false"/>
 </Container>

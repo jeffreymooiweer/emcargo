@@ -1008,13 +1008,13 @@ export interface UpdateStatus {
 /** Whether this installation can replace its own container, and if not,
  *  which of the operator's prerequisites is missing. */
 export interface UpdateCapability {
+  /** Compatibility field; installation capability is reported by available. */
   apply_enabled: boolean;
   socket: boolean;
   container: string | null;
   image: string | null;
   available: boolean;
   reason:
-    | "switch_off"
     | "no_socket"
     | "socket_permission"
     | "container_not_found"

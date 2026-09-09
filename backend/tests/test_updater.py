@@ -1,4 +1,4 @@
-"""In-app updating: capable only where the operator said so, honest always.
+"""In-app updating: ready when the installation supports it, honest always.
 
 The swap itself needs a real Docker daemon and is exercised in life; what
 these tests hold is everything around it — the capability answer for every
@@ -30,17 +30,33 @@ def make_client(handler) -> httpx.Client:
                         base_url="http://docker")
 
 
-def test_capability_reports_the_switch_first(data_dir, monkeypatch):
-    monkeypatch.delenv("UPDATE_APPLY_ENABLED", raising=False)
+@pytest.mark.parametrize("legacy_switch", [None, "false", "true"])
+def test_capability_is_ready_without_an_environment_opt_in(data_dir, tmp_path, monkeypatch, legacy_switch):
+    """Installed Unraid templates carried an explicit false value. Merely
+    changing a default would leave those administrators blocked after updating.
+    Capability must now depend on the real Docker prerequisites, and observing
+    it must never start an update by itself.
+    """
+    if legacy_switch is None:
+        monkeypatch.delenv("UPDATE_APPLY_ENABLED", raising=False)
+    else:
+        monkeypatch.setenv("UPDATE_APPLY_ENABLED", legacy_switch)
     get_settings.cache_clear()
+    _socket(tmp_path, monkeypatch)
+    monkeypatch.setattr(updater, "own_container_id", lambda client: "a" * 64)
+
+    def handler(request):
+        assert request.method == "GET"
+        return httpx.Response(200, json={"Config": {"Image": updater.IMAGE_REPOSITORY + ":latest"}})
+
+    monkeypatch.setattr(updater, "docker_client", lambda: make_client(handler))
     ability = updater.capability()
-    assert ability["available"] is False
-    assert ability["reason"] == "switch_off"
+    assert ability["apply_enabled"] is True
+    assert ability["available"] is True
+    assert ability["reason"] is None
 
 
 def test_capability_reports_a_missing_socket(data_dir, tmp_path, monkeypatch):
-    monkeypatch.setenv("UPDATE_APPLY_ENABLED", "true")
-    get_settings.cache_clear()
     monkeypatch.setattr(updater, "DOCKER_SOCKET", tmp_path / "no-socket")
     ability = updater.capability()
     assert ability["available"] is False
@@ -54,8 +70,6 @@ def _socket(tmp_path, monkeypatch):
 
 
 def test_capability_refuses_a_foreign_image(data_dir, tmp_path, monkeypatch):
-    monkeypatch.setenv("UPDATE_APPLY_ENABLED", "true")
-    get_settings.cache_clear()
     _socket(tmp_path, monkeypatch)
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -70,12 +84,10 @@ def test_capability_refuses_a_foreign_image(data_dir, tmp_path, monkeypatch):
 
 
 def test_capability_names_a_socket_it_may_not_open(data_dir, tmp_path, monkeypatch):
-    """The Unraid case: socket mounted, switch on, but the socket is owned
+    """The Unraid case: socket mounted, but the socket is owned
     by root and the app runs as uid 1000. That must come back as its own
     reason — it used to surface as container_not_found, which sent the
     operator looking in the wrong place."""
-    monkeypatch.setenv("UPDATE_APPLY_ENABLED", "true")
-    get_settings.cache_clear()
     _socket(tmp_path, monkeypatch)
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -104,8 +116,6 @@ def test_own_container_id_verifies_against_the_daemon(monkeypatch):
 
 
 def test_start_update_pulls_and_hands_over(data_dir, tmp_path, monkeypatch):
-    monkeypatch.setenv("UPDATE_APPLY_ENABLED", "true")
-    get_settings.cache_clear()
     _socket(tmp_path, monkeypatch)
     own_id = "c" * 64
     calls: list[str] = []
@@ -156,8 +166,6 @@ def test_the_socket_is_not_mounted_twice(data_dir, tmp_path, monkeypatch):
     mode: ``/var/run/docker.sock:/var/run/docker.sock:rw``. Adding the plain
     form next to it gives two mounts on one destination, and the daemon
     refuses that with 400 "Duplicate mount point"."""
-    monkeypatch.setenv("UPDATE_APPLY_ENABLED", "true")
-    get_settings.cache_clear()
     _socket(tmp_path, monkeypatch)
     own_id = "d" * 64
     seen: list[str] = []
@@ -208,8 +216,6 @@ def test_bind_destination_reads_every_shape_docker_writes():
 
 
 def test_start_update_refuses_a_non_version(data_dir, tmp_path, monkeypatch):
-    monkeypatch.setenv("UPDATE_APPLY_ENABLED", "true")
-    get_settings.cache_clear()
     _socket(tmp_path, monkeypatch)
     monkeypatch.setattr(updater, "capability", lambda: {
         "available": True, "container": "c" * 64,
@@ -289,8 +295,7 @@ def test_the_api_refuses_without_capability(data_dir, monkeypatch):
     from app.core.deps import get_current_user
     from app.main import app
 
-    monkeypatch.delenv("UPDATE_APPLY_ENABLED", raising=False)
-    get_settings.cache_clear()
+    monkeypatch.setattr(updater, "DOCKER_SOCKET", data_dir / "missing-socket")
     app.dependency_overrides[get_current_user] = lambda: NS(
         id=1, username="admin", role="admin", active=True)
     try:
@@ -300,7 +305,32 @@ def test_the_api_refuses_without_capability(data_dir, monkeypatch):
             assert ability.json()["available"] is False
             response = client.post("/api/update-apply")
             assert response.status_code == 409
-            assert response.json()["detail"]["params"]["reason"] == "switch_off"
+            assert response.json()["detail"]["params"]["reason"] == "no_socket"
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.mark.parametrize("role", ["user", "super_user", "dg_specialist"])
+def test_updates_stay_admin_only_when_enabled_by_default(data_dir, monkeypatch, role):
+    """Removing the environment gate must not grant update access to an
+    operational role. The real route dependencies must reject the request
+    before probing Docker or starting a container replacement.
+    """
+    from fastapi.testclient import TestClient
+    from app.core.deps import get_current_user
+    from app.main import app
+
+    def unexpected_capability():
+        pytest.fail("A non-admin request reached the Docker capability probe")
+
+    monkeypatch.setattr(updater, "capability", unexpected_capability)
+    app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(
+        id=1, username="operator", role=role, active=True)
+    try:
+        with TestClient(app) as client:
+            assert client.get("/api/update-capability").status_code == 403
+            assert client.get("/api/update-state").status_code == 403
+            assert client.post("/api/update-apply").status_code == 403
     finally:
         app.dependency_overrides.pop(get_current_user, None)
 
@@ -349,8 +379,6 @@ def test_capability_accepts_our_repository_pinned_by_digest(data_dir, tmp_path, 
     """A digest pins an image; it does not change which repository owns it.
     Previously splitting at the digest colon classified official images as foreign.
     """
-    monkeypatch.setenv('UPDATE_APPLY_ENABLED', 'true')
-    get_settings.cache_clear()
     _socket(tmp_path, monkeypatch)
     monkeypatch.setattr(updater, 'own_container_id', lambda client: 'abc')
     monkeypatch.setattr(updater, 'docker_client', lambda: make_client(
