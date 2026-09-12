@@ -362,12 +362,12 @@
     "updateAuto": "Avec Watchtower cela se fait tout seul ; sous Unraid un clic sur « update » dans l'onglet Docker suffit.",
     "unCardsStoreTitle": "Jeu de fiches installé",
     "unCardsStoreIntro": "Cartes générées par EMCargo, installées sur le volume de données — pas dans l'image Docker.",
-    "unCardsNone": "Aucun jeu de cartes n'est encore installé. Téléchargez le jeu le plus récent ou importez un fichier ZIP téléchargé.",
+    "unCardsNone": "Aucun jeu de fiches n’est encore installé.",
     "unCardsInstalled": "Installé : {{count}} cartes, générées le {{generated}}",
     "unCardsImportedAt": "Importé le {{date}}",
     "unCardsCheck": "Vérifier s'il existe un nouveau jeu",
     "unCardsChecking": "Vérification…",
-    "unCardsNoRelease": "Aucun jeu de cartes publié n'a encore été trouvé.",
+    "unCardsNoRelease": "Aucun jeu de fiches n’a encore été publié. Réessayez plus tard ou importez un fichier ZIP.",
     "unCardsRemoteUnreachable": "GitHub est injoignable ; impossible de déterminer pour l'instant s'il existe un jeu plus récent.",
     "unCardsUpdateAvailable": "Un jeu plus récent est disponible ({{tag}}).",
     "unCardsUpToDate": "Le jeu installé est à jour ({{tag}}).",
@@ -845,6 +845,10 @@
     },
     "trips": {
       "empty": "Ajoutez au moins un envoi au trajet."
+    },
+    "un_cards": {
+      "no_release": "Aucun jeu de fiches n’a encore été publié. Réessayez plus tard ou importez un fichier ZIP.",
+      "download_failed": "Le jeu de fiches n’a pas pu être téléchargé. Réessayez ou importez un fichier ZIP."
     }
   },
   "instructions": {

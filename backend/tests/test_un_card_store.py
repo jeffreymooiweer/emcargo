@@ -14,6 +14,7 @@ import zipfile
 from pathlib import Path
 
 import pytest
+import httpx
 from fastapi.testclient import TestClient
 
 from app.core.config import get_settings
@@ -175,6 +176,85 @@ def test_card_path_never_guesses(data_dir, tmp_path):
     assert un_card_store.card_path("1203", "IMDG") is None
     assert un_card_store.card_path("12030", "ADR") is None
     assert un_card_store.card_path("../etc", "ADR") is None
+
+
+def _published_release(**overrides):
+    return {
+        "tag_name": "un-cards-2026.09.12-1", "draft": False,
+        "prerelease": False, "published_at": "2026-09-12T12:00:00Z",
+        "assets": [{"name": un_card_store.PACKAGE_NAME, "size": 123,
+                    "browser_download_url": "https://github.com/jeffreymooiweer/emcargo/releases/download/un-cards-2026.09.12-1/emcargo-un-cards.zip"}],
+        **overrides,
+    }
+
+
+def _release_transport(monkeypatch, handler):
+    client_type = httpx.Client
+    monkeypatch.setattr(un_card_store.httpx, "Client", lambda **kwargs: client_type(
+        transport=httpx.MockTransport(handler), **kwargs))
+
+
+def test_app_releases_do_not_hide_an_older_card_set(monkeypatch):
+    """A still-current card set must remain downloadable after more than
+    one page of app releases; the two products share one release feed."""
+    seen = []
+
+    def respond(request):
+        seen.append(request.url.params["page"])
+        assert request.url.host == "api.github.com"
+        assert request.url.params["per_page"] == "100"
+        rows = ([{"tag_name": f"v2.{i}.0"} for i in range(100)]
+                if seen[-1] == "1" else [_published_release()])
+        return httpx.Response(200, json=rows)
+
+    _release_transport(monkeypatch, respond)
+    assert un_card_store.latest_remote()["tag"] == "un-cards-2026.09.12-1"
+    assert seen == ["1", "2"]
+
+
+def test_unpublished_or_incomplete_sets_are_not_download_candidates(monkeypatch):
+    """A draft, prerelease or package still being uploaded is not an
+    available set, even when its tag already looks like a card release."""
+    rows = [_published_release(draft=True), _published_release(prerelease=True),
+            _published_release(assets=[]), _published_release()]
+    _release_transport(monkeypatch, lambda request: httpx.Response(200, json=rows))
+    assert un_card_store.latest_remote()["available"] is True
+    rows.pop()
+    assert un_card_store.latest_remote() == {"available": False}
+
+
+def test_missing_release_has_its_own_failure(monkeypatch, tmp_path):
+    monkeypatch.setattr(un_card_store, "latest_remote", lambda: {"available": False})
+    with pytest.raises(un_card_store.UnCardReleaseUnavailable):
+        un_card_store.download_latest_package(tmp_path / "cards.zip")
+    assert not (tmp_path / "cards.zip").exists()
+
+
+def test_missing_release_and_network_failure_remain_distinct(data_dir, monkeypatch):
+    """The screenshot showed an English error after a known-empty lookup.
+    A missing publication now has its own translated message; a broken
+    connection must never be presented as proof that no set exists."""
+    from types import SimpleNamespace
+    app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(
+        id=1, username="ada", role="admin", active=True)
+    try:
+        with TestClient(app) as client:
+            monkeypatch.setattr(un_card_store, "latest_remote", lambda: {"available": False})
+            response = client.post("/api/un-cards/download-latest")
+            assert response.status_code == 404
+            assert response.json()["detail"]["code"] == "un_cards.no_release"
+
+            def disconnected():
+                raise httpx.ConnectError("offline")
+
+            monkeypatch.setattr(un_card_store, "latest_remote", disconnected)
+            remote = client.get("/api/un-cards/status?remote=true").json()["remote"]
+            assert remote["reachable"] is False
+            response = client.post("/api/un-cards/download-latest")
+            assert response.status_code == 502
+            assert response.json()["detail"]["code"] == "un_cards.download_failed"
+    finally:
+        app.dependency_overrides.clear()
 
 
 # --- the endpoints are the administrator's only -------------------------------

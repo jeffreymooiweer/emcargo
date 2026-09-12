@@ -362,12 +362,12 @@
     "updateAuto": "Met Watchtower gaat dit vanzelf; op Unraid volstaat één klik op 'update' in het Docker-tabblad.",
     "unCardsStoreTitle": "Geïnstalleerde kaartenset",
     "unCardsStoreIntro": "Door EMCargo gegenereerde kaarten, geïnstalleerd op het datavolume — geen onderdeel van het Docker-image.",
-    "unCardsNone": "Er is nog geen kaartenset geïnstalleerd. Haal de nieuwste set op of importeer een gedownload ZIP-bestand.",
+    "unCardsNone": "Er is nog geen kaartenset geïnstalleerd.",
     "unCardsInstalled": "Geïnstalleerd: {{count}} kaarten, gegenereerd {{generated}}",
     "unCardsImportedAt": "Geïmporteerd {{date}}",
     "unCardsCheck": "Controleren op nieuwe set",
     "unCardsChecking": "Controleren…",
-    "unCardsNoRelease": "Er is nog geen gepubliceerde kaartenset gevonden.",
+    "unCardsNoRelease": "Er is nog geen kaartenset gepubliceerd. Probeer het later opnieuw of importeer een ZIP-bestand.",
     "unCardsRemoteUnreachable": "GitHub is niet bereikbaar; of er een nieuwere set is, is nu niet vast te stellen.",
     "unCardsUpdateAvailable": "Er staat een nieuwere set klaar ({{tag}}).",
     "unCardsUpToDate": "De geïnstalleerde set is actueel ({{tag}}).",
@@ -845,6 +845,10 @@
     },
     "trips": {
       "empty": "Voeg ten minste één zending toe aan de rit."
+    },
+    "un_cards": {
+      "no_release": "Er is nog geen kaartenset gepubliceerd. Probeer het later opnieuw of importeer een ZIP-bestand.",
+      "download_failed": "De kaartenset kon niet worden gedownload. Probeer het opnieuw of importeer een ZIP-bestand."
     }
   },
   "instructions": {
