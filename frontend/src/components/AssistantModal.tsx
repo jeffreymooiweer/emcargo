@@ -20,6 +20,7 @@ interface Props {
   modality?: string;
 }
 const copy = <T,>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
+const PLAIN_QUESTIONS = new Set(["consignor_name", "consignor_address", "consignee_name", "consignee_address", "carrier_name", "loading_point", "discharge_point", "loading_date"]);
 
 /** A focused shipment interview, with an inspectable working draft.
  * Successful turns are saved in the ordinary wizard. Failed interpretations
@@ -40,6 +41,8 @@ export default function AssistantModal({ open, onClose, buildState, onApplyState
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [availability, setAvailability] = useState<"checking" | "ready" | "missing" | "error">("checking");
+  const [statusAttempt, setStatusAttempt] = useState(0);
   const dialog = useRef<HTMLDivElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const sequence = useRef(0);
@@ -74,6 +77,7 @@ export default function AssistantModal({ open, onClose, buildState, onApplyState
       const failure = result.events.find(event => event.kind === "clarify" || event.kind === "not_understood");
       if (failure) {
         setError(errorFor(failure));
+        if (failure.reason === "unknown") setShowInfo(true);
         // A stale question is the only failure that requires a new question.
         if (failure.reason === "stale") { setPending(result.pending); setScreen(result.pending?.scope === "goods_intake" ? "describe" : result.pending ? "question" : "ready"); }
         return;
@@ -84,7 +88,7 @@ export default function AssistantModal({ open, onClose, buildState, onApplyState
       setPending(result.pending);
       setScreen(result.pending?.scope === "goods_intake" ? "describe" : result.pending ? "question" : "ready");
       if (action !== "revise") callbacks.current.onApplyState(copy(result.state));
-      setInput("");
+      setInput(action === "revise" ? String(target?.value ?? "") : "");
       setChoice("");
       setShowInfo(false);
       const answered = result.events.filter(event => event.kind === "answered");
@@ -94,8 +98,11 @@ export default function AssistantModal({ open, onClose, buildState, onApplyState
         : result.events.some(event => event.kind === "un_confirmed") ? t("assistant.unConfirmed", { un: String(result.events.find(e => e.kind === "un_confirmed")?.un) })
         : result.events.some(event => event.kind === "un_dismissed") ? t("assistant.unDismissed") : "");
 
-    } catch {
-      if (sequence.current === request) setError(t("assistant.problem.connection"));
+    } catch (cause) {
+      if (sequence.current === request) setError(t(
+        cause && typeof cause === "object" && "code" in cause && cause.code === "assistant.model_required"
+          ? "assistant.modelRequired" : "assistant.problem.connection",
+      ));
     } finally {
       if (sequence.current === request) { inFlight.current = false; setBusy(false); }
     }
@@ -114,13 +121,29 @@ export default function AssistantModal({ open, onClose, buildState, onApplyState
     const initial = copy(callbacks.current.buildState());
     setWorking(initial); setHistory([]); setPending(null); setReview(undefined);
     setInput(""); setChoice(""); setError(""); setNotice(""); setShowInfo(false); setScreen("describe");
-    if (initial.draft_lines?.length) void send("", "answer", undefined, initial);
+    setAvailability("checking");
+    const statusRequest = ++sequence.current;
+    void api.assistantStatus().then(status => {
+      if (sequence.current !== statusRequest) return;
+      if (!status.installed || !status.available) { setAvailability("missing"); return; }
+      setAvailability("ready");
+      if (initial.draft_lines?.length) void send("", "answer", undefined, initial);
+    }).catch(() => {
+      if (sequence.current === statusRequest) setAvailability("error");
+    });
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") { event.preventDefault(); callbacks.current.onClose(); }
       if (event.key !== "Tab") return;
       const items = Array.from(dialog.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), summary, [tabindex="0"]') ?? [])
-        .filter(el => !el.closest("details:not([open])") || el.tagName === "SUMMARY");
+        .filter(el => {
+          for (let node: HTMLElement | null = el; node; node = node.parentElement) {
+            if (node.tagName === "DETAILS" && !node.hasAttribute("open") && !node.querySelector(":scope > summary")?.contains(el)) return false;
+            const style = window.getComputedStyle(node);
+            if (node.hidden || style.display === "none" || style.visibility === "hidden") return false;
+          }
+          return true;
+        });
       const first = items[0], last = items[items.length - 1];
       if (event.shiftKey && (document.activeElement === first || !items.includes(document.activeElement as HTMLElement))) { event.preventDefault(); last?.focus(); }
       else if (!event.shiftKey && (document.activeElement === last || !dialog.current?.contains(document.activeElement))) { event.preventDefault(); first?.focus(); }
@@ -133,15 +156,15 @@ export default function AssistantModal({ open, onClose, buildState, onApplyState
     };
     // A fresh opening deliberately reads the latest manual wizard edits.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, statusAttempt]);
 
   useLayoutEffect(() => {
     if (!open) return;
     // Focus before paint: a delayed focus callback could interrupt someone
     // already typing in the address suggestions of the next question.
-    if (screen === "describe") dialog.current?.querySelector<HTMLTextAreaElement>("textarea")?.focus();
+    if (screen === "describe" && availability === "ready") dialog.current?.querySelector<HTMLTextAreaElement>("textarea")?.focus();
     else heading.current?.focus();
-  }, [open, screen, pending?.scope, pending?.field, pending?.line_id]);
+  }, [open, availability, screen, pending?.scope, pending?.field, pending?.line_id]);
 
   function goBack() {
     const snapshot = history[history.length - 1];
@@ -159,6 +182,7 @@ export default function AssistantModal({ open, onClose, buildState, onApplyState
     ? candidates.length === 1 ? t("assistant.unConfirmOne", candidates[0]) : t("assistant.unConfirmMany")
     : pending?.scope === "goods_weight_basis" ? t("assistant.weightBasisQuestion", { weight: pending.weight })
     : pending?.scope === "goods_quantity" ? t("assistant.quantityQuestion", { unit: unitLabel(pending.unit) })
+    : pending?.scope === "doc_question" && PLAIN_QUESTIONS.has(String(pending.field)) ? t(`assistant.questionFor.${pending.field}`)
     : L(pending?.simple) || t("assistant.question", { label: L(pending?.label) || pending?.field });
   const options = pending?.scope === "un_confirm"
     ? candidates.length === 1 ? [{ value: "ja", label: t("assistant.yes") }, { value: "nee", label: t("assistant.no") }]
@@ -182,9 +206,15 @@ export default function AssistantModal({ open, onClose, buildState, onApplyState
     {!goods.length && <p className="assistant-empty">{t("assistant.summaryEmpty")}</p>}
     {goods.map(line => <div className="assistant-cargo" key={String(line.id)}>
       <div className="assistant-cargo-title"><span>{String(line.description ?? "")}</span>
-        <button type="button" disabled={busy} className="assistant-edit" onClick={() => edit({ scope: "goods_quantity", field: "quantity", line_id: line.id })} aria-label={t("assistant.editQuantity", { goods: String(line.description ?? "") })}>{t("assistant.edit")}</button></div>
+        <button type="button" disabled={busy} className="assistant-edit" onClick={() => edit({ scope: "goods_quantity", field: "quantity", line_id: line.id, value: line.quantity_unconfirmed ? "" : line.quantity })} aria-label={t("assistant.editQuantity", { goods: String(line.description ?? "") })}>{t("assistant.edit")}</button></div>
       <p>{line.quantity_unconfirmed ? t("assistant.quantityMissing") : `${line.quantity} ${unitLabel(line.unit)}`}</p>
-      {line.weight_total_kg != null && <p className="assistant-measure">{Number(line.weight_total_kg).toLocaleString(i18n.language, { maximumFractionDigits: 3 })} kg <span>· {t(line.weight_each_kg != null ? "assistant.statedWeight" : "assistant.calculatedWeight")}</span></p>}
+      {line.unconfirmed_weight_kg != null ? <p className="assistant-measure">{t("assistant.weightAwaitingBasis", { weight: Number(line.unconfirmed_weight_kg).toLocaleString(i18n.language) })}</p>
+        : line.weight_total_kg != null && <p className="assistant-measure">{Number(line.weight_total_kg).toLocaleString(i18n.language, { maximumFractionDigits: 3 })} kg <span>· {t(line.weight_each_kg != null ? "assistant.statedWeight" : "assistant.calculatedWeight")}</span></p>}
+      <details className="assistant-cargo-actions"><summary>{t("assistant.measurements")}</summary>
+        {line.length_cm != null && line.width_cm != null && line.height_cm != null && <p>{[line.length_cm, line.width_cm, line.height_cm].map(value => Number(value).toLocaleString(i18n.language)).join(" × ")} cm</p>}
+        <button type="button" disabled={busy} className="assistant-edit" aria-label={`${t("assistant.editWeight")} · ${line.description}`} onClick={() => edit({ scope: "goods_question", field: "goods_weight_each", line_id: line.id })}>{t("assistant.editWeight")}</button>
+        <button type="button" disabled={busy} className="assistant-edit" aria-label={`${t("assistant.editDimensions")} · ${line.description}`} onClick={() => edit({ scope: "goods_question", field: "goods_dimensions", line_id: line.id })}>{t("assistant.editDimensions")}</button>
+      </details>
       {line.confirmed_un ? <span className="assistant-un">UN {String(line.confirmed_un)}</span> : null}
     </div>)}
     {documentFacts.length > 0 && <dl className="assistant-facts">{documentFacts.map(fact => <div key={fact.field}>
@@ -198,6 +228,14 @@ export default function AssistantModal({ open, onClose, buildState, onApplyState
   return createPortal(<div className="assistant-backdrop" data-testid="assistant-backdrop" onClick={onClose}>
     <div ref={dialog} role="dialog" aria-modal="true" aria-labelledby="assistant-title" className="assistant-dialog" data-busy={busy} onClick={event => event.stopPropagation()}>
       <header className="assistant-header"><div className="assistant-mark"><AiIcon className="h-7 w-7" /></div><div><h2 id="assistant-title">{t("assistant.title")}</h2><p>{t("assistant.subtitle")}</p></div><button type="button" className="assistant-close" aria-label={t("assistant.close")} onClick={onClose}><CloseIcon className="h-5 w-5" /></button></header>
+      {availability !== "ready" ? <div className="assistant-availability">
+        <h3 ref={heading} tabIndex={-1}>{t(availability === "checking" ? "assistant.checkingModel" : availability === "missing" ? "assistant.modelTitle" : "assistant.statusFailed")}</h3>
+        <p role="status">{t(availability === "checking" ? "assistant.checkingModelHint" : availability === "missing" ? "assistant.modelRequired" : "assistant.problem.connection")}</p>
+        <div className="assistant-availability-actions">
+          <button type="button" className="assistant-primary" onClick={onClose}>{t("assistant.continueManually")}</button>
+          {availability !== "checking" && <button type="button" className="assistant-secondary" onClick={() => setStatusAttempt(attempt => attempt + 1)}>{t("assistant.retryStatus")}</button>}
+        </div>
+      </div> : <>
       <ol className="assistant-stages" aria-label={t("assistant.progress")}>{["brief", "cargo", "details", "review"].map((key, i) => <li key={key} data-active={i === section} data-complete={i < section} aria-current={i === section ? "step" : undefined}><span>{i < section ? <CheckIcon className="h-3 w-3" /> : i + 1}</span>{t(`assistant.stage.${key}`)}</li>)}</ol>
       <div className="assistant-layout">
         <div className="assistant-main">
@@ -244,6 +282,7 @@ export default function AssistantModal({ open, onClose, buildState, onApplyState
         {screen === "ready" ? <button type="button" disabled={busy} className="assistant-primary" onClick={() => { onClose(); onReview?.(); }}>{t("assistant.done")}<ArrowRightIcon className="h-4 w-4" /></button>
           : <button type="button" disabled={busy || !answer} className="assistant-primary" onClick={() => void send(answer)}>{t(screen === "describe" ? "assistant.start" : "assistant.next")}<ArrowRightIcon className="h-4 w-4" /></button>}
       </footer>
+      </>}
     </div>
   </div>, document.body);
 }

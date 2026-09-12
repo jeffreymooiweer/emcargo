@@ -35,6 +35,64 @@ NUMBER_WORDS = {
     "duizend": 1000, "thousand": 1000, "tausend": 1000, "mille": 1000,
 }
 
+QUANTITY_WORD = r"(?:\d+(?:[.,]\d+)?|" + "|".join(
+    sorted(NUMBER_WORDS, key=len, reverse=True)
+) + ")"
+AMBIGUOUS_QUANTITY = re.compile(
+    rf"(?<![\w.,/\-]){QUANTITY_WORD}\s*(?:of|or|oder|ou|[-–/])\s*{QUANTITY_WORD}(?![\w.,/\-])", re.I,
+)
+_QUANTITY_ANSWER = re.compile(
+    r"^(?:(?:(?:het|dat|dit)\s+(?:zijn|is)|er\s+(?:zijn|gaan)|"
+    r"there\s+are|they\s+are|it\s+is|es\s+sind|das\s+sind|"
+    r"il\s+y\s+a|ce\s+sont)\s+)?"
+    rf"(?P<count>{QUANTITY_WORD})(?:\s+(?P<unit>[\w-]+))?"
+    r"(?:\s+(?:in\s+totaal|totaal|in\s+total|total|insgesamt|au\s+total))?[.! ]*$", re.I,
+)
+
+
+def quantity_answer(text: str, expected_unit: str | None = None) -> float | None:
+    """Read an answer about one quantity, including a spoken count and unit.
+
+    A package unit must agree with the question. Extra goods, another number
+    or a measurement cannot accidentally change the current line's count.
+    """
+    from app.services.units import get_unit
+
+    if unsure(text) or NEGATED.search(text) or AMBIGUOUS_QUANTITY.search(text):
+        return None
+    match = _QUANTITY_ANSWER.fullmatch(text.strip())
+    if not match:
+        return None
+    word = match.group("count").casefold()
+    value = float(NUMBER_WORDS[word]) if word in NUMBER_WORDS else number(word)
+    unit_text = match.group("unit")
+    if unit_text:
+        unit = get_unit(unit_text)
+        if unit is None or (expected_unit and unit != get_unit(expected_unit)):
+            return None
+    return value
+
+
+def quantity_statement(text: str) -> bool:
+    """A count with a known goods unit is not a company name or address."""
+    match = _QUANTITY_ANSWER.fullmatch(text.strip())
+    return bool(match and match.group("unit") and quantity_answer(text) is not None)
+
+
+def quantity_prefix(text: str) -> tuple[str, str] | None:
+    """Split a leading package count from its measurements, never a mass.
+
+    When someone answers "8 pallets, total 800 kg", keeping only the mass
+    leaves the old package count in place and changes the per-package weight.
+    """
+    from app.services.units import Dimension, get_unit
+
+    match = re.match(rf"^({QUANTITY_WORD}\s+([\w-]+))\b(.*)$", text.strip(), re.I | re.S)
+    unit = get_unit(match.group(2)) if match else None
+    if not match or not unit or unit.dimension != Dimension.COUNT:
+        return None
+    return match.group(1), match.group(3).strip(" ,;.")
+
 
 def unsure(text: str) -> bool:
     return bool(UNKNOWN.search(text) or UNCERTAIN.search(text))

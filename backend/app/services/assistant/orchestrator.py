@@ -22,6 +22,7 @@ from app.services.assistant import runtime
 from app.services.assistant.understanding import (
     UNKNOWN, NEGATED, ALTERNATIVE, NUMBER, NUMBER_WORDS, unsure, number,
     grounded, stated_number, labelled_facts,
+    AMBIGUOUS_QUANTITY, quantity_answer, quantity_statement, quantity_prefix,
 )
 from app.services.assistant.goods import (
     dimensions_from_model,
@@ -387,18 +388,21 @@ _INTAKE_SCHEMA = {
     "type": "object",
     "properties": {
         "fields": {"type": "object", "properties": {field: {"type": "string"} for field in _INTAKE_FIELDS},
-                   "required": list(_INTAKE_FIELDS), "additionalProperties": False},
+                   "additionalProperties": False},
         "lines": _LINES_SCHEMA["properties"]["lines"],
     },
     "required": ["fields", "lines"], "additionalProperties": False,
 }
 
 _INTAKE_PROMPT = (
-    "Extract shipment facts. Copy exact source words. Empty string means not stated. "
+    "Extract shipment facts. Copy exact source spans. Omit fields that are not stated. "
     "FIRST fill fields: consignor_name = sender company; consignor_address = sender street/city; "
     "consignee_name = receiver company; consignee_address = receiver street/city; "
     "carrier_name = transport company; loading_point = origin; discharge_point = destination; "
     "purchase_order = order number. NEVER put these facts in lines. "
+    "An address needs both the street/number and the stated town, copied as one source span. "
+    "Keep connecting words: 'Kade 1 in Rotterdam' is a full span; 'Kade 1' alone is incomplete. "
+    "Leave an incomplete address empty. An order number is NOT a shipment reference or booking number. "
     "THEN lines: goods description, quantity, unit. A company, place, address or order is NOT goods. "
     "Example: '4 pallets books from Example Ltd, Dock 1 London to Demo GmbH in Berlin, carrier Road Ltd, order 42' "
     "means consignor_name='Example Ltd', consignor_address='Dock 1 London', "
@@ -608,7 +612,7 @@ def _apply_goods_message(
     does.
     """
     events: list[dict[str, Any]] = []
-    if unsure(message) or re.search(r"(?:^|\s)-\d", message) or re.fullmatch(r"(?:hallo|hoi|hello|hi|test|bedankt|dank u|thanks|bonjour|salut|danke)[.! ]*", message, re.I):
+    if unsure(message) or AMBIGUOUS_QUANTITY.search(message) or re.search(r"(?:^|\s)-\d", message) or re.fullmatch(r"(?:hallo|hoi|hello|hi|test|bedankt|dank u|thanks|bonjour|salut|danke)[.! ]*", message, re.I):
         return [{"kind": "clarify", "reason": "intake"}]
 
     def fill(fields: dict[str, str]) -> None:
@@ -633,6 +637,10 @@ def _apply_goods_message(
     # are deterministic and exact, so they run before any model.
     explicit, message = labelled_facts(message)
     for key, value in list(explicit.items()):
+        if key.endswith("_address") and not _address_has_detail(value):
+            return [{"kind": "clarify", "field": key, "reason": "address"}]
+        if key.endswith("_name") and quantity_statement(value):
+            return [{"kind": "clarify", "field": key, "reason": "mixed"}]
         if key == "loading_date":
             explicit[key] = _read_date(value) or (
                 (_dt.date.today() + _dt.timedelta(days=_RELATIVE_DATES[value.casefold()])).isoformat()
@@ -662,13 +670,16 @@ def _apply_goods_message(
     # model call. Rich prose can use the optional local reader.
     simple = bool(message) and not re.search(r"[,;]|\b(?:BV|GmbH|Ltd|vervoerder|carrier|order)\b", message, re.I) and all("|" in part or _LEADING_COUNT.match(part)
                                    for part in _split_segments(message))
-    intake = _model_intake(message) if message and not simple else None
+    use_model = bool(message) and not simple and runtime.installed()
+    intake = _model_intake(message) if use_model else None
+    if use_model and intake is None:
+        return [{"kind": "clarify", "reason": "model_unavailable"}]
     if intake is not None:
         raw_lines, fields = intake
         rows = _intake_rows(raw_lines, fields, message)
         fill(fields)
         if not rows and not fields:
-            rows = None  # the model read nothing at all; the floor takes over
+            return [{"kind": "clarify", "reason": "intake"}]
     if rows is None:
         # The deterministic floor: "100 plates from Wezep to the port of
         # Rotterdam" answers two document questions before they are asked.
@@ -968,6 +979,15 @@ def _canonical_question(state: dict[str, Any], requested: dict[str, Any], db: Se
     fields still belong to the registry and DG preparation service.
     """
     key = _question_key(requested)
+    if requested.get("scope") == "goods_question" and requested.get("field") in goods_fields():
+        line = next((line for line in state.get("draft_lines", [])
+                     if line.get("id") == requested.get("line_id")), None)
+        if line is None:
+            return None
+        meta = goods_fields()[requested["field"]]
+        return {"scope": "goods_question", "field": requested["field"], "line_id": line["id"],
+                "goods": line.get("description"), "required": False, "options": [],
+                "label": meta.get("label"), "simple": meta.get("simple"), "help": meta.get("help")}
     found = next((q for q in _all_pending(state) if _question_key(q) == key), None)
     if found:
         return found
@@ -1221,9 +1241,10 @@ def _model_choice(pending: dict[str, Any], message: str) -> str | None:
 
 
 def _address_has_detail(text: str) -> bool:
-    # A model often repeated the destination city as the receiver's entire
-    # address. That would suppress the actual address question.
-    return bool(re.search(r"\d", text) and re.search(r"[a-zÀ-ÿ]", text, re.I)) or (
+    # Neither a city nor a bare street/number may suppress the full-address
+    # question. This is a completeness floor, not address verification.
+    words = re.findall(r"[^\W\d_]+", text, re.UNICODE)
+    return bool(re.search(r"\d", text) and len(words) >= 2) or (
         len(text.split()) >= 4 and ("," in text or "\n" in text))
 
 
@@ -1284,7 +1305,7 @@ def _apply_answer(
             return [{"kind": "not_understood"}]
         unit = get_unit(str(line.get("unit") or "pcs"))
         counted = unit is None or unit.dimension == Dimension.COUNT
-        value = number(text)
+        value = quantity_answer(text, str(line.get("unit") or "pcs"))
         if value is None or (counted and not value.is_integer()) or value <= 0:
             return [{"kind": "clarify", "field": "quantity", "example": "4"}]
         previous = float(line.get("quantity") or 0)
@@ -1380,7 +1401,32 @@ def _apply_answer(
                      if l.get("id") == pending.get("line_id")), None)
         if line is None:
             return [{"kind": "not_understood"}]
+        counted = quantity_prefix(text)
+        if counted:
+            events = _apply_answer(state, {"scope": "goods_quantity", "field": "quantity",
+                                           "line_id": line["id"], "required": True}, counted[0], language)
+            if any(event["kind"] == "clarify" for event in events) or not counted[1]:
+                return events
+            return events + _apply_answer(state, pending, counted[1], language)
         field = str(pending.get("field") or "")
+        measurements = parse_dimensions(text)
+        if measurements:
+            weight = parse_weight_kg(text)
+            mass_mentioned = bool(re.search(r"\b(?:kg|kilo|kilograms?|kilogrammes?|g|grams?|grammes?|tonnes?|tonnen|ton|t)\b", text, re.I))
+            if mass_mentioned and weight is None:
+                return [{"kind": "clarify", "field": "goods_weight_each", "example": "800 kg"}]
+            line.update(measurements)
+            events = [{"kind": "answered", "field": "goods_dimensions",
+                       "value": (f"{measurements['length_cm']:g} x {measurements['width_cm']:g}"
+                                 f" x {measurements['height_cm']:g} cm")}]
+            if weight is not None:
+                basis = _weight_basis(text)
+                if basis:
+                    _store_weight(line, weight, basis)
+                else:
+                    line["unconfirmed_weight_kg"] = weight
+                events.append({"kind": "answered", "field": "weight", "value": f"{weight:g} kg"})
+            return events
         if field == "goods_dimensions":
             # Deterministic reading first; the model only gets the answers the
             # regular expressions could not read, and every number it returns
@@ -1411,6 +1457,13 @@ def _apply_answer(
         return [{"kind": "answered", "field": field, "value": f"{weight:g} kg"}]
 
     if scope == "doc_question":
+        if quantity_statement(text):
+            matching = [line for line in state.get("draft_lines", [])
+                        if quantity_answer(text, str(line.get("unit") or "pcs")) is not None]
+            if len(matching) == 1:
+                return _apply_answer(state, {"scope": "goods_quantity", "field": "quantity",
+                                             "line_id": matching[0]["id"], "required": True}, text, language)
+            return [{"kind": "clarify", "reason": "wrong_field", "field": pending.get("field")}]
         value = re.sub(r"^(?:(?:dat|dit|het) is(?: het bedrijf)?|it is|it's|that is|das ist|c'est|il s'agit de)\s+", "", text, flags=re.I)
         if str(pending.get("field", "")).endswith("_name") and (";" in value or re.search(r"\b(?:van|from|von|depuis)\b.+\b(?:naar|to|nach|vers)\b", value, re.I)):
             return [{"kind": "clarify", "reason": "mixed"}]

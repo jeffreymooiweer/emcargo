@@ -129,8 +129,14 @@ def parse_weight_kg(text: str) -> float | None:
     kilograms; tonnes are converted."""
     if unsure(text) or NEGATED.search(text) or ALTERNATIVE.search(text) or re.search(r"-\s*\d", text):
         return None
-    if _DIMENSIONS.search(text):
-        return None
+    has_dimensions = bool(_DIMENSIONS.search(text))
+    if has_dimensions:
+        if parse_dimensions(text) is None:
+            return None
+        # A complete dimension triple and an explicit mass can coexist in
+        # one answer. Removing just that triple prevents its digits from
+        # becoming a mass while preserving the stated weight.
+        text = _DIMENSIONS.sub("", text).strip(" ,;.")
     # Prefer the number carrying a mass unit; a package count is not mass.
     pattern = re.compile(rf"({NUMBER})\s*(kilogrammes?|kilograms?|kilogram|kilo|kg|grams?|grammes?|g|tonnes?|tonnen|ton|t)\b", re.I)
     matches = list(pattern.finditer(text))
@@ -138,7 +144,7 @@ def parse_weight_kg(text: str) -> float | None:
         match = matches[0]
         value = number(match.group(1))
         factor = _TO_KG.get(match.group(2).lower(), 1.0)
-    elif not matches:
+    elif not matches and not has_dimensions:
         value, factor = number(text.strip()), 1.0
     else:
         return None

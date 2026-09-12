@@ -357,10 +357,10 @@ The final screen is a handoff for review in the ordinary wizard, not transport
 release. Calculation, document validation, saving and the configured DG Specialist
 release still happen through the application's existing workflow.
 
-The assistant works without a model. An administrator can install the optional
-local model under **Settings → AI assistant**. It helps read richer prose while
-simple counted descriptions, familiar answers and uncertain replies are handled
-without a model round trip. Model output must be traceable to the source text;
+The assistant requires an installed local model. An administrator installs it
+under **Settings → AI assistant**. Until then, continue manually in the wizard.
+Once installed, exact readers handle simple counted descriptions, familiar
+answers and uncertain replies without a model round trip. Model output must be traceable to the source text;
 it cannot supply a missing address, a guessed measurement or a regulatory choice.
 A paraphrased choice understood only by the model is shown as a suggestion. It
 is recorded only when you explicitly select the intended option.
@@ -564,7 +564,7 @@ rename it, remove it — its people and shipments then belong to none rather tha
 disappearing — and pick a department per user beside their role. **Maintenance** holds the things
 an administrator *does* rather than saves: updating, the **UN Cards** section where the
 card set is installed, checked for updates or removed (see [un-cards.md](un-cards.md)),
-and the assistant's optional local model. When the update check is on and a newer
+and the local model required to enable the optional assistant. When the update check is on and a newer
 release exists, administrators get a small dismissible note in the
 corner. The **Updates** panel carries a **check now** button and,
 on supported installations with Docker socket access (see

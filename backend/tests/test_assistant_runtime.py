@@ -122,11 +122,11 @@ def test_the_right_hash_is_accepted(tmp_path, monkeypatch):
     assert destination.read_bytes() == payload
 
 
-def test_without_an_install_the_status_says_deterministic():
+def test_without_an_install_the_assistant_is_unavailable():
     report = runtime.status()
-    assert report["mode"] == "deterministic"
+    assert report["mode"] == "unavailable"
     assert report["installed"] is False
-    assert report["available"] is True
+    assert report["available"] is False
 
 
 def fake_model(monkeypatch, extract):

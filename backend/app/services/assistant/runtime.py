@@ -9,9 +9,9 @@ download refuses to run rather than trust the network.
 
 The model's only job is translation (see the orchestrator): every call is
 constrained to a JSON schema by llama.cpp's grammar support, so output that
-is not the expected structure cannot exist. When the runtime is absent,
-downloading, or broken, the assistant keeps working on its deterministic
-floor — a runtime failure must never prevent guided shipment entry.
+is not the expected structure cannot exist. The assistant requires an installed
+local model. Exact readers avoid inference for simple answers once installed;
+ordinary manual shipment entry is independent of the model.
 """
 from __future__ import annotations
 
@@ -103,11 +103,12 @@ def installed() -> bool:
 def status() -> dict[str, Any]:
     config = sources()
     server_pin = (config.get("server") or {}).get(_arch()) or {}
+    is_installed = installed()
     return {
-        "available": True,
-        "mode": "model" if installed() else "deterministic",
-        "model": (config.get("model") or {}).get("name") if installed() else None,
-        "installed": installed(),
+        "available": is_installed,
+        "mode": "model" if is_installed else "unavailable",
+        "model": (config.get("model") or {}).get("name") if is_installed else None,
+        "installed": is_installed,
         "installable": bool(server_pin.get("sha256")
                             and (config.get("model") or {}).get("sha256")),
         "architecture": _arch(),

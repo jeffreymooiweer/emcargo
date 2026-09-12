@@ -341,9 +341,9 @@
     "sessionTimeout": "Session lifetime (minutes)",
     "sessionTimeoutHint": "How long someone stays signed in. 480 is one working day.",
     "assistantTitle": "AI assistant (local model)",
-    "assistantIntro": "The assistant always works; a local model only makes reading free text more flexible.",
+    "assistantIntro": "The assistant uses a local language model. Install it here to use the assistant. Your answers are processed locally.",
     "assistantMode": "Current mode",
-    "assistantDeterministic": "guided input (no model)",
+    "assistantDeterministic": "Not installed",
     "assistantInstall": "Download and enable model",
     "assistantRemove": "Remove model",
     "assistantDownloading": "Downloading and verifying…",
@@ -835,6 +835,9 @@
       "comment_required": "Explain what needs to be changed.",
       "already_decided": "This review already has a decision. Refresh the page.",
       "owner_required": "Only the submitter or admin can delete this review."
+    },
+    "assistant": {
+      "model_required": "An administrator can install the local language model in Settings. You can then use the assistant. You can enter your shipment manually in the wizard now."
     }
   },
   "instructions": {
@@ -977,7 +980,9 @@
       "weight_basis": "Do you mean total weight or weight per item? I want to avoid counting the quantity twice.",
       "reference": "I cannot find that earlier information yet. Please provide the requested detail directly.",
       "address": "I also need the address, beyond the town name. Provide the street and house number with the town, or look up the address.",
-      "confirm_choice": "Do you mean “{{choice}}”? Select that option if correct, or rephrase your answer. I have not recorded it yet."
+      "confirm_choice": "Do you mean “{{choice}}”? Select that option if correct, or rephrase your answer. I have not recorded it yet.",
+      "wrong_field": "This looks like a quantity. I cannot link it to one goods line. Edit the quantity on the correct line in your shipment summary.",
+      "model_unavailable": "The local language model could not process your description. Your text is kept. Try again or split the description into shorter parts."
     },
     "stage": {
       "brief": "Description",
@@ -988,7 +993,28 @@
     "weightBasisQuestion": "Is {{weight}} kg the total or the weight per item?",
     "weightTotal": "Total for this goods line",
     "weightEach": "Per item or package",
-    "quantityNeeded": "Enter the missing goods quantity first, or continue with the shipment assistant."
+    "quantityNeeded": "Enter the missing goods quantity first, or continue with the shipment assistant.",
+    "modelTitle": "The local language model is required",
+    "modelRequired": "An administrator can install the local language model in Settings. You can then use the assistant. You can enter your shipment manually in the wizard now.",
+    "checkingModel": "Preparing the assistant",
+    "checkingModelHint": "Checking whether the local language model is available.",
+    "statusFailed": "The assistant cannot be reached yet",
+    "continueManually": "Continue manually",
+    "retryStatus": "Try again",
+    "measurements": "Weight and dimensions",
+    "editWeight": "Edit weight",
+    "editDimensions": "Edit dimensions",
+    "weightAwaitingBasis": "{{weight}} kg — total or per item still to be confirmed",
+    "questionFor": {
+      "consignor_name": "Who instructs the carrier for this shipment?",
+      "consignor_address": "What is the sender’s full address?",
+      "consignee_name": "Who is the shipment for?",
+      "consignee_address": "What is the receiver’s full address?",
+      "carrier_name": "Which carrier is handling the transport?",
+      "loading_point": "Where will the goods be collected?",
+      "discharge_point": "Where should the goods be delivered?",
+      "loading_date": "On what date will the goods be collected?"
+    }
   },
   "whatsNew": {
     "title": "What's new",
