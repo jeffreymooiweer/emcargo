@@ -23,6 +23,7 @@ export interface DraftLine {
   quantity_unconfirmed?: boolean;
   weight_basis?: "each" | "total";
   stated_weight_kg?: number;
+  weight_total_kg?: number | "";
   unconfirmed_weight_kg?: number;
   unit: string;
   /** The form this commodity travels in: solid, stacked, loose bulk. Determines
@@ -327,9 +328,9 @@ export default function ReviewLinesPanel({
             <li key={line.id} className={"goods-row" + (open ? " goods-row-open" : "")}
               data-empty={!line.description.trim()}>
               <div className="goods-fields">
-                <span className="goods-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
                 <div className="goods-description">
-                  <EquipmentCombobox value={line.description}
+                  <label className="goods-field-label" htmlFor={`goods-description-${line.id}`}>{t("wizard.stageGoods")}</label>
+                  <EquipmentCombobox id={`goods-description-${line.id}`} value={line.description}
                     placeholder={t("review.simplePlaceholder")}
                     onChange={(value) => updateDraft(line.id, { description: value })}
                     inputRef={(element) => {

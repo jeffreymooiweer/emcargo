@@ -392,7 +392,7 @@ def build_bundle(payload: DocumentBundleRequest, db: Session) -> tuple[Path, str
             )
             if errors:
                 notes.append(f"{item.document_key}: not included, still incomplete: "
-                             + "; ".join(str(e) for e in errors[:3]))
+                             + "; ".join(str(e.get("message", e)) if isinstance(e, dict) else str(e) for e in errors[:3]))
                 continue
             out_path = _render_export(document, item, signature_png,
                                       _card_link_base(db))

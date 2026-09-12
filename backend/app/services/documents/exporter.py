@@ -1,4 +1,5 @@
 import os
+import math
 import re
 import tempfile
 from datetime import datetime
@@ -11,6 +12,7 @@ from openpyxl.utils import get_column_letter
 
 from app.services.documents.notices import OUTPUT_NOTICES
 from app.core.languages import normalise, pick
+from app.core.messages import detail as error_detail
 from app.services.documents import brand, customs_route
 from app.services.dg.autofill import adr_quantity, description_line
 from app.services.dg.database import get_un_entries, is_transport_forbidden
@@ -466,12 +468,23 @@ def validate_document(
     lines: list[dict[str, Any]],
     dangerous_goods: list[dict[str, Any]] | None,
     language: str = "nl",
-) -> tuple[list[str], list[str]]:
+) -> tuple[list[str | dict[str, Any]], list[str]]:
     """Return (blocking errors, warnings) for a document export."""
     lang = _lang(language)
-    errors: list[str] = []
+    errors: list[str | dict[str, Any]] = []
     warnings: list[str] = []
     customs_verdicts: dict[str, customs_route.Verdict] | None = None
+    if document.get("key") in {"cmr", "avc_waybill"}:
+        included = [line for line in lines if line.get("include", True)]
+        def positive(value: Any) -> bool:
+            try:
+                return math.isfinite(float(value)) and float(value) > 0
+            except (TypeError, ValueError):
+                return False
+        if not included or any(not str(line.get("description") or "").strip()
+                               or not positive(line.get("quantity"))
+                               or not positive(line.get("weight_total_kg")) for line in included):
+            errors.append(error_detail("documents.goods_incomplete"))
 
     for section in resolve_sections(document):
         for field in section.get("fields", []):

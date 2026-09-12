@@ -8,7 +8,7 @@
  * value/label split of the answers, and that a misunderstood answer neither
  * advances the survey nor grows the history.
  */
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -25,7 +25,7 @@ vi.mock("react-i18next", () => ({
 }));
 
 vi.mock("../api/client", () => ({
-  api: { assistantStep: vi.fn(), geoLocations: vi.fn(), geoAddress: vi.fn() },
+  api: { assistantStatus: vi.fn(), assistantStep: vi.fn(), geoLocations: vi.fn(), geoAddress: vi.fn() },
 }));
 
 const stepMock = api.assistantStep as ReturnType<typeof vi.fn>;
@@ -65,7 +65,7 @@ async function reachQuestion(onApplyState = vi.fn()) {
   stepMock.mockResolvedValueOnce(QUESTION);
   renderModal(onApplyState);
   await userEvent.type(
-    screen.getByLabelText("assistant.describeLabel"),
+    await screen.findByLabelText("assistant.describeLabel"),
     "1000 jerrycans diesel",
   );
   await userEvent.click(screen.getByRole("button", { name: "assistant.start" }));
@@ -74,6 +74,7 @@ async function reachQuestion(onApplyState = vi.fn()) {
 }
 
 beforeEach(() => {
+  vi.mocked(api.assistantStatus).mockReset().mockResolvedValue({ available: true, installed: true, mode: "model", model: "Local model", installable: true, architecture: "x86_64", download: { state: "idle", detail: "" }, running: false });
   stepMock.mockReset();
   geoLocationsMock.mockReset().mockResolvedValue({ results: [] });
   geoAddressMock.mockReset().mockResolvedValue({ results: [], available: true });
@@ -104,7 +105,7 @@ describe("AssistantModal", () => {
     const onApplyState = await reachQuestion();
     await userEvent.click(screen.getByRole("button", { name: "assistant.previous" }));
     // Back to the describe screen, with the pre-answer state re-applied.
-    expect(screen.getByLabelText("assistant.describeLabel")).toBeTruthy();
+    expect(await screen.findByLabelText("assistant.describeLabel")).toBeTruthy();
     expect(onApplyState).toHaveBeenLastCalledWith({ modality: "road", draft_lines: [] });
   });
 
@@ -147,7 +148,7 @@ describe("AssistantModal", () => {
       },
     });
     renderModal();
-    await userEvent.type(screen.getByLabelText("assistant.describeLabel"), "diesel");
+    await userEvent.type(await screen.findByLabelText("assistant.describeLabel"), "diesel");
     await userEvent.click(screen.getByRole("button", { name: "assistant.start" }));
     expect(await screen.findByText("Hoe gaat dit vervoerd worden?")).toBeTruthy();
     // The formal wording only appears after opening the info mark.
@@ -196,7 +197,7 @@ describe("AssistantModal", () => {
       },
     });
     renderModal();
-    await userEvent.type(screen.getByLabelText("assistant.describeLabel"), "4 pallets");
+    await userEvent.type(await screen.findByLabelText("assistant.describeLabel"), "4 pallets");
     await userEvent.click(screen.getByRole("button", { name: "assistant.start" }));
     expect(await screen.findByText("Hoe groot is één pallet?")).toBeTruthy();
     expect(screen.getByText("kalkzandsteen")).toBeTruthy();
@@ -224,7 +225,7 @@ describe("AssistantModal", () => {
       }],
     });
     renderModal();
-    await userEvent.type(screen.getByLabelText("assistant.describeLabel"), "staal");
+    await userEvent.type(await screen.findByLabelText("assistant.describeLabel"), "staal");
     await userEvent.click(screen.getByRole("button", { name: "assistant.start" }));
     const input = await screen.findByPlaceholderText("geo.locationPlaceholder");
     await userEvent.type(input, "rott");
@@ -261,7 +262,7 @@ describe("AssistantModal", () => {
       available: true,
     });
     renderModal();
-    await userEvent.type(screen.getByLabelText("assistant.describeLabel"), "staal");
+    await userEvent.type(await screen.findByLabelText("assistant.describeLabel"), "staal");
     await userEvent.click(screen.getByRole("button", { name: "assistant.start" }));
     const search = await screen.findByPlaceholderText("geo.addressPlaceholder");
     await userEvent.type(search, "kade 1");
@@ -288,9 +289,9 @@ describe("AssistantModal", () => {
       },
     });
     renderModal();
-    await userEvent.type(screen.getByLabelText("assistant.describeLabel"), "staal");
+    await userEvent.type(await screen.findByLabelText("assistant.describeLabel"), "staal");
     await userEvent.click(screen.getByRole("button", { name: "assistant.start" }));
-    await screen.findByText(/Datum van opmaak/);
+    await screen.findByText("assistant.questionFor.established_date");
     const picker = document.querySelector('input[type="date"]') as HTMLInputElement;
     expect(picker).toBeTruthy();
     fireEvent.change(picker, { target: { value: "2026-08-20" } });
@@ -304,7 +305,7 @@ describe("AssistantModal", () => {
   it("no pending question means the survey is done", async () => {
     stepMock.mockResolvedValueOnce({ state: {}, events: [{ kind: "ready", documents: [] }], pending: null });
     const { onClose } = renderModal();
-    await userEvent.type(screen.getByLabelText("assistant.describeLabel"), "staal");
+    await userEvent.type(await screen.findByLabelText("assistant.describeLabel"), "staal");
     await userEvent.click(screen.getByRole("button", { name: "assistant.start" }));
     expect(await screen.findByText("assistant.ready")).toBeTruthy();
     await userEvent.click(screen.getByRole("button", { name: "assistant.done" }));
@@ -359,7 +360,7 @@ it("ignores a late answer after the assistant closes", async () => {
   stepMock.mockReturnValue(new Promise(yes => { resolve = yes; }));
   const props = { onClose: vi.fn(), buildState: () => ({ modality: "road", draft_lines: [] }), onApplyState: vi.fn() };
   const view = render(<AssistantModal open {...props} />);
-  await userEvent.type(screen.getByLabelText("assistant.describeLabel"), "20 jerrycans diesel");
+  await userEvent.type(await screen.findByLabelText("assistant.describeLabel"), "20 jerrycans diesel");
   await userEvent.click(screen.getByRole("button", { name: "assistant.start" }));
   view.rerender(<AssistantModal open={false} {...props} />);
   await act(async () => resolve(QUESTION));
@@ -380,4 +381,106 @@ it("keeps keyboard focus inside the dialog and restores the trigger on close", a
   close.focus(); await userEvent.tab({ shift: true });
   expect(screen.getByRole("dialog")).toContainElement(document.activeElement as HTMLElement);
   view.unmount(); expect(trigger).toHaveFocus(); trigger.remove();
+});
+
+it("requires the installed local model before accepting any shipment text", async () => {
+  vi.mocked(api.assistantStatus).mockResolvedValueOnce({ available: false, installed: false, mode: "unavailable", model: null, installable: true, architecture: "x86_64", download: { state: "idle", detail: "" }, running: false });
+  const { onApplyState } = renderModal();
+  expect(await screen.findByText("assistant.modelRequired")).toBeInTheDocument();
+  expect(screen.queryByRole("textbox")).toBeNull();
+  expect(stepMock).not.toHaveBeenCalled();
+  expect(onApplyState).not.toHaveBeenCalled();
+  await userEvent.click(screen.getByRole("button", { name: "assistant.retryStatus" }));
+  expect(await screen.findByLabelText("assistant.describeLabel")).toBeInTheDocument();
+});
+
+it("does not send an existing draft until installation status is known", async () => {
+  let finish!: (value: Awaited<ReturnType<typeof api.assistantStatus>>) => void;
+  vi.mocked(api.assistantStatus).mockReturnValueOnce(new Promise(resolve => { finish = resolve; }));
+  const props = { onClose: vi.fn(), buildState: () => QUESTION.state, onApplyState: vi.fn() };
+  const view = render(<AssistantModal open {...props} />);
+  expect(stepMock).not.toHaveBeenCalled();
+  view.rerender(<AssistantModal open={false} {...props} />);
+  await act(async () => finish({ available: true, installed: true, mode: "model", model: "Local model", installable: true, architecture: "x86_64", download: { state: "idle", detail: "" }, running: false }));
+  expect(stepMock).not.toHaveBeenCalled();
+  expect(props.onApplyState).not.toHaveBeenCalled();
+});
+
+it("keeps the draft closed when the model status request fails", async () => {
+  vi.mocked(api.assistantStatus).mockRejectedValueOnce(new Error("private path"));
+  renderModal();
+  expect(await screen.findByText("assistant.statusFailed")).toBeInTheDocument();
+  expect(screen.queryByRole("textbox")).toBeNull();
+  expect(screen.queryByText("private path")).toBeNull();
+  expect(stepMock).not.toHaveBeenCalled();
+});
+
+it("explains model removal during a turn and preserves the typed answer", async () => {
+  await reachQuestion();
+  await userEvent.type(screen.getByLabelText("assistant.orDescribe"), "colli");
+  stepMock.mockRejectedValueOnce(Object.assign(new Error("local model removed"), { code: "assistant.model_required" }));
+  await userEvent.click(screen.getByRole("button", { name: "assistant.next" }));
+  expect(await screen.findByText("assistant.modelRequired")).toBeInTheDocument();
+  expect(screen.getByLabelText("assistant.orDescribe")).toHaveValue("colli");
+  expect(screen.getByRole("button", { name: "assistant.next" })).toBeDisabled();
+  expect(screen.getByLabelText("assistant.orDescribe")).toBeDisabled();
+  const calls = stepMock.mock.calls.length;
+  vi.mocked(api.assistantStatus).mockResolvedValueOnce({ available: false, installed: false, mode: "unavailable", model: null, installable: true, architecture: "x86_64", download: { state: "idle", detail: "" }, running: false });
+  await userEvent.click(screen.getByRole("button", { name: "assistant.retryStatus" }));
+  expect(screen.getByRole("button", { name: "assistant.next" })).toBeDisabled();
+  await userEvent.click(screen.getByRole("button", { name: "assistant.retryStatus" }));
+  expect(screen.getByLabelText("assistant.orDescribe")).toHaveValue("colli");
+  expect(screen.getByRole("button", { name: "assistant.next" })).toBeEnabled();
+  expect(stepMock).toHaveBeenCalledTimes(calls);
+});
+
+it("shows translated choices in the summary and reselects them when revised", async () => {
+  // The browser review exposed 'prepaid' in a Dutch shipment summary, and
+  // revision put that storage code in the free-text input instead of selecting
+  // the recorded option. Labels are for people; only the request uses codes.
+  const fact = { scope: "doc_question", field: "carriage_payment", label: { nl: "Betaling" }, value: "prepaid", options: ["prepaid"], option_labels: { prepaid: { nl: "Franco (afzender betaalt)" } } };
+  stepMock.mockResolvedValueOnce({ ...QUESTION, pending: null, review: { facts: [fact] } });
+  render(<AssistantModal open onClose={vi.fn()} buildState={() => QUESTION.state} onApplyState={vi.fn()} />);
+  const summary = await screen.findByRole("complementary", { name: "assistant.summary" });
+  expect(await within(summary).findByText("Franco (afzender betaalt)")).toBeVisible();
+  expect(within(summary).queryByText("prepaid")).toBeNull();
+  stepMock.mockResolvedValueOnce({ ...QUESTION, pending: fact });
+  await userEvent.click(within(summary).getByRole("button", { name: /assistant.editField/ }));
+  expect(await screen.findByRole("radio", { name: "Franco (afzender betaalt)" })).toBeChecked();
+  expect(screen.getByLabelText("assistant.orDescribe")).toHaveValue("");
+  stepMock.mockResolvedValueOnce({ ...QUESTION, pending: null });
+  await userEvent.click(screen.getByRole("button", { name: "assistant.next" }));
+  expect(stepMock).toHaveBeenLastCalledWith(expect.objectContaining({ message: "prepaid" }));
+});
+
+it("opens question-specific help when the user does not know the answer", async () => {
+  stepMock.mockResolvedValueOnce({ ...QUESTION, pending: { ...QUESTION.pending, help: { nl: "Find this on the packaging label." } } });
+  renderModal();
+  await userEvent.type(await screen.findByLabelText("assistant.describeLabel"), "20 jerrycans diesel");
+  await userEvent.click(screen.getByRole("button", { name: "assistant.start" }));
+  await screen.findByText(/Vervoerswijze/);
+  stepMock.mockResolvedValueOnce({ ...QUESTION, events: [{ kind: "clarify", reason: "unknown" }] });
+  await userEvent.type(screen.getByLabelText("assistant.orDescribe"), "ik weet het niet");
+  await userEvent.click(screen.getByRole("button", { name: "assistant.next" }));
+  expect(await screen.findByText(/Find this on the packaging label\./)).toBeVisible();
+  expect(screen.getByLabelText("assistant.orDescribe")).toHaveValue("ik weet het niet");
+});
+
+it("targets the selected goods line when editing weight from the summary", async () => {
+  const state = { modality: "road", draft_lines: [
+    { id: 1, description: "Machine parts", quantity: 4, unit: "pallet" },
+    { id: 7, description: "Books", quantity: 2, unit: "box" },
+  ] };
+  stepMock.mockResolvedValueOnce({ ...QUESTION, state });
+  const onApplyState = vi.fn();
+  render(<AssistantModal open onClose={vi.fn()} buildState={() => state} onApplyState={onApplyState} />);
+  await screen.findByText(/Vervoerswijze/);
+  onApplyState.mockClear();
+  const summary = await screen.findByRole("complementary", { name: "assistant.summary" });
+  await userEvent.click(within(summary).getAllByText("assistant.measurements")[1]);
+  stepMock.mockResolvedValueOnce({ state, events: [], pending: { scope: "goods_question", field: "goods_weight_each", line_id: 7, simple: { nl: "What does one box weigh?" } } });
+  await userEvent.click(within(summary).getByRole("button", { name: "assistant.editWeight · Books" }));
+  expect(stepMock).toHaveBeenLastCalledWith(expect.objectContaining({ action: "revise", pending: expect.objectContaining({ line_id: 7, field: "goods_weight_each" }) }));
+  expect(await screen.findByText("What does one box weigh?")).toBeInTheDocument();
+  expect(onApplyState).not.toHaveBeenCalled();
 });

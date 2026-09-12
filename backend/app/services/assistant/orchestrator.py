@@ -22,6 +22,7 @@ from app.services.assistant import runtime
 from app.services.assistant.understanding import (
     UNKNOWN, NEGATED, ALTERNATIVE, NUMBER, NUMBER_WORDS, unsure, number,
     grounded, stated_number, labelled_facts,
+    AMBIGUOUS_QUANTITY, quantity_answer, quantity_statement, quantity_prefix,
 )
 from app.services.assistant.goods import (
     dimensions_from_model,
@@ -122,7 +123,7 @@ _LEADING_COUNT = re.compile(rf"^({_COUNT_WORD})\s+(\S+)\s+(.+)$", re.IGNORECASE)
 #: Only these words separate goods; "of 25 l" and "at 200 litres each" are
 #: parts of the same item and must never become a line of their own.
 _SEGMENT_BOUNDARY = re.compile(
-    rf"(?:\b(?:en|and|und|et|plus)\b|,|;|&)\s+(?={_COUNT_WORD}\s+\S+\s+\S)",
+    rf"(?:\b(?:en|and|und|et|plus)\b|,|;|&)\s+(?={_COUNT_WORD}\s+[^\W\d_])",
     re.IGNORECASE,
 )
 
@@ -144,9 +145,8 @@ def _split_segments(message: str) -> list[str]:
 
     "1000 jerricans of petrol and a pallet of sand-lime brick" is two items,
     and putting them on one line loses the second one entirely. A cut is only
-    made where a separating word is followed by a count, a unit the catalogue
-    knows, and a description after it — so "of 25 l with petrol" and "at 200
-    litres each" stay part of the item they belong to.
+    made before a counted noun or a known unit with a description. Bare
+    measurements such as "and 200 litres" stay part of the existing item.
     """
     from app.services.units import get_unit
 
@@ -162,7 +162,10 @@ def _split_segments(message: str) -> list[str]:
                 break
             head, tail = pieces[-1][:match.start()].strip(), pieces[-1][match.end():].strip()
             unit_word = tail.split()[1] if len(tail.split()) > 1 else ""
-            if not head or get_unit(unit_word) is None:
+            unit = get_unit(unit_word)
+            # A bare measurement such as ', 80 grams' qualifies the goods.
+            # A counted noun such as '4 chairs' is a new goods line.
+            if not head or (unit is not None and len(tail.split()) < 3) or not unit_word.isalpha():
                 # Not a new item: leave the sentence as it stands.
                 break
             pieces[-1] = head
@@ -193,6 +196,12 @@ def _to_parser_row(segment: str) -> str:
             # the whole sentence became one piece, and 100 plates of steel
             # weighed 78.5 kg.
             return f"{match.group(2)} {match.group(3).strip()} | {count:g} | pcs"
+    noun = re.fullmatch(rf"({_COUNT_WORD})\s+([^\W\d_]+)[.! ]*", segment, re.I)
+    if noun:
+        from app.services.units import get_unit
+        count = _count_of(noun.group(1))
+        if count is not None and get_unit(noun.group(2)) is None:
+            return f"{noun.group(2)} | {count:g} | pcs"
     return segment
 
 
@@ -218,7 +227,7 @@ _INTENT_HEAD = re.compile(
 )
 _INTENT_TAIL = re.compile(
     r"\s+(?:laten vervoeren|laten transporteren|laten verschepen|"
-    r"vervoeren|versturen|verzenden|transporteren|"
+    r"vervoeren|sturen|versturen|verzenden|transporteren|"
     r"transported|shipped|versenden|verschicken|befördern|transportieren|expédier|envoyer|transporter)\b",
     re.IGNORECASE,
 )
@@ -286,6 +295,9 @@ def _resolve_location(text: str, modality: str, language: str) -> str | None:
     from app.services.geo.locations import search_locations
 
     kinds = [kind for pattern, kind in _LOCATION_KIND if pattern.search(text)]
+    if modality in {"road", "multimodal"} and not kinds:
+        # A city on a road route is not evidence of a particular terminal.
+        return None
     query = _LOCATION_FILLER.sub(" ", text)
     for pattern, _kind in _LOCATION_KIND:
         query = pattern.sub(" ", query)
@@ -344,7 +356,8 @@ def _split_route(message: str) -> tuple[str, str | None, str | None]:
     if not match:
         return message, None, None
     origin = match.group("origin").strip(" ,.")
-    destination = match.group("destination").strip(" ,.")
+    destination = re.split(r"(?<=[.!?])\s+", match.group("destination"))[0].strip(" ,.")
+    destination = _INTENT_TAIL.sub("", destination).strip(" ,.")
     if not origin or not destination:
         return message, None, None
     return message[:match.start()].strip(), origin, destination
@@ -387,18 +400,21 @@ _INTAKE_SCHEMA = {
     "type": "object",
     "properties": {
         "fields": {"type": "object", "properties": {field: {"type": "string"} for field in _INTAKE_FIELDS},
-                   "required": list(_INTAKE_FIELDS), "additionalProperties": False},
+                   "additionalProperties": False},
         "lines": _LINES_SCHEMA["properties"]["lines"],
     },
     "required": ["fields", "lines"], "additionalProperties": False,
 }
 
 _INTAKE_PROMPT = (
-    "Extract shipment facts. Copy exact source words. Empty string means not stated. "
+    "Extract shipment facts. Copy exact source spans. Omit fields that are not stated. "
     "FIRST fill fields: consignor_name = sender company; consignor_address = sender street/city; "
     "consignee_name = receiver company; consignee_address = receiver street/city; "
     "carrier_name = transport company; loading_point = origin; discharge_point = destination; "
     "purchase_order = order number. NEVER put these facts in lines. "
+    "An address needs both the street/number and the stated town, copied as one source span. "
+    "Keep connecting words: 'Kade 1 in Rotterdam' is a full span; 'Kade 1' alone is incomplete. "
+    "Leave an incomplete address empty. An order number is NOT a shipment reference or booking number. "
     "THEN lines: goods description, quantity, unit. A company, place, address or order is NOT goods. "
     "Example: '4 pallets books from Example Ltd, Dock 1 London to Demo GmbH in Berlin, carrier Road Ltd, order 42' "
     "means consignor_name='Example Ltd', consignor_address='Dock 1 London', "
@@ -447,6 +463,20 @@ def _model_intake(message: str) -> tuple[list[dict[str, Any]], dict[str, str]] |
             value = iso
         if field.endswith("_address") and not _address_has_detail(value):
             continue
+        if field.endswith("_name"):
+            # Grounding words is insufficient: a counted good or a route town
+            # is not evidence of a party's identity.
+            if re.match(rf"^{_COUNT_WORD}\s+", value, re.I):
+                continue
+            roles = {
+                "consignor_name": r"afzender|verzender|sender|consignor|absender|expéditeur",
+                "consignee_name": r"ontvanger|geadresseerde|receiver|consignee|empfänger|destinataire",
+                "carrier_name": r"vervoerder|carrier|frachtführer|transporteur",
+            }
+            named_role = re.search(r"\b(?:" + roles.get(field, r"(?!)") + r")\b\s*(?::|is|ist|est|=)?\s*" + re.escape(value), message, re.I)
+            company = re.search(r"\b(?:BV|B\.V\.|GmbH|Ltd|LLC|SARL|SA|NV)\b", value, re.I)
+            if not named_role and not company:
+                continue
         reference_labels = {"purchase_order": r"\b(?:order|opdracht|bestellnummer|commande)\b",
                             "shipment_reference": r"\b(?:ref|referentie|reference|referenz|référence)\b",
                             "booking_number": r"\b(?:booking|boeking|boekingsnummer|buchung|réservation)\b"}
@@ -572,7 +602,9 @@ def _intake_rows(
                                if get_unit(match.group(2)) is not None
                                else f"{match.group(2)} {match.group(3)}".strip())
             known = get_unit(unit)
-            rows.append(f"{description} | {quantity:g} | {known.code if known else (unit or 'pcs')}")
+            if unit and known is None and not grounded(description, unit):
+                continue
+            rows.append(f"{description} | {quantity:g} | {known.code if known else 'pcs'}")
         else:
             rows.append(_to_parser_row(description))
     return rows
@@ -608,7 +640,14 @@ def _apply_goods_message(
     does.
     """
     events: list[dict[str, Any]] = []
-    if unsure(message) or re.search(r"(?:^|\s)-\d", message) or re.fullmatch(r"(?:hallo|hoi|hello|hi|test|bedankt|dank u|thanks|bonjour|salut|danke)[.! ]*", message, re.I):
+    # Keep certain shipment facts when a separate sentence asks for help or
+    # states that a measurement is unknown. Uncertain counts remain blocked.
+    sentences = re.split(r"(?<=[.!?])\s+", message.strip())
+    if len(sentences) > 1:
+        message = " ".join(part for part in sentences if not (
+            unsure(part) and not re.search(r"\d|\b(?:" + "|".join(NUMBER_WORDS) + r")\b", part, re.I)
+        ))
+    if unsure(message) or AMBIGUOUS_QUANTITY.search(message) or re.search(r"(?:^|\s)-\d", message) or re.fullmatch(r"(?:hallo|hoi|hello|hi|test|bedankt|dank u|thanks|bonjour|salut|danke)[.! ]*", message, re.I):
         return [{"kind": "clarify", "reason": "intake"}]
 
     def fill(fields: dict[str, str]) -> None:
@@ -633,6 +672,10 @@ def _apply_goods_message(
     # are deterministic and exact, so they run before any model.
     explicit, message = labelled_facts(message)
     for key, value in list(explicit.items()):
+        if key.endswith("_address") and not _address_has_detail(value):
+            return [{"kind": "clarify", "field": key, "reason": "address"}]
+        if key.endswith("_name") and quantity_statement(value):
+            return [{"kind": "clarify", "field": key, "reason": "mixed"}]
         if key == "loading_date":
             explicit[key] = _read_date(value) or (
                 (_dt.date.today() + _dt.timedelta(days=_RELATIVE_DATES[value.casefold()])).isoformat()
@@ -660,20 +703,24 @@ def _apply_goods_message(
     rows: list[str] | None = None
     # Explicitly structured rows and simple counted descriptions need no
     # model call. Rich prose can use the optional local reader.
-    simple = bool(message) and not re.search(r"[,;]|\b(?:BV|GmbH|Ltd|vervoerder|carrier|order)\b", message, re.I) and all("|" in part or _LEADING_COUNT.match(part)
-                                   for part in _split_segments(message))
-    intake = _model_intake(message) if message and not simple else None
+    route_goods, route_origin, route_destination = _split_route(" " + message)
+    simple = bool(route_goods.strip()) and not re.search(r"\b(?:BV|GmbH|Ltd|vervoerder|carrier|order)\b", message, re.I) and all("|" in part or _to_parser_row(part) != part
+                                   for part in _split_segments(route_goods.strip()))
+    use_model = bool(message) and not simple and runtime.installed()
+    intake = _model_intake(message) if use_model else None
+    if use_model and intake is None:
+        return [{"kind": "clarify", "reason": "model_unavailable"}]
     if intake is not None:
         raw_lines, fields = intake
         rows = _intake_rows(raw_lines, fields, message)
         fill(fields)
         if not rows and not fields:
-            rows = None  # the model read nothing at all; the floor takes over
+            return [{"kind": "clarify", "reason": "intake"}]
     if rows is None:
         # The deterministic floor: "100 plates from Wezep to the port of
         # Rotterdam" answers two document questions before they are asked.
         # The phrase leaves the goods description either way.
-        message, origin, destination = _split_route(message)
+        message, origin, destination = _split_route(" " + message)
         if origin and destination:
             fill({"loading_point": origin, "discharge_point": destination})
         rows = [_to_parser_row(segment) for segment in _split_segments(message)]
@@ -761,7 +808,10 @@ def _goods_rows(state: dict[str, Any]) -> tuple[str, list[dict[str, Any]]]:
         if not description:
             continue
         if line.get("stated_weight_kg") and line.get("weight_basis"):
-            _store_weight(line, float(line["stated_weight_kg"]), line["weight_basis"])
+            # Recalculate the previously confirmed mass without discarding a
+            # newer answer that still needs total/per-item confirmation.
+            weight = float(line["stated_weight_kg"])
+            line["weight_each_kg"] = weight / float(line.get("quantity") or 1) if line["weight_basis"] == "total" else weight
         content = _clean(line.get("package_content")) or _dg_content(state, line)
         # The content was taken out of the description when the line was made;
         # the calculation needs it back to turn a count into a mass.
@@ -805,7 +855,19 @@ def _sync_goods(state: dict[str, Any], db: Session, language: str) -> None:
                       "transport_volume_m3", "material", "material_category",
                       "status", "messages"):
             draft[field] = line.get(field)
+        completed = set()
+        if all(draft.get(axis) for axis in ("length_cm", "width_cm", "height_cm")):
+            completed.add(f"goods:{draft.get('id')}:goods_dimensions")
+        if draft.get("stated_weight_kg") and not draft.get("unconfirmed_weight_kg"):
+            completed.add(f"goods:{draft.get('id')}:goods_weight_each")
+        if completed:
+            state["skipped_questions"] = [key for key in state.get("skipped_questions", []) if key not in completed]
         for question in goods_open_questions(line):
+            if (question["field"] == "goods_dimensions"
+                    and f"goods:{draft.get('id')}:goods_dimensions" in state.get("skipped_questions", [])
+                    and not line.get("weight_total_kg")):
+                question = {"field": "goods_weight_each", "required": False,
+                            "reason": "weight_unknown_material"}
             questions.append({"line_id": draft.get("id"),
                               "description": draft.get("description"), **question})
     state["_goods_questions"] = questions
@@ -968,6 +1030,15 @@ def _canonical_question(state: dict[str, Any], requested: dict[str, Any], db: Se
     fields still belong to the registry and DG preparation service.
     """
     key = _question_key(requested)
+    if requested.get("scope") == "goods_question" and requested.get("field") in goods_fields():
+        line = next((line for line in state.get("draft_lines", [])
+                     if line.get("id") == requested.get("line_id")), None)
+        if line is None:
+            return None
+        meta = goods_fields()[requested["field"]]
+        return {"scope": "goods_question", "field": requested["field"], "line_id": line["id"],
+                "goods": line.get("description"), "required": False, "options": [],
+                "label": meta.get("label"), "simple": meta.get("simple"), "help": meta.get("help")}
     found = next((q for q in _all_pending(state) if _question_key(q) == key), None)
     if found:
         return found
@@ -1221,9 +1292,10 @@ def _model_choice(pending: dict[str, Any], message: str) -> str | None:
 
 
 def _address_has_detail(text: str) -> bool:
-    # A model often repeated the destination city as the receiver's entire
-    # address. That would suppress the actual address question.
-    return bool(re.search(r"\d", text) and re.search(r"[a-zÀ-ÿ]", text, re.I)) or (
+    # Neither a city nor a bare street/number may suppress the full-address
+    # question. This is a completeness floor, not address verification.
+    words = re.findall(r"[^\W\d_]+", text, re.UNICODE)
+    return bool(re.search(r"\d", text) and len(words) >= 2) or (
         len(text.split()) >= 4 and ("," in text or "\n" in text))
 
 
@@ -1231,6 +1303,35 @@ def _weight_basis(text: str) -> str | None:
     total = bool(re.search(r"\b(?:totaal|total|together|samen|gesamt|insgesamt)\b", text, re.I))
     each = bool(re.search(r"\b(?:per|elk|elke|ieder|each|je|pro|par|chacun)\b", text, re.I))
     return "total" if total and not each else "each" if each and not total else None
+
+
+def _party_from_model(text: str, field: str) -> str | None:
+    """Extract an entity from conversational prose, with exact source grounding.
+
+    The local model interprets arbitrary phrasing; no generated name or address
+    can pass the same grounding checks used for initial intake.
+    """
+    if not runtime.installed() or unsure(text) or NEGATED.search(text):
+        return None
+    schema = {"type": "object", "properties": {"name": {"type": "string"}},
+              "required": ["name"], "additionalProperties": False}
+    result = runtime.extract_json(
+        f"The user answers the shipment field {field}. Extract only the explicitly named company or person. "
+        "Copy their name from the user's text. Remove conversational introductions. "
+        "Never return a whole sentence, goods, a location, or a guessed company. "
+        "If no unambiguous name is stated, return an empty name. Example: "
+        "'For this shipment Example Ltd is our customer' -> 'Example Ltd'.",
+        text, schema, timeout=15, max_tokens=128)
+    value = str((result or {}).get("name") or "").strip()
+    if (not value or not grounded(text, value) or value.casefold() == text.strip(" .").casefold()
+            or re.match(rf"^{_COUNT_WORD}\s+", value, re.I)
+            or re.search(r"\b(?:ik|wij|we|our|ons|onze|zijn|is|are|ist|est)\b", value, re.I)):
+        return None
+    return value
+
+
+def _prose_name(value: str) -> bool:
+    return bool(re.search(r"\b(?:ik|wij|we|ons|onze|i|our|wir|unser\w*|nous|notre|heten|heet|is|zijn|are|ist|est)\b", value, re.I))
 
 
 def _store_weight(line: dict[str, Any], weight: float, basis: str) -> None:
@@ -1241,12 +1342,60 @@ def _store_weight(line: dict[str, Any], weight: float, basis: str) -> None:
     line.pop("unconfirmed_weight_kg", None)
 
 
+def _stated_mass(text: str, quantity: float) -> tuple[float, str | None] | None:
+    """Read mass clauses independently of dimensions; cross-check dual totals."""
+    clauses = re.split(r"(?<!\d)\.|\.(?!\d)|[;!?]|,\s*(?:dus|so|also|donc)\s+", text)
+    masses = []
+    for clause in clauses:
+        if not re.search(r"\b(?:kg|kilo|kilograms?|kilogrammes?|grams?|g|tonnes?|tonnen|ton|t)\b", clause, re.I):
+            continue
+        weight = parse_weight_kg(clause)
+        if weight is None:
+            return None
+        masses.append((weight, _weight_basis(clause)))
+    if len(masses) == 1:
+        return masses[0]
+    if len(masses) == 2 and {basis for _, basis in masses} == {"total", "each"}:
+        values = {basis: weight for weight, basis in masses}
+        if math.isclose(values["total"], values["each"] * quantity, rel_tol=1e-6):
+            return values["total"], "total"
+    return None
+
+
+def _goods_weight_correction(state: dict[str, Any], text: str) -> list[dict[str, Any]] | None:
+    """Route an explicit, uniquely named mass correction to the right item."""
+    if not re.search(r"\b(?:wacht|correctie|corrigeer|correct|actually|korrigier\w*|correction)\b", text, re.I):
+        return None
+    clause = re.split(r"[.!?]", text)[0]
+    lines = [line for line in state.get("draft_lines", []) if re.search(
+        r"\b" + re.escape(str(line.get("description") or "").rstrip("s")) + r"s?\b", clause, re.I)]
+    if len(lines) != 1:
+        return None
+    # An explicitly rejected old value is not an alternative new value.
+    clause = re.sub(r",\s*(?:niet|not|nicht|pas)\s+\d+(?:[.,]\d+)?\s*(?:kg|kilo)\b.*$", "", clause, flags=re.I)
+    mass = _stated_mass(clause, float(lines[0].get("quantity") or 1))
+    if mass is None or mass[1] is None:
+        return None
+    _store_weight(lines[0], mass[0], mass[1])
+    return [{"kind": "answered", "field": "goods_weight_each", "value": f"{mass[0]:g} kg"}]
+
+
 def _apply_answer(
     state: dict[str, Any], pending: dict[str, Any], message: str, language: str,
 ) -> list[dict[str, Any]]:
     text = message.strip()
     lowered = text.casefold()
     scope = pending.get("scope")
+
+    if (not pending.get("required") and UNKNOWN.search(text)
+            and re.search(r"\b(?:later|später|plus tard)\b", text, re.I)):
+        # An explicit request to leave an optional answer for later is an
+        # action, not an invalid fact. Required fields still need an answer.
+        key = (f"goods:{pending.get('line_id')}:{pending.get('field')}"
+               if scope == "goods_question" else f"doc:{pending.get('field')}")
+        if scope in {"goods_question", "doc_question"}:
+            state.setdefault("skipped_questions", []).append(key)
+            return [{"kind": "skipped", "field": pending.get("field")}]
 
     if lowered in _SKIP_WORDS and pending.get("required"):
         return [{"kind": "clarify", "reason": "required", "field": pending.get("field")}]
@@ -1284,7 +1433,7 @@ def _apply_answer(
             return [{"kind": "not_understood"}]
         unit = get_unit(str(line.get("unit") or "pcs"))
         counted = unit is None or unit.dimension == Dimension.COUNT
-        value = number(text)
+        value = quantity_answer(text, str(line.get("unit") or "pcs"), str(line.get("description") or ""))
         if value is None or (counted and not value.is_integer()) or value <= 0:
             return [{"kind": "clarify", "field": "quantity", "example": "4"}]
         previous = float(line.get("quantity") or 0)
@@ -1380,7 +1529,33 @@ def _apply_answer(
                      if l.get("id") == pending.get("line_id")), None)
         if line is None:
             return [{"kind": "not_understood"}]
+        counted = quantity_prefix(text)
+        if counted:
+            events = _apply_answer(state, {"scope": "goods_quantity", "field": "quantity",
+                                           "line_id": line["id"], "required": True}, counted[0], language)
+            if any(event["kind"] == "clarify" for event in events) or not counted[1]:
+                return events
+            return events + _apply_answer(state, pending, counted[1], language)
         field = str(pending.get("field") or "")
+        measurements = parse_dimensions(text)
+        if measurements:
+            mass = _stated_mass(text, float(line.get("quantity") or 1))
+            weight = mass[0] if mass else None
+            mass_mentioned = bool(re.search(r"\b(?:kg|kilo|kilograms?|kilogrammes?|g|grams?|grammes?|tonnes?|tonnen|ton|t)\b", text, re.I))
+            if mass_mentioned and weight is None:
+                return [{"kind": "clarify", "field": "goods_weight_each", "example": "800 kg"}]
+            line.update(measurements)
+            events = [{"kind": "answered", "field": "goods_dimensions",
+                       "value": (f"{measurements['length_cm']:g} x {measurements['width_cm']:g}"
+                                 f" x {measurements['height_cm']:g} cm")}]
+            if weight is not None:
+                basis = mass[1]
+                if basis:
+                    _store_weight(line, weight, basis)
+                else:
+                    line["unconfirmed_weight_kg"] = weight
+                events.append({"kind": "answered", "field": "weight", "value": f"{weight:g} kg"})
+            return events
         if field == "goods_dimensions":
             # Deterministic reading first; the model only gets the answers the
             # regular expressions could not read, and every number it returns
@@ -1396,22 +1571,55 @@ def _apply_answer(
                         line["unconfirmed_weight_kg"] = weight
                     return [{"kind": "answered", "field": "weight", "value": f"{weight:g} kg"}]
                 return [{"kind": "clarify", "field": field, "example": "120 x 80 x 100 cm"}]
+            # Reuse the combined-data path so model-assisted dimensions cannot
+            # silently discard an explicit mass in the same answer.
+            dimensions = f"{measurements['length_cm']:g} x {measurements['width_cm']:g} x {measurements['height_cm']:g} cm"
+            mass = _stated_mass(text, float(line.get("quantity") or 1))
+            if re.search(r"\b(?:kg|kilo|ton|tonne)\b", text, re.I) and mass is None:
+                return [{"kind": "clarify", "field": "goods_weight_each", "example": "900 kg"}]
             line.update(measurements)
-            return [{"kind": "answered", "field": field,
-                     "value": (f"{measurements['length_cm']:g} x {measurements['width_cm']:g}"
-                               f" x {measurements['height_cm']:g} cm")}]
-        weight = parse_weight_kg(text)
+            if mass:
+                if mass[1]:
+                    _store_weight(line, mass[0], mass[1])
+                else:
+                    line["unconfirmed_weight_kg"] = mass[0]
+            return [{"kind": "answered", "field": field, "value": dimensions}]
+        mass = _stated_mass(text, float(line.get("quantity") or 1))
+        weight = mass[0] if mass else parse_weight_kg(text)
         if weight is None:
+            if re.search(r"\b(?:totaal|total|samen|together|gesamt)\b", text, re.I) and re.search(r"\b(?:per|each|je|pro|par)\b", text, re.I):
+                return [{"kind": "clarify", "reason": "weight_conflict", "field": field}]
             return [{"kind": "clarify", "field": field, "example": "900 kg"}]
-        basis = _weight_basis(text) or "each"  # The active question explicitly asks per item.
-        if len(re.findall(NUMBER, text)) > 1 and not _weight_basis(text):
+        basis = (mass[1] if mass else _weight_basis(text)) or "each"
+        if len(re.findall(NUMBER, text)) > 1 and not (mass and mass[1]):
             return [{"kind": "clarify", "reason": "weight_basis"}]
+        if mass and mass[1] is None and len(re.findall(r"\w+", text)) > 2 and float(line.get("quantity") or 1) > 1:
+            # Free prose may describe the whole consignment even while the
+            # question asks per item. Do not silently multiply such a weight.
+            line["unconfirmed_weight_kg"] = weight
+            return [{"kind": "answered", "field": "weight", "value": f"{weight:g} kg"}]
         _store_weight(line, weight, basis)
         weight = line["weight_each_kg"]
         return [{"kind": "answered", "field": field, "value": f"{weight:g} kg"}]
 
     if scope == "doc_question":
+        if quantity_statement(text):
+            matching = [line for line in state.get("draft_lines", [])
+                        if quantity_answer(text, str(line.get("unit") or "pcs")) is not None]
+            if len(matching) == 1:
+                return _apply_answer(state, {"scope": "goods_quantity", "field": "quantity",
+                                             "line_id": matching[0]["id"], "required": True}, text, language)
+            return [{"kind": "clarify", "reason": "wrong_field", "field": pending.get("field")}]
         value = re.sub(r"^(?:(?:dat|dit|het) is(?: het bedrijf)?|it is|it's|that is|das ist|c'est|il s'agit de)\s+", "", text, flags=re.I)
+        if str(pending.get("field", "")).endswith("_name"):
+            value = re.sub(r"^(?:ik regel (?:het )?vervoer namens|wij versturen (?:dit )?namens|i (?:arrange|organise) (?:the )?transport (?:for|on behalf of)|ich organisiere den transport für|j'organise le transport pour)\s+", "", value, flags=re.I).strip(" .")
+            if pending.get("field") == "consignee_name":
+                value = re.sub(r"^(?:voor|for|für|pour)\s+", "", value, flags=re.I)
+            if _prose_name(value):
+                extracted = _party_from_model(text, str(pending["field"]))
+                if extracted is None:
+                    return [{"kind": "clarify", "reason": "mixed"}]
+                value = extracted
         if str(pending.get("field", "")).endswith("_name") and (";" in value or re.search(r"\b(?:van|from|von|depuis)\b.+\b(?:naar|to|nach|vers)\b", value, re.I)):
             return [{"kind": "clarify", "reason": "mixed"}]
         if re.fullmatch(r"(?:hetzelfde|dezelfde)(?: adres)? als (?:de )?afzender|same as (?:the )?sender|wie (?:der )?absender|comme (?:l[’'])?expéditeur", text, re.I):
@@ -1434,6 +1642,13 @@ def _apply_answer(
         options = pending.get("options") or []
         if options:
             matched = _match_option(text, options, pending.get("option_labels"))
+            if matched is None and {"prepaid", "collect"}.issubset(options):
+                # Payment direction must not depend on a small model guessing.
+                if not unsure(text) and not NEGATED.search(text) and not ALTERNATIVE.search(text):
+                    payer = re.search(r"\b(klant|ontvanger|geadresseerde|afzender|wij|we|sender|consignee|receiver|customer|absender|empfänger|destinataire|expéditeur)\b[^.!?]*\b(betaalt|betalen|pays|pay|zahlt|zahlen|paie|payons)\b", text, re.I)
+                    if payer:
+                        return _choice_proposal(pending, "prepaid" if payer.group(1).casefold() in {"afzender", "wij", "we", "sender", "absender", "expéditeur"} else "collect")
+                return [{"kind": "clarify", "field": pending.get("field"), "attempt": text}]
             if matched is None:
                 suggested = _model_choice(pending, text)
                 if suggested:
@@ -1451,6 +1666,43 @@ def _apply_answer(
 
 
 # --- the turn --------------------------------------------------------------
+
+def _repair_mixed_goods(state: dict[str, Any], message: str, db: Session, language: str) -> list[dict[str, Any]] | None:
+    """Repair an explicitly requested split without reallocating measurements.
+
+    Older intake could merge counted goods or put a counted noun in the sender
+    field. Only facts already present and explicitly challenged are moved.
+    """
+    split_requested = re.search(r"(?:aparte|afzonderlijke)\s+goederenregels|separate\s+goods\s+lines|getrennte\s+Warenzeilen|lignes\s+de\s+marchandises\s+séparées", message, re.I)
+    if not split_requested:
+        return None
+    rows: list[str] = []
+    retained = []
+    for line in state.get("draft_lines", []):
+        parts = _split_segments(f"{line.get('quantity', 1)} {line.get('description', '')}")
+        if len(parts) <= 1:
+            retained.append(line)
+            continue
+        if line.get("dangerous_goods") or any(line.get(key) for key in (*_GOODS_FIELDS, "weight_total_kg")):
+            return [{"kind": "clarify", "reason": "split_goods"}]
+        rows.extend(_to_parser_row(part) for part in parts)
+    values = state.get("doc_values") or {}
+    sender = str(values.get("consignor_name") or "")
+    moved_sender = bool(sender and grounded(message, sender) and re.search(r"goederen.*niet\s+(?:de\s+)?afzender", message, re.I)
+                        and _to_parser_row(sender) != sender)
+    if moved_sender:
+        rows.append(_to_parser_row(sender))
+    if not rows or any("|" not in row for row in rows):
+        return [{"kind": "clarify", "reason": "split_goods"}]
+    state["draft_lines"] = retained
+    if moved_sender:
+        values.pop("consignor_name", None)
+    # Normalize the legacy noun-as-unit bug only when it names the same goods.
+    from app.services.units import get_unit
+    for line in retained:
+        if not get_unit(str(line.get("unit") or "")) and grounded(str(line.get("description") or ""), str(line.get("unit") or "")):
+            line["unit"] = "pcs"
+    return _apply_goods_message(state, "\n".join(rows), db, language)
 
 def step(
     state: dict[str, Any], message: str, pending: dict[str, Any] | None,
@@ -1481,7 +1733,12 @@ def step(
     elif pending and canonical is None:
         events = [{"kind": "clarify", "reason": "stale"}]
     elif _clean(message):
-        if action == "add_goods" or not canonical or canonical["scope"] == "goods_intake":
+        repair = _goods_weight_correction(state, message) if action == "answer" and state.get("draft_lines") else None
+        if repair is None:
+            repair = _repair_mixed_goods(state, message, db, language) if action == "answer" and state.get("draft_lines") else None
+        if repair is not None:
+            events = repair
+        elif action == "add_goods" or not canonical or canonical["scope"] == "goods_intake":
             events = _apply_goods_message(state, message, db, language)
             if not events:
                 events = [{"kind": "clarify", "reason": "intake"}]

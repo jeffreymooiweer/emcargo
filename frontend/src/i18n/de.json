@@ -240,6 +240,7 @@
   "messages": {
     "dg_un_detected": "UN-Nummer erkannt — Zeile als Gefahrgut markiert",
     "wall_thickness_missing": "Wandstärke fehlt — ohne dieses Maß lässt sich das Gewicht eines Profils nicht bestimmen",
+    "transport_dimensions_missing": "Das Gewicht ist eingetragen. Die Außenmaße fehlen noch, daher ist das Ladevolumen unbekannt. Tragen Sie die Maße unter Details ein.",
     "dimensions_missing": "Keine Maße in der Beschreibung und kein Gewicht eingetragen — tragen Sie das Gewicht unter Details ein.",
     "length_missing": "Keine Länge in der Beschreibung — ohne sie lässt sich das Gewicht dieses Profils nicht bestimmen.",
     "kg_per_meter_missing": "Keine Kilogramm je Meter für dieses Profil bekannt — tragen Sie das Gewicht unter Details ein.",
@@ -341,9 +342,9 @@
     "sessionTimeout": "Sitzungsdauer (Minuten)",
     "sessionTimeoutHint": "Wie lange jemand angemeldet bleibt. 480 ist ein Arbeitstag.",
     "assistantTitle": "KI-Assistent (lokales Modell)",
-    "assistantIntro": "Der Assistent funktioniert immer; ein lokales Modell macht nur das Lesen freien Textes flexibler.",
+    "assistantIntro": "Der Assistent verwendet ein lokales Sprachmodell. Installieren Sie es hier, um den Assistenten zu nutzen. Ihre Antworten werden lokal verarbeitet.",
     "assistantMode": "Aktueller Modus",
-    "assistantDeterministic": "geführte Eingabe (ohne Modell)",
+    "assistantDeterministic": "Nicht installiert",
     "assistantInstall": "Modell herunterladen und aktivieren",
     "assistantRemove": "Modell entfernen",
     "assistantDownloading": "Wird heruntergeladen und verifiziert…",
@@ -835,6 +836,12 @@
       "comment_required": "Erläutern Sie die erforderlichen Änderungen.",
       "already_decided": "Diese Prüfung wurde bereits entschieden. Aktualisieren Sie die Seite.",
       "owner_required": "Nur der Einreicher oder Admin kann diese Prüfung löschen."
+    },
+    "assistant": {
+      "model_required": "Ein Administrator kann das lokale Sprachmodell in den Einstellungen installieren. Danach können Sie den Assistenten nutzen. Sie können Ihre Sendung jetzt manuell im Assistenten zur Sendungserfassung eingeben."
+    },
+    "documents": {
+      "goods_incomplete": "Ergänzen Sie Warenbeschreibung, Menge und Gewicht vor dem Herunterladen des Frachtbriefs"
     }
   },
   "instructions": {
@@ -977,7 +984,11 @@
       "weight_basis": "Meinen Sie das Gesamtgewicht oder das Gewicht pro Stück? Die Menge darf nicht doppelt gezählt werden.",
       "reference": "Ich kann diese frühere Angabe nicht finden. Bitte geben Sie den Wert direkt an.",
       "address": "Ich benötige die Anschrift zusätzlich zum Ortsnamen. Geben Sie Straße, Hausnummer und Ort an oder suchen Sie die Adresse.",
-      "confirm_choice": "Meinen Sie „{{choice}}“? Wählen Sie diese Option, wenn sie zutrifft, oder formulieren Sie anders. Ich habe noch nichts übernommen."
+      "confirm_choice": "Meinen Sie „{{choice}}“? Wählen Sie diese Option, wenn sie zutrifft, oder formulieren Sie anders. Ich habe noch nichts übernommen.",
+      "wrong_field": "Das scheint eine Menge zu sein. Ich kann sie keiner einzelnen Warenzeile zuordnen. Ändern Sie die Menge in der richtigen Zeile Ihrer Sendungsübersicht.",
+      "model_unavailable": "Das lokale Sprachmodell konnte Ihre Beschreibung nicht verarbeiten. Ihr Text bleibt erhalten. Versuchen Sie es erneut oder teilen Sie die Beschreibung in kürzere Abschnitte auf.",
+      "weight_conflict": "Gesamtgewicht und Gewicht pro Stück stimmen nicht mit der Anzahl überein. Prüfen Sie die Gewichte und geben Sie das richtige Gewicht an. Ihre bisherigen Angaben bleiben erhalten.",
+      "split_goods": "Beschreiben Sie jede Ware in einer eigenen Zeile, zum Beispiel „2 Schreibtische“ und „4 Bürostühle“. Kehren Sie mit Zurück zur Beschreibung zurück. Vorhandene Gewichte und Abmessungen werden nicht automatisch aufgeteilt."
     },
     "stage": {
       "brief": "Beschreibung",
@@ -988,7 +999,32 @@
     "weightBasisQuestion": "Sind {{weight}} kg das Gesamtgewicht oder das Gewicht pro Stück?",
     "weightTotal": "Gesamtgewicht dieser Position",
     "weightEach": "Pro Stück oder Packstück",
-    "quantityNeeded": "Ergänzen Sie zuerst die fehlende Gütermenge oder fahren Sie mit dem Sendungsassistenten fort."
+    "quantityNeeded": "Ergänzen Sie zuerst die fehlende Gütermenge oder fahren Sie mit dem Sendungsassistenten fort.",
+    "modelTitle": "Das lokale Sprachmodell wird benötigt",
+    "modelRequired": "Ein Administrator kann das lokale Sprachmodell in den Einstellungen installieren. Danach können Sie den Assistenten nutzen. Sie können Ihre Sendung jetzt manuell im Assistenten zur Sendungserfassung eingeben.",
+    "checkingModel": "Assistent wird vorbereitet",
+    "checkingModelHint": "Die Verfügbarkeit des lokalen Sprachmodells wird geprüft.",
+    "statusFailed": "Der Assistent ist noch nicht erreichbar",
+    "continueManually": "Manuell fortfahren",
+    "retryStatus": "Erneut versuchen",
+    "measurements": "Gewicht und Abmessungen",
+    "editWeight": "Gewicht ändern",
+    "editDimensions": "Abmessungen ändern",
+    "weightAwaitingBasis": "{{weight}} kg — Gesamtgewicht oder je Stück noch zu bestätigen",
+    "questionFor": {
+      "freight_payment": "Wer bezahlt die Transportkosten?",
+      "payment_instruction": "Wer bezahlt die Transportkosten?",
+      "established_place": "In welchem Ort stellen Sie diesen Frachtbrief aus?",
+      "established_date": "An welchem Datum stellen Sie diesen Frachtbrief aus?",
+      "consignor_name": "Wer beauftragt den Frachtführer mit dieser Sendung?",
+      "consignor_address": "Wie lautet die vollständige Anschrift des Absenders?",
+      "consignee_name": "Für wen ist die Sendung bestimmt?",
+      "consignee_address": "Wie lautet die vollständige Anschrift des Empfängers?",
+      "carrier_name": "Welcher Frachtführer übernimmt den Transport?",
+      "loading_point": "Wo werden die Waren abgeholt?",
+      "discharge_point": "Wo sollen die Waren angeliefert werden?",
+      "loading_date": "An welchem Datum werden die Waren abgeholt?"
+    }
   },
   "whatsNew": {
     "title": "Was ist neu",

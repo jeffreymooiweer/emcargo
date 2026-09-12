@@ -533,6 +533,13 @@ def process_line(
         if qty:
             weight_each = weight_total / qty
 
+    if weight_total is not None and weight_total > 0 and "dimensions_missing" in messages:
+        messages = ["transport_dimensions_missing" if message == "dimensions_missing" else message for message in messages]
+
+    # Package outer dimensions define loading volume even without a material.
+    if transport_vol is None and qty and row_unit and row_unit.dimension == Dimension.COUNT and all((length_cm, width_cm, height_cm)):
+        transport_vol = length_cm * width_cm * height_cm * qty / 1_000_000
+
     return LineResult(
         line_id=line_id,
         raw=row.raw,
@@ -597,7 +604,7 @@ def parse_and_calculate(
             "totals": {},
             "errors": [l.messages for l in lines if l.messages],
         }
-    included = [l for l in lines if l.include and l.weight_total_kg]
+    included = [l for l in lines if l.include]
     totals = {
         "line_count": len(lines),
         "included_count": len(included),

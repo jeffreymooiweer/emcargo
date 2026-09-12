@@ -2,6 +2,11 @@
 from datetime import datetime, timezone
 
 
+def utc_timestamp(value: datetime) -> datetime:
+    """Label UTC database timestamps so browsers can display their local time."""
+    return value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value.astimezone(timezone.utc)
+
+
 def utc_filter_bound(value: datetime) -> datetime:
     """Preserve legacy UTC-naive filters and normalize explicit offsets.
 

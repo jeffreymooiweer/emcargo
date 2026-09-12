@@ -16,7 +16,7 @@ from typing import Any
 from sqlalchemy import func
 from sqlalchemy.orm import Session, defer, joinedload
 
-from app.core.dates import utc_filter_bound
+from app.core.dates import utc_filter_bound, utc_timestamp
 from app.models.trip import Trip
 from app.models.user import Department, User
 from app.schemas.trips import TripDetail, TripIn, TripSummary
@@ -117,8 +117,8 @@ def summary(record: Trip) -> TripSummary:
         created_by=record.creator.username if record.creator else "",
         department_id=record.department_id,
         department=record.department.name if record.department else "",
-        created_at=record.created_at,
-        updated_at=record.updated_at,
+        created_at=utc_timestamp(record.created_at),
+        updated_at=utc_timestamp(record.updated_at),
     )
 
 

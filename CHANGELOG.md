@@ -2,6 +2,37 @@
 
 All notable changes are documented here, following [Semantic Versioning](https://semver.org/).
 
+## [2.5.1] — 2026-09-12
+
+### More reliable shipment answers
+
+- Apply recognised spreadsheet column order to file and Excel clipboard imports;
+  keep manually entered weights when dimensions change, show translated choices
+  in folded document groups, and label stored shipment/trip timestamps as UTC.
+- Make the PDF, startup, catalogue and updater test fixtures portable to Windows;
+  resolve the configured Bash executable and keep POSIX permission checks on POSIX.
+- Repair the blank development page, select the pinned native Windows runtime,
+  and reject empty or truncated model installations. Pause and resume a pending
+  answer when the model disappears; reveal recovery messages on small screens.
+- Keep articles before the next field label out of company names, and show
+  translated choices in the shipment summary and when revising an answer.
+
+- Require the installed local language model before using the assistant, in
+  both the interface and API. Explain installation and manual continuation;
+  preserve answers if the model is removed during an interview.
+- Keep supplied counts, dimensions and weights together. Never replace a
+  stated weight with a density estimate, guess alternative counts, or treat a
+  package quantity as the sender. Keep ambiguous corrections open.
+- Understand spoken count answers and German/French package units. Validate
+  explicitly labelled intake addresses as strictly as follow-up answers.
+- Allow weight and dimension corrections directly from the shipment summary
+  without discarding later answers. Use plain shipment questions, open the
+  relevant explanation for unknown answers and improve small-screen controls.
+- Cover the reproduced defects with calculation, API and interaction tests.
+- Leave incomplete model-read addresses open and never turn a failed model
+  read into a goods line containing the whole story. Omit unstated model
+  fields to reduce unnecessary output and invented references.
+
 ## [2.5.0] — 2026-09-09
 
 ### A guided shipment assistant

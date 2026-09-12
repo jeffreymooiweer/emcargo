@@ -177,7 +177,7 @@ def test_a_group_stand_in_admits_that_it_is_broader():
     from pathlib import Path as _Path
 
     entries = _json.loads(
-        (_Path(__file__).resolve().parents[1] / "seed" / "dg" / "card_data.json").read_text()
+        (_Path(__file__).resolve().parents[1] / "seed" / "dg" / "card_data.json").read_text(encoding="utf-8")
     )["entries"]
     source = next(un for un, e in entries.items() if "SG22" in (e.get("segregation_codes") or []))
     warnings = check_imdg_segregation_provisions(
@@ -209,7 +209,7 @@ def test_a_conditional_cargo_provision_needs_its_class_present():
     from pathlib import Path as _Path
 
     entries = _json.loads(
-        (_Path(__file__).resolve().parents[1] / "seed" / "dg" / "card_data.json").read_text()
+        (_Path(__file__).resolve().parents[1] / "seed" / "dg" / "card_data.json").read_text(encoding="utf-8")
     )["entries"]
     source = next(un for un, e in entries.items() if "SG26" in (e.get("segregation_codes") or []))
 

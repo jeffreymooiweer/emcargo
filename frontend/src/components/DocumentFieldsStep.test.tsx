@@ -118,6 +118,18 @@ function Harness({ documents = [CMR], focusField, returnLabel, onReturn, onDone,
 }
 
 describe("the questions, grouped by what they mean", () => {
+  it("shows the translated choice in the folded summary", () => {
+    const document: DocumentDefinition = { ...CMR, sections: [{
+      key: "payment", label: text("Betaling"), fields: [{
+        key: "freight_payment", label: text("Vrachtbetaling"), status: "USER_OPTIONAL", type: "select",
+        options: [{ value: "prepaid", label: text("Franco") }],
+      }],
+    }] };
+    render(<Harness documents={[document]} filled={{ freight_payment: "prepaid" }} />);
+    expect(screen.getByText("Vrachtbetaling: Franco")).toBeInTheDocument();
+    expect(screen.queryByText("Vrachtbetaling: prepaid")).toBeNull();
+  });
+
   it("shows the three groups on one page, no form per document", () => {
     render(<Harness documents={[CMR, IMO]} />);
     expect(screen.getByRole("heading", { name: "docgroups.parties" })).toBeInTheDocument();

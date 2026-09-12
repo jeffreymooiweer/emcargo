@@ -11,6 +11,7 @@ const MIN_SEARCH_LEN = 2;
 const DEBOUNCE_MS = 280;
 
 interface Props {
+  id?: string;
   value: string;
   onChange: (value: string, equipment?: EquipmentItem | null) => void;
   placeholder?: string;
@@ -40,6 +41,7 @@ function library(): Promise<EquipmentItem[]> {
 }
 
 export default function EquipmentCombobox({
+  id,
   value,
   onChange,
   placeholder,
@@ -167,6 +169,7 @@ export default function EquipmentCombobox({
   return (
     <div ref={wrapRef} className="relative">
       <input
+        id={id}
         ref={(element) => {
           inputRef.current = element;
           exposeInput?.(element);

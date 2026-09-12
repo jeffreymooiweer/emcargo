@@ -15,7 +15,9 @@ async function refusal(res: Response): Promise<Error> {
   if (res.status === 403 && isApiMessage(err.detail) && err.detail.code === "auth.two_factor_required") {
     window.dispatchEvent(new CustomEvent(TWO_FACTOR_REQUIRED_EVENT));
   }
-  return new Error(describeDetail(err.detail));
+  return Object.assign(new Error(describeDetail(err.detail)), {
+    code: isApiMessage(err.detail) ? err.detail.code : undefined,
+  });
 }
 
 async function downloadBlob(path: string, filename: string): Promise<void> {
@@ -540,7 +542,7 @@ export const api = {
       const err = await res.json().catch(() => ({ detail: res.statusText }));
       const detail = err.detail;
       if (detail && typeof detail === "object" && Array.isArray(detail.errors)) {
-        throw new Error(detail.errors.join("\n"));
+        throw new Error(detail.errors.map(describeDetail).join("\n"));
       }
       throw new Error(typeof detail === "string" ? detail : "Export failed");
     }
@@ -585,7 +587,7 @@ export const api = {
       const err = await res.json().catch(() => ({ detail: res.statusText }));
       const detail = err.detail;
       if (detail && typeof detail === "object" && Array.isArray(detail.errors)) {
-        throw new Error(detail.errors.join("\n"));
+        throw new Error(detail.errors.map(describeDetail).join("\n"));
       }
       throw new Error(typeof detail === "string" ? detail : "Export failed");
     }
@@ -1044,7 +1046,7 @@ export interface UpdateStateAnswer {
  *  model is installed, and how an install in progress is doing. */
 export interface AssistantStatus {
   available: boolean;
-  mode: "model" | "deterministic";
+  mode: "model" | "unavailable";
   model: string | null;
   installed: boolean;
   installable: boolean;

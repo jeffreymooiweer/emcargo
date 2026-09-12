@@ -30,10 +30,12 @@ vi.mock("../components/DangerousGoodsStep", async original => ({
 }));
 vi.mock("../components/ReviewLinesPanel", async (original) => ({
   ...await original<typeof import("../components/ReviewLinesPanel")>(),
-  default: ({ draftLines, onDraftChange }: { draftLines: DraftLine[]; onDraftChange: (lines: DraftLine[]) => void }) => (
+  default: ({ draftLines, onDraftChange, onLineWeightChange }: { draftLines: DraftLine[]; onDraftChange: (lines: DraftLine[]) => void; onLineWeightChange?: (id: number, field: "weight_total_kg", value: number) => void }) => (<>
     <input aria-label="Goods description" value={draftLines[0]?.description ?? ""}
       onChange={(event) => onDraftChange([{ ...draftLines[0], description: event.target.value }])} />
-  ),
+    <button onClick={() => onLineWeightChange?.(1, "weight_total_kg", 37.25)}>Enter weight</button>
+    <button onClick={() => onDraftChange([{ ...draftLines[0], length_cm: 120 }])}>Change length</button>
+  </>),
 }));
 
 const registry = {
@@ -83,6 +85,21 @@ beforeEach(() => {
 afterEach(() => { vi.useRealTimers(); });
 
 describe("shipment restoration", () => {
+  it("keeps an entered total weight when dimensions change", async () => {
+    mocks.api.runningDraft.mockResolvedValue(saved());
+    mocks.api.calculate.mockResolvedValue({ success: true, lines: [{ line_id: 1, description: "Saved goods",
+      quantity: 1, unit: "pcs", include: true, status: "ok", weight_total_kg: 50,
+      weight_each_kg: 50, messages: [], detected_un_numbers: [] }], totals: {} });
+    open();
+    await screen.findByLabelText("Goods description");
+    await waitFor(() => expect(mocks.api.calculate).toHaveBeenCalled());
+    fireEvent.click(screen.getByText("Enter weight"));
+    fireEvent.click(screen.getByText("Change length"));
+    await waitFor(() => expect(mocks.api.calculate).toHaveBeenLastCalledWith(expect.objectContaining({
+      line_overrides: [expect.objectContaining({ line_id: 1, length_m: 1.2, weight_total_kg: 37.25 })],
+    })));
+  });
+
   // Saved results round per-piece and total weights separately. Sending both
   // back made the backend multiply the rounded piece value and change a
   // shipment merely by reopening it. Older manual corrections must survive
@@ -228,4 +245,24 @@ it("undoing the assistant intake also clears document values in the actual wizar
   await act(async () => mocks.assistantProps!.onApplyState({ draft_lines: [], dg_entries: [], doc_values: {} }));
   expect(mocks.assistantProps!.buildState().draft_lines).toEqual([]);
   expect(mocks.assistantProps!.buildState().doc_values).toEqual({});
+});
+
+it("recalculates assistant weight changes made on the details step", async () => {
+  // The visible novice test changed 48 to 52 kg after leaving the goods step;
+  // the old effect only recalculated on that step and left export data stale.
+  const shipment = saved("bureaustoelen");
+  shipment.snapshot = { ...shipment.snapshot, stepKey: "details" };
+  mocks.api.runningDraft.mockResolvedValue(shipment);
+  open();
+  await waitFor(() => expect(mocks.assistantProps).not.toBeNull());
+  await waitFor(() => expect(mocks.assistantProps!.buildState().doc_values?.consignor_name).toBe("Saved company"));
+  expect(screen.queryByLabelText("Goods description")).toBeNull();
+  await act(async () => mocks.assistantProps!.onApplyState({ modality: "road", draft_lines: [
+    { id: 1, description: "bureaustoelen", quantity: 4, unit: "pcs", weight_each_kg: 13,
+      weight_total_kg: 52, stated_weight_kg: 52, weight_basis: "total" },
+  ] }));
+  await waitFor(() => expect(mocks.api.calculate).toHaveBeenCalledWith(expect.objectContaining({
+    text: "bureaustoelen | 4 | pcs",
+    line_overrides: [expect.objectContaining({ line_id: 1, weight_each_kg: 13 })],
+  })));
 });

@@ -240,6 +240,7 @@
   "messages": {
     "dg_un_detected": "Numéro ONU détecté — ligne marquée comme marchandises dangereuses",
     "wall_thickness_missing": "Épaisseur de paroi manquante — sans elle, le poids d'un profilé ne peut pas être déterminé",
+    "transport_dimensions_missing": "Le poids est renseigné. Les dimensions extérieures manquent encore, donc le volume de chargement est inconnu. Saisissez les dimensions dans Détails.",
     "dimensions_missing": "Aucune dimension dans la description et aucun poids saisi — indiquez le poids sous Détails.",
     "length_missing": "Aucune longueur dans la description — sans elle, le poids de ce profilé ne peut être établi.",
     "kg_per_meter_missing": "Aucun kilo par mètre connu pour ce profilé — indiquez le poids sous Détails.",
@@ -341,9 +342,9 @@
     "sessionTimeout": "Durée de session (minutes)",
     "sessionTimeoutHint": "Combien de temps une personne reste connectée. 480 correspond à une journée de travail.",
     "assistantTitle": "Assistant IA (modèle local)",
-    "assistantIntro": "L'assistant fonctionne toujours ; un modèle local rend seulement la lecture de texte libre plus souple.",
+    "assistantIntro": "L’assistant utilise un modèle de langue local. Installez-le ici pour utiliser l’assistant. Vos réponses sont traitées localement.",
     "assistantMode": "Mode actuel",
-    "assistantDeterministic": "saisie guidée (sans modèle)",
+    "assistantDeterministic": "Non installé",
     "assistantInstall": "Télécharger et activer le modèle",
     "assistantRemove": "Supprimer le modèle",
     "assistantDownloading": "Téléchargement et vérification…",
@@ -835,6 +836,12 @@
       "comment_required": "Expliquez les modifications nécessaires.",
       "already_decided": "Ce contrôle a déjà été traité. Actualisez la page.",
       "owner_required": "Seul l’auteur ou l’administrateur peut supprimer ce contrôle."
+    },
+    "assistant": {
+      "model_required": "Un administrateur peut installer le modèle de langue local dans les paramètres. Vous pourrez ensuite utiliser l’assistant. Vous pouvez saisir votre envoi manuellement dès maintenant."
+    },
+    "documents": {
+      "goods_incomplete": "Renseignez la description, la quantité et le poids des marchandises avant de télécharger la lettre de voiture"
     }
   },
   "instructions": {
@@ -977,7 +984,11 @@
       "weight_basis": "S’agit-il du poids total ou par pièce ? Je veux éviter de compter la quantité deux fois.",
       "reference": "Je ne trouve pas encore cette information antérieure. Veuillez la fournir directement.",
       "address": "J’ai aussi besoin de l’adresse complète. Indiquez la rue, le numéro et la ville, ou recherchez l’adresse.",
-      "confirm_choice": "Voulez-vous dire « {{choice}} » ? Sélectionnez cette option si elle convient, ou reformulez. Je n’ai encore rien enregistré."
+      "confirm_choice": "Voulez-vous dire « {{choice}} » ? Sélectionnez cette option si elle convient, ou reformulez. Je n’ai encore rien enregistré.",
+      "wrong_field": "Cela ressemble à une quantité. Je ne peux pas l’attribuer à une seule ligne de marchandises. Modifiez la quantité sur la bonne ligne du récapitulatif de votre envoi.",
+      "model_unavailable": "Le modèle de langue local n’a pas pu traiter votre description. Votre texte est conservé. Réessayez ou divisez la description en parties plus courtes.",
+      "weight_conflict": "Le poids total et le poids par article ne correspondent pas à la quantité. Vérifiez les poids et indiquez lequel est correct. Vos données précédentes sont conservées.",
+      "split_goods": "Décrivez chaque marchandise sur sa propre ligne, par exemple « 2 bureaux » et « 4 chaises de bureau ». Revenez à la description avec Précédent pour modifier les lignes. Les poids et dimensions existants ne sont pas répartis automatiquement."
     },
     "stage": {
       "brief": "Description",
@@ -988,7 +999,32 @@
     "weightBasisQuestion": "Les {{weight}} kg sont-ils le total ou le poids par pièce ?",
     "weightTotal": "Total de cette ligne",
     "weightEach": "Par pièce ou colis",
-    "quantityNeeded": "Indiquez d’abord la quantité manquante ou poursuivez avec l’assistant d’expédition."
+    "quantityNeeded": "Indiquez d’abord la quantité manquante ou poursuivez avec l’assistant d’expédition.",
+    "modelTitle": "Le modèle de langue local est nécessaire",
+    "modelRequired": "Un administrateur peut installer le modèle de langue local dans les paramètres. Vous pourrez ensuite utiliser l’assistant. Vous pouvez saisir votre envoi manuellement dès maintenant.",
+    "checkingModel": "Préparation de l’assistant",
+    "checkingModelHint": "Vérification de la disponibilité du modèle de langue local.",
+    "statusFailed": "L’assistant n’est pas encore accessible",
+    "continueManually": "Continuer manuellement",
+    "retryStatus": "Réessayer",
+    "measurements": "Poids et dimensions",
+    "editWeight": "Modifier le poids",
+    "editDimensions": "Modifier les dimensions",
+    "weightAwaitingBasis": "{{weight}} kg — poids total ou par pièce à confirmer",
+    "questionFor": {
+      "freight_payment": "Qui paie les frais de transport ?",
+      "payment_instruction": "Qui paie les frais de transport ?",
+      "established_place": "Dans quelle ville établissez-vous cette lettre de voiture ?",
+      "established_date": "À quelle date établissez-vous cette lettre de voiture ?",
+      "consignor_name": "Qui mandate le transporteur pour cet envoi ?",
+      "consignor_address": "Quelle est l’adresse complète de l’expéditeur ?",
+      "consignee_name": "À qui cet envoi est-il destiné ?",
+      "consignee_address": "Quelle est l’adresse complète du destinataire ?",
+      "carrier_name": "Quel transporteur assure le transport ?",
+      "loading_point": "Où les marchandises seront-elles enlevées ?",
+      "discharge_point": "Où les marchandises doivent-elles être livrées ?",
+      "loading_date": "À quelle date les marchandises seront-elles enlevées ?"
+    }
   },
   "whatsNew": {
     "title": "Nouveautés",

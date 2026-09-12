@@ -18,6 +18,7 @@ key the administrator set themselves.
 """
 
 import logging
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -86,6 +87,7 @@ def test_the_same_key_comes_back_after_a_restart(tmp_path):
     assert first == second
 
 
+@pytest.mark.skipif(os.name != "posix", reason="POSIX mode bits do not describe Windows ACL permissions")
 def test_the_stored_key_is_not_readable_for_others(tmp_path):
     ensure_secret_key(FakeSettings(data_dir=tmp_path, app_secret_key="change-me"))
     mode = (tmp_path / SECRET_KEY_FILENAME).stat().st_mode

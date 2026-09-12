@@ -173,28 +173,31 @@ formal field and its article references behind an info mark, a previous
 button that really goes back, and the same address and location suggestions
 the wizard's own fields have. What the sentence already said is never asked
 again: the count, the contents per package and the totals compute by
-themselves. Two modes:
+themselves.
 
-- **Guided input (default, nothing to install).** The assistant works without
-  any language model: the parser, the name recognition and the wizard's own
-  open questions carry the whole conversation. This is what every
-  installation has out of the box, at no extra footprint.
-- **With the local model (opt-in).** An admin can install a small local
-  language model in *Settings*: the official Qwen3-1.7B (Apache-2.0) served
-  by llama.cpp, downloaded once into `/data/assistant` and verified against
-  SHA-256 pins recorded in this repository. It only makes the *reading*
-  more flexible — free prose is split into goods lines, paraphrased answers
-  are mapped onto the question's own options. It never decides regulatory
-  content: every value still passes the same validators, every question still
-  comes from the app's own open-questions list, and everything stays on your
-  server (the one-time download is the assistant's only external traffic).
+**The assistant requires a local language model.** An administrator installs
+the official Qwen3-1.7B (Apache-2.0) in *Settings*. Its llama.cpp runtime and
+weights are downloaded once into `/data/assistant`, verified against this
+repository's SHA-256 pins. Without this installation the assistant stays
+unavailable, including through its API. The ordinary wizard remains available
+for manual entry.
+
+The managed runtime supports Linux x86-64/ARM64 and Windows x86-64. Unsupported
+hosts cannot install the assistant. Empty or truncated model files do not enable
+it. If the model is removed during an interview, the assistant preserves the
+typed answer and pauses until installation is restored and checked again.
+
+The model reads free prose; the application owns the questions and validation.
+Exact readers handle simple counts, dimensions and labelled facts without a
+model round trip. Unclear input stays open, and model-only choice interpretations
+require confirmation. The model never decides regulatory content.
 
 Measured on a standard 4-vCPU runner with the exact pinned runtime (the
 `measure-assistant-latency` workflow, so the figures can be reproduced):
 model loaded in 2 s, a free-prose sentence split into goods lines in 5.9 s, a
 paraphrased answer mapped onto an option in 2.1 s, ~2.4 GB RSS while running,
-~1.9 GB disk. Without the model installed the assistant answers instantly and
-needs nothing.
+~1.9 GB disk. These are earlier runtime measurements, not a response-time
+guarantee for every shipment or server.
 
 ## Good to know
 

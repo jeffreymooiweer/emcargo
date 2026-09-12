@@ -228,7 +228,9 @@ export default function DocumentFieldsStep({
       for (const field of section.fields) {
         const value = valueOf(field);
         if (!value) continue;
-        const flat = value.replace(/\s+/g, " ").trim();
+        const option = field.options?.find((item) => item.value === value);
+        const display = option ? L(option.label) : field.type === "checkbox" && value === "true" ? t("docfields.yes") : value;
+        const flat = display.replace(/\s+/g, " ").trim();
         parts.push(`${L(field.label)}: ${flat.length > 40 ? `${flat.slice(0, 40)}…` : flat}`);
         if (parts.length === 4) return parts.join(" · ");
       }

@@ -357,6 +357,7 @@ export default function WizardPage() {
   }, [stepKey]);
 
   const goToField = (key: string) => {
+    if (key === "goods_complete") { setStepKey("lines"); return; }
     setReturnTo(stepKey);
     setFocusField(key);
     setStepKey("details");
@@ -602,6 +603,7 @@ export default function WizardPage() {
         line.height_cm ?? "",
         line.wall_thickness_mm ?? "",
         line.weight_each_kg ?? "",
+        line.weight_total_kg ?? "",
       ]),
     );
   const draftSignature = signatureOf(draftLines);
@@ -612,7 +614,8 @@ export default function WizardPage() {
   // stops. The delay is there so as not to send a request on every keystroke.
   const calculatedSignature = useRef<string | null>(null);
   useEffect(() => {
-    if (restorePending || stepKey !== "lines" || assistantOpen || draftLines.some(line => line.quantity_unconfirmed)) return;
+    if (restorePending || assistantOpen || draftLines.some(line => line.quantity_unconfirmed || line.unconfirmed_weight_kg != null)) return;
+    if (stepKey !== "lines" && assistantDraftSignature.current !== draftSignature) return;
     if (!draftLines.some((line) => line.description.trim())) return;
     if (calculatedSignature.current === draftSignature) return;
 
@@ -692,11 +695,23 @@ export default function WizardPage() {
   ) => {
     if (!result) return;
     updateResultLines(applyLineWeightChange(result.lines, lineId, field, value));
+    const id = draftLines.filter(line => line.description.trim())[lineId - 1]?.id;
+    // An entered weight is input, so later dimension edits must not erase it.
+    setDraftLines(lines => lines.map(line => line.id === id ? {
+      ...line, weight_each_kg: undefined, weight_total_kg: undefined,
+      [field]: value == null || !Number.isFinite(value) ? undefined : value,
+    } : line));
   };
 
   const handleTotalWeightChange = (value: number | null) => {
     if (!result || value == null || Number.isNaN(value)) return;
-    updateResultLines(scaleLinesToTotalWeight(result.lines, value));
+    const scaled = scaleLinesToTotalWeight(result.lines, value);
+    updateResultLines(scaled);
+    const ids = draftLines.filter(line => line.description.trim()).map(line => line.id);
+    setDraftLines(lines => lines.map(line => {
+      const item = scaled[ids.indexOf(line.id)];
+      return item?.include ? { ...line, weight_each_kg: undefined, weight_total_kg: item.weight_total_kg ?? undefined } : line;
+    }));
   };
 
   /** The 24-hour emergency number, which IMDG 5.4.1.5.11 and the IATA DGR
@@ -766,6 +781,12 @@ export default function WizardPage() {
     if (doc.dg_only && !needsDg) return { status: "not_applicable", missing: [], waitingCarrier: false };
     const values = exportValuesFor(doc);
     const missing: { key: string; label: string }[] = [];
+    if (["cmr", "avc_waybill"].includes(doc.key)) {
+      const goods = result?.lines.filter((line) => line.include) ?? [];
+      if (!goods.length || goods.some((line) => !line.description.trim() || !(Number(line.quantity) > 0) || !(Number(line.weight_total_kg) > 0))) {
+        missing.push({ key: "goods_complete", label: t("errors.documents.goods_incomplete") });
+      }
+    }
     let waitingCarrier = false;
     for (const section of resolveSections(doc, registry)) {
       for (const field of section.fields ?? []) {
@@ -822,7 +843,7 @@ export default function WizardPage() {
   );
 
   const exportGenericDoc = async (doc: DocumentDefinition) => {
-    if (!result || reviewBlocked) return;
+    if (!result || reviewBlocked || docStatus(doc).status !== "ready") return;
     setExportingDoc(doc.key);
     try {
       await api.exportDocument({
@@ -1393,6 +1414,12 @@ export default function WizardPage() {
   const applyAssistantState = (state: import("../api/client").AssistantState) => {
     const nextLines = draftLinesFromAssistant(state, draftLines);
     if (nextLines) {
+      if (signatureOf(nextLines) !== signatureOf(draftLines) || nextLines.some(line => line.unconfirmed_weight_kg != null)) {
+        // A later-step correction must invalidate export data immediately.
+        // The calculation effect refreshes it when the interview closes.
+        setResult(null);
+        calculatedSignature.current = null;
+      }
       assistantDraftSignature.current = signatureOf(nextLines);
       setDraftLines(nextLines);
       if (!nextLines.length) { setResult(null); calculatedSignature.current = null; }
@@ -1412,6 +1439,9 @@ export default function WizardPage() {
   };
 
   const includedLines = result?.lines.filter((line) => line.include) ?? [];
+  // A sum of known package volumes is not the whole shipment's volume.
+  const completeTransportVolume = includedLines.length > 0 && includedLines.every(line => line.transport_volume_m3 != null)
+    ? result?.totals.total_transport_volume_m3 ?? null : null;
 
   /** The documents being prepared, for the panel that stands beside the work.
    *  A document that does not apply to this shipment is not being prepared and
@@ -1466,7 +1496,7 @@ export default function WizardPage() {
         value: t("check.goodsValue", {
           count: result.totals.included_count,
           weight: result.totals.total_weight_kg,
-          volume: result.totals.total_transport_volume_m3,
+          volume: completeTransportVolume ?? "—",
         }),
         onChange: () => setStepKey("lines") },
       { key: "packages", label: t("check.packages"), value: packages,
@@ -1516,7 +1546,7 @@ export default function WizardPage() {
         <ShipmentPanel
           lines={result?.totals.line_count ?? draftLines.filter((line) => line.description.trim()).length}
           weightKg={result?.totals.total_weight_kg ?? null}
-          volumeM3={result?.totals.total_transport_volume_m3 ?? null}
+          volumeM3={completeTransportVolume}
           attention={attention}
           documents={panelDocuments}
           onMissing={goToField}
@@ -1540,7 +1570,7 @@ export default function WizardPage() {
           onClick={() => setAssistantOpen((open) => !open)}
           aria-label={assistantOpen ? t("assistant.close") : t("assistant.open")}
           title={assistantOpen ? t("assistant.close") : t("assistant.open")}
-          className={`inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-3 transition dark:border-brand-900 dark:bg-brand-950/40 ${
+          className={`inline-flex h-[50px] items-center justify-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-3 transition dark:border-brand-900 dark:bg-brand-950/40 ${
             assistantOpen
               ? "bg-brand-50 text-brand-700 dark:bg-brand-950/50 dark:text-brand-200"
               : "text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
@@ -1782,7 +1812,7 @@ export default function WizardPage() {
             <ul className="space-y-1 text-sm text-slate-600 dark:text-slate-400">
               <li>{t("wizard.lines")}: {result.totals.included_count}</li>
               <li>{t("wizard.totalWeight")}: {result.totals.total_weight_kg} kg</li>
-              <li>{t("wizard.totalVolume")}: {result.totals.total_transport_volume_m3} m³</li>
+              <li>{t("wizard.totalVolume")}: {completeTransportVolume ?? "—"} m³</li>
             </ul>
             </div>
           </details>
@@ -1974,7 +2004,7 @@ export default function WizardPage() {
                         type="button"
                         onClick={() => exportGenericDoc(doc)}
                         disabled={busy || reviewBlocked || info.status === "blocked" || info.status === "not_applicable" || info.status === "draft"}
-                        className={buttonSecondary + " gap-2"}
+                        className={buttonSecondary + " inline-flex items-center justify-center gap-2"}
                       >
                         <DownloadIcon />{busy ? t("wizardDocs.exporting") : t("wizard.download")}
                       </button>
@@ -1985,7 +2015,8 @@ export default function WizardPage() {
             </div>
           </div>
 
-          <div className={`${panelClass} space-y-2 p-4 sm:p-6`}>
+          <div className={`${panelClass} space-y-3 p-4 sm:p-6`}>
+            <div className="flex flex-wrap items-center gap-3">
             <label
               htmlFor="document-language"
               className="text-sm font-medium text-slate-800 dark:text-slate-100"
@@ -2004,6 +2035,7 @@ export default function WizardPage() {
                 </option>
               ))}
             </select>
+            </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {t("wizardDocs.documentLanguageRule")}
             </p>

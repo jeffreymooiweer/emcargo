@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.deps import get_current_user, require_admin
+from app.core.messages import error
 from app.core.ratelimit import ASSISTANT_MODEL, ASSISTANT_STEP, limiter
 from app.models.user import User
 from app.services.assistant import runtime
@@ -38,6 +39,8 @@ def assistant_step(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    if not runtime.installed():
+        raise error(409, "assistant.model_required")
     return step(payload.state, payload.message, payload.pending, db, payload.language, payload.action)
 
 
@@ -45,10 +48,9 @@ def assistant_step(
 def assistant_status(user: User = Depends(get_current_user)):
     """Whether the assistant can run, and in which mode.
 
-    The deterministic chain is always available; "model" mode only changes
-    how flexibly free text is read, never what may be asked or answered. The
-    status also carries the download state, so the settings page can show an
-    install in progress.
+    The assistant is available only after the local model is installed.
+    Installation progress belongs to Settings; ordinary manual entry remains
+    available regardless of the model's status.
     """
     return runtime.status()
 

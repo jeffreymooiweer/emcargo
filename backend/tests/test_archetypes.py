@@ -103,7 +103,7 @@ def export(document_key, *products, values=None, language="nl"):
         response = api.post("/api/documents/export", json={
             "document_key": document_key,
             "values": values or CONSIGNMENT,
-            "lines": [],
+            "lines": [{"description": "Test cargo", "quantity": 1, "unit": "pcs", "weight_total_kg": 800}],
             "dangerous_goods": [{"line_id": "1", "products": list(products)}],
             "output_language": language,
         })
