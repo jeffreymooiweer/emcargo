@@ -183,6 +183,7 @@ export function AddressTextarea({
   onChange,
   textareaClassName,
   textareaId,
+  rows,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -190,6 +191,7 @@ export function AddressTextarea({
   /** The address itself, not the lookup box above it: that is the field the
    *  export needs, so that is what a label points at and a caller focuses. */
   textareaId?: string;
+  rows?: number;
 }) {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
@@ -229,7 +231,7 @@ export function AddressTextarea({
           />
         )}
       </div>
-      <textarea id={textareaId} className={textareaClassName} value={value} onChange={(e) => onChange(e.target.value)} />
+      <textarea id={textareaId} rows={rows} className={textareaClassName} value={value} onChange={(e) => onChange(e.target.value)} />
     </div>
   );
 }

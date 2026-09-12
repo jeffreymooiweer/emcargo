@@ -1024,6 +1024,18 @@
       "loading_point": "Où les marchandises seront-elles enlevées ?",
       "discharge_point": "Où les marchandises doivent-elles être livrées ?",
       "loading_date": "À quelle date les marchandises seront-elles enlevées ?"
+    },
+    "business": {
+      "title": "Rechercher une adresse professionnelle",
+      "searching": "Recherche des établissements avec ce nom et cette ville…",
+      "choose": "Choisissez le bon établissement.",
+      "confirm": "J’ai trouvé cette adresse. Est-ce le bon établissement ?",
+      "use": "Utiliser cette entreprise et cette adresse",
+      "source": "Suggestion du service d’adresses configuré. La liste peut être incomplète ; vérifiez aussi l’adresse de livraison.",
+      "empty": "Aucune adresse professionnelle complète correspondante. Précisez le nom dans le champ de recherche ou saisissez l’adresse.",
+      "unavailable": "La recherche est désactivée ou le service d’adresses est indisponible. Vous pouvez saisir l’adresse.",
+      "retry": "Rechercher à nouveau",
+      "manual": "Saisir manuellement / aucun de ces résultats"
     }
   },
   "whatsNew": {

@@ -234,6 +234,7 @@ def test_every_rate_limit_in_the_application_in_one_table():
         "assistant_step": "120 per 1 minute",
         "assistant_model": "3 per 1 minute",
         "geo_address": "60 per 1 minute",
+        "geo_businesses": "60 per 1 minute",
         # Groupage: one points check per consignment plus one over the load.
         "dg_trip": "30 per 1 minute",
         # The two that answer a stranger. Everything above this line is a

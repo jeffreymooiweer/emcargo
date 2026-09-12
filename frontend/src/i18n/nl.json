@@ -1024,6 +1024,18 @@
       "loading_point": "Waar worden de goederen opgehaald?",
       "discharge_point": "Waar moeten de goederen worden afgeleverd?",
       "loading_date": "Op welke datum worden de goederen opgehaald?"
+    },
+    "business": {
+      "title": "Bedrijfsadres zoeken",
+      "searching": "Ik zoek vestigingen bij deze naam en plaats…",
+      "choose": "Kies de juiste vestiging.",
+      "confirm": "Ik heb dit adres gevonden. Is dit de juiste vestiging?",
+      "use": "Dit bedrijf en adres overnemen",
+      "source": "Voorstel uit de ingestelde adressendienst. De lijst kan onvolledig zijn; controleer ook het afleveradres.",
+      "empty": "Geen passend volledig bedrijfsadres gevonden. Zoek met een preciezere naam in het adresveld of vul het zelf in.",
+      "unavailable": "Bedrijven zoeken is uitgeschakeld of de adressendienst is niet bereikbaar. U kunt het adres zelf invullen.",
+      "retry": "Opnieuw zoeken",
+      "manual": "Zelf invullen / geen van deze"
     }
   },
   "whatsNew": {

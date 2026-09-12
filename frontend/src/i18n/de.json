@@ -1024,6 +1024,18 @@
       "loading_point": "Wo werden die Waren abgeholt?",
       "discharge_point": "Wo sollen die Waren angeliefert werden?",
       "loading_date": "An welchem Datum werden die Waren abgeholt?"
+    },
+    "business": {
+      "title": "Firmenadresse suchen",
+      "searching": "Standorte mit diesem Namen und Ort werden gesucht…",
+      "choose": "Wählen Sie den richtigen Standort.",
+      "confirm": "Ich habe diese Adresse gefunden. Ist dies der richtige Standort?",
+      "use": "Firma und Adresse übernehmen",
+      "source": "Vorschlag des konfigurierten Adressdienstes. Die Liste kann unvollständig sein; prüfen Sie auch die Lieferadresse.",
+      "empty": "Keine passende vollständige Firmenadresse gefunden. Suchen Sie im Adressfeld mit einem genaueren Namen oder geben Sie sie selbst ein.",
+      "unavailable": "Die Firmensuche ist deaktiviert oder der Adressdienst ist nicht erreichbar. Sie können die Adresse selbst eingeben.",
+      "retry": "Erneut suchen",
+      "manual": "Selbst eingeben / keiner dieser Standorte"
     }
   },
   "whatsNew": {

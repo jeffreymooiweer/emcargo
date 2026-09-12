@@ -1024,6 +1024,18 @@
       "loading_point": "Where will the goods be collected?",
       "discharge_point": "Where should the goods be delivered?",
       "loading_date": "On what date will the goods be collected?"
+    },
+    "business": {
+      "title": "Find business address",
+      "searching": "Looking for establishments with this name and town…",
+      "choose": "Choose the correct establishment.",
+      "confirm": "I found this address. Is this the correct establishment?",
+      "use": "Use this business and address",
+      "source": "Proposal from the configured address service. Results may be incomplete; also check the delivery address.",
+      "empty": "No matching complete business address found. Search with a more precise name in the address field or enter it yourself.",
+      "unavailable": "Business lookup is disabled or the address service is unavailable. You can enter the address yourself.",
+      "retry": "Search again",
+      "manual": "Enter manually / none of these"
     }
   },
   "whatsNew": {
