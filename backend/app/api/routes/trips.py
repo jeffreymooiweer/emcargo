@@ -14,9 +14,10 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.deps import get_current_user
+from app.core.messages import error
 from app.models.trip import Trip
 from app.models.user import User
-from app.schemas.trips import TripDetail, TripIn, TripPage, TripSummary
+from app.schemas.trips import TripDetail, TripIn, TripPage
 from app.services import audit, departments, trips
 
 router = APIRouter(prefix="/trips", tags=["trips"])
@@ -53,33 +54,31 @@ def list_trips(
                     page=page, per_page=per_page)
 
 
-@router.post("", response_model=TripSummary)
+@router.post("", response_model=TripDetail)
 def keep_trip(request: Request, payload: TripIn,
               user: User = Depends(get_current_user),
               db: Session = Depends(get_db)):
-    if len(payload.consignments) < 2:
-        raise HTTPException(status_code=422,
-                            detail="A trip is at least two consignments.")
+    if not payload.consignments:
+        raise error(422, "trips.empty")
     try:
         record = trips.keep(db, user, payload)
     except trips.RecordTooLarge as exc:
         raise HTTPException(status_code=413, detail=str(exc)) from exc
-    return trips.summary(_kept(request, db, user, record, "trip.kept"))
+    return trips.detail(_kept(request, db, user, record, "trip.kept"))
 
 
-@router.put("/{trip_id}", response_model=TripSummary)
+@router.put("/{trip_id}", response_model=TripDetail)
 def update_trip(request: Request, trip_id: int, payload: TripIn,
                 user: User = Depends(get_current_user),
                 db: Session = Depends(get_db)):
     record = _record(trip_id, db, user)
-    if len(payload.consignments) < 2:
-        raise HTTPException(status_code=422,
-                            detail="A trip is at least two consignments.")
+    if not payload.consignments:
+        raise error(422, "trips.empty")
     try:
         record = trips.keep(db, user, payload, existing=record)
     except trips.RecordTooLarge as exc:
         raise HTTPException(status_code=413, detail=str(exc)) from exc
-    return trips.summary(_kept(request, db, user, record, "trip.updated"))
+    return trips.detail(_kept(request, db, user, record, "trip.updated"))
 
 
 @router.get("/{trip_id}", response_model=TripDetail)

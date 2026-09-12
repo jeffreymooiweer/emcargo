@@ -1,445 +1,263 @@
-import { canOversee } from "../permissions";
-import HistoryStatus from "../components/HistoryStatus";
-/**
- * The groupage trips this installation kept.
- *
- * Exists only where the history is switched on — the same promise, the same
- * page shape, as the shipments. A list with a search and a date range, and
- * a record with the judgement as it was given: what each consignment said
- * alone, what they said together, the mixed-loading and limited-quantities
- * findings, and the editions all of it was computed against. From the
- * record the trip reopens on the groupage page, or is removed.
- */
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Navigate, useNavigate, useParams, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate, useParams } from "react-router";
-
-import { api, Department, TripDetail, TripSummary, User } from "../api/client";
+import { api, type ShipmentSummary, type TripConsignment, type TripDetail, type TripIn, type TripResult, type User } from "../api/client";
+import { canOversee } from "../permissions";
 import { usePreferences } from "../settings/preferences";
-import ConfirmDialog from "../toast/ConfirmDialog";
 import { useToast } from "../toast/ToastProvider";
-import { localDateFilters } from "../utils/dateRanges";
+import ConfirmDialog from "../toast/ConfirmDialog";
+import { CheckIcon, CloseIcon, ImportIcon, PlusIcon, RoadIcon, ShipmentsIcon, TrashIcon } from "../components/icons";
+import ShipmentPicker from "./trips/ShipmentPicker";
+import TripLibrary from "./trips/TripLibrary";
+import TripAssessment from "./trips/TripAssessment";
+import { productCount, profilesFor, readConsignment, readMass, sameConsignment } from "./trips/tripState";
+import "./trips/trips.css";
 
-const panelClass = "bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800";
-const inputClass =
-  "w-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 rounded-lg px-3 py-2.5 text-sm min-h-[44px]";
-const buttonPrimary =
-  "bg-brand-600 text-white px-4 py-2.5 rounded-lg font-medium hover:bg-brand-700 disabled:opacity-50 min-h-[44px] text-sm";
-const buttonSecondary =
-  "px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 min-h-[44px] text-sm inline-flex items-center";
-const buttonDanger =
-  "px-4 py-2.5 rounded-lg border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/40 disabled:opacity-50 min-h-[44px] text-sm";
+interface Draft { name: string; consignments: TripConsignment[]; mass: string }
+interface Assessment { key: string; result: TripResult; savedAt?: string; editions?: Record<string, unknown> }
+const emptyDraft = (): Draft => ({ name: "", consignments: [], mass: "" });
+const draftKey = (draft: Draft) => JSON.stringify(draft);
+const checkKeyFor = (draft: Draft, language: string) => JSON.stringify([draft.consignments, readMass(draft.mass), language]);
 
-const PER_PAGE = 25;
-
-function when(iso: string, language: string): string {
-  try {
-    return new Date(iso).toLocaleString(language, { dateStyle: "medium", timeStyle: "short" });
-  } catch {
-    return iso;
-  }
-}
-
-/** The manifest's keys as a reader knows them; anything new keeps its key
- *  with the underscores spaced out. */
-const EDITION_LABELS: Record<string, string> = {
-  adr: "ADR",
-  rid: "RID",
-  adn: "ADN",
-  imdg: "IMDG",
-  imdg_class_tables: "IMDG class tables",
-  imdg_un_cards: "IMDG UN cards",
-  ems: "EmS",
-  iata: "IATA",
-};
-
-function editionLabel(key: string): string {
-  return EDITION_LABELS[key] ?? key.replace(/_/g, " ").toUpperCase();
-}
-
-/** The groupage address a kept trip reopens at. */
-export function groupageLinkFor(trip: TripSummary): string {
-  return `/groupage?trip=${trip.id}`;
+/** Old bookmarks open the editor directly, without an intermediate detail page. */
+export function LegacyTripRoute() {
+  const { id } = useParams();
+  return <Navigate to={`/trips?trip=${encodeURIComponent(id ?? "")}`} replace />;
 }
 
 export default function TripsPage({ user }: { user?: User | null }) {
   const { t, i18n } = useTranslation();
   const { publicSettings } = usePreferences();
-  const { id } = useParams();
-  const admin = canOversee(user);
-
-  if (!publicSettings?.history_enabled) return <HistoryStatus title={t("trips.title")} admin={user?.role === "admin"} />;
-
-  if (id) return <TripView id={Number(id)} language={i18n.language} />;
-  return <TripList language={i18n.language} admin={admin} />;
-}
-
-function TripList({ language, admin }: { language: string; admin: boolean }) {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
+  const historyOn = !!publicSettings?.history_enabled;
   const toast = useToast();
-  const [items, setItems] = useState<TripSummary[]>([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [q, setQ] = useState("");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [department, setDepartment] = useState("");
-  const [departments, setDepartments] = useState<Department[]>([]);
-
-  useEffect(() => {
-    if (!admin) return;
-    api.departments().then(setDepartments).catch(() => setDepartments([]));
-  }, [admin]);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const answer = await api.trips({
-        q,
-        ...localDateFilters(from, to),
-        page,
-        per_page: PER_PAGE,
-        department: admin ? department : undefined,
-      });
-      setItems(answer.items);
-      setTotal(answer.total);
-    } catch (e) {
-      toast.error(String(e));
-    } finally {
-      setLoading(false);
-    }
-    // toast is stable for the provider's lifetime.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, from, to, page, department, admin]);
-
-  useEffect(() => {
-    const handle = setTimeout(() => void load(), q ? 250 : 0);
-    return () => clearTimeout(handle);
-  }, [load, q]);
-
-  const pages = Math.max(1, Math.ceil(total / PER_PAGE));
-  const open = (trip: TripSummary) => navigate(`/trips/${trip.id}`);
-  const name = (trip: TripSummary) => trip.name || t("trips.noName");
-
-  return (
-    <div className="collection-page page-enter space-y-4 sm:space-y-6">
-      <div className={`${panelClass} p-5 sm:p-8 flex flex-wrap items-start justify-between gap-3`}>
-        <div>
-          <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-100">{t("trips.title")}</h2>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 max-w-2xl">{t("trips.intro")}</p>
-        </div>
-        <Link to="/groupage" className={buttonSecondary}>
-          {t("trips.newTrip")}
-        </Link>
-      </div>
-
-      <div className={`${panelClass} p-4 sm:p-5 grid items-end gap-3 md:grid-cols-[2fr_1fr_1fr]`}>
-        <input
-          className={inputClass}
-          placeholder={t("trips.search")}
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            setPage(1);
-          }}
-          aria-label={t("trips.search")}
-        />
-        <label className="text-xs text-slate-500 dark:text-slate-400">
-          {t("history.from")}
-          <input type="date" className={`${inputClass} mt-1`} value={from} onChange={(e) => { setFrom(e.target.value); setPage(1); }} />
-        </label>
-        <label className="text-xs text-slate-500 dark:text-slate-400">
-          {t("history.to")}
-          <input type="date" className={`${inputClass} mt-1`} value={to} onChange={(e) => { setTo(e.target.value); setPage(1); }} />
-        </label>
-        {admin && departments.length > 0 && (
-          <select
-            className={inputClass}
-            value={department}
-            onChange={(e) => {
-              setDepartment(e.target.value);
-              setPage(1);
-            }}
-            aria-label={t("departments.userDepartment")}
-          >
-            <option value="">{t("departments.all")}</option>
-            <option value="none">{t("departments.unassigned")}</option>
-            {departments.map((d) => (
-              <option key={d.id} value={String(d.id)}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-        )}
-        <p className="text-xs text-slate-500 dark:text-slate-400 md:col-span-3">
-          {t("trips.count", { count: items.length, total })}
-        </p>
-      </div>
-
-      {!loading && items.length === 0 && (
-        <p className={`${panelClass} p-5 text-sm text-slate-600 dark:text-slate-300`}>{t("trips.empty")}</p>
-      )}
-
-      {/* Phone: cards */}
-      <div className="space-y-3 md:hidden">
-        {items.map((trip) => (
-          <button
-            key={trip.id}
-            type="button"
-            onClick={() => open(trip)}
-            className={`${panelClass} w-full text-left shadow-sm p-4 space-y-1`}
-          >
-            <div className="flex items-center gap-2">
-              <span className="min-w-0 truncate font-semibold text-slate-900 dark:text-slate-100">{name(trip)}</span>
-              <Badge trip={trip} />
-            </div>
-            <p className="text-sm text-slate-700 dark:text-slate-200">
-              {t("trips.consignments", { count: trip.consignment_count })}
-              {trip.total_points !== null ? ` · ${t("trips.points", { value: trip.total_points })}` : ""}
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              {when(trip.created_at, language)}
-              {trip.created_by ? ` · ${trip.created_by}` : ""}
-              {trip.department ? ` · ${trip.department}` : ""}
-            </p>
-          </button>
-        ))}
-      </div>
-
-      {/* Desktop: table */}
-      {items.length > 0 && (
-        <div className={`${panelClass} hidden overflow-x-auto md:block`}>
-          <table className="w-full text-sm text-slate-800 dark:text-slate-200">
-            <thead className="bg-slate-50 dark:bg-slate-800/80">
-              <tr>
-                <th className="px-3 py-2 text-left">{t("trips.name")}</th>
-                <th className="px-3 py-2 text-right">{t("trips.consignmentsHeader")}</th>
-                <th className="px-3 py-2 text-right">{t("trips.pointsHeader")}</th>
-                <th className="px-3 py-2 text-left">{t("history.kept")}</th>
-                <th className="px-3 py-2 text-left">{t("history.by")}</th>
-                {admin && departments.length > 0 && (
-                  <th className="px-3 py-2 text-left">{t("departments.userDepartment")}</th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((trip) => (
-                <tr
-                  key={trip.id}
-                  onClick={() => open(trip)}
-                  className="border-t border-slate-100 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60"
-                >
-                  <td className="px-3 py-2">
-                    <span className="flex items-center gap-2">
-                      <Link to={`/trips/${trip.id}`} className="font-medium text-brand-700 dark:text-brand-300 hover:underline" onClick={(e) => e.stopPropagation()}>
-                        {name(trip)}
-                      </Link>
-                      <Badge trip={trip} />
-                    </span>
-                  </td>
-                  <td className="px-3 py-2 text-right">{trip.consignment_count}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{trip.total_points ?? "—"}</td>
-                  <td className="px-3 py-2 whitespace-nowrap">{when(trip.created_at, language)}</td>
-                  <td className="px-3 py-2">{trip.created_by || "—"}</td>
-                  {admin && departments.length > 0 && <td className="px-3 py-2">{trip.department || "—"}</td>}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {pages > 1 && (
-        <div className="flex items-center justify-between gap-3">
-          <button type="button" className={buttonSecondary} disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-            {t("history.previous")}
-          </button>
-          <span className="text-sm text-slate-500 dark:text-slate-400">{t("history.page", { page, pages })}</span>
-          <button type="button" className={buttonSecondary} disabled={page >= pages} onClick={() => setPage((p) => p + 1)}>
-            {t("history.next")}
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function Badge({ trip }: { trip: TripSummary }) {
-  const { t } = useTranslation();
-  if (!trip.exemption_lost) return null;
-  return (
-    <span
-      className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-200"
-      title={t("groupage.exemptionLost")}
-    >
-      {t("trips.exemptionLostShort")}
-    </span>
-  );
-}
-
-function TripView({ id, language }: { id: number; language: string }) {
-  const { t } = useTranslation();
   const navigate = useNavigate();
-  const toast = useToast();
-  const [trip, setTrip] = useState<TripDetail | null>(null);
-  const [failed, setFailed] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [confirmRemove, setConfirmRemove] = useState(false);
+  const [params] = useSearchParams();
+  const targetId = params.get("trip");
+  const selection = params.get("shipments") ?? "";
+  const [draft, setDraft] = useState<Draft>(emptyDraft);
+  const [baseline, setBaseline] = useState(draftKey(emptyDraft()));
+  const [tripId, setTripId] = useState<number | null>(null);
+  const [assessment, setAssessment] = useState<Assessment | null>(null);
+  const [checkFailure, setCheckFailure] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
+  const [revision, setRevision] = useState(0);
+  const [opening, setOpening] = useState(false);
+  const [openFailed, setOpenFailed] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveFailure, setSaveFailure] = useState("");
+  const [picker, setPicker] = useState(false);
+  const [busyIds, setBusyIds] = useState<Set<number>>(new Set());
+  const [importing, setImporting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [leaveAction, setLeaveAction] = useState<(() => void) | null>(null);
+  const generation = useRef(0);
+  const loadedTarget = useRef<string | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const addButton = useRef<HTMLButtonElement>(null);
+  const nameInput = useRef<HTMLInputElement>(null);
+  const locked = saving || opening;
+  const adding = busyIds.size > 0 || importing;
+  const mass = readMass(draft.mass);
+  const checkKey = useMemo(() => checkKeyFor(draft, i18n.language), [draft, i18n.language]);
+  // The key gates rendering as well as request completion: no stale green frame.
+  const current = assessment?.key === checkKey ? assessment : null;
+  const dirty = draftKey(draft) !== baseline || (!!tripId && !!current && !current.savedAt);
+  const failed = checkFailure === checkKey;
+  const pending = !!draft.consignments.length && mass !== undefined && !current && !failed && !opening;
+  const latestDraft = useRef(draft); latestDraft.current = draft;
+  const pendingIds = useRef(new Set<number>());
+
+  function adopt(detail: TripDetail) {
+    const next = { name: detail.name, mass: detail.unit_max_mass_tonnes == null ? "" : String(detail.unit_max_mass_tonnes),
+      consignments: detail.consignments.map(c => ({ ...c, profiles: c.profiles ?? detail.regulations })) };
+    setDraft(next); setBaseline(draftKey(next)); setTripId(detail.id);
+    // Retain the language of the historical assessment. A language change triggers a new check.
+    setAssessment({ key: checkKeyFor(next, detail.language), result: detail.result, savedAt: detail.updated_at, editions: detail.editions });
+    setCheckFailure(null); setSaveFailure(""); setPicker(false);
+  }
 
   useEffect(() => {
-    let cancelled = false;
-    api
-      .trip(id)
-      .then((detail) => {
-        if (!cancelled) setTrip(detail);
-      })
-      .catch(() => {
-        if (!cancelled) setFailed(true);
-      });
-    return () => {
-      cancelled = true;
+    const target = targetId ? `trip:${targetId}` : selection ? `selection:${selection}` : "new";
+    if (loadedTarget.current === target) return;
+    loadedTarget.current = target;
+    const run = ++generation.current;
+    setOpenFailed(false); setAssessment(null); setCheckFailure(null); setSaveFailure(""); setPicker(false);
+    setDraft(emptyDraft()); setBaseline(draftKey(emptyDraft())); setTripId(null);
+    pendingIds.current.clear(); setBusyIds(new Set());
+    if (!targetId && !selection) { setOpening(false); return; }
+    if (!historyOn) { setOpening(false); setOpenFailed(true); return; }
+    setOpening(true);
+    const load = async () => {
+      try {
+        if (targetId) {
+          if (!/^\d+$/.test(targetId) || Number(targetId) < 1) throw new Error("invalid id");
+          const detail = await api.trip(Number(targetId));
+          if (run === generation.current) adopt(detail);
+        } else {
+          const ids = [...new Set(selection.split(",").filter(v => /^\d+$/.test(v)).map(Number).filter(v => v > 0))];
+          if (!ids.length) throw new Error("empty selection");
+          const answers = await Promise.allSettled(ids.map(async id => {
+            const detail = await api.shipment(id);
+            return readConsignment(detail.export, detail.reference || `#${id}`, id);
+          }));
+          if (run !== generation.current) return;
+          const consignments = answers.flatMap(answer => answer.status === "fulfilled" ? [answer.value] : []);
+          setDraft({ name: "", mass: "", consignments });
+          if (answers.some(answer => answer.status === "rejected")) setSaveFailure(t("tripWorkspace.someMissing"));
+        }
+      } catch { if (run === generation.current) setOpenFailed(true); }
+      finally { if (run === generation.current) setOpening(false); }
     };
-  }, [id]);
+    void load();
+    // The location identifies the load. Interface text must not reopen an edited trip.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetId, selection, historyOn, revision]);
 
-  if (failed) {
-    return (
-      <div className={`${panelClass} p-5 space-y-3`}>
-        <p className="text-sm text-slate-600 dark:text-slate-300">{t("trips.notFound")}</p>
-        <Link to="/trips" className={buttonSecondary}>
-          {t("trips.back")}
-        </Link>
-      </div>
-    );
-  }
-  if (!trip) {
-    return <p className={`${panelClass} p-5 text-sm text-slate-500 dark:text-slate-400`}>{t("trips.loading")}</p>;
+  useEffect(() => () => { generation.current += 1; loadedTarget.current = null; }, []);
+
+  useEffect(() => {
+    if (opening || !draft.consignments.length || mass === undefined || current) return;
+    let cancelled = false;
+    setCheckFailure(null);
+    const timer = setTimeout(() => {
+      api.dgTrip({ consignments: draft.consignments, profiles: profilesFor(draft.consignments), language: i18n.language, unit_max_mass_tonnes: mass })
+        .then(result => { if (!cancelled) setAssessment({ key: checkKey, result }); })
+        .catch(() => { if (!cancelled) setCheckFailure(checkKey); });
+    }, 450);
+    return () => { cancelled = true; clearTimeout(timer); };
+    // Draft names do not affect the calculation; checkKey includes only assessment inputs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkKey, retry, opening]);
+
+  useEffect(() => {
+    if (!dirty) return;
+    const unload = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    const followLink = (event: MouseEvent) => {
+      const link = (event.target as HTMLElement).closest?.("a[href]") as HTMLAnchorElement | null;
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || !link || link.target === "_blank" || link.hasAttribute("download")) return;
+      if (link.origin !== window.location.origin || link.pathname + link.search === window.location.pathname + window.location.search) return;
+      event.preventDefault(); event.stopPropagation();
+      setLeaveAction(() => () => navigate(link.pathname + link.search + link.hash));
+    };
+    window.addEventListener("beforeunload", unload);
+    document.addEventListener("click", followLink, true);
+    return () => { window.removeEventListener("beforeunload", unload); document.removeEventListener("click", followLink, true); };
+  }, [dirty, navigate]);
+
+  function change(action: () => void) {
+    if (locked || adding) return;
+    if (dirty) setLeaveAction(() => action); else action();
   }
 
-  const remove = async () => {
-    setConfirmRemove(false);
-    setBusy(true);
-    try {
-      await api.forgetTrip(trip.id);
-      toast.success(t("trips.removed"));
-      navigate("/trips");
-    } catch (e) {
-      toast.error(String(e));
-      setBusy(false);
+  function startNew() {
+    loadedTarget.current = null; generation.current += 1;
+    setDraft(emptyDraft()); setBaseline(draftKey(emptyDraft())); setTripId(null); setAssessment(null); setSaveFailure(""); setOpenFailed(false); setPicker(false);
+    navigate("/trips");
+    nameInput.current?.focus();
+  }
+
+  function append(consignments: TripConsignment[]) {
+    const fresh = [...latestDraft.current.consignments];
+    let duplicate = false;
+    for (const c of consignments) {
+      if (fresh.some(existing => sameConsignment(existing, c))) duplicate = true;
+      else fresh.push(c);
     }
-  };
+    const next = { ...latestDraft.current, consignments: fresh };
+    latestDraft.current = next; setDraft(next); setSaveFailure("");
+    if (duplicate) toast.info(t("tripWorkspace.duplicate"));
+  }
 
-  const row = (label: string, value: string | number) => (
-    <div className="flex justify-between gap-4 border-b border-slate-100 py-2 text-sm dark:border-slate-800 last:border-b-0">
-      <span className="text-slate-500 dark:text-slate-400">{label}</span>
-      <span className="text-right text-slate-800 dark:text-slate-100">{value}</span>
-    </div>
-  );
-  const result = trip.result;
-  const editions = Object.entries(trip.editions || {})
-    .map(([key, value]) => `${editionLabel(key)} ${String(value)}`)
-    .join(" · ");
+  async function addShipment(summary: ShipmentSummary) {
+    if (pendingIds.current.has(summary.id)) return;
+    const run = generation.current;
+    pendingIds.current.add(summary.id); setBusyIds(new Set(pendingIds.current));
+    try {
+      const detail = await api.shipment(summary.id);
+      if (run === generation.current) append([readConsignment(detail.export, detail.reference || `#${summary.id}`, summary.id)]);
+    } catch { if (run === generation.current) setSaveFailure(t("tripWorkspace.addFailed", { name: summary.reference || `#${summary.id}` })); }
+    finally { pendingIds.current.delete(summary.id); setBusyIds(new Set(pendingIds.current)); }
+  }
 
-  return (
-    <div className="collection-page page-enter space-y-4 sm:space-y-6 max-w-3xl">
-      <Link to="/trips" className="text-sm text-brand-700 dark:text-brand-300 hover:underline">
-        ← {t("trips.back")}
-      </Link>
+  async function importFiles(files: FileList | null) {
+    if (!files?.length) return;
+    const run = generation.current;
+    setImporting(true);
+    const loaded: TripConsignment[] = [], refused: string[] = [];
+    for (const file of Array.from(files)) {
+      try {
+        if (file.size > 4 * 1024 * 1024) throw new Error("too large");
+        loaded.push(readConsignment(JSON.parse(await file.text()), file.name));
+      } catch { refused.push(file.name); }
+    }
+    if (run === generation.current) {
+      append(loaded);
+      if (refused.length) setSaveFailure(t("tripWorkspace.importFailed", { names: refused.join(", ") }));
+    }
+    setImporting(false);
+  }
 
-      <div className={`${panelClass} p-5 sm:p-8 space-y-4`}>
-        <div className="flex flex-wrap items-center gap-2">
-          <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-slate-100">
-            {trip.name || t("trips.noName")}
-          </h2>
-          <Badge trip={trip} />
-        </div>
-        <div>
-          {row(t("trips.consignmentsHeader"), trip.consignments.map((c) => c.name).join(", ") || trip.consignment_count)}
-          {row(t("history.regulations"), trip.regulations.join(", ") || "—")}
-          {row(t("groupage.unitMass"), trip.unit_max_mass_tonnes ?? "—")}
-          {row(t("history.kept"), `${when(trip.created_at, language)}${trip.created_by ? ` · ${trip.created_by}` : ""}`)}
-          {trip.department && row(t("departments.userDepartment"), trip.department)}
-          {trip.updated_at !== trip.created_at && row(t("history.updated"), when(trip.updated_at, language))}
-          {editions && row(t("trips.editions"), editions)}
-        </div>
+  async function save() {
+    if (!current || mass === undefined || !draft.consignments.length || saving || adding) return;
+    setSaving(true); setSaveFailure("");
+    const payload: TripIn = { name: draft.name.trim() || t("tripWorkspace.defaultName", { date: new Date().toLocaleDateString(i18n.language) }), consignments: draft.consignments, profiles: profilesFor(draft.consignments), language: i18n.language, unit_max_mass_tonnes: mass };
+    try {
+      const detail = tripId ? await api.updateTrip(tripId, payload) : await api.keepTrip(payload);
+      loadedTarget.current = `trip:${detail.id}`;
+      adopt(detail); setRevision(v => v + 1);
+      navigate(`/trips?trip=${detail.id}`, { replace: true });
+    } catch { setSaveFailure(t("tripWorkspace.saveFailed")); }
+    finally { setSaving(false); }
+  }
 
-        <div className="flex flex-wrap gap-2 pt-2">
-          <Link to={groupageLinkFor(trip)} className={buttonPrimary}>
-            {t("trips.reopen")}
-          </Link>
-          <button type="button" className={buttonDanger} disabled={busy} onClick={() => setConfirmRemove(true)}>
-            {t("trips.remove")}
-          </button>
-        </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400">{t("trips.keptAsJudged")}</p>
+  async function removeTrip() {
+    if (!tripId) return;
+    setConfirmDelete(false); setSaving(true);
+    try { await api.forgetTrip(tripId); startNew(); setRevision(v => v + 1); toast.success(t("trips.removed")); }
+    catch { setSaveFailure(t("tripWorkspace.deleteFailed")); }
+    finally { setSaving(false); }
+  }
+
+  const requestCheck = () => { setAssessment(null); setRetry(v => v + 1); };
+  const closePicker = () => { setPicker(false); addButton.current?.focus(); };
+
+  return <div className="trip-workspace page-enter">
+    <header className="page-heading"><div><h1>{t("trips.title")}</h1><p>{t("tripWorkspace.intro")}</p></div>
+      <button type="button" className="action-secondary" disabled={locked || adding} onClick={() => change(startNew)}><PlusIcon />{t("trips.newTrip")}</button>
+    </header>
+    {!historyOn && <p className="trip-storage-note">{t("tripWorkspace.noStorage")}</p>}
+    <div className={`trip-layout ${!historyOn ? "trip-layout-solo" : ""}`}>
+      {historyOn && <TripLibrary activeId={tripId} revision={revision} oversee={canOversee(user)} disabled={locked || adding} onSelect={id => { if (id !== tripId) change(() => navigate(`/trips?trip=${id}`)); }} />}
+      <div className="trip-editor">
+        {opening ? <div className="trip-loading surface" role="status">{t("trips.loading")}</div> : openFailed ? <div className="surface trip-load-error" role="alert"><h2>{t("trips.notFound")}</h2><p>{t("tripWorkspace.loadFailed")}</p><button type="button" className="action-secondary" onClick={() => { loadedTarget.current = null; setRevision(v => v + 1); }}>{t("tripWorkspace.retry")}</button></div> : <>
+          <fieldset disabled={locked} className="surface trip-composer">
+            <div className="trip-composer-header"><span className="trip-vehicle-icon"><RoadIcon /></span><div><label htmlFor="trip-name">{t("groupage.tripName")}</label><input ref={nameInput} id="trip-name" placeholder={t("tripWorkspace.namePlaceholder")} maxLength={120} value={draft.name} onChange={event => setDraft(d => ({ ...d, name: event.target.value }))} /></div></div>
+            <div className="trip-load-heading"><h2>{t("tripWorkspace.onBoard")}<span>{draft.consignments.length}</span></h2>
+              {!!draft.consignments.length && <button ref={addButton} className="trip-text-button" type="button" aria-expanded={picker} onClick={() => historyOn ? setPicker(v => !v) : fileInput.current?.click()}><PlusIcon />{t("tripWorkspace.add")}</button>}
+            </div>
+            {draft.consignments.length ? <ul className="trip-load">{draft.consignments.map((consignment, index) => <li key={consignment.shipment_id ? `shipment-${consignment.shipment_id}` : `file-${index}`}>
+              <span className="trip-load-number">{String(index + 1).padStart(2, "0")}</span><div className="trip-load-copy"><input aria-label={`${t("groupage.consignmentName")} ${index + 1}`} maxLength={120} value={consignment.name} onChange={event => setDraft(d => ({ ...d, consignments: d.consignments.map((c, i) => i === index ? { ...c, name: event.target.value } : c) }))} />
+                <p>{consignment.route_label || t(consignment.entries.length ? "tripWorkspace.dgPositions" : "tripWorkspace.generalGoods", { count: productCount(consignment) })}</p></div>
+              {consignment.entries.length > 0 && <span className="trip-dg-tag">DG</span>}
+              <button className="trip-icon-button" type="button" aria-label={t("tripWorkspace.removeShipment", { name: consignment.name })} onClick={() => setDraft(d => ({ ...d, consignments: d.consignments.filter((_, i) => i !== index) }))}><CloseIcon /></button>
+            </li>)}</ul> : !picker && <div className="trip-empty"><ShipmentsIcon /><h3>{t("tripWorkspace.start")}</h3><p>{t(historyOn ? "tripWorkspace.startHint" : "tripWorkspace.importHint")}</p><button ref={addButton} className="action-primary" type="button" aria-expanded={picker} onClick={() => historyOn ? setPicker(true) : fileInput.current?.click()}><PlusIcon />{t("tripWorkspace.add")}</button></div>}
+            {picker && historyOn && <ShipmentPicker selected={draft.consignments} busyIds={busyIds} onAdd={summary => void addShipment(summary)} onClose={closePicker} />}
+            <div className="trip-composer-bottom"><button className="trip-text-button" type="button" disabled={importing} onClick={() => fileInput.current?.click()}><ImportIcon />{t(importing ? "tripWorkspace.adding" : "tripWorkspace.import")}</button>
+              <input ref={fileInput} type="file" accept="application/json,.json" multiple className="sr-only" aria-label={t("tripWorkspace.import")} onChange={event => { void importFiles(event.target.files); event.target.value = ""; }} />
+              {!!draft.consignments.length && <details className="trip-vehicle" open={mass === undefined || (!!current?.result.lq_marking?.lq_gross_kg && current.result.lq_marking.required === null) || undefined}><summary>{t("tripWorkspace.vehicle")}{draft.mass && <span> · {draft.mass} t</span>}</summary><label htmlFor="trip-mass">{t("groupage.unitMass")}</label><input id="trip-mass" inputMode="decimal" placeholder={t("tripWorkspace.unknown")} value={draft.mass} aria-invalid={mass === undefined} aria-describedby="trip-mass-hint" onChange={event => setDraft(d => ({ ...d, mass: event.target.value }))} /><p id="trip-mass-hint">{t(mass === undefined ? "tripWorkspace.assessment.invalidMassHint" : "tripWorkspace.massHint")}</p></details>}
+            </div>
+          </fieldset>
+          {saveFailure && <div className="trip-inline-error" role="alert">{saveFailure}</div>}
+          {!!draft.consignments.length && <TripAssessment result={current?.result ?? null} consignments={draft.consignments} pending={pending} failed={failed} invalidMass={mass === undefined} savedAt={current?.savedAt} editions={current?.editions} onRetry={requestCheck} />}
+          {(!!draft.consignments.length || !!tripId) && <footer className="trip-savebar">
+            <span role="status" className="trip-save-status">{saving ? t("tripWorkspace.saving") : !historyOn ? t("tripWorkspace.sessionOnly") : tripId && !dirty ? <><CheckIcon />{t("tripWorkspace.saved")}</> : t("tripWorkspace.unsaved")}</span>
+            {tripId && <button type="button" className="trip-icon-button trip-delete" aria-label={t("trips.remove")} disabled={locked || adding} onClick={() => setConfirmDelete(true)}><TrashIcon /></button>}
+            {historyOn && <button className="action-primary" type="button" disabled={locked || adding || !current || !draft.consignments.length || mass === undefined || (!!tripId && !dirty && !!current.savedAt)} onClick={() => void save()}>{t("tripWorkspace.save")}</button>}
+          </footer>}
+        </>}
       </div>
-
-      {result && result.consignments && (
-        <div className="space-y-4">
-          {result.exemption_lost && (
-            <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-100">
-              <p className="font-semibold">{t("groupage.exemptionLost")}</p>
-              <p className="mt-1">{result.exemption_lost.message}</p>
-            </div>
-          )}
-          <div className={`${panelClass} p-4 sm:p-5`}>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              {t("groupage.apartAndTogether")}
-            </h3>
-            <table className="mt-2 w-full text-sm">
-              <tbody>
-                {result.consignments.map((c) => (
-                  <tr key={c.name} className="border-b border-slate-100 dark:border-slate-800">
-                    <td className="py-1 text-slate-800 dark:text-slate-200">{c.name}</td>
-                    <td className="py-1 text-right tabular-nums">{c.points ?? "—"}</td>
-                    <td className="py-1 pl-3 text-right text-xs text-slate-500 dark:text-slate-400">
-                      {c.exempt === true ? t("groupage.exempt") : c.exempt === false ? t("groupage.notExempt") : t("groupage.incomplete")}
-                    </td>
-                  </tr>
-                ))}
-                <tr className="font-semibold">
-                  <td className="py-1">{t("groupage.together")}</td>
-                  <td className="py-1 text-right tabular-nums">{result.adr_points?.total_points}</td>
-                  <td className="py-1 pl-3 text-right text-xs">{t("groupage.threshold", { value: result.adr_points?.threshold })}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          {result.mixed_loading && result.mixed_loading.length > 0 && (
-            <div className={`${panelClass} p-4 sm:p-5`}>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                {t("groupage.mixedLoading")}
-              </h3>
-              <ul className="mt-2 space-y-2 text-sm">
-                {result.mixed_loading.map((w, i) => (
-                  <li key={i} className="text-slate-700 dark:text-slate-300">
-                    {w.message}
-                    {w.products && <span className="block text-xs text-slate-500 dark:text-slate-400">{w.products}</span>}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {result.lq_marking && (
-            <div className={`${panelClass} p-4 sm:p-5`}>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                {result.lq_marking.rule}
-              </h3>
-              <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">{result.lq_marking.message}</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      <ConfirmDialog
-        open={confirmRemove}
-        title={t("trips.remove")}
-        body={t("trips.confirmRemove")}
-        confirmLabel={t("trips.remove")}
-        onConfirm={remove}
-        onCancel={() => setConfirmRemove(false)}
-      />
     </div>
-  );
+    <ConfirmDialog open={!!leaveAction} title={t("tripWorkspace.leaveTitle")} body={t("tripWorkspace.leaveHint")} confirmLabel={t("tripWorkspace.discard")} onCancel={() => setLeaveAction(null)} onConfirm={() => { const action = leaveAction; setLeaveAction(null); action?.(); }} />
+    <ConfirmDialog open={confirmDelete} title={t("trips.remove")} body={t("tripWorkspace.deleteHint")} confirmLabel={t("trips.remove")} onCancel={() => setConfirmDelete(false)} onConfirm={() => void removeTrip()} />
+  </div>;
 }

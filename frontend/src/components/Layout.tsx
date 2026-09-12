@@ -10,7 +10,7 @@ import CommandMenu from "./CommandMenu";
 import UpdateToast from "./UpdateToast";
 import TwoFactorNudge, { clearTwoFactorNudge } from "./TwoFactorNudge";
 import WhatsNewModal from "./WhatsNewModal";
-import { ShieldIcon, ChevronDownIcon, CloseIcon, CollapseIcon, DocumentIcon, LogoutIcon, GroupageIcon, HistoryIcon, HomeIcon, LibraryIcon, MenuIcon, PlusIcon, RoadIcon, SettingsIcon, ShipmentsIcon, TripsIcon, UserIcon } from "./icons";
+import { ShieldIcon, ChevronDownIcon, CloseIcon, CollapseIcon, DocumentIcon, LogoutIcon, HistoryIcon, HomeIcon, LibraryIcon, MenuIcon, PlusIcon, RoadIcon, SettingsIcon, ShipmentsIcon, TripsIcon, UserIcon } from "./icons";
 
 interface Props { user: User; onLogout: () => void }
 
@@ -59,7 +59,7 @@ export default function Layout({ user, onLogout }: Props) {
   }
   const destinations = [
     {to: "/overzicht", label: t("nav.overview")}, {to: "/shipments", label: t("nav.shipments")}, {to: "/trips", label: t("nav.trips")}, {to: "/articles", label: t("nav.articles")},
-    {to: "/", label: t("nav.new")}, {to: "/groupage", label: t("nav.groupage")},
+    {to: "/", label: t("nav.new")},
     ...(manager ? [{to: "/materieel", label: t("nav.materieel")}, {to: "/users", label: t("nav.users")}] : []),
     ...(admin ? [{to: "/audit", label: t("nav.audit")}] : []),
     {to: "/dg-reviews", label: t("dgReview.title")},
@@ -92,14 +92,12 @@ export default function Layout({ user, onLogout }: Props) {
       {manager && link("/materieel", t("nav.materieel"), RoadIcon, compact)}
       {compact ? <>
         {link("/settings", t("nav.settings"), SettingsIcon, true)}
-        {link("/groupage", t("nav.groupage"), GroupageIcon, true)}
         {manager && link("/users", t("nav.users"), UserIcon, true)}
         {admin && link("/audit", t("nav.audit"), HistoryIcon, true)}
         {link("/legal", t("nav.legal"), DocumentIcon, true)}
-      </> : <details className="emcargo-nav-group" open={["/settings", "/users", "/audit", "/legal", "/groupage"].includes(location.pathname) || undefined}>
+      </> : <details className="emcargo-nav-group" open={["/settings", "/users", "/audit", "/legal"].includes(location.pathname) || undefined}>
         <summary className="emcargo-nav-link"><SettingsIcon className="h-[22px] w-[22px]" /><span>{t("nav.manage")}</span><ChevronDownIcon className="ml-auto h-3.5 w-3.5" /></summary>
         <div className="emcargo-subnav">
-          {link("/groupage", t("nav.groupage"), GroupageIcon, false)}
           {link("/settings", t("nav.settings"), SettingsIcon, false)}
           {manager && link("/users", t("nav.users"), UserIcon, false)}
           {admin && link("/audit", t("nav.audit"), HistoryIcon, false)}

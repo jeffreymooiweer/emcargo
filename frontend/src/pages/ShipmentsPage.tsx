@@ -238,7 +238,7 @@ function ShipmentList({ language, admin, dgsa }: { language: string; admin: bool
           <span className="text-sm text-slate-700 dark:text-slate-200">
             {t("history.picked", { count: picked.length })}
           </span>
-          <Link to={`/groupage?shipments=${picked.join(",")}`} className={`${buttonPrimary} ml-auto`}>
+          <Link to={`/trips?shipments=${picked.join(",")}`} className={`${buttonPrimary} ml-auto`}>
             {t("history.toTrip", { count: picked.length })}
           </Link>
           <button type="button" className={buttonSecondary} onClick={() => setPicked([])}>

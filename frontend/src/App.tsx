@@ -20,6 +20,7 @@ const DgsaReportPage = lazy(() => import("./pages/DgsaReportPage"));
 const ArticlesPage = lazy(() => import("./pages/ArticlesPage"));
 const AuditPage = lazy(() => import("./pages/AuditPage"));
 const TripsPage = lazy(() => import("./pages/TripsPage"));
+const LegacyTripRoute = lazy(() => import("./pages/TripsPage").then(module => ({ default: module.LegacyTripRoute })));
 const LegalPage = lazy(() => import("./pages/LegalPage"));
 import { BrandingProvider } from "./branding";
 import { PreferencesProvider } from "./settings/preferences";
@@ -93,7 +94,7 @@ export default function App() {
           <Route path="/shipments/report" element={<DgsaReportPage user={user} />} />
           <Route path="/shipments/:id" element={<ShipmentsPage user={user} />} />
           <Route path="/trips" element={<TripsPage user={user} />} />
-          <Route path="/trips/:id" element={<TripsPage user={user} />} />
+          <Route path="/trips/:id" element={<LegacyTripRoute />} />
           <Route path="/articles" element={<ArticlesPage user={user} />} />
           {canManage(user) && <Route path="/materieel" element={<MaterieelPage />} />}
           <Route path="/dg-reviews" element={<DgReviewsPage user={user} />} />
