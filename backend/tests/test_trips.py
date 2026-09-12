@@ -145,11 +145,37 @@ def test_a_trip_that_stays_exempt_is_indexed_so(db, monkeypatch):
         assert row["total_points"] == 600 and row["exemption_lost"] is False
 
 
-def test_one_consignment_is_not_a_trip(db, monkeypatch):
+def test_one_consignment_can_start_a_trip(db, monkeypatch):
     with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
         alone = trip(consignments=trip()["consignments"][:1])
-        assert client.post("/api/trips", json=alone).status_code == 422
-    assert trips.count(db) == 0
+        response = client.post("/api/trips", json=alone)
+        assert response.status_code == 200
+        assert response.json()["consignment_count"] == 1
+        assert response.json()["result"]["adr_points"]["total_points"] == 600
+    assert trips.count(db) == 1
+
+
+def test_empty_trip_is_refused_on_create_and_update(db, monkeypatch):
+    """The unified editor starts empty, but an empty load must not be saved."""
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
+        assert client.post("/api/trips", json=trip(consignments=[])).status_code == 422
+        kept = client.post("/api/trips", json=trip()).json()
+        assert client.put(f"/api/trips/{kept['id']}", json=trip(consignments=[])).status_code == 422
+        assert client.get(f"/api/trips/{kept['id']}").json()["consignment_count"] == 2
+
+
+def test_general_freight_and_source_profiles_survive_reopening(db, monkeypatch):
+    """Ordinary freight belongs on the same trip; source profiles must survive edits."""
+    with application(db, monkeypatch, EMCARGO_HISTORY="true") as client:
+        payload = trip(consignments=[{"name": "Timber", "entries": [], "profiles": [],
+                                     "route_label": "Wezep → Oirschot"}], profiles=[])
+        kept = client.post("/api/trips", json=payload).json()
+        detail = client.get(f"/api/trips/{kept['id']}").json()
+        assert detail["consignments"][0]["entries"] == []
+        assert detail["consignments"][0]["profiles"] == []
+        assert detail["consignments"][0]["route_label"] == "Wezep → Oirschot"
+        assert kept["result"] == detail["result"]
+        assert kept["editions"] == detail["editions"]
 
 
 def test_keeping_again_brings_the_same_row_up_to_date(db, monkeypatch):

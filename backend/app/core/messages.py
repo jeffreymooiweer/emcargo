@@ -50,6 +50,7 @@ class ApiError(HTTPException):
 #: Kept here rather than at the raise sites so that the set of codes is
 #: countable — a translation guard cannot check what it cannot enumerate.
 MESSAGES: dict[str, str] = {
+    "trips.empty": "Add at least one shipment to the trip.",
     "documents.goods_incomplete": "Complete the goods description, quantity and weight before downloading the consignment note",
     "assistant.model_required": "Install the local language model in Settings before using the assistant. You can continue manually in the wizard.",
     'permissions.manager_required': 'Operational management access is required.',

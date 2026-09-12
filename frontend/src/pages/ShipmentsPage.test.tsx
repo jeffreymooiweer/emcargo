@@ -150,7 +150,7 @@ describe("de zendingenpagina", () => {
     // The trip is opened with the selection in the address; the server
     // decides per shipment whether this viewer may read it.
     expect(screen.getByRole("link", { name: /history\.toTrip:2/ })).toHaveAttribute(
-      "href", "/groupage?shipments=7,8");
+      "href", "/trips?shipments=7,8");
   });
 
   it("zet het concept waar de gebruiker mee bezig was bovenaan", async () => {

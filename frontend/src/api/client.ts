@@ -304,9 +304,9 @@ export const api = {
   trips: (query: TripQuery = {}) => request<TripPage>(`/trips${auditSuffix(query)}`),
   trip: (id: number) => request<TripDetail>(`/trips/${id}`),
   keepTrip: (payload: TripIn) =>
-    request<TripSummary>("/trips", { method: "POST", body: JSON.stringify(payload) }),
+    request<TripDetail>("/trips", { method: "POST", body: JSON.stringify(payload) }),
   updateTrip: (id: number, payload: TripIn) =>
-    request<TripSummary>(`/trips/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+    request<TripDetail>(`/trips/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
   forgetTrip: (id: number) => request<{ ok: boolean }>(`/trips/${id}`, { method: "DELETE" }),
   /** The audit log: who did what, metadata only. Administrators only, and
    *  requires an administrator account. */
@@ -1083,12 +1083,20 @@ export interface TwoFactorSetup {
   code_sent: boolean;
 }
 
-/** A groupage assessment: what each consignment said alone, and what they say
- *  together. Carries no identifier, because a trip is never stored. */
+/** The assessment of the selected load; persistence is a separate operation. */
 export interface TripResult {
   consignments: { name: string; points: number | null; exempt: boolean | null; status: string }[];
-  adr_points: { total_points: number; threshold: number; status: string };
-  mixed_loading: { message: string; products?: string; rule?: string }[];
+  adr_points: {
+    total_points: number; threshold: number; status: string;
+    incomplete_products?: string[]; forbidden_products?: string[];
+    mode_note?: string; basis_note?: string; still_required?: string;
+  };
+  mixed_loading: { message: string; products?: string; rule?: string; severity?: string }[];
+  lq_eq?: {
+    status?: string;
+    rows?: { product: string; lq?: { status: string; message: string }; eq?: { status: string; message: string } }[];
+    warnings?: { message: string; products?: string; rule?: string; severity?: string }[];
+  };
   lq_marking: {
     rule: string;
     message: string;
@@ -1138,6 +1146,8 @@ export interface TripConsignment {
   name: string;
   entries: Record<string, unknown>[];
   shipment_id?: number | null;
+  profiles?: string[] | null;
+  route_label?: string;
 }
 
 /** A groupage trip as the groupage page hands it over to be kept. The

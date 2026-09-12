@@ -37,6 +37,13 @@ class TripConsignmentIn(BaseModel):
     entries: list[dict[str, Any]] = Field(default_factory=list)
     #: The kept shipment this was picked from, when it was; a file has none.
     shipment_id: int | None = None
+    profiles: list[str] | None = None
+    route_label: str = Field(default="", max_length=500)
+
+    @field_validator("profiles", mode="before")
+    @classmethod
+    def _known_profiles(cls, value: Any) -> list[str] | None:
+        return None if value is None else known_profiles(value)
 
 
 class TripIn(BaseModel):

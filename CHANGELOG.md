@@ -2,6 +2,19 @@
 
 All notable changes are documented here, following [Semantic Versioning](https://semver.org/).
 
+## [2.8.0] — 2026-09-12
+
+### One workspace for trips
+
+- Assemble, check, save and reopen trips on the Ritten page. Groupage is included here, with redirects for existing bookmarks and shipment selections.
+- Add shipments directly from a searchable list or import shipment exports. One-shipment trips and ordinary freight are supported alongside dangerous goods.
+- Refresh the combined assessment automatically when the load changes. Stale responses cannot overwrite newer results, and saved checks remain visibly dated snapshots.
+- Show blocking findings, incomplete data and required attention before calculation details. Saving a trip does not imply DG release.
+- Preserve edits on network errors, protect unsaved changes when switching trips, deduplicate imports, accept decimal commas and expose the vehicle mass when needed.
+- Keep search, date and department filters, departmental access rules, optional retention, and all four interface languages.
+
+This remains a load assessment workspace, not route optimisation or a loading-capacity planner.
+
 ## [2.7.0] — 2026-09-12
 
 ### Business addresses in the shipment assistant
