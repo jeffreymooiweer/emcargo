@@ -14,11 +14,12 @@ lion's share of the runtime.
 That kind of duplicated work creeps back in unnoticed — a second workflow is
 quickly added and nobody counts the checks. Hence these tests. They read the
 YAML as text; that is deliberately crude, because what is guarded here is not
-the exact wording but the shape: one workflow that runs by itself, no
-duplicates, and no emulation without publication.
+the exact wording but the shape: one CI workflow, narrowly scoped publishing
+workflows, no duplicates, and no emulation without publication.
 """
 
 from pathlib import Path
+from fnmatch import fnmatchcase
 
 import pytest
 import yaml
@@ -60,10 +61,38 @@ def automatic() -> list[str]:
 # --- What runs by itself ---------------------------------------------------
 
 
-def test_only_two_workflows_start_by_themselves():
-    """ci.yml on every push, and tag-release.yml on a merged release branch. All
-    the others wait until somebody asks, and cost nothing until then."""
-    assert automatic() == ["ci.yml", "tag-release.yml"]
+def test_only_ci_and_scoped_publication_workflows_start_by_themselves():
+    """Card sets were missing because their publication was manual only.
+    Source changes now publish them, while all research and extraction
+    workflows remain opt-in and the test suites still run only once."""
+    assert automatic() == ["ci.yml", "generate-un-cards.yml", "tag-release.yml"]
+
+
+@pytest.mark.parametrize("path, should_generate", [
+    ("scripts/un_cards/render.py", True),
+    ("scripts/un_cards/assets/labels/3.png", True),
+    ("backend/seed/dg/adr_table_a.json", True),
+    ("backend/app/config/dg_compliance.json", True),
+    ("frontend/public/shipping.png", True),
+    (".github/workflows/generate-un-cards.yml", True),
+    ("VERSION", False),
+    ("frontend/src/pages/TripsPage.tsx", False),
+    ("backend/app/api/routes/trips.py", False),
+    ("docs/development.md", False),
+])
+def test_card_generation_only_follows_its_sources_on_main(path, should_generate):
+    """Ordinary app changes must not rebuild thousands of unchanged PDFs.
+    A branch or pull request must not trigger their public release either."""
+    events = triggers(load("generate-un-cards.yml"))
+    assert set(events) == {"push", "workflow_dispatch"}
+    assert events["push"]["branches"] == ["main"]
+    assert any(fnmatchcase(path, pattern) for pattern in events["push"]["paths"]) == should_generate
+
+
+def test_card_publication_does_not_replace_the_latest_app_release():
+    """The application updater reads the latest app release. A separately
+    published data set must not replace it with a non-version card tag."""
+    assert "--latest=false" in steps_only("generate-un-cards.yml")
 
 
 def test_no_two_workflows_share_a_name():
