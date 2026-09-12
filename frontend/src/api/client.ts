@@ -542,7 +542,7 @@ export const api = {
       const err = await res.json().catch(() => ({ detail: res.statusText }));
       const detail = err.detail;
       if (detail && typeof detail === "object" && Array.isArray(detail.errors)) {
-        throw new Error(detail.errors.join("\n"));
+        throw new Error(detail.errors.map(describeDetail).join("\n"));
       }
       throw new Error(typeof detail === "string" ? detail : "Export failed");
     }
@@ -587,7 +587,7 @@ export const api = {
       const err = await res.json().catch(() => ({ detail: res.statusText }));
       const detail = err.detail;
       if (detail && typeof detail === "object" && Array.isArray(detail.errors)) {
-        throw new Error(detail.errors.join("\n"));
+        throw new Error(detail.errors.map(describeDetail).join("\n"));
       }
       throw new Error(typeof detail === "string" ? detail : "Export failed");
     }

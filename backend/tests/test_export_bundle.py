@@ -68,11 +68,13 @@ PRODUCT = {
 }
 
 DG = [{"line_id": "1", "vehicle": "UNIT-1", "products": [PRODUCT]}]
+LINES = [{"line_id": 1, "include": True, "description": "Vaten benzine",
+          "quantity": 4, "unit": "vat", "weight_total_kg": 800}]
 
 
 def doc(key, **overrides):
     payload = {"document_key": key, "values": dict(CONSIGNMENT),
-               "lines": [], "dangerous_goods": DG, "output_language": "nl"}
+               "lines": [dict(line) for line in LINES], "dangerous_goods": DG, "output_language": "nl"}
     payload.update(overrides)
     return payload
 
@@ -82,6 +84,17 @@ def bundle(payload):
         response = api.post("/api/documents/export/bundle", json=payload)
     release()
     return response
+
+
+@pytest.mark.parametrize("lines", [[], [{"description": "Chairs", "quantity": 8}],
+                                    [{"description": "Chairs", "quantity": 8, "weight_total_kg": 0}]])
+def test_unweighed_cargo_cannot_bypass_the_wizard(lines):
+    """The novice could download an empty-weight CMR; enforce this at HTTP too."""
+    with client() as api:
+        response = api.post("/api/documents/export", json=doc("cmr", lines=lines, dangerous_goods=[]))
+    release()
+    assert response.status_code == 422
+    assert response.json()["detail"]["errors"][0]["code"] == "documents.goods_incomplete"
 
 
 def names_in(response) -> list[str]:

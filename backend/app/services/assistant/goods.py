@@ -55,9 +55,10 @@ def open_questions_for_line(line: dict[str, Any]) -> list[dict[str, Any]]:
         return []
     has_dimensions = all(_known(line.get(key))
                          for key in ("length_cm", "width_cm", "height_cm"))
-    if has_dimensions:
-        return []
     weight_known = _known(line.get("weight_total_kg")) or _known(line.get("weight_each_kg"))
+    if has_dimensions:
+        return [] if weight_known else [{"field": "goods_weight_each", "required": False,
+                                        "reason": "weight_unknown_material"}]
     volume_known = _known(line.get("transport_volume_m3"))
     if weight_known and volume_known:
         return []
@@ -106,7 +107,20 @@ def parse_dimensions(text: str) -> dict[str, float] | None:
     matches = list(_DIMENSIONS.finditer(text or ""))
     match = matches[0] if len(matches) == 1 else None
     if not match:
-        return None
+        # Named axes are common in ordinary prose; map each explicit value
+        # to its axis rather than relying on a model to infer the order.
+        axes = {}
+        for key, label in (("length_cm", "lang|long|lange?|langue"),
+                           ("width_cm", "breed|wide|breit|large"),
+                           ("height_cm", "hoog|high|hoch|haut")):
+            found = list(re.finditer(rf"({_NUMBER})\s*(mm|cm|m)\s*(?:{label})\b", text, re.I))
+            if len(found) != 1:
+                return None
+            value = float(found[0].group(1).replace(",", ".")) * _TO_CM[found[0].group(2).lower()]
+            if not 0 < value <= 100_000:
+                return None
+            axes[key] = round(value, 2)
+        return axes
     numbers = [match.group(1), match.group(3), match.group(5)]
     units = [match.group(2), match.group(4), match.group(6)]
     stated = [unit for unit in units if unit]

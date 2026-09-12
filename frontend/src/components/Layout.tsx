@@ -1,4 +1,4 @@
-import { canManage } from "../permissions";
+import { canManage, roleLabel } from "../permissions";
 import BrandName from "./BrandName";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router";
@@ -24,12 +24,10 @@ export default function Layout({ user, onLogout }: Props) {
   const manager = canManage(user);
   const [menuOpen, setMenuOpen] = useState(false);
   const [railOpen, setRailOpen] = useState(true);
-  const [version, setVersion] = useState<string | null>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const drawer = useRef<HTMLElement>(null);
   const previousPath = useRef(location.pathname);
 
-  useEffect(() => { api.health().then((health) => setVersion(health.version)).catch(() => {}); }, []);
   useEffect(() => {
     setMenuOpen(false);
     // A new page starts at its heading, even when the previous form was long.
@@ -72,7 +70,6 @@ export default function Layout({ user, onLogout }: Props) {
     : destinations.find(item => item.to === location.pathname)?.label
       || (location.pathname.startsWith("/shipments/") ? t("nav.shipments") : location.pathname.startsWith("/trips/") ? t("nav.trips") : t("studio.workspace"));
   const name = branding.name || t("app.name");
-  const versionLabel = version ? (version.startsWith("v") ? version : `v${version}`) : "";
   const brand = (compact = false) => <div className="emcargo-brand">
     <img src={branding.logo || "/emcargo.svg"} alt="" className="h-9 w-9 shrink-0 object-contain" />
     {!compact && <span className="truncate text-2xl font-semibold tracking-tight"><BrandName name={name} /></span>}
@@ -114,7 +111,7 @@ export default function Layout({ user, onLogout }: Props) {
   const account = (compact = false) => <div className="emcargo-account">
     <NavLink to="/settings?tab=details" className="account-profile-link" aria-label={t("profile.open")} onClick={() => setMenuOpen(false)}>
       <Avatar user={user} />
-      {!compact && <div className="min-w-0"><p className="truncate text-sm">{user.username}</p>{versionLabel && <p className="mt-1 text-xs text-slate-500 dark:text-slate-400" aria-label={`${t("settings.version")} ${versionLabel}`}>{versionLabel}</p>}</div>}
+      {!compact && <div className="min-w-0"><p className="truncate text-sm">{user.username}</p><p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{t(roleLabel(user.role))}</p></div>}
     </NavLink>
     <button onClick={() => void logout()} className="mt-3 min-h-[44px] w-full border-t border-slate-200 pt-3 text-left text-sm dark:border-slate-700" aria-label={t("nav.logout")}>{compact ? <LogoutIcon className="h-5 w-5" /> : t("nav.logout")}</button>
   </div>;

@@ -240,6 +240,7 @@
   "messages": {
     "dg_un_detected": "UN number detected — line marked as dangerous goods",
     "wall_thickness_missing": "Wall thickness missing — without it a profile's weight cannot be determined",
+    "transport_dimensions_missing": "The weight has been entered. Outer dimensions are still missing, so loading volume is unknown. Enter dimensions under Details.",
     "dimensions_missing": "No dimensions in the description and no weight filled in — enter the weight under Details.",
     "length_missing": "No length in the description — without it this profile's weight cannot be worked out.",
     "kg_per_meter_missing": "No kilos per metre known for this profile — enter the weight under Details.",
@@ -838,6 +839,9 @@
     },
     "assistant": {
       "model_required": "An administrator can install the local language model in Settings. You can then use the assistant. You can enter your shipment manually in the wizard now."
+    },
+    "documents": {
+      "goods_incomplete": "Complete the goods description, quantity and weight before downloading the consignment note"
     }
   },
   "instructions": {
@@ -982,7 +986,9 @@
       "address": "I also need the address, beyond the town name. Provide the street and house number with the town, or look up the address.",
       "confirm_choice": "Do you mean “{{choice}}”? Select that option if correct, or rephrase your answer. I have not recorded it yet.",
       "wrong_field": "This looks like a quantity. I cannot link it to one goods line. Edit the quantity on the correct line in your shipment summary.",
-      "model_unavailable": "The local language model could not process your description. Your text is kept. Try again or split the description into shorter parts."
+      "model_unavailable": "The local language model could not process your description. Your text is kept. Try again or split the description into shorter parts.",
+      "weight_conflict": "The total weight and weight per item do not match the quantity. Check the weights and tell me which is correct. Your previous data has been kept.",
+      "split_goods": "Describe each item on its own line, for example “2 desks” and “4 office chairs”. Use Previous to return to the description and change the grouping. Existing weights and dimensions are not distributed automatically."
     },
     "stage": {
       "brief": "Description",
@@ -1006,6 +1012,10 @@
     "editDimensions": "Edit dimensions",
     "weightAwaitingBasis": "{{weight}} kg — total or per item still to be confirmed",
     "questionFor": {
+      "freight_payment": "Who pays the transport costs?",
+      "payment_instruction": "Who pays the transport costs?",
+      "established_place": "In which town are you preparing this consignment note?",
+      "established_date": "On what date are you preparing this consignment note?",
       "consignor_name": "Who instructs the carrier for this shipment?",
       "consignor_address": "What is the sender’s full address?",
       "consignee_name": "Who is the shipment for?",

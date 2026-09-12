@@ -240,6 +240,7 @@
   "messages": {
     "dg_un_detected": "Numéro ONU détecté — ligne marquée comme marchandises dangereuses",
     "wall_thickness_missing": "Épaisseur de paroi manquante — sans elle, le poids d'un profilé ne peut pas être déterminé",
+    "transport_dimensions_missing": "Le poids est renseigné. Les dimensions extérieures manquent encore, donc le volume de chargement est inconnu. Saisissez les dimensions dans Détails.",
     "dimensions_missing": "Aucune dimension dans la description et aucun poids saisi — indiquez le poids sous Détails.",
     "length_missing": "Aucune longueur dans la description — sans elle, le poids de ce profilé ne peut être établi.",
     "kg_per_meter_missing": "Aucun kilo par mètre connu pour ce profilé — indiquez le poids sous Détails.",
@@ -838,6 +839,9 @@
     },
     "assistant": {
       "model_required": "Un administrateur peut installer le modèle de langue local dans les paramètres. Vous pourrez ensuite utiliser l’assistant. Vous pouvez saisir votre envoi manuellement dès maintenant."
+    },
+    "documents": {
+      "goods_incomplete": "Renseignez la description, la quantité et le poids des marchandises avant de télécharger la lettre de voiture"
     }
   },
   "instructions": {
@@ -982,7 +986,9 @@
       "address": "J’ai aussi besoin de l’adresse complète. Indiquez la rue, le numéro et la ville, ou recherchez l’adresse.",
       "confirm_choice": "Voulez-vous dire « {{choice}} » ? Sélectionnez cette option si elle convient, ou reformulez. Je n’ai encore rien enregistré.",
       "wrong_field": "Cela ressemble à une quantité. Je ne peux pas l’attribuer à une seule ligne de marchandises. Modifiez la quantité sur la bonne ligne du récapitulatif de votre envoi.",
-      "model_unavailable": "Le modèle de langue local n’a pas pu traiter votre description. Votre texte est conservé. Réessayez ou divisez la description en parties plus courtes."
+      "model_unavailable": "Le modèle de langue local n’a pas pu traiter votre description. Votre texte est conservé. Réessayez ou divisez la description en parties plus courtes.",
+      "weight_conflict": "Le poids total et le poids par article ne correspondent pas à la quantité. Vérifiez les poids et indiquez lequel est correct. Vos données précédentes sont conservées.",
+      "split_goods": "Décrivez chaque marchandise sur sa propre ligne, par exemple « 2 bureaux » et « 4 chaises de bureau ». Revenez à la description avec Précédent pour modifier les lignes. Les poids et dimensions existants ne sont pas répartis automatiquement."
     },
     "stage": {
       "brief": "Description",
@@ -1006,6 +1012,10 @@
     "editDimensions": "Modifier les dimensions",
     "weightAwaitingBasis": "{{weight}} kg — poids total ou par pièce à confirmer",
     "questionFor": {
+      "freight_payment": "Qui paie les frais de transport ?",
+      "payment_instruction": "Qui paie les frais de transport ?",
+      "established_place": "Dans quelle ville établissez-vous cette lettre de voiture ?",
+      "established_date": "À quelle date établissez-vous cette lettre de voiture ?",
       "consignor_name": "Qui mandate le transporteur pour cet envoi ?",
       "consignor_address": "Quelle est l’adresse complète de l’expéditeur ?",
       "consignee_name": "À qui cet envoi est-il destiné ?",

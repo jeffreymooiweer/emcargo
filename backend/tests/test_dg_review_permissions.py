@@ -17,7 +17,7 @@ from app.models.user import User
 from app.models.dg_review import DgReview
 from app.schemas.settings import InstanceSettings
 from app.services import settings_store
-from tests.test_export_bundle import CONSIGNMENT, DG
+from tests.test_export_bundle import CONSIGNMENT, DG, LINES
 
 
 @pytest.fixture
@@ -43,10 +43,10 @@ def setup():
 
 
 def shipment():
-    document = {"document_key": "cmr", "values": deepcopy(CONSIGNMENT), "lines": [],
+    document = {"document_key": "cmr", "values": deepcopy(CONSIGNMENT), "lines": deepcopy(LINES),
                 "dangerous_goods": deepcopy(DG), "profiles": ["ADR"], "modality": "road", "output_language": "nl"}
     return {"modality": "road", "language": "nl", "profiles": ["ADR"], "values": deepcopy(CONSIGNMENT),
-            "lines": [], "dangerous_goods": deepcopy(DG), "documents": ["cmr"],
+            "lines": deepcopy(LINES), "dangerous_goods": deepcopy(DG), "documents": ["cmr"],
             "bundle": {"documents": [document], "dangerous_goods": deepcopy(DG), "profiles": ["ADR"], "output_language": "nl"},
             "snapshot": {"version": 1, "stepKey": "export", "docValues": deepcopy(CONSIGNMENT)}}
 

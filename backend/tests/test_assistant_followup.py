@@ -30,6 +30,15 @@ def answer(db, result, text):
     return assistant.step(result["state"], text, result["pending"], db)
 
 
+def document_questions(db, result):
+    """Leave both optional measurements open to isolate document-field behavior."""
+    for _ in range(4):
+        if result['pending']['scope'] != 'goods_question':
+            return result
+        result = answer(db, result, 'overslaan')
+    raise AssertionError('Goods questions did not finish')
+
+
 @pytest.mark.parametrize("text", ["acht", "acht pallets", "Het zijn acht pallets", "eight pallets", "Es sind acht Paletten", "Ce sont huit palettes"])
 def test_spoken_quantity_is_accepted_without_changing_the_goods_unit(db, text):
     result = begin(db)
@@ -80,7 +89,7 @@ def test_ambiguous_combined_measurements_are_not_partially_saved(db, text):
 
 
 def test_quantity_correction_during_sender_question_updates_the_only_matching_line(db):
-    result = answer(db, begin(db), "overslaan")
+    result = document_questions(db, begin(db))
     changed = answer(db, result, "Het zijn acht pallets")
     assert changed["state"]["draft_lines"][0]["quantity"] == 8
     assert not changed["state"]["doc_values"].get("consignor_name")
@@ -163,7 +172,7 @@ def test_real_model_street_only_output_cannot_suppress_the_address_question(db, 
     })
     result = begin(db, "4 pallets onderdelen van Voorbeeld BV aan Kade 1 in Rotterdam naar Duisburg")
     assert not result["state"]["doc_values"].get("consignor_address")
-    result = answer(db, result, "overslaan")
+    result = document_questions(db, result)
     assert result["pending"]["field"] == "consignor_address"
 
 

@@ -114,7 +114,7 @@ def test_the_contents_of_a_package_are_never_read_as_a_route(db):
     # A bare city with entries in several countries stays the word; a
     # city with one catalogue entry resolves to it.
     assert state["doc_values"]["loading_point"] == "Rotterdam"
-    assert state["doc_values"]["discharge_point"] == "Duisburg (DEDUI), DE"
+    assert state["doc_values"]["discharge_point"] == "Duisburg"
     line = state["draft_lines"][0]
     assert line["description"] == "benzine"
     assert line["package_content"] == "25 L"
@@ -136,9 +136,9 @@ def test_the_owner_s_full_sentence_is_read_completely(db):
     assert line["package_content"] == "25 L"
     assert line["weight_total_kg"] == 33525.0
     values = state["doc_values"]
-    # Resolved against the same location catalogue the wizard searches.
+    # Resolve an explicit port, but preserve an unqualified destination.
     assert values["loading_point"] == "Rotterdam (NLRTM), NL"
-    assert values["discharge_point"] == "Amsterdam Airport Schiphol (AMS), Amsterdam, NL"
+    assert values["discharge_point"] == "schiphol"
     tomorrow = (datetime.date.today() + datetime.timedelta(days=1)).isoformat()
     assert values["loading_date"] == tomorrow
     assert pending["scope"] == "un_confirm"
@@ -207,7 +207,9 @@ def test_an_unreadable_measurement_is_asked_again_and_writes_nothing(db):
 def test_the_measurement_question_can_be_skipped(db):
     state, pending, _events = drive(
         db, ["4 pallets kalkzandstenen", "overslaan"])
-    assert pending["scope"] == "doc_question"
+    assert pending["field"] == "goods_weight_each"
+    result = step(state, "overslaan", pending, db)
+    assert result["pending"]["scope"] == "doc_question"
     assert "goods:1:goods_dimensions" in state["skipped_questions"]
 
 

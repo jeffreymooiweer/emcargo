@@ -291,7 +291,7 @@ describe("AssistantModal", () => {
     renderModal();
     await userEvent.type(await screen.findByLabelText("assistant.describeLabel"), "staal");
     await userEvent.click(screen.getByRole("button", { name: "assistant.start" }));
-    await screen.findByText(/Datum van opmaak/);
+    await screen.findByText("assistant.questionFor.established_date");
     const picker = document.querySelector('input[type="date"]') as HTMLInputElement;
     expect(picker).toBeTruthy();
     fireEvent.change(picker, { target: { value: "2026-08-20" } });
@@ -422,6 +422,35 @@ it("explains model removal during a turn and preserves the typed answer", async 
   await userEvent.click(screen.getByRole("button", { name: "assistant.next" }));
   expect(await screen.findByText("assistant.modelRequired")).toBeInTheDocument();
   expect(screen.getByLabelText("assistant.orDescribe")).toHaveValue("colli");
+  expect(screen.getByRole("button", { name: "assistant.next" })).toBeDisabled();
+  expect(screen.getByLabelText("assistant.orDescribe")).toBeDisabled();
+  const calls = stepMock.mock.calls.length;
+  vi.mocked(api.assistantStatus).mockResolvedValueOnce({ available: false, installed: false, mode: "unavailable", model: null, installable: true, architecture: "x86_64", download: { state: "idle", detail: "" }, running: false });
+  await userEvent.click(screen.getByRole("button", { name: "assistant.retryStatus" }));
+  expect(screen.getByRole("button", { name: "assistant.next" })).toBeDisabled();
+  await userEvent.click(screen.getByRole("button", { name: "assistant.retryStatus" }));
+  expect(screen.getByLabelText("assistant.orDescribe")).toHaveValue("colli");
+  expect(screen.getByRole("button", { name: "assistant.next" })).toBeEnabled();
+  expect(stepMock).toHaveBeenCalledTimes(calls);
+});
+
+it("shows translated choices in the summary and reselects them when revised", async () => {
+  // The browser review exposed 'prepaid' in a Dutch shipment summary, and
+  // revision put that storage code in the free-text input instead of selecting
+  // the recorded option. Labels are for people; only the request uses codes.
+  const fact = { scope: "doc_question", field: "carriage_payment", label: { nl: "Betaling" }, value: "prepaid", options: ["prepaid"], option_labels: { prepaid: { nl: "Franco (afzender betaalt)" } } };
+  stepMock.mockResolvedValueOnce({ ...QUESTION, pending: null, review: { facts: [fact] } });
+  render(<AssistantModal open onClose={vi.fn()} buildState={() => QUESTION.state} onApplyState={vi.fn()} />);
+  const summary = await screen.findByRole("complementary", { name: "assistant.summary" });
+  expect(await within(summary).findByText("Franco (afzender betaalt)")).toBeVisible();
+  expect(within(summary).queryByText("prepaid")).toBeNull();
+  stepMock.mockResolvedValueOnce({ ...QUESTION, pending: fact });
+  await userEvent.click(within(summary).getByRole("button", { name: /assistant.editField/ }));
+  expect(await screen.findByRole("radio", { name: "Franco (afzender betaalt)" })).toBeChecked();
+  expect(screen.getByLabelText("assistant.orDescribe")).toHaveValue("");
+  stepMock.mockResolvedValueOnce({ ...QUESTION, pending: null });
+  await userEvent.click(screen.getByRole("button", { name: "assistant.next" }));
+  expect(stepMock).toHaveBeenLastCalledWith(expect.objectContaining({ message: "prepaid" }));
 });
 
 it("opens question-specific help when the user does not know the answer", async () => {
@@ -447,7 +476,7 @@ it("targets the selected goods line when editing weight from the summary", async
   render(<AssistantModal open onClose={vi.fn()} buildState={() => state} onApplyState={onApplyState} />);
   await screen.findByText(/Vervoerswijze/);
   onApplyState.mockClear();
-  const summary = screen.getByRole("complementary", { name: "assistant.summary" });
+  const summary = await screen.findByRole("complementary", { name: "assistant.summary" });
   await userEvent.click(within(summary).getAllByText("assistant.measurements")[1]);
   stepMock.mockResolvedValueOnce({ state, events: [], pending: { scope: "goods_question", field: "goods_weight_each", line_id: 7, simple: { nl: "What does one box weigh?" } } });
   await userEvent.click(within(summary).getByRole("button", { name: "assistant.editWeight · Books" }));

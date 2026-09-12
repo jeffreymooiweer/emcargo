@@ -27,6 +27,15 @@ def answer(db, result, text, **kwargs):
     return assistant.step(result["state"], text, result["pending"], db, **kwargs)
 
 
+def document_questions(db, result):
+    """Leave both optional measurements open to isolate document-field behavior."""
+    for _ in range(4):
+        if result['pending']['scope'] != 'goods_question':
+            return result
+        result = answer(db, result, 'overslaan')
+    raise AssertionError('Goods questions did not finish')
+
+
 @pytest.mark.parametrize("text", ["-20 kg", "20 of 30 kg", "20–30 kg", "ongeveer 20 kg", "1.000 kg", "misschien 900", "20 kg en 30 kg"])
 def test_uncertain_or_ambiguous_weights_never_become_a_fact(text):
     assert parse_weight_kg(text) is None
@@ -48,7 +57,7 @@ def test_uncertain_dimensions_are_not_measured_dimensions(text):
 
 @pytest.mark.parametrize("text", ["ik weet het niet", "geen idee", "I don't know", "ich weiß nicht", "je ne sais pas"])
 def test_unknown_party_is_left_open_and_question_is_retained(db, text):
-    question = answer(db, begin(db), "overslaan")
+    question = document_questions(db, begin(db))
     assert question["pending"]["field"] == "consignor_name"
     result = answer(db, question, text)
     assert "consignor_name" not in result["state"]["doc_values"]
@@ -85,7 +94,7 @@ def test_missing_count_is_asked_instead_of_assuming_one(db):
 
 
 def test_many_explicit_facts_and_a_correction_are_not_one_field(db):
-    result = answer(db, begin(db), "overslaan")
+    result = document_questions(db, begin(db))
     result = answer(db, result, "Afzender: Voorbeeld BV; ontvanger: Demo GmbH; laadplaats: Rotterdam; losplaats: Duisburg")
     values = result["state"]["doc_values"]
     assert values["consignor_name"] == "Voorbeeld BV"
@@ -106,7 +115,7 @@ def test_intake_understands_labelled_details_without_a_model(db):
 
 
 def test_failed_multiple_fact_answer_is_atomic(db):
-    result = answer(db, begin(db), "overslaan")
+    result = document_questions(db, begin(db))
     before = copy.deepcopy(result["state"])
     after = answer(db, result, "Afzender: Voorbeeld BV; laaddatum: 2026-02-31")
     assert after["state"] == before
@@ -125,7 +134,7 @@ def test_required_flag_and_options_are_owned_by_application(db):
 
 
 def test_revision_changes_one_fact_and_keeps_later_answers(db):
-    result = answer(db, begin(db), "overslaan")
+    result = document_questions(db, begin(db))
     result = answer(db, result, "Afzender: Voorbeeld BV; ontvanger: Demo GmbH")
     revision = assistant.step(result["state"], "", {"scope": "doc_question", "field": "consignor_name"}, db, action="revise")
     assert revision["pending"]["field"] == "consignor_name"
@@ -188,7 +197,7 @@ def test_model_cannot_fill_receiver_address_with_the_destination_city(db, monkey
 
 
 def test_an_explicit_reference_reuses_the_existing_sender_address(db):
-    result = answer(db, begin(db), "overslaan")
+    result = document_questions(db, begin(db))
     result = answer(db, result, "Voorbeeld BV")
     result = answer(db, result, "Kade 1, Rotterdam")
     result = answer(db, result, "Demo GmbH")

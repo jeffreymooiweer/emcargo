@@ -109,6 +109,7 @@ export function dimensionOverridesFromDrafts(
     width_cm?: number | "";
     height_cm?: number | "";
     weight_each_kg?: number | "";
+    weight_total_kg?: number | "";
   }[],
 ) {
   const overrides: Record<string, number | string>[] = [];
@@ -124,7 +125,10 @@ export function dimensionOverridesFromDrafts(
       // A weight the consignor stated themselves — through the assistant, for
       // goods the catalogue does not know. It counts towards the first
       // calculation like any other thing they filled in.
-      if (typeof draft.weight_each_kg === "number" && draft.weight_each_kg > 0) {
+      if (typeof draft.weight_total_kg === "number" && draft.weight_total_kg > 0) {
+        entry.weight_total_kg = draft.weight_total_kg;
+        any = true;
+      } else if (typeof draft.weight_each_kg === "number" && draft.weight_each_kg > 0) {
         entry.weight_each_kg = draft.weight_each_kg;
         any = true;
       }

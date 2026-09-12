@@ -267,7 +267,7 @@ def test_the_intake_reads_everything_the_sentence_states(db, monkeypatch):
     assert values["consignor_name"] == "Mooiweer BV"
     assert values["consignee_name"] == "Afnemer GmbH"
     assert values["carrier_name"] == "Trans Janssen"
-    assert values["discharge_point"] == "Duisburg (DEDUI), DE"
+    assert values["discharge_point"] == "Duisburg"
     assert values["purchase_order"] == "4711"
     assert values["loading_date"] == "2026-08-18"
     answered = {e["field"] for e in result["events"] if e["kind"] == "answered"}

@@ -18,6 +18,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 import platform
 import shutil
 import socket
@@ -25,6 +26,7 @@ import subprocess
 import tarfile
 import threading
 import time
+import zipfile
 from pathlib import Path
 from typing import Any
 
@@ -53,7 +55,15 @@ def sources() -> dict[str, Any]:
 
 def _arch() -> str:
     machine = platform.machine().lower()
-    return "aarch64" if machine in ("aarch64", "arm64") else "x86_64"
+    if machine in ("aarch64", "arm64"):
+        return "aarch64"
+    return "x86_64" if machine in ("x86_64", "amd64") else machine
+
+
+def _server_pin(config: dict[str, Any]) -> dict[str, Any]:
+    system = platform.system()
+    key = _arch() if system == "Linux" else f"{system.lower()}-{_arch()}"
+    return (config.get("server") or {}).get(key) or {}
 
 
 def assistant_dir() -> Path:
@@ -61,7 +71,7 @@ def assistant_dir() -> Path:
 
 
 def _server_binary() -> Path:
-    return assistant_dir() / "bin" / "llama-server"
+    return assistant_dir() / "bin" / ("llama-server.exe" if platform.system() == "Windows" else "llama-server")
 
 
 def _model_path() -> Path:
@@ -97,12 +107,27 @@ def _repair_library_links(directory: Path) -> None:
 
 
 def installed() -> bool:
-    return _server_binary().exists() and _model_path().exists()
+    # Partial files and directories must never unlock the assistant. Downloads
+    # are hash-verified before promotion; size/header checks also detect a
+    # truncated or replaced model without hashing 1.8 GB on every request.
+    if not _server_pin(sources()):
+        return False
+    try:
+        binary, model = _server_binary(), _model_path()
+        expected_size = (sources().get("model") or {}).get("size")
+        if not binary.is_file() or binary.stat().st_size == 0 or not model.is_file():
+            return False
+        if not expected_size or model.stat().st_size != expected_size:
+            return False
+        with model.open("rb") as handle:
+            return handle.read(4) == b"GGUF"
+    except OSError:
+        return False
 
 
 def status() -> dict[str, Any]:
     config = sources()
-    server_pin = (config.get("server") or {}).get(_arch()) or {}
+    server_pin = _server_pin(config)
     is_installed = installed()
     return {
         "available": is_installed,
@@ -144,13 +169,34 @@ def _fetch_verified(url: str, sha256: str, destination: Path, label: str) -> Non
 
 def install_server(server_pin: dict[str, Any], base: Path) -> Path:
     """Install the verified server independently of the large model weights."""
-    archive = base / "server.tar.gz"
+    windows_archive = server_pin["url"].endswith(".zip")
+    archive = base / ("server.zip" if windows_archive else "server.tar.gz")
     _fetch_verified(server_pin["url"], server_pin["sha256"], archive, "server")
     _download.update({"state": "downloading", "detail": "unpack"})
     bin_dir = base / "bin"
     if bin_dir.exists():
         shutil.rmtree(bin_dir)
     bin_dir.mkdir(parents=True)
+    if windows_archive:
+        with zipfile.ZipFile(archive) as bundle:
+            for member in bundle.infolist():
+                name = Path(member.filename).name
+                if member.is_dir() or not (name == "llama-server.exe" or name.lower().endswith(".dll")):
+                    continue
+                with bundle.open(member) as source, (bin_dir / name).open("wb") as target:
+                    shutil.copyfileobj(source, target)
+    else:
+        _unpack_linux_server(archive, bin_dir)
+    archive.unlink(missing_ok=True)
+    _repair_library_links(bin_dir)
+    server = bin_dir / ("llama-server.exe" if windows_archive else "llama-server")
+    if not server.is_file():
+        raise ValueError("server: archive held no llama-server binary")
+    server.chmod(0o755)
+    return server
+
+
+def _unpack_linux_server(archive: Path, bin_dir: Path) -> None:
     with tarfile.open(archive, "r:gz") as bundle:
         for member in bundle.getmembers():
             name = Path(member.name).name
@@ -162,17 +208,10 @@ def install_server(server_pin: dict[str, Any], base: Path) -> Path:
                 continue
             with source, (bin_dir / name).open("wb") as target:
                 shutil.copyfileobj(source, target)
-    archive.unlink(missing_ok=True)
-    _repair_library_links(bin_dir)
-    server = bin_dir / "llama-server"
-    if not server.exists():
-        raise ValueError("server: archive held no llama-server binary")
-    server.chmod(0o755)
-    return server
 
 
 def _install(config: dict[str, Any]) -> None:
-    server_pin = (config.get("server") or {}).get(_arch()) or {}
+    server_pin = _server_pin(config)
     model_pin = config.get("model") or {}
     install_server(server_pin, assistant_dir())
 
@@ -183,7 +222,7 @@ def _install(config: dict[str, Any]) -> None:
 def start_download() -> dict[str, Any]:
     """Fetch binary and model in a background thread; progress in status()."""
     config = sources()
-    server_pin = (config.get("server") or {}).get(_arch()) or {}
+    server_pin = _server_pin(config)
     model_pin = config.get("model") or {}
     if not server_pin.get("sha256") or not model_pin.get("sha256"):
         return {"error": "sources_not_pinned"}
@@ -243,7 +282,8 @@ def ensure_server(timeout: float = 15.0) -> bool:
              "--reasoning-budget", "0"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
-            env={"LD_LIBRARY_PATH": str(binary.parent)},
+            env={**os.environ, "LD_LIBRARY_PATH": str(binary.parent)},
+            creationflags=subprocess.CREATE_NO_WINDOW if platform.system() == "Windows" else 0,
         )
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:

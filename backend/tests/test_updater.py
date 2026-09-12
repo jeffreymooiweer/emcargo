@@ -7,6 +7,7 @@ the update sends to the daemon, and the helper's successor payload and
 rollback, all against a scripted Docker API.
 """
 import json
+from pathlib import Path
 from types import SimpleNamespace
 
 import httpx
@@ -64,7 +65,9 @@ def test_capability_reports_a_missing_socket(data_dir, tmp_path, monkeypatch):
 
 
 def _socket(tmp_path, monkeypatch):
-    socket = tmp_path / "docker.sock"
+    # Keep the fake bind path free of Windows drive-letter separators.
+    monkeypatch.chdir(tmp_path)
+    socket = Path("docker.sock")
     socket.write_bytes(b"")
     monkeypatch.setattr(updater, "DOCKER_SOCKET", socket)
 

@@ -24,6 +24,7 @@ from app.core.config import get_settings
 from app.core.languages import pick
 from app.services.dg.naming import resolve_for_profile
 from app.services.dg.autofill import adr_category_totals, description_line
+from app.services.units import get_unit
 
 # IATA open format: each of the two choice pairs consists of two /Ch fields. The
 # struck-through (non-applicable) field gets the "XXX" option, the applicable
@@ -113,9 +114,35 @@ def _amount(value: Any) -> str:
         return str(value)
 
 
+_PACKAGE_NAMES = {
+    "box": {"nl": "doos/dozen", "en": "box/boxes", "de": "Karton/Kartons", "fr": "carton/cartons"},
+    "pallet": {"nl": "pallet/pallets", "en": "pallet/pallets", "de": "Palette/Paletten", "fr": "palette/palettes"},
+    "drum": {"nl": "vat/vaten", "en": "drum/drums", "de": "Fass/Fässer", "fr": "fût/fûts"},
+    "bag": {"nl": "zak/zakken", "en": "bag/bags", "de": "Sack/Säcke", "fr": "sac/sacs"},
+    "roll": {"nl": "rol/rollen", "en": "roll/rolls", "de": "Rolle/Rollen", "fr": "rouleau/rouleaux"},
+    "bundle": {"nl": "bundel/bundels", "en": "bundle/bundles", "de": "Bündel/Bündel", "fr": "lot/lots"},
+    "jerrycan": {"nl": "jerrycan/jerrycans", "en": "jerrycan/jerrycans", "de": "Kanister/Kanister", "fr": "jerrican/jerricans"},
+    "ibc": {"nl": "IBC/IBC's", "en": "IBC/IBCs", "de": "IBC/IBC", "fr": "GRV/GRV"},
+}
+
+
+def _cargo_prefix(quantity: Any, code: str | None, description: str, lang: str) -> str:
+    """Keep the user's quantity unit in the compact CMR goods description."""
+    if quantity in (None, ""):
+        return ""
+    unit = get_unit(code)
+    first_word = description.split()[0] if description.split() else ""
+    if unit is None or unit.code == "pcs" or get_unit(first_word) == unit:
+        return f"{_amount(quantity)} × "
+    names = pick(_PACKAGE_NAMES.get(unit.code, {}), lang)
+    label = names.split("/")[0 if float(quantity) == 1 else -1] if names else unit.symbol
+    return f"{_amount(quantity)} {label} "
+
+
 def _cmr_goods_rows(
     lines: list[dict[str, Any]],
     dangerous_goods: list[dict[str, Any]] | None = None,
+    lang: str = "nl",
 ) -> list[tuple[str, str, str]]:
     """Goods lines for boxes 6-12.
 
@@ -146,7 +173,7 @@ def _cmr_goods_rows(
                 weight = volume = ""  # count the mass only once
             continue
         desc = line.get("output_description") or line.get("description") or ""
-        prefix = f"{_amount(qty)} × " if qty not in (None, "") else ""
+        prefix = _cargo_prefix(qty, line.get("unit"), desc, lang)
         rows.append((
             f"{prefix}{desc}".strip(),
             _amount(line.get("weight_total_kg")),
@@ -191,7 +218,7 @@ def fill_cmr(
     fields["VakRood21-1"] = _first(values.get("established_place"))
     fields["VakRood21-2"] = _first(values.get("established_date"))
 
-    rows = _wrap_goods_rows(_cmr_goods_rows(lines, dangerous_goods))
+    rows = _wrap_goods_rows(_cmr_goods_rows(lines, dangerous_goods, lang))
     if len(rows) <= CMR_MAX_ROWS:
         for i, (desc, weight, volume) in enumerate(rows, start=1):
             n = f"{i:02d}"

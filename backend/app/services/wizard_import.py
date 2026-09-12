@@ -132,4 +132,6 @@ def spreadsheet_to_wizard_text(rows: list[list[str]]) -> tuple[str, bool]:
         return "", False
     header_map = detect_columns([str(cell).lower().strip() for cell in rows[0]])
     has_header = header_map["description"] is not None or header_map["quantity"] is not None
+    if has_header:
+        return apply_mapping(rows, header_map, True), True
     return rows_to_pipe_text(rows, skip_header=has_header), has_header

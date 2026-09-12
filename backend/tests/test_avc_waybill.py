@@ -56,8 +56,9 @@ def _render(dangerous_goods, lang="nl"):
     """Fill the form and produce (full text, words with position)."""
     path = fill_avc_waybill(VALUES, LINES, dangerous_goods, lang)
     try:
-        page = fitz.open(path)[0]
-        return page.get_text(), page.get_text("words")
+        with fitz.open(path) as document:
+            page = document[0]
+            return page.get_text(), page.get_text("words")
     finally:
         path.unlink(missing_ok=True)
 

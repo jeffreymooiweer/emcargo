@@ -120,8 +120,7 @@ kbd { font-family: inherit; font-size: .75rem; color: var(--muted); }
 .goods-list { border-block: 1px solid var(--line); }
 .goods-row { padding: 16px 0 8px; background: transparent; }
 .goods-row + .goods-row { border-top: 1px solid var(--line); }
-.goods-fields { display: grid; grid-template-columns: 22px minmax(130px,1fr) 80px 112px 110px 44px; align-items: center; gap: 10px; }
-.goods-index { color: var(--muted); font-size: .6875rem; font-variant-numeric: tabular-nums; }
+.goods-fields { display: grid; grid-template-columns: minmax(130px,1fr) 80px 112px 110px 44px; align-items: center; gap: 10px; }
 .goods-description { min-width: 0; }
 .goods-description input,.dark .goods-description input { font-size: 1rem; font-weight: 550; border-color: transparent; background: transparent; padding-inline: 0; }
 .goods-description input:focus,.dark .goods-description input:focus { border-color: var(--accent); padding-inline: 8px; }
@@ -132,7 +131,7 @@ kbd { font-family: inherit; font-size: .75rem; color: var(--muted); }
 .goods-weight > div { min-height: 44px; display: flex; align-items: center; justify-content: flex-end; white-space: nowrap; font-size: .9375rem; font-weight: 600; }
 .goods-weight-unit { font-size: .8125rem; font-weight: 400; color: var(--muted); margin-left: 3px; }
 .goods-weight-pending,.goods-pending { color: var(--muted); }
-.goods-row-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-left: 32px; }
+.goods-row-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .goods-row-state { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; font-size: .75rem; }
 .goods-substance { color: #b45309; }
 .dark .goods-substance { color: #f2be73; }
@@ -297,8 +296,7 @@ kbd { font-family: inherit; font-size: .75rem; color: var(--muted); }
 
 @container goods (max-width: 650px) {
  .goods-fields { grid-template-columns: 72px minmax(0,1fr) 96px; column-gap: 12px; row-gap: 8px; }
- .goods-index { grid-column: 1; grid-row: 1; align-self: center; }
- .goods-description { grid-column: 1 / -1; grid-row: 1; margin-left: 28px; margin-right: 44px; }
+ .goods-description { grid-column: 1 / -1; grid-row: 1; margin-right: 44px; }
  .goods-menu { grid-column: 3; grid-row: 1; justify-self: end; }
  .goods-quantity-field { grid-column: 1; grid-row: 2; }
  .goods-unit-field { grid-column: 2; grid-row: 2; }

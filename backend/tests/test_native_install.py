@@ -10,6 +10,7 @@ application's own settings, on every run.
 from __future__ import annotations
 
 import re
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -41,7 +42,7 @@ def env_keys(text: str) -> set[str]:
 
 def test_the_scripts_parse():
     for script in ("install.sh", "update.sh"):
-        subprocess.run(["bash", "-n", str(NATIVE / script)], check=True)
+        subprocess.run([shutil.which("bash") or "bash", "-n", str(NATIVE / script)], check=True)
 
 
 def test_the_unit_and_the_script_agree_on_the_paths():

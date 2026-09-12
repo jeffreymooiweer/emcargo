@@ -240,6 +240,7 @@
   "messages": {
     "dg_un_detected": "UN-Nummer erkannt — Zeile als Gefahrgut markiert",
     "wall_thickness_missing": "Wandstärke fehlt — ohne dieses Maß lässt sich das Gewicht eines Profils nicht bestimmen",
+    "transport_dimensions_missing": "Das Gewicht ist eingetragen. Die Außenmaße fehlen noch, daher ist das Ladevolumen unbekannt. Tragen Sie die Maße unter Details ein.",
     "dimensions_missing": "Keine Maße in der Beschreibung und kein Gewicht eingetragen — tragen Sie das Gewicht unter Details ein.",
     "length_missing": "Keine Länge in der Beschreibung — ohne sie lässt sich das Gewicht dieses Profils nicht bestimmen.",
     "kg_per_meter_missing": "Keine Kilogramm je Meter für dieses Profil bekannt — tragen Sie das Gewicht unter Details ein.",
@@ -838,6 +839,9 @@
     },
     "assistant": {
       "model_required": "Ein Administrator kann das lokale Sprachmodell in den Einstellungen installieren. Danach können Sie den Assistenten nutzen. Sie können Ihre Sendung jetzt manuell im Assistenten zur Sendungserfassung eingeben."
+    },
+    "documents": {
+      "goods_incomplete": "Ergänzen Sie Warenbeschreibung, Menge und Gewicht vor dem Herunterladen des Frachtbriefs"
     }
   },
   "instructions": {
@@ -982,7 +986,9 @@
       "address": "Ich benötige die Anschrift zusätzlich zum Ortsnamen. Geben Sie Straße, Hausnummer und Ort an oder suchen Sie die Adresse.",
       "confirm_choice": "Meinen Sie „{{choice}}“? Wählen Sie diese Option, wenn sie zutrifft, oder formulieren Sie anders. Ich habe noch nichts übernommen.",
       "wrong_field": "Das scheint eine Menge zu sein. Ich kann sie keiner einzelnen Warenzeile zuordnen. Ändern Sie die Menge in der richtigen Zeile Ihrer Sendungsübersicht.",
-      "model_unavailable": "Das lokale Sprachmodell konnte Ihre Beschreibung nicht verarbeiten. Ihr Text bleibt erhalten. Versuchen Sie es erneut oder teilen Sie die Beschreibung in kürzere Abschnitte auf."
+      "model_unavailable": "Das lokale Sprachmodell konnte Ihre Beschreibung nicht verarbeiten. Ihr Text bleibt erhalten. Versuchen Sie es erneut oder teilen Sie die Beschreibung in kürzere Abschnitte auf.",
+      "weight_conflict": "Gesamtgewicht und Gewicht pro Stück stimmen nicht mit der Anzahl überein. Prüfen Sie die Gewichte und geben Sie das richtige Gewicht an. Ihre bisherigen Angaben bleiben erhalten.",
+      "split_goods": "Beschreiben Sie jede Ware in einer eigenen Zeile, zum Beispiel „2 Schreibtische“ und „4 Bürostühle“. Kehren Sie mit Zurück zur Beschreibung zurück. Vorhandene Gewichte und Abmessungen werden nicht automatisch aufgeteilt."
     },
     "stage": {
       "brief": "Beschreibung",
@@ -1006,6 +1012,10 @@
     "editDimensions": "Abmessungen ändern",
     "weightAwaitingBasis": "{{weight}} kg — Gesamtgewicht oder je Stück noch zu bestätigen",
     "questionFor": {
+      "freight_payment": "Wer bezahlt die Transportkosten?",
+      "payment_instruction": "Wer bezahlt die Transportkosten?",
+      "established_place": "In welchem Ort stellen Sie diesen Frachtbrief aus?",
+      "established_date": "An welchem Datum stellen Sie diesen Frachtbrief aus?",
       "consignor_name": "Wer beauftragt den Frachtführer mit dieser Sendung?",
       "consignor_address": "Wie lautet die vollständige Anschrift des Absenders?",
       "consignee_name": "Für wen ist die Sendung bestimmt?",

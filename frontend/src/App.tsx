@@ -1,10 +1,10 @@
 import { canManage } from "./permissions";
-const DgReviewsPage = lazy(() => import("./pages/DgReviewsPage"));
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router";
 import { api, User } from "./api/client";
 import { useTranslation } from "react-i18next";
 import Layout from "./components/Layout";
+const DgReviewsPage = lazy(() => import("./pages/DgReviewsPage"));
 const CardsPage = lazy(() => import("./pages/CardsPage"));
 const GroupagePage = lazy(() => import("./pages/GroupagePage"));
 import LoginPage from "./pages/LoginPage";

@@ -240,6 +240,7 @@
   "messages": {
     "dg_un_detected": "UN-nummer gedetecteerd — regel gemarkeerd als gevaarlijke stoffen",
     "wall_thickness_missing": "Wanddikte ontbreekt — zonder die maat is het gewicht van een profiel niet te bepalen",
+    "transport_dimensions_missing": "Het gewicht is ingevuld. De buitenmaten ontbreken nog, dus het laadvolume is nog onbekend. Vul de maten in bij Details.",
     "dimensions_missing": "Geen maten in de omschrijving en geen gewicht ingevuld — vul het gewicht in bij Details.",
     "length_missing": "Geen lengte in de omschrijving — zonder lengte is het gewicht van dit profiel niet te bepalen.",
     "kg_per_meter_missing": "Geen kilo's per meter bekend voor dit profiel — vul het gewicht in bij Details.",
@@ -838,6 +839,9 @@
     },
     "assistant": {
       "model_required": "Een beheerder kan het lokale taalmodel installeren bij Instellingen. Daarna kunt u de assistent gebruiken. U kunt uw zending nu handmatig invullen in de wizard."
+    },
+    "documents": {
+      "goods_incomplete": "Vul omschrijving, aantal en gewicht van de goederen in vóór het downloaden van de vrachtbrief"
     }
   },
   "instructions": {
@@ -982,7 +986,9 @@
       "address": "Ik heb ook het adres nodig, niet alleen de plaatsnaam. Geef bijvoorbeeld de straat en het huisnummer met de plaats, of zoek het adres op.",
       "confirm_choice": "Bedoelt u “{{choice}}”? Kies die optie als dit klopt, of beschrijf uw antwoord anders. Ik heb dit nog niet vastgelegd.",
       "wrong_field": "Dit lijkt een hoeveelheid. Ik kan deze niet aan één goederenregel koppelen. Pas het aantal bij de juiste goederenregel aan in uw zendingoverzicht.",
-      "model_unavailable": "Het lokale taalmodel kon uw beschrijving niet verwerken. Uw tekst blijft staan. Probeer opnieuw of splits de beschrijving op in kortere delen."
+      "model_unavailable": "Het lokale taalmodel kon uw beschrijving niet verwerken. Uw tekst blijft staan. Probeer opnieuw of splits de beschrijving op in kortere delen.",
+      "weight_conflict": "Het totaalgewicht en het gewicht per stuk komen niet overeen met het aantal. Controleer deze gewichten en geef aan welk gewicht klopt. Uw vorige gegevens zijn behouden.",
+      "split_goods": "Beschrijf elk goed op een eigen regel, bijvoorbeeld “2 bureaus” en “4 bureaustoelen”. Ga met Vorige terug naar de beschrijving om de indeling te wijzigen. Bestaande gewichten en afmetingen verdeel ik niet automatisch."
     },
     "stage": {
       "brief": "Beschrijving",
@@ -1006,6 +1012,10 @@
     "editDimensions": "Afmetingen aanpassen",
     "weightAwaitingBasis": "{{weight}} kg — totaal of per stuk nog te bepalen",
     "questionFor": {
+      "freight_payment": "Wie betaalt de vervoerskosten?",
+      "payment_instruction": "Wie betaalt de vervoerskosten?",
+      "established_place": "In welke plaats maakt u deze vrachtbrief op?",
+      "established_date": "Op welke datum maakt u deze vrachtbrief op?",
       "consignor_name": "Wie geeft de vervoerder opdracht voor deze zending?",
       "consignor_address": "Wat is het volledige adres van de afzender?",
       "consignee_name": "Voor wie is de zending bestemd?",

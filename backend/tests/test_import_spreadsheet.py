@@ -51,6 +51,13 @@ def test_wizard_spreadsheet_to_text():
     assert "staal hoekprofiel 80x80x8x6000 | 8 | stuks" in text
 
 
+def test_recognised_headers_apply_their_column_order():
+    rows = [["Aantal", "Omschrijving", "Eenheid"], ["5", "Machine parts", "pallet"]]
+    text, has_header = spreadsheet_to_wizard_text(rows)
+    assert has_header
+    assert text == "Machine parts | 5 | pallet"
+
+
 def test_rows_to_pipe_text_skips_header():
     rows = [["description", "quantity"], ["item a", "2"]]
     assert rows_to_pipe_text(rows, skip_header=True) == "item a | 2"

@@ -2,6 +2,11 @@
   "_what_this_is": "The assistant's model runtime is not shipped in the image: the llama.cpp server binary and the GGUF model are downloaded to /data/assistant when an admin enables the assistant, and every download is verified against the SHA-256 pinned here. The pins are facts about files the pin-assistant-sources workflow fetched and hashed on a runner; a null sha256 means the artifact has not been pinned yet and the download refuses to run.",
   "llama_tag": "b10452",
   "server": {
+    "windows-x86_64": {
+      "url": "https://github.com/ggml-org/llama.cpp/releases/download/b10452/llama-b10452-bin-win-cpu-x64.zip",
+      "sha256": "ab30399cddbc7c7d7b69626ace6d4217491f4d29f473d9dd84bc0e3a57d36eae",
+      "size": 18464447
+    },
     "x86_64": {
       "url": "https://github.com/ggml-org/llama.cpp/releases/download/b10452/llama-b10452-bin-ubuntu-x64.tar.gz",
       "sha256": "31c81f76888bdb35db9b5b6bc880f8f9dc82ab9fdd6621fa6cd40d61f78cd82b",

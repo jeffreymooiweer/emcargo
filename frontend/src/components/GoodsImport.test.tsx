@@ -154,6 +154,33 @@ describe("adding or replacing", () => {
     expect(screen.getByRole("button", { name: "review.importConfirm" })).toBeDisabled();
     expect(onImport).not.toHaveBeenCalled();
   });
+
+  it("maps Excel clipboard columns and excludes the heading row", async () => {
+    vi.spyOn(api, "parseWizardImportFile").mockResolvedValue({
+      text: "Bolts | 8 | stuks", has_header: true, analysis: RECOGNISED,
+      rows: [["Aantal", "Omschrijving", "Eenheid"], ["8", "Bolts", "stuks"]],
+    });
+    const onImport = renderImport(true);
+    await userEvent.click(screen.getByRole("button", { name: "review.importAction" }));
+    fireEvent.change(screen.getByLabelText("review.importPaste"), { target: { value: "Aantal\tOmschrijving\tEenheid\n8\tBolts\tstuks" } });
+    await userEvent.click(screen.getByRole("button", { name: "review.importAppend" }));
+    await waitFor(() => expect(onImport).toHaveBeenCalledWith("Bolts | 8 | stuks", "append"));
+  });
+
+  it("lets the user check a guessed clipboard mapping before importing", async () => {
+    vi.spyOn(api, "parseWizardImportFile").mockResolvedValue({
+      text: "Bolts | 8 | stuks", has_header: false, analysis: GUESSED,
+      rows: [["Bolts", "8", "stuks"]],
+    });
+    const onImport = renderImport(false);
+    await userEvent.click(screen.getByRole("button", { name: "review.importAction" }));
+    fireEvent.change(screen.getByLabelText("review.importPaste"), { target: { value: "Bolts\t8\tstuks" } });
+    await userEvent.click(screen.getByRole("button", { name: "review.importConfirm" }));
+    await waitFor(() => expect(screen.getByLabelText("review.importPaste")).toHaveValue("Bolts | 8 | stuks"));
+    expect(onImport).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole("button", { name: "review.importConfirm" }));
+    expect(onImport).toHaveBeenCalledWith("Bolts | 8 | stuks", "replace");
+  });
 });
 
 it("closing an in-flight file import cannot apply its late response", async () => {

@@ -49,6 +49,9 @@ def start_with(env_dir: Path, **overrides) -> subprocess.CompletedProcess:
         # Without this, startup tries to fetch catalogues from the internet.
         "CATALOG_AUTO_SYNC": "false",
     }
+    # Windows needs its system directory to initialise Python's socket support.
+    if "SYSTEMROOT" in os.environ:
+        env["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
     env.update({k: v for k, v in overrides.items() if v is not None})
     return subprocess.run(
         [sys.executable, "-c", BUILD_THE_APP],

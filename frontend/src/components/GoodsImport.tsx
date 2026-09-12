@@ -126,8 +126,29 @@ export default function GoodsImport({ hasLines, onImport, dropped, onDroppedHand
   }, [open, initialPaste]);
   useEffect(() => () => { operation.current += 1; }, []);
 
-  const run = (mode: "append" | "replace") => {
+  const run = async (mode: "append" | "replace") => {
     if (!text.trim()) return;
+    // Excel clipboard data deserves the same header detection and column
+    // mapping as an uploaded spreadsheet, including reordered columns.
+    if (text.includes("\t")) {
+      const request = ++operation.current;
+      setBusy(true);
+      try {
+        const result = await api.parseWizardImportFile(new File([text], "clipboard.txt", { type: "text/plain" }));
+        if (request !== operation.current) return;
+        setText(result.text);
+        setAnalysis(result.analysis);
+        setRows(result.rows);
+        if (result.analysis.source !== "header" || !result.text.trim()) return;
+        onImport(result.text, mode);
+        close();
+      } catch (e) {
+        if (request === operation.current) toast.error(e instanceof Error ? e.message : String(e));
+      } finally {
+        if (request === operation.current) setBusy(false);
+      }
+      return;
+    }
     onImport(text, mode);
     close();
   };

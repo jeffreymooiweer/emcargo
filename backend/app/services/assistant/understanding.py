@@ -42,15 +42,15 @@ AMBIGUOUS_QUANTITY = re.compile(
     rf"(?<![\w.,/\-]){QUANTITY_WORD}\s*(?:of|or|oder|ou|[-–/])\s*{QUANTITY_WORD}(?![\w.,/\-])", re.I,
 )
 _QUANTITY_ANSWER = re.compile(
-    r"^(?:(?:(?:het|dat|dit)\s+(?:zijn|is)|er\s+(?:zijn|gaan)|"
+    r"^(?:(?:toch|actually|doch|finalement)\s+)?(?:(?:(?:het|dat|dit)\s+(?:zijn|is)|er\s+(?:zijn|gaan)|"
     r"there\s+are|they\s+are|it\s+is|es\s+sind|das\s+sind|"
     r"il\s+y\s+a|ce\s+sont)\s+)?"
-    rf"(?P<count>{QUANTITY_WORD})(?:\s+(?P<unit>[\w-]+))?"
+    rf"(?:(?:toch|actually|doch|finalement)\s+)?(?P<count>{QUANTITY_WORD})(?:\s+(?P<unit>[\w-]+))?"
     r"(?:\s+(?:in\s+totaal|totaal|in\s+total|total|insgesamt|au\s+total))?[.! ]*$", re.I,
 )
 
 
-def quantity_answer(text: str, expected_unit: str | None = None) -> float | None:
+def quantity_answer(text: str, expected_unit: str | None = None, description: str = "") -> float | None:
     """Read an answer about one quantity, including a spoken count and unit.
 
     A package unit must agree with the question. Extra goods, another number
@@ -68,7 +68,9 @@ def quantity_answer(text: str, expected_unit: str | None = None) -> float | None
     unit_text = match.group("unit")
     if unit_text:
         unit = get_unit(unit_text)
-        if unit is None or (expected_unit and unit != get_unit(expected_unit)):
+        goods_noun = (expected_unit and get_unit(expected_unit) == get_unit("pcs")
+                      and any(word.endswith(unit_text.casefold()) for word in re.findall(r"\w+", description.casefold())))
+        if not goods_noun and (unit is None or (expected_unit and unit != get_unit(expected_unit))):
             return None
     return value
 
@@ -142,7 +144,7 @@ FIELD_ALIASES = {
 }
 _ALIAS_FIELD = {alias: field for field, aliases in FIELD_ALIASES.items() for alias in aliases.split("|")}
 _FACT_START = re.compile(
-    r"(?<!\w)(?:(?:de|the|der|die|le|la)\s+)?(?P<label>" + "|".join(re.escape(k) for k in sorted(_ALIAS_FIELD, key=len, reverse=True))
+    r"(?<!\w)(?:(?:de|het|the|der|die|das|le|la)\s+)?(?P<label>" + "|".join(re.escape(k) for k in sorted(_ALIAS_FIELD, key=len, reverse=True))
     + r")\s*(?::|=|\bis\b|\bist\b|\best\b)\s*", re.I,
 )
 

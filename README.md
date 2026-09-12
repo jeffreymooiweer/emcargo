@@ -182,6 +182,11 @@ repository's SHA-256 pins. Without this installation the assistant stays
 unavailable, including through its API. The ordinary wizard remains available
 for manual entry.
 
+The managed runtime supports Linux x86-64/ARM64 and Windows x86-64. Unsupported
+hosts cannot install the assistant. Empty or truncated model files do not enable
+it. If the model is removed during an interview, the assistant preserves the
+typed answer and pauses until installation is restored and checked again.
+
 The model reads free prose; the application owns the questions and validation.
 Exact readers handle simple counts, dimensions and labelled facts without a
 model round trip. Unclear input stays open, and model-only choice interpretations
