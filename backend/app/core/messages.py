@@ -50,6 +50,8 @@ class ApiError(HTTPException):
 #: Kept here rather than at the raise sites so that the set of codes is
 #: countable — a translation guard cannot check what it cannot enumerate.
 MESSAGES: dict[str, str] = {
+    "un_cards.no_release": "No UN card set has been published yet. Check for a new set later or import a ZIP file.",
+    "un_cards.download_failed": "The card set could not be downloaded. Try again or import a ZIP file.",
     "trips.empty": "Add at least one shipment to the trip.",
     "documents.goods_incomplete": "Complete the goods description, quantity and weight before downloading the consignment note",
     "assistant.model_required": "Install the local language model in Settings before using the assistant. You can continue manually in the wizard.",

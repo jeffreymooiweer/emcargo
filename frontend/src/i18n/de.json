@@ -362,12 +362,12 @@
     "updateAuto": "Mit Watchtower geschieht das von selbst; unter Unraid genügt ein Klick auf 'update' im Docker-Tab.",
     "unCardsStoreTitle": "Installierter Kartensatz",
     "unCardsStoreIntro": "Von EMCargo erzeugte Karten, installiert auf dem Datenvolume — kein Teil des Docker-Images.",
-    "unCardsNone": "Es ist noch kein Kartensatz installiert. Laden Sie den neuesten Satz herunter oder importieren Sie eine heruntergeladene ZIP-Datei.",
+    "unCardsNone": "Es ist noch kein Kartensatz installiert.",
     "unCardsInstalled": "Installiert: {{count}} Karten, generiert {{generated}}",
     "unCardsImportedAt": "Importiert {{date}}",
     "unCardsCheck": "Auf neuen Satz prüfen",
     "unCardsChecking": "Prüfen…",
-    "unCardsNoRelease": "Es wurde noch kein veröffentlichter Kartensatz gefunden.",
+    "unCardsNoRelease": "Es wurde noch kein Kartensatz veröffentlicht. Versuchen Sie es später erneut oder importieren Sie eine ZIP-Datei.",
     "unCardsRemoteUnreachable": "GitHub ist nicht erreichbar; ob ein neuerer Satz existiert, lässt sich gerade nicht feststellen.",
     "unCardsUpdateAvailable": "Ein neuerer Satz steht bereit ({{tag}}).",
     "unCardsUpToDate": "Der installierte Satz ist aktuell ({{tag}}).",
@@ -845,6 +845,10 @@
     },
     "trips": {
       "empty": "Fügen Sie der Fahrt mindestens eine Sendung hinzu."
+    },
+    "un_cards": {
+      "no_release": "Es wurde noch kein Kartensatz veröffentlicht. Versuchen Sie es später erneut oder importieren Sie eine ZIP-Datei.",
+      "download_failed": "Der Kartensatz konnte nicht heruntergeladen werden. Versuchen Sie es erneut oder importieren Sie eine ZIP-Datei."
     }
   },
   "instructions": {

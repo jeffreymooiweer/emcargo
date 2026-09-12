@@ -981,7 +981,7 @@ function AssistantAdmin() {
  *  request. The upload path exists for installations that cannot reach
  *  GitHub; both run the same server-side verification.
  */
-function UnCardsAdminPanel() {
+export function UnCardsAdminPanel() {
   const { t } = useTranslation();
   const toast = useToast();
   const [status, setStatus] = useState<UnCardStoreStatus | null>(null);
@@ -991,7 +991,7 @@ function UnCardsAdminPanel() {
     api
       .unCardStoreStatus(remote)
       .then(setStatus)
-      .catch((e) => toast.error(String(e)));
+      .catch((e) => toast.error(e instanceof Error ? e.message : String(e)));
 
   useEffect(() => {
     void refresh(false);
@@ -1007,7 +1007,7 @@ function UnCardsAdminPanel() {
       await action();
       if (done) toast.success(done);
     } catch (e) {
-      toast.error(String(e));
+      toast.error(e instanceof Error ? e.message : String(e));
     } finally {
       setBusy("");
     }
@@ -1016,6 +1016,7 @@ function UnCardsAdminPanel() {
   const local = status?.local;
   const remote = status?.remote;
   const sizeMb = local?.total_size ? (local.total_size / 1e6).toFixed(0) : null;
+  const noPublishedSet = remote?.available === false && remote.reachable !== false;
 
   return (
     <section className={`${panelClass} p-5 space-y-4`}>
@@ -1075,7 +1076,7 @@ function UnCardsAdminPanel() {
         <button
           type="button"
           className={buttonPrimary}
-          disabled={busy !== ""}
+          disabled={busy !== "" || noPublishedSet}
           onClick={() =>
             run(
               "download",
@@ -1126,7 +1127,7 @@ function UnCardsAdminPanel() {
               toast.undoable(t("toast.removedUnCards"), {
                 execute: () => {
                   api.unCardStoreRemove().then(() => refresh(false)).catch((e) => {
-                    toast.error(String(e));
+                    toast.error(e instanceof Error ? e.message : String(e));
                     void refresh(false);
                   });
                 },

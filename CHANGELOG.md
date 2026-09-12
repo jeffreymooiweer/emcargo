@@ -2,6 +2,17 @@
 
 All notable changes are documented here, following [Semantic Versioning](https://semver.org/).
 
+## [2.8.1] — 2026-09-12
+
+### Available UN card sets
+
+- Generate, validate and publish a UN card set when its generator or measured source data changes on main, so a new installation has a package to download.
+- Keep card releases separate from the latest application release and stop publication when generation fails for a requested card.
+- Find older card sets across release-feed pages and ignore drafts, previews and releases without the ZIP asset.
+- Disable downloading after a check confirms that no set is published. Explain missing releases and failed downloads in all four interface languages.
+
+Card sets cover the measured ADR, RID, ADN and IMDG tables. ICAO remains explicitly unavailable because the repository has no measured air table.
+
 ## [2.8.0] — 2026-09-12
 
 ### One workspace for trips

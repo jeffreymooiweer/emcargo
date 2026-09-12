@@ -17,6 +17,7 @@ import httpx
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from app.core.deps import require_admin
+from app.core.messages import error
 from app.models.user import User
 from app.services.documents import un_card_store
 
@@ -50,11 +51,12 @@ def download_and_import_latest(admin: User = Depends(require_admin)):
         remote = un_card_store.download_latest_package(package)
         result = un_card_store.import_package(package)
         return {"ok": True, "tag": remote.get("tag"), **result}
+    except un_card_store.UnCardReleaseUnavailable as exc:
+        raise error(404, "un_cards.no_release") from exc
     except un_card_store.UnCardImportError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except httpx.HTTPError as exc:
-        raise HTTPException(status_code=502,
-                            detail=f"The release could not be downloaded: {exc}") from exc
+        raise error(502, "un_cards.download_failed") from exc
     finally:
         package.unlink(missing_ok=True)
 

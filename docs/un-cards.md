@@ -49,7 +49,13 @@ python scripts/un_cards/generate.py --scope single --un 1203 --out /tmp/cards
 python scripts/un_cards/validate.py --dir /tmp/cards
 ```
 
-Through GitHub Actions: **Generate UN cards** (`workflow_dispatch`), inputs
+Merging changes to the generator, its measured source tables, its label artwork
+or its workflow into `main` automatically generates, validates and publishes a
+new set. Application-only changes leave the existing set in place. A failed
+generation or validation stops publication. Card releases never replace the
+latest application release, which the in-app updater relies on.
+
+For a manual run, use **Generate UN cards** (`workflow_dispatch`), inputs
 
 - `scope`: `single` (with `un_number`, for a quick look) or `all`;
 - `modalities`: comma-separated subset, default all five;

@@ -265,14 +265,15 @@ minutes.
 
 ### What runs, and when
 
-Only **two** workflows start by themselves. Everything else in
-`.github/workflows/` waits to be asked, and costs nothing until it is — the number of
-files in that directory is not the number of things that run.
+Automatic workflows are limited to CI, application release tagging and card-set
+publication after relevant source changes. Everything else in `.github/workflows/`
+waits to be asked. Ordinary application changes do not regenerate card sets.
 
 | Workflow | Runs on | Jobs |
 |---|---|---|
 | `ci.yml` | push to `main`, every pull request, on request | Backend tests, Frontend build, Docker build |
 | `tag-release.yml` | on request (and on a merged `agent/release-v*` branch) | tag, GitHub Release, and it renames main's image to the version |
+| `generate-un-cards.yml` | card generator/source changes on `main`, or on request | generate, validate and publish the separate card package; never mark it as the latest app release |
 | `read-land-regulations.yml` | on request | quotes ADR/RID/ADN; commits nothing |
 | `probe-*.yml`, `extract-imdg-*.yml` | on request | maintenance and research |
 

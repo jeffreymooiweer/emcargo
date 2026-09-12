@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 #: The one place releases are fetched from. Pinned on purpose: a server-side
 #: download that took a caller-supplied URL would be an SSRF hole.
-RELEASES_URL = "https://api.github.com/repos/jeffreymooiweer/EMCargo/releases?per_page=30"
+RELEASES_URL = "https://api.github.com/repos/jeffreymooiweer/emcargo/releases"
 RELEASE_TAG_PREFIX = "un-cards-"
 PACKAGE_NAME = "emcargo-un-cards.zip"
 
@@ -56,6 +56,10 @@ MAX_DOWNLOAD_BYTES = 1024 * 1024 * 1024
 
 class UnCardImportError(Exception):
     """A reason the import was refused; shown to the administrator as-is."""
+
+
+class UnCardReleaseUnavailable(UnCardImportError):
+    """No published package exists; the API exposes a translatable error."""
 
 
 def store_dir() -> Path:
@@ -123,24 +127,35 @@ def _imported_at() -> str | None:
 def latest_remote() -> dict[str, Any]:
     """The newest published card release — metadata only, no package download."""
     with httpx.Client(timeout=20.0, follow_redirects=True) as client:
-        response = client.get(RELEASES_URL, headers={"Accept": "application/vnd.github+json"})
-        response.raise_for_status()
-        releases = response.json()
-    for release in releases:  # newest first
-        tag = str(release.get("tag_name") or "")
-        if not tag.startswith(RELEASE_TAG_PREFIX):
-            continue
-        assets = {a.get("name"): a for a in release.get("assets", [])}
-        if PACKAGE_NAME not in assets:
-            continue
-        package = assets[PACKAGE_NAME]
-        return {
-            "available": True,
-            "tag": tag,
-            "published_at": release.get("published_at"),
-            "package_size": package.get("size"),
-            "package_url": package.get("browser_download_url"),
-        }
+        page = 1
+        while True:
+            # App releases must not hide an older, still-current card set.
+            # Construct each page on the pinned endpoint; never follow an
+            # arbitrary pagination URL returned in an HTTP header.
+            response = client.get(
+                RELEASES_URL, params={"per_page": 100, "page": page},
+                headers={"Accept": "application/vnd.github+json"})
+            response.raise_for_status()
+            releases = response.json()
+            for release in releases:
+                tag = str(release.get("tag_name") or "")
+                if (not tag.startswith(RELEASE_TAG_PREFIX)
+                        or release.get("draft") or release.get("prerelease")):
+                    continue
+                assets = {a.get("name"): a for a in release.get("assets", [])}
+                package = assets.get(PACKAGE_NAME)
+                if not package or not package.get("browser_download_url"):
+                    continue
+                return {
+                    "available": True,
+                    "tag": tag,
+                    "published_at": release.get("published_at"),
+                    "package_size": package.get("size"),
+                    "package_url": package.get("browser_download_url"),
+                }
+            if len(releases) < 100:
+                break
+            page += 1
     return {"available": False}
 
 
@@ -164,7 +179,7 @@ def download_latest_package(target: Path) -> dict[str, Any]:
     """Fetch the newest release package to ``target``, size-capped."""
     remote = latest_remote()
     if not remote.get("available"):
-        raise UnCardImportError("No published UN card release was found.")
+        raise UnCardReleaseUnavailable("No published UN card release was found.")
     url = remote["package_url"]
     written = 0
     with httpx.Client(timeout=httpx.Timeout(30.0, read=300.0),

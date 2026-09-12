@@ -225,7 +225,9 @@ def main() -> int:
             build_zip(args.out, manifest, args.zip)
             print(f"package: {args.zip} ({args.zip.stat().st_size / 1e6:.1f} MB)")
 
-    return 0 if report["summary"]["generated"] > 0 else 1
+    # A partial set must never pass the publishing workflow. Entirely
+    # unavailable modalities are recorded separately in all mode.
+    return 0 if report["summary"]["generated"] > 0 and not failures else 1
 
 
 if __name__ == "__main__":

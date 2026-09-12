@@ -8,6 +8,16 @@
 name: Generate UN cards
 
 on:
+  # Publishing is part of maintaining the generator and its measured sources.
+  # App-only releases do not require another identical card set.
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/generate-un-cards.yml
+      - scripts/un_cards/**
+      - backend/seed/dg/**
+      - backend/app/config/dg_compliance.json
+      - frontend/public/shipping.png
   workflow_dispatch:
     inputs:
       scope:
@@ -36,6 +46,7 @@ concurrency:
 jobs:
   generate:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -47,15 +58,19 @@ jobs:
         run: pip install reportlab pymupdf
 
       - name: Generate
+        env:
+          CARD_SCOPE: ${{ github.event_name == 'push' && 'all' || inputs.scope }}
+          CARD_MODALITIES: ${{ inputs.modalities || 'ADR,RID,ADN,IMDG,ICAO' }}
+          CARD_UN_NUMBER: ${{ inputs.un_number }}
         run: |
-          if [ "${{ inputs.scope }}" = "all" ]; then
+          if [ "$CARD_SCOPE" = "all" ]; then
             python scripts/un_cards/generate.py --scope all \
-              --modalities "${{ inputs.modalities }}" \
+              --modalities "$CARD_MODALITIES" \
               --out /tmp/cards --zip /tmp/emcargo-un-cards.zip
           else
             python scripts/un_cards/generate.py --scope single \
-              --un "${{ inputs.un_number }}" \
-              --modalities "${{ inputs.modalities }}" \
+              --un "$CARD_UN_NUMBER" \
+              --modalities "$CARD_MODALITIES" \
               --out /tmp/cards --manifest
           fi
 
@@ -63,7 +78,7 @@ jobs:
         run: python scripts/un_cards/validate.py --dir /tmp/cards
 
       - name: Upload as artifact (test mode)
-        if: ${{ !inputs.publish || inputs.scope != 'all' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && (!inputs.publish || inputs.scope != 'all') }}
         uses: actions/upload-artifact@v4
         with:
           name: un-cards-${{ inputs.scope }}
@@ -72,7 +87,7 @@ jobs:
           retention-days: 14
 
       - name: Publish as release
-        if: ${{ inputs.publish && inputs.scope == 'all' }}
+        if: ${{ github.event_name == 'push' || (inputs.publish && inputs.scope == 'all') }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -93,6 +108,8 @@ jobs:
           EOF
           gh release create "$TAG" \
             --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --latest=false \
             --title "UN cards $DATE ($N)" \
             --notes-file /tmp/release-notes.txt \
             /tmp/emcargo-un-cards.zip \
