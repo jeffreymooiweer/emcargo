@@ -9,7 +9,7 @@ All notable changes are documented here, following [Semantic Versioning](https:/
 - Look up named companies and their addresses from shipment descriptions using the configured address service, including companies outside the Netherlands.
 - Offer distinct establishments for selection and require confirmation even when only one match is returned. Keep manual entry available when results are missing or the service is unavailable.
 - Preserve existing addresses and shipment details, ignore stale search responses and allow a selected business address to be undone.
-- Recognise intent phrases such as "Ik moet morgen" without losing the goods and quantities in the shipment description.
+- Recognise conversational intent phrases without losing the goods and quantities in the shipment description.
 - Remove the visible frame around the assistant header icon and show four lines in address answers.
 
 Address coverage depends on the configured provider. Results are proposals, not an exhaustive business register or verification of a delivery entrance. The assistant still requires an installed local language model.
