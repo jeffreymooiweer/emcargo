@@ -5,6 +5,7 @@ import { api, AssistantEvent, AssistantPending, AssistantReview, AssistantState 
 import { documentLanguage, localised } from "../i18n/language";
 import { ArrowRightIcon, CheckIcon, CloseIcon } from "./icons";
 import AiIcon from "./AiIcon";
+import BusinessSuggestions from "./BusinessSuggestions";
 import { AddressTextarea, LOCATION_FIELD_KEYS, LocationInput, MODALITY_LOCATION_TYPES } from "./GeoInputs";
 import "./AssistantModal.css";
 
@@ -63,7 +64,7 @@ export default function AssistantModal({ open, onClose, buildState, onApplyState
       : t("assistant.corrected", { attempt: String(event.attempt ?? "") });
   };
 
-  async function send(message: string, action: Action = "answer", target?: AssistantPending, initial?: AssistantState) {
+  async function send(message: string, action: Action = "answer", target?: AssistantPending, initial?: AssistantState, previous?: Snapshot) {
     if (inFlight.current || modelBlocked) return;
     inFlight.current = true;
     const request = ++sequence.current;
@@ -84,7 +85,7 @@ export default function AssistantModal({ open, onClose, buildState, onApplyState
         if (failure.reason === "stale") { setPending(result.pending); setScreen(result.pending?.scope === "goods_intake" ? "describe" : result.pending ? "question" : "ready"); }
         return;
       }
-      if (!initial) setHistory(stack => [...stack, snapshot]);
+      if (previous || !initial) setHistory(stack => [...stack, previous ?? snapshot]);
       setWorking(copy(result.state));
       setReview(result.review);
       setPending(result.pending);
@@ -110,6 +111,15 @@ export default function AssistantModal({ open, onClose, buildState, onApplyState
     } finally {
       if (sequence.current === request) { inFlight.current = false; setBusy(false); }
     }
+  }
+
+  async function pickBusiness(party: string, candidate: { name: string; address: string }) {
+    if (busy || modelBlocked || inFlight.current) return;
+    const view = current.current;
+    const next = copy(view.working);
+    if (next.doc_values?.[`${party}_address`]) return;
+    next.doc_values = { ...next.doc_values, [`${party}_name`]: candidate.name, [`${party}_address`]: candidate.address };
+    await send("", "answer", undefined, next, { state: copy(view.working), pending: view.pending, review: view.review, screen: view.screen, answer: view.input });
   }
 
   async function recheckModel() {
@@ -269,7 +279,16 @@ export default function AssistantModal({ open, onClose, buildState, onApplyState
       <div className="assistant-layout">
         <div className="assistant-main">
           <details className="assistant-mobile-summary"><summary>{t("assistant.summary")}<span>{description || t("assistant.summaryEmptyShort")}</span></summary>{summary}</details>
-          <div className="assistant-question" key={`${screen}:${pending?.scope}:${pending?.line_id}:${pending?.field}`}>
+          <div className="assistant-question">
+            {screen !== "describe" && availability === "ready" && !modelBlocked && ([
+              ["consignor", "loading_point"], ["consignee", "discharge_point"],
+            ] as const).map(([party, location]) => {
+              const name = working.doc_values?.[`${party}_name`];
+              const city = working.doc_values?.[location];
+              return name && city && !working.doc_values?.[`${party}_address`] ?
+                <BusinessSuggestions key={`${party}:${name}:${city}`} name={name} city={city} language={lang}
+                  disabled={busy || !!input.trim()} onPick={candidate => void pickBusiness(party, candidate)} /> : null;
+            })}
             {screen === "describe" ? <>
               <p className="assistant-eyebrow">{t("assistant.begin")}</p>
               <h3 ref={heading} tabIndex={-1}>{t("assistant.describeLabel")}</h3>
@@ -293,7 +312,7 @@ export default function AssistantModal({ open, onClose, buildState, onApplyState
               </label>)}</div>}
               <label className="assistant-answer-label" htmlFor="assistant-answer">{t(options.length ? "assistant.orDescribe" : "assistant.yourAnswer")}</label>
               <fieldset disabled={busy || modelBlocked} className="assistant-answer-field">
-                {isAddress ? <AddressTextarea value={input} onChange={setInput} textareaId="assistant-answer" textareaClassName="assistant-input" />
+                {isAddress ? <AddressTextarea value={input} onChange={setInput} textareaId="assistant-answer" rows={4} textareaClassName="assistant-input" />
                   : isLocation ? <LocationInput id="assistant-answer" value={input} onChange={setInput} types={MODALITY_LOCATION_TYPES[modality ?? ""] ?? ["airport", "port", "station"]} className="assistant-input" />
                   : <input id="assistant-answer" className="assistant-input" type="text" inputMode={pending?.scope === "goods_quantity" ? "numeric" : "text"} value={input} onChange={e => { setInput(e.target.value); setChoice(""); }} placeholder={t(pending?.type === "date" ? "assistant.dateExample" : "assistant.answerPlaceholder")} maxLength={4000} aria-invalid={!!error} aria-describedby={error ? "assistant-error" : undefined} onKeyDown={event => { if (event.key === "Enter" && answer) { event.preventDefault(); void send(answer); } }} />}
                 {pending?.type === "date" && <input className="assistant-date-picker" type="date" aria-label={t("assistant.chooseDate")} value={/^\d{4}-\d{2}-\d{2}$/.test(input) ? input : ""} onChange={e => setInput(e.target.value)} />}

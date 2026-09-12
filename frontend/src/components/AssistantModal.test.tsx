@@ -25,7 +25,7 @@ vi.mock("react-i18next", () => ({
 }));
 
 vi.mock("../api/client", () => ({
-  api: { assistantStatus: vi.fn(), assistantStep: vi.fn(), geoLocations: vi.fn(), geoAddress: vi.fn() },
+  api: { assistantStatus: vi.fn(), assistantStep: vi.fn(), geoLocations: vi.fn(), geoAddress: vi.fn(), geoBusinesses: vi.fn() },
 }));
 
 const stepMock = api.assistantStep as ReturnType<typeof vi.fn>;
@@ -78,6 +78,38 @@ beforeEach(() => {
   stepMock.mockReset();
   geoLocationsMock.mockReset().mockResolvedValue({ results: [] });
   geoAddressMock.mockReset().mockResolvedValue({ results: [], available: true });
+  vi.mocked(api.geoBusinesses).mockReset().mockResolvedValue({ results: [], available: true });
+});
+
+it("applies the chosen business without losing goods and can undo the choice", async () => {
+  const state = { ...QUESTION.state, doc_values: { consignee_name: "supermarkt PLUS", discharge_point: "Wezep" } };
+  const candidate = { name: "PLUS", address: "Clematisstraat 3\n8091 VJ Wezep\nNetherlands" };
+  vi.mocked(api.geoBusinesses).mockResolvedValue({ results: [candidate], available: true });
+  stepMock.mockResolvedValueOnce({ ...QUESTION, state });
+  const { onApplyState } = renderModal();
+  await userEvent.type(await screen.findByLabelText("assistant.describeLabel"), "4 pallets naar PLUS in Wezep");
+  await userEvent.click(screen.getByRole("button", { name: "assistant.start" }));
+  const choice = await screen.findByRole("button", { name: /Clematisstraat 3/ });
+  const chosen = { ...state, doc_values: { ...state.doc_values, consignee_name: candidate.name, consignee_address: candidate.address } };
+  stepMock.mockResolvedValueOnce({ ...QUESTION, state: chosen });
+  await userEvent.click(choice);
+  expect(stepMock).toHaveBeenLastCalledWith(expect.objectContaining({ state: chosen }));
+  expect(onApplyState).toHaveBeenLastCalledWith(chosen);
+  expect(screen.queryByRole("button", { name: /Clematisstraat 3/ })).toBeNull();
+  await userEvent.click(screen.getByRole("button", { name: "assistant.previous" }));
+  expect(onApplyState).toHaveBeenLastCalledWith(state);
+  await screen.findByRole("button", { name: /Clematisstraat 3/ });
+});
+
+it("never looks up a replacement for a manually entered business address", async () => {
+  stepMock.mockResolvedValueOnce({ ...QUESTION, state: { ...QUESTION.state, doc_values: {
+    consignee_name: "PLUS", discharge_point: "Wezep", consignee_address: "Confirmed delivery entrance",
+  } } });
+  renderModal();
+  await userEvent.type(await screen.findByLabelText("assistant.describeLabel"), "4 pallets");
+  await userEvent.click(screen.getByRole("button", { name: "assistant.start" }));
+  await screen.findByText(/Vervoerswijze/);
+  expect(api.geoBusinesses).not.toHaveBeenCalled();
 });
 
 describe("AssistantModal", () => {

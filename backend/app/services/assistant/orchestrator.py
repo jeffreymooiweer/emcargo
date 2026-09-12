@@ -220,9 +220,9 @@ _ROUTE = re.compile(
 #: themselves to the goods description — measured with the owner's own
 #: sentence, which came out as one piece of everything.
 _INTENT_HEAD = re.compile(
-    r"^(?:ik wil(?: graag)?|ik zou graag|wij willen(?: graag)?|graag|"
-    r"i want to|i would like to|we want to|please|ich möchte|wir möchten|ich will|bitte|"
-    r"je souhaite|je voudrais|j’aimerais|nous souhaitons|merci de)\s+",
+    r"^(?:ik moet|wij moeten|ik wil(?: graag)?|ik zou graag|wij willen(?: graag)?|graag|"
+    r"i need to|i must|we need to|i want to|i would like to|we want to|please|ich muss|wir müssen|ich möchte|wir möchten|ich will|bitte|"
+    r"je dois|nous devons|je souhaite|je voudrais|j’aimerais|nous souhaitons|merci de)\s+",
     re.IGNORECASE,
 )
 _INTENT_TAIL = re.compile(
@@ -704,6 +704,16 @@ def _apply_goods_message(
     # Explicitly structured rows and simple counted descriptions need no
     # model call. Rich prose can use the optional local reader.
     route_goods, route_origin, route_destination = _split_route(" " + message)
+    # Explicit business/place endpoints are document facts even when the
+    # counted goods can use the fast reader. Never ask the model to invent
+    # an address; the separate lookup presents sourced proposals in the UI.
+    from app.services.geo.businesses import split_business_place
+    for endpoint, party, location in ((route_origin, "consignor", "loading_point"),
+                                      (route_destination, "consignee", "discharge_point")):
+        business = split_business_place(endpoint or "")
+        if business:
+            name, city = business
+            fill({f"{party}_name": name, location: city})
     simple = bool(route_goods.strip()) and not re.search(r"\b(?:BV|GmbH|Ltd|vervoerder|carrier|order)\b", message, re.I) and all("|" in part or _to_parser_row(part) != part
                                    for part in _split_segments(route_goods.strip()))
     use_model = bool(message) and not simple and runtime.installed()

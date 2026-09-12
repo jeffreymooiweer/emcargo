@@ -485,6 +485,10 @@ export const api = {
     request<{ results: GeoLocation[] }>(
       `/geo/locations?q=${encodeURIComponent(q)}&limit=${limit}${types?.length ? `&type=${types.join(",")}` : ""}`,
     ),
+  geoBusinesses: (name: string, city: string, lang = "en") =>
+    request<{ results: { name: string; address: string }[]; available: boolean }>(
+      `/geo/businesses?name=${encodeURIComponent(name)}&city=${encodeURIComponent(city)}&lang=${lang}`,
+    ),
   geoAddress: (q: string, lang = "en", limit = 6) =>
     request<{ results: GeoAddress[]; available: boolean }>(
       `/geo/address?q=${encodeURIComponent(q)}&lang=${lang}&limit=${limit}`,

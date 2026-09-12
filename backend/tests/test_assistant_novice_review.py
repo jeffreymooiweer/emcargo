@@ -30,6 +30,18 @@ def test_novice_intake_keeps_known_facts(db):
     assert 'verpakt' not in result['state']['doc_values']['discharge_point']
 
 
+def test_named_business_destination_keeps_counted_goods_and_separates_town(db):
+    result = assistant.step({'modality': 'road'},
+        'Ik moet morgen 4 pallets knakworsten vervoeren van de haven in Rotterdam naar supermarkt Plus in Wezep', None, db)
+    state = result['state']
+    assert state['draft_lines'][0]['quantity'] == 4
+    assert state['draft_lines'][0]['unit'] == 'pallet'
+    assert 'knakworsten' in state['draft_lines'][0]['description']
+    assert state['doc_values']['consignee_name'] == 'supermarkt Plus'
+    assert state['doc_values']['discharge_point'] == 'Wezep'
+    assert 'consignee_address' not in state['doc_values']
+
+
 def test_correction_uses_current_goods_noun():
     assert quantity_answer('Het zijn toch 8 stoelen.', 'pcs', 'gebruikte bureaustoelen') == 8
     assert quantity_answer('Het zijn toch 8 dozen.', 'pcs', 'gebruikte bureaustoelen') is None

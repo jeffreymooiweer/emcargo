@@ -50,7 +50,10 @@ def geo_address(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    settings = instance_settings(db)
+    return lookup_addresses(q, lang, limit, instance_settings(db))
+
+
+def lookup_addresses(q, lang, limit, settings):
     # The one request this app makes to the outside world while somebody is
     # typing. An administrator can switch it off, and then it is not made at
     # all rather than made and discarded.
@@ -89,3 +92,24 @@ def geo_address(
             }
         )
     return {"results": results, "available": True}
+
+
+@router.get("/businesses")
+@limiter.limit(ADDRESS_LOOKUP)
+def geo_businesses(
+    request: Request,
+    name: str = Query(..., min_length=2, max_length=100),
+    city: str = Query(..., min_length=2, max_length=100),
+    lang: str = Query(default="en", min_length=2, max_length=2),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.services.geo.businesses import business_name, match_businesses
+
+    settings = instance_settings(db)
+    query_name = business_name(name)
+    if not query_name:
+        return {"results": [], "available": settings.address_lookup_enabled}
+    response = lookup_addresses(f"{query_name} {city}", lang, 15, settings)
+    return {"results": match_businesses(response["results"], name, city),
+            "available": response["available"]}
