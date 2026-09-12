@@ -6,6 +6,17 @@ All notable changes are documented here, following [Semantic Versioning](https:/
 
 ### More reliable shipment answers
 
+- Apply recognised spreadsheet column order to file and Excel clipboard imports;
+  keep manually entered weights when dimensions change, show translated choices
+  in folded document groups, and label stored shipment/trip timestamps as UTC.
+- Make the PDF, startup, catalogue and updater test fixtures portable to Windows;
+  resolve the configured Bash executable and keep POSIX permission checks on POSIX.
+- Repair the blank development page, select the pinned native Windows runtime,
+  and reject empty or truncated model installations. Pause and resume a pending
+  answer when the model disappears; reveal recovery messages on small screens.
+- Keep articles before the next field label out of company names, and show
+  translated choices in the shipment summary and when revising an answer.
+
 - Require the installed local language model before using the assistant, in
   both the interface and API. Explain installation and manual continuation;
   preserve answers if the model is removed during an interview.
